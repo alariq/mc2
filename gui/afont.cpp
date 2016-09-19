@@ -64,13 +64,13 @@ aFont::~aFont()
 
 unsigned long aFont::height( ) const
 {
-	unsigned long width, height;
+	DWORD width, height;
 	gos_TextSetAttributes (gosFont, 0, size, false, true, false, false);
 	gos_TextStringLength(&width,&height,"ABCDE");
 	return height;
 }
 
-void	aFont::getSize( unsigned long& width, unsigned long& height, const char* pText )
+void	aFont::getSize( DWORD& width, DWORD& height, const char* pText )
 {
 	gos_TextSetAttributes (gosFont, 0, size, false, true, false, false);
 	gos_TextStringLength(&width,&height,pText);
@@ -80,16 +80,16 @@ void	aFont::getSize( unsigned long& width, unsigned long& height, const char* pT
 
 unsigned long aFont::height( const char* st, int areaWidth ) const
 {
-	unsigned long width, height;
+	DWORD width, height;
 	gos_TextSetAttributes (gosFont, 0, size, false, true, false, false);
 	gos_TextSetRegion( 0, 0, areaWidth, Environment.screenHeight );
 	gos_TextStringLength(&width,&height,st);
 
-	unsigned long lineCount = 1;
+	DWORD lineCount = 1;
 
 	if ( width > areaWidth - 1 )
 	{
-		unsigned long curLineWidth = 0;
+		DWORD curLineWidth = 0;
 
 		gosASSERT( strlen( st) < 2048 );
 
@@ -209,7 +209,7 @@ unsigned long aFont::height( const char* st, int areaWidth ) const
 
 unsigned long aFont::width( const char* st ) const
 {
-	unsigned long width, height;
+	DWORD width, height;
 	gos_TextSetAttributes (gosFont, 0, size, false, true, false, false);
 	gos_TextStringLength(&width,&height,st);
 	return width;
@@ -234,7 +234,7 @@ void aFont::destroy()
 }
 
 void aFont::render( const char* text, int xPos, int yPos, int areaWidth, int areaHeight, 
-				   unsigned long color, bool bBold, int alignment )
+				   DWORD color, bool bBold, int alignment )
 {
 	gos_TextSetAttributes( gosFont, color, size, true, true, bBold, false, alignment );
 	
@@ -242,7 +242,7 @@ void aFont::render( const char* text, int xPos, int yPos, int areaWidth, int are
 	{
 		if ( alignment == 1 )
 		{
-			unsigned long width, height;
+			DWORD width, height;
 			gos_TextStringLength( &width, &height, text );
 			xPos -= width;
 			areaWidth = width + 1;
@@ -255,7 +255,7 @@ void aFont::render( const char* text, int xPos, int yPos, int areaWidth, int are
 	{
 		if ( alignment == 3  ) // bottom
 		{
-			unsigned long width, height;
+			DWORD width, height;
 			gos_TextStringLength( &width, &height, text );
 			yPos -= height;
 			areaHeight = height + 1;

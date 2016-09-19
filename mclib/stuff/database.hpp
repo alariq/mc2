@@ -121,12 +121,12 @@ namespace Stuff {
 			TestInstance() const;
 
 	protected:
-		DWORD
+		void*
 			m_handle;
 		bool
 			m_dirtyFlag,
 			m_readOnly;
-		DWORD
+		size_t
 			m_currentRecord,
 			m_baseAddress;
 		Record

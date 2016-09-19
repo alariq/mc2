@@ -993,12 +993,12 @@ void __stdcall gos_GetFile( const char* FileName, BYTE** MemoryImage, DWORD* Siz
 //
 // Opens a memory mapped file - returns a handle that must be passed to the Close function below.
 //
-DWORD __stdcall gos_OpenMemoryMappedFile( const char* FileName, BYTE** MemoryImage, DWORD* Size );
+void* __stdcall gos_OpenMemoryMappedFile( const char* FileName, BYTE** MemoryImage, DWORD* Size );
 
 //
 // Closes a memory mapped file
 //
-void __stdcall gos_CloseMemoryMappedFile( DWORD Handle );
+void __stdcall gos_CloseMemoryMappedFile( void* Handle );
 
 
 //

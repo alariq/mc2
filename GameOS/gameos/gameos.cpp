@@ -7,7 +7,7 @@
 #include "strres.h"
 
 ////////////////////////////////////////////////////////////////////////////////
-void AddDebuggerMenuItem(char const*, bool (*)(), void (*)(), bool (*)(), unsigned long (*)(char const*, unsigned long))
+void AddDebuggerMenuItem(char const*, bool (*)(), void (*)(), bool (*)(), DWORD (*)(char const*, DWORD))
 {
     // TODO: maybe use dconsole for this
 }
@@ -212,7 +212,7 @@ HGOSHEAP __stdcall gos_CreateMemoryHeap(char const* HeapName, DWORD MaximumSize/
     gos_Heap* pheap = new gos_Heap();
     memset(pheap, 0, sizeof(gos_Heap));
     pheap->pParent = parentHeap;
-    pheap->Magic = reinterpret_cast<DWORD>(HeapName);
+    pheap->Magic = (DWORD)(reinterpret_cast<size_t>(HeapName) & 0xffffffff);
     strncpy(pheap->Name, HeapName, sizeof(pheap->Name)-1);
     pheap->Name[sizeof(pheap->Name)-1] = '\0';
 #ifdef LAB_ONLY

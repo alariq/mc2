@@ -521,7 +521,7 @@ CompressDone:
 // LZ Compress Routine
 // Takes a pointer to dest buffer, a pointer to source buffer and len of source.
 // returns length of compressed image.
-long LZCompress (MemoryPtr dest, MemoryPtr src, unsigned long srcLen)
+size_t LZCompress (MemoryPtr dest, MemoryPtr src, size_t srcLen)
 {
     // TODO: sebi: use zlib
     gosASSERT(0 && "implement LZCompress");

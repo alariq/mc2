@@ -1,6 +1,7 @@
 #include"stuffheaders.hpp"
 #include"database.hpp"
 #include<toolos.hpp>
+#include <stddef.h> // ptrdiff_t
 
 //===========================================================================//
 // File:	Database.cpp                                                     //
@@ -134,7 +135,8 @@ Record::Record(
 	//------------------
 	//
 	DWORD index=m_ID % Database::e_DataBlockSize;
-	DWORD offset = (DWORD)this - db_handle->m_baseAddress;
+    size_t offset = (size_t)this - db_handle->m_baseAddress;
+	//DWORD offset = (DWORD)this - db_handle->m_baseAddress;
 	m_nextIDRecord = db->m_idOffsets[index];
 	db->m_idOffsets[index] = offset;
 	Check_Pointer(handle->m_name);
@@ -174,7 +176,7 @@ void
 		record = reinterpret_cast<Record*>(db->m_idOffsets[index]);
 		while (record)
 		{
-			record = reinterpret_cast<Record*>((DWORD)record + db_handle->m_baseAddress);
+			record = reinterpret_cast<Record*>((size_t)record + db_handle->m_baseAddress);
 			Check_Object(record);
 			if (record->m_ID == m_ID)
 				break;
@@ -197,9 +199,9 @@ void
 		record = reinterpret_cast<Record*>(db->m_idOffsets[index]);
 		while (record)
 		{
-			record = reinterpret_cast<Record*>((DWORD)record + db_handle->m_baseAddress);
+			record = reinterpret_cast<Record*>((size_t)record + db_handle->m_baseAddress);
 			Check_Object(record);
-			if ((DWORD)record->m_nextIDRecord+db_handle->m_baseAddress == (DWORD)this)
+			if ((DWORD)record->m_nextIDRecord+db_handle->m_baseAddress == (size_t)this)
 			{
 				record->m_nextIDRecord = m_nextIDRecord;
 				break;
@@ -222,9 +224,9 @@ void
 		record = reinterpret_cast<Record*>(db->m_nameOffsets[index]);
 		while (record)
 		{
-			record = reinterpret_cast<Record*>((DWORD)record + db_handle->m_baseAddress);
+			record = reinterpret_cast<Record*>((size_t)record + db_handle->m_baseAddress);
 			Check_Object(record);
-			if ((DWORD)record->m_nextNameRecord+db_handle->m_baseAddress == (DWORD)this)
+			if ((DWORD)record->m_nextNameRecord+db_handle->m_baseAddress == (size_t)this)
 			{
 				record->m_nextNameRecord = m_nextNameRecord;
 				break;
@@ -430,7 +432,7 @@ bool
 	{
 		record =
 			reinterpret_cast<Record*>(
-				(DWORD)record + m_databaseHandle->m_baseAddress
+				(size_t)record + m_databaseHandle->m_baseAddress
 			);
 		Check_Object(record);
 		if (record->m_ID==m_ID)
@@ -467,7 +469,7 @@ bool
 	while (record)
 	{
 		record = reinterpret_cast<Record*>(
-			(DWORD)record + m_databaseHandle->m_baseAddress
+			(size_t)record + m_databaseHandle->m_baseAddress
 		);
 		Check_Object(record);
 		if (record->m_hash == hash && !_stricmp(m_name,record->m_name))
@@ -522,7 +524,7 @@ bool
 			{
 				m_databaseHandle->m_currentPointer =
 					reinterpret_cast<Record*>(
-						(DWORD)data + m_databaseHandle->m_baseAddress
+						(size_t)data + m_databaseHandle->m_baseAddress
 					);
 				return true;
 			}
@@ -533,7 +535,7 @@ bool
 
 	m_databaseHandle->m_currentPointer = 
 		reinterpret_cast<Record*>(
-			(DWORD)m_databaseHandle->m_currentPointer + m_databaseHandle->m_baseAddress
+			(size_t)m_databaseHandle->m_currentPointer + m_databaseHandle->m_baseAddress
 		);
 	return true;
 }
@@ -604,7 +606,7 @@ DatabaseHandle::DatabaseHandle(
 				STOP(("Invalid database file \"%s\"", filename));
 			if (m_dataBase->m_version > Database::e_Version)
 				STOP(("Application must be recompiled to use database \"%s\"", filename));
-			m_baseAddress = reinterpret_cast<DWORD>(m_dataBase);
+			m_baseAddress = reinterpret_cast<size_t>(m_dataBase);
 			Check_Object(m_dataBase);
 		}
 		else
@@ -638,7 +640,7 @@ DatabaseHandle::DatabaseHandle(
 			}
 			else
 			{
-				m_baseAddress = reinterpret_cast<DWORD>(m_dataBase);
+				m_baseAddress = reinterpret_cast<size_t>(m_dataBase);
 				Check_Object(m_dataBase);
 			}
 		}
@@ -688,7 +690,7 @@ DatabaseHandle::~DatabaseHandle()
 			{
 				while (record)
 				{
-					record = reinterpret_cast<Record*>((DWORD)record + m_baseAddress);
+					record = reinterpret_cast<Record*>((size_t)record + m_baseAddress);
 					Check_Object(record);
 					Record* this_record = record;
 
@@ -777,7 +779,7 @@ void
 			new_id_index[i] = new_record - new_records;
 			while (old_record)
 			{
-				old_record = reinterpret_cast<Record*>((DWORD)old_record + m_baseAddress);
+				old_record = reinterpret_cast<Record*>((size_t)old_record + m_baseAddress);
 				Check_Object(old_record);
 
 				new_record->m_data = old_record;
@@ -807,7 +809,7 @@ void
 		Record* old_record = reinterpret_cast<Record*>(m_dataBase->m_nameOffsets[i]);
 		if (old_record)
 		{
-			old_record = reinterpret_cast<Record*>((DWORD)old_record + m_baseAddress);
+			old_record = reinterpret_cast<Record*>((size_t)old_record + m_baseAddress);
 			Check_Object(old_record);
 
 			//
@@ -844,7 +846,7 @@ void
 				Verify(j<m_dataBase->m_numberOfRecords);
 				if (old_record)
 				{
-					old_record = reinterpret_cast<Record*>((DWORD)old_record + m_baseAddress);
+					old_record = reinterpret_cast<Record*>((size_t)old_record + m_baseAddress);
 					Check_Object(old_record);
 					index = old_record->m_ID % Database::e_DataBlockSize;
 					j = new_id_index[index];

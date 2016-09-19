@@ -1239,8 +1239,8 @@ long				aComboBox::AddItem( const char* text, unsigned long color )
 aTextListItem::aTextListItem( const aFont& newFont )
 {
 	font = newFont;
-	unsigned long height;
-	unsigned long  width;
+	DWORD height;
+	DWORD width;
 	font.getSize( width, height, "> ");
 	aListItem::init( width, 0, Environment.screenWidth, ((float)height*1.25) );
 	state = ENABLED;
@@ -1250,8 +1250,8 @@ aTextListItem::aTextListItem( const aFont& newFont )
 aTextListItem::aTextListItem(long newFontResID)
 {
 	font.init( newFontResID );
-	unsigned long height;
-	unsigned long  width;
+	DWORD height;
+	DWORD width;
 	font.getSize( width, height, "> ");
 	aListItem::init( width, 0, Environment.screenWidth, ((float)height*1.25) );
 	state = ENABLED;
@@ -1261,8 +1261,8 @@ aTextListItem::aTextListItem(long newFontResID)
 void aTextListItem::init(long newFontResID)
 {
 	font.init( newFontResID );
-	unsigned long height;
-	unsigned long  width;
+	DWORD height;
+	DWORD width;
 	font.getSize( width, height, "> ");
 	aListItem::init( width, 0, Environment.screenWidth, ((float)height*1.25) );
 	state = ENABLED;

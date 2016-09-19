@@ -1968,9 +1968,9 @@ void encryptFile (char *inputFile, char* outputFile)
 
 	dataFile.read(rawData,fileSize);
 
-	DWORD zlibSize = fileSize * 2;
+	unsigned long int zlibSize = fileSize * 2;
 	compress2(zlibData,&zlibSize,rawData,fileSize,0);
-	DWORD lzSize = LZCompress (LZData, zlibData, zlibSize);
+	size_t lzSize = LZCompress (LZData, zlibData, zlibSize);
 
 	dataFile.close();
 
@@ -2000,9 +2000,9 @@ void decryptFile (char *inputFile, char *outputFile)
 	long result = dataFile.open(inputFile);
 	if (result == NO_ERR) 
 	{
-		DWORD lzSize = dataFile.readLong();
-		DWORD zlibSize = dataFile.readLong();
-		DWORD fileSize = dataFile.readLong();
+		long lzSize = dataFile.readLong();
+		long zlibSize = dataFile.readLong();
+		long fileSize = dataFile.readLong();
 	
 		rawData = (MemoryPtr)malloc(fileSize);
 		zlibData = (MemoryPtr)malloc(zlibSize);
@@ -2010,8 +2010,8 @@ void decryptFile (char *inputFile, char *outputFile)
 	
 		dataFile.read(LZData,lzSize);
 	
-		DWORD testSize = fileSize;
-		DWORD test2Size = LZDecomp(zlibData, LZData, lzSize);
+		size_t testSize = fileSize;
+		size_t test2Size = LZDecomp(zlibData, LZData, lzSize);
 		if (test2Size != zlibSize) 
 			STOP(("Didn't Decompress to same size as started with!!"));
 	

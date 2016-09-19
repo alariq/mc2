@@ -23,13 +23,13 @@ public:
 	long init( long resourceID );
 	void destroy();
 	void render( const char* text, int XPos, int YPos, int areaWidth, 
-		int areaHeight, unsigned long color, bool bBold, int alignment );
+		int areaHeight, DWORD color, bool bBold, int alignment );
 
 	long load( const char* fontName);
 	unsigned long height() const;
 	unsigned long width( const char* st) const;
 	unsigned long height( const char* st, int areaWidth ) const;
-	void		  getSize( unsigned long& width, unsigned long& height, const char* pText );
+	void		  getSize( DWORD& width, DWORD& height, const char* pText );
 	
 	static HGOSFONT3D loadFont( long resourceID, long& size );
 	long	getSize() { return size; }
