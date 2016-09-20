@@ -5,6 +5,7 @@
 extern "C" {
 #endif
 
+#define WINBASEAPI    
 
 #define TIME_ZONE_ID_STANDARD 1
 #define TIME_ZONE_ID_DAYLIGHT 2
@@ -53,6 +54,12 @@ int lstrlenA(LPCSTR);
 
 int lstrcmpiA(LPCSTR,LPCSTR);
 int lstrcmpiW(LPCWSTR,LPCWSTR);
+
+
+WINBASEAPI PVOID WINAPI VirtualAlloc(PVOID,DWORD,DWORD,DWORD);
+WINBASEAPI BOOL WINAPI VirtualFree(PVOID,DWORD,DWORD);
+
+WINBASEAPI DWORD WINAPI GetLastError(void);
 
 #ifdef __cplusplus
 }

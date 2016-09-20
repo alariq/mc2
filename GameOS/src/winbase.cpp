@@ -2,11 +2,16 @@
 #include <sys/stat.h>
 #include <time.h>
 #include <sys/time.h>
+#include <sys/mman.h>
 #include <unistd.h>
+#include <assert.h>
+#include <errno.h>
 
 #include"windows.h"
 #include"string.h"
 #include"wchar.h"
+
+static int gGetLastError = 0;
 
 DWORD GetTimeZoneInformation(LPTIME_ZONE_INFORMATION tzi)
 {
@@ -73,3 +78,59 @@ int lstrcmpiW(LPCWSTR str1, LPCWSTR str2)
 {
     return wcscasecmp(str1, str2);
 }
+
+WINBASEAPI PVOID WINAPI VirtualAlloc(PVOID lpAddress, DWORD dwSize, DWORD flAllocationType, DWORD flProtect)
+{
+    if(flAllocationType == MEM_RESERVE)
+    {       
+        // to RESERVE memory in Linux, use mmap with a private, anonymous, non-accessible mapping.
+        // The following line reserves 1gb of ram starting at 0x10000000.
+        void* result = mmap(0, dwSize, PROT_NONE, MAP_PRIVATE | MAP_ANON, -1, 0);
+        if(result == MAP_FAILED)
+            gGetLastError = errno;
+
+        return result == MAP_FAILED ? 0 : result;
+    }
+    else if(flAllocationType == MEM_COMMIT)
+    {
+        assert(lpAddress!=0);
+
+        // to COMMIT memory in Linux, use mprotect on the range of memory you'd like to commit, and
+        // grant the memory READ and/or WRITE access.
+        // The following line commits 1mb of the buffer.  It will return -1 on out of memory errors.
+        //
+        int flags = 0;
+
+        if(flProtect == PAGE_READONLY)
+            flags = PROT_READ;
+        else if(flProtect == PAGE_READWRITE)
+            flags = PROT_READ | PROT_WRITE;
+
+        int result = mprotect((void*)lpAddress, dwSize, flags);
+        if(result == -1)
+        {
+            gGetLastError = errno;
+            return NULL;
+        }
+        return lpAddress;
+    }
+    else
+    {
+        assert(0 && "VirtualAlloc: unsupported allocation type");
+    }
+}
+
+
+WINBASEAPI BOOL WINAPI VirtualFree(PVOID lpAddress, DWORD dwSize, DWORD dwFreeType)
+{
+    assert(dwFreeType == MEM_RELEASE);
+    int rv = munmap(lpAddress, dwSize);
+
+    return rv==-1 ? FALSE : TRUE;
+}
+
+WINBASEAPI DWORD WINAPI GetLastError()
+{
+    return gGetLastError;
+}
+

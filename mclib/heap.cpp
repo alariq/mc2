@@ -106,7 +106,6 @@ HeapManager::~HeapManager (void)
 //---------------------------------------------------------------------------
 void HeapManager::destroy (void)
 {
-#ifndef USE_GOS_HEAP
 	long result = 0;
 	
 	//-----------------------------
@@ -128,7 +127,6 @@ void HeapManager::destroy (void)
 		if (result == FALSE)
 			result = GetLastError();
 	}
-#endif // USE_GOS_HEAP
 
 	init();
 }
@@ -167,7 +165,6 @@ MemoryPtr HeapManager::getHeapPtr (void)
 //---------------------------------------------------------------------------
 long HeapManager::createHeap (unsigned long memSize)
 {
-#ifndef USE_GOS_HEAP
 	heap = (MemoryPtr)VirtualAlloc(NULL,memSize,MEM_RESERVE,PAGE_READWRITE);
 
 	if (heap)
@@ -176,7 +173,6 @@ long HeapManager::createHeap (unsigned long memSize)
 		totalSize = memSize;
 		return NO_ERR;
 	}
-#endif
 
 	return COULDNT_CREATE;
 }
@@ -184,7 +180,6 @@ long HeapManager::createHeap (unsigned long memSize)
 //---------------------------------------------------------------------------
 long HeapManager::commitHeap (unsigned long commitSize)
 {
-#ifndef USE_GOS_HEAP
 	if (commitSize == 0)
 		commitSize = totalSize;
 	
@@ -208,6 +203,13 @@ long HeapManager::commitHeap (unsigned long commitSize)
 
 	MemoryPtr result = (MemoryPtr)VirtualAlloc(heap,commitSize,MEM_COMMIT,PAGE_READWRITE);
 
+    size_t currentEbp0;
+    asm("mov %%rsp, %0;"
+            : "=r"(currentEbp0)
+            :
+            :
+       );
+
 	if (result == heap)
 	{
 		long actualSize = commitSize;
@@ -218,6 +220,13 @@ long HeapManager::commitHeap (unsigned long commitSize)
 		// Add this to the UEBER HEAP 
 		globalHeapList->addHeap(this);
 		#endif
+
+        size_t currentEbp1;
+        asm("mov %%rsp, %0;"
+            : "=r"(currentEbp1)
+            :
+            :
+        );
 		
 		//------------------------------
 		// Store off who called this.
@@ -228,10 +237,17 @@ long HeapManager::commitHeap (unsigned long commitSize)
 		unsigned long prevEbp;
 		unsigned long retAddr;
 		
-		__asm
-		{
-			mov currentEbp,esp
-		}
+		//__asm
+		//{
+		//	mov currentEbp,esp
+		//}
+
+        // currentEbp = esp;
+        asm("mov %%rsp, %0;"
+            : "=r"(currentEbp)
+            :
+            :
+        );
 		
 		prevEbp = *((unsigned long *)currentEbp);
 		retAddr = *((unsigned long *)(currentEbp+4));
@@ -239,15 +255,13 @@ long HeapManager::commitHeap (unsigned long commitSize)
 
 		return NO_ERR;
 	}
-#endif
-	gosASSERT(false);
+
 	return COULDNT_COMMIT;
 }
 		
 //---------------------------------------------------------------------------
 long HeapManager::decommitHeap (unsigned long decommitSize)
 {
-#ifndef USE_GOS_HEAP
 	long result = 0;
 	
 	if (decommitSize == 0)
@@ -265,7 +279,6 @@ long HeapManager::decommitHeap (unsigned long decommitSize)
 	result = VirtualFree((void *)committedSize,decommitSize,MEM_DECOMMIT);
 	if (result == FALSE)
 		result = GetLastError();
-#endif
 
 	return NO_ERR;
 }
