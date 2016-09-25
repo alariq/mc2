@@ -45,6 +45,13 @@ extern char transcriptsPath[];
 // Free Functions
 
 //---------------------------------------------------------------------------
+
+#ifdef LINUX_BUILD
+    #define PATH_SEPARATOR  "/"
+#else
+    #define PATH_SEPARATOR  "\\"
+#endif
+
 #endif
 
 //---------------------------------------------------------------------------

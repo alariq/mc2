@@ -98,7 +98,7 @@ void LogisticsData::init()
 	missionInfo = new LogisticsMissionInfo;
 
 	FitIniFile file;
-	if ( NO_ERR != file.open( "data\\campaign\\campaign.fit" ) )
+	if ( NO_ERR != file.open( "data" PATH_SEPARATOR "campaign" PATH_SEPARATOR "campaign.fit" ) )
 	{
 		Assert( 0, 0, "coudln't find the campaign file\n" );
 	}
@@ -2123,7 +2123,7 @@ int LogisticsData::acceptMechModifications( const char* name )
 			if ( !(*vIter)->isDesignerMech() )
 			{
 				FullPathFileName mechFile;
-				mechFile.init("data\\multiplayer\\",(*vIter)->getName(),".var");
+				mechFile.init("data" PATH_SEPARATOR "multiplayer" PATH_SEPARATOR ,(*vIter)->getName(),".var");
 
 				FitIniFile file;
 				file.create(mechFile);
@@ -2307,7 +2307,7 @@ void LogisticsData::startMultiPlayer()
 
 	// need to initialize multiplayer variants here...
 	char findString[512];
-	sprintf(findString,"data\\multiplayer\\*.var");
+	sprintf(findString,"data" PATH_SEPARATOR "multiplayer" PATH_SEPARATOR "*.var");
 
 
 #ifdef LINUX_BUILD
@@ -2323,7 +2323,7 @@ void LogisticsData::startMultiPlayer()
 			if ((findResult.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) == 0)
 			{
 				FullPathFileName path;
-				path.init("data\\multiplayer\\",findResult.cFileName,"");
+				path.init("data" PATH_SEPARATOR "multiplayer" PATH_SEPARATOR, findResult.cFileName,"");
 				decryptFile(path,"tmp.fit");
 
 				FitIniFile file;

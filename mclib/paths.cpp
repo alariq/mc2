@@ -20,11 +20,6 @@
 
 //---------------------------------------------------------------------------
 // static Globals
-#ifdef LINUX_BUILD
-    #define PATH_SEPARATOR  "/"
-#else
-    #define PATH_SEPARATOR  "\\"
-#endif
 
 char terrainPath[80]		= "data" PATH_SEPARATOR "terrain"   PATH_SEPARATOR;
 char objectPath[80]			= "data" PATH_SEPARATOR "objects"   PATH_SEPARATOR;
