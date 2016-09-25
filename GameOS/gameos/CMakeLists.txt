@@ -10,6 +10,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O0 -ggdb -Wno-unused-local-typedefs -st
 # -Wno-unused-local-typedefs - to disable "typedef was ignored on this declaration"
 
 add_definitions(-D_DEBUG)
+add_definitions(-D_ARMOR)
 add_definitions(-DUSE_ASSEMBLER_CODE=0)
 add_definitions(-DLINUX_BUILD)
 
