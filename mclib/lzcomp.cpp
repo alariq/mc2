@@ -20,6 +20,11 @@
 #define gos_Free free
 #endif
 
+#include "zlib.h"
+
+// 128K and more cold be faster
+#define CHUNK 16384
+
 //---------------------------------------------------------------------------
 // Static Globals
 
@@ -28,6 +33,8 @@
 #endif
 
 typedef unsigned char* MemoryPtr;
+
+#ifndef LINUX_BUILD
 
 //-----------------------------
 //Used by Compressor Routine
@@ -61,7 +68,6 @@ struct Hash
 	unsigned char hashChar;
 };
 
-#ifndef LINUX_BUILD
 
 
 static unsigned char		tag_LZCHashBuf[sizeof(Hash) * MaxMax + 1024];
@@ -523,9 +529,56 @@ CompressDone:
 // returns length of compressed image.
 size_t LZCompress (MemoryPtr dest, MemoryPtr src, size_t srcLen)
 {
-    // TODO: sebi: use zlib
-    gosASSERT(0 && "implement LZCompress");
-    return 0; 
+    int ret, flush;
+    unsigned have;
+    z_stream strm;
+    unsigned char in[CHUNK];
+    unsigned char out[CHUNK];
+    int compression_level = -1; // tradeoff between speed/memeory used = to 6, available 0 - 9
+
+    /* allocate deflate state */
+    strm.zalloc = Z_NULL;
+    strm.zfree = Z_NULL;
+    strm.opaque = Z_NULL;
+    ret = deflateInit(&strm, compression_level);
+    if (ret != Z_OK)
+        return 0;
+
+    MemoryPtr dataptr = src;
+    size_t len_left = srcLen;
+    size_t out_size = 0;
+    do {
+
+        strm.avail_in = len_left >= CHUNK ? CHUNK : len_left;
+        flush = len_left > CHUNK ? Z_NO_FLUSH : Z_FINISH ;
+        memcpy(in, dataptr, strm.avail_in);
+        strm.next_in = in;
+
+        dataptr += strm.avail_in;
+        len_left -= strm.avail_in;
+
+        do {
+            strm.avail_out = CHUNK;
+            strm.next_out = out;
+
+            ret = deflate(&strm, flush);    /* no bad return value */
+            gosASSERT(ret != Z_STREAM_ERROR);  /* state not clobbered */
+
+            have = CHUNK - strm.avail_out;
+            memcpy(dest, out, have);
+            dest += have;
+            out_size += have;
+
+        } while(strm.avail_out == 0);
+        gosASSERT(strm.avail_in == 0);     /* all input will be used */
+
+    /* done when last data in file processed */
+    } while (flush != Z_FINISH);
+    gosASSERT(ret == Z_STREAM_END);        /* stream will be complete */
+
+    /* clean up and return */
+    (void)deflateEnd(&strm);
+    return out_size;
 }
 #endif
 
