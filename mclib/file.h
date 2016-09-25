@@ -174,6 +174,7 @@ class File
 			short readShort (void);
 			long readLong (void);
 			float readFloat( void );
+			int readInt( void );
 
 			long readString (MemoryPtr buffer);
 			long readLine (MemoryPtr buffer, long maxLength);
@@ -185,6 +186,7 @@ class File
 			long writeByte (unsigned char value);
 			long writeWord (short value);
 			long writeShort (short value);
+			long writeInt(int value);
 			long writeLong (long value);
 			long writeFloat (float value);
 

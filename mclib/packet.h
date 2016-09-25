@@ -43,9 +43,9 @@
 #define ANY_PACKET_TYPE				0x07
 #define OFFSET_MASK         		((1L << TYPE_SHIFT) - 1L)
 
-#define GetPacketType(offset) 		(((unsigned long)offset)>>TYPE_SHIFT)
+#define GetPacketType(offset) 		(((unsigned int)offset)>>TYPE_SHIFT)
 #define GetPacketOffset(offset)		(offset&OFFSET_MASK)
-#define SetPacketType(offset,type)	((offset)+(long(type)<<TYPE_SHIFT))
+#define SetPacketType(offset,type)	((offset)+((unsigned int)(type)<<TYPE_SHIFT))
 
 #define TABLE_ENTRY(p) ((2+p)<<2)	// ((1+p)*sizeof(long))
 
@@ -58,15 +58,15 @@ class PacketFile : public File
 	//Data Members
 	//-------------
 	protected:
-		long numPackets;
-		long currentPacket;
-		long packetSize;
-		long packetBase;
+		unsigned int numPackets;
+		unsigned int currentPacket;
+		unsigned int packetSize;
+		unsigned int packetBase;
 
-		long packetType;		
-		long packetUnpackedSize;
+		unsigned int packetType;		
+		unsigned int packetUnpackedSize;
 
-		long *seekTable;
+		unsigned int* seekTable;
 
 		bool usesCheckSum;
 
@@ -94,40 +94,40 @@ class PacketFile : public File
 			usesCheckSum = TRUE;
 		}
 
-		long readPacketOffset (long packet, long *lastType = 0);
-		long readPacket (long packet, unsigned char *buffer);
-		long readPackedPacket (long packet, unsigned char *buffer);
+		unsigned int readPacketOffset (unsigned int packet, unsigned int *lastType = 0);
+		unsigned int readPacket (unsigned int packet, unsigned char *buffer);
+		unsigned int readPackedPacket (unsigned int packet, unsigned char *buffer);
 
-		long seekPacket (long packet);
+		unsigned int seekPacket (unsigned int packet);
 
 		void operator ++ (void);
 		void operator -- (void);
 		
-		long getNumPackets (void);
-		long getCurrentPacket (void);
-		long getPacketOffset(void);
+		unsigned int getNumPackets (void);
+		unsigned int getCurrentPacket (void);
+		unsigned int getPacketOffset(void);
 
-		long getPacketSize (void)
+		unsigned int getPacketSize (void)
 		{
 			return packetUnpackedSize;
 		}
 
-		long getPackedPacketSize (void);
-		long getStorageType (void);
+		unsigned int getPackedPacketSize (void);
+		unsigned int getStorageType (void);
 
 		virtual FileClass getFileClass (void)
 		{
 			return PACKETFILE;
 		}
 			
-		long checkSumFile (void);
+		unsigned int checkSumFile (void);
 
 		//-------------------------------------------
 		// Functions to Write Packet Files
-		void reserve (long count, bool withCheckSum = FALSE);
-		long writePacket (long packet, MemoryPtr buffer, long nbytes, unsigned char p_type = ANY_PACKET_TYPE);
-		long insertPacket (long packet, MemoryPtr buffer, long nbytes, unsigned char p_type = ANY_PACKET_TYPE);
-		long writePacket (long packet, MemoryPtr buffer);
+		void reserve (unsigned int count, bool withCheckSum = FALSE);
+		unsigned int writePacket (unsigned int packet, MemoryPtr buffer, unsigned int nbytes, unsigned char p_type = ANY_PACKET_TYPE);
+		unsigned int insertPacket (unsigned int packet, MemoryPtr buffer, unsigned int nbytes, unsigned char p_type = ANY_PACKET_TYPE);
+		unsigned int writePacket (unsigned int packet, MemoryPtr buffer);
 };
 
 

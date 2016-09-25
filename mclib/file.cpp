@@ -916,8 +916,46 @@ short File::readShort (void)
 }
 
 //---------------------------------------------------------------------------
+int File::readInt(void)
+{
+	int value = 0;
+	int result = 0;
+
+	if (inRAM && fileImage)	
+	{
+		char *readAddress = (char*)fileImage+logicalPosition;
+		memcpy((char *)(&value),readAddress,sizeof(value));
+		logicalPosition += sizeof(value);
+	}
+	else if (fastFile)
+	{
+		result = fastFile->readFast(fastFileHandle,(char *)&value,sizeof(value));
+		logicalPosition += sizeof(value);
+	}
+	else
+	{
+		if (isOpen())
+		{
+			result = _read(handle,(void*)(&value),sizeof(value));
+			logicalPosition += sizeof(value);
+
+			if (result != sizeof(value))
+				lastError = errno;
+		}
+		else
+		{
+			lastError = FILE_NOT_OPEN;
+		}
+	}
+	
+	return value;
+}
+
+//---------------------------------------------------------------------------
 long File::readLong (void)
 {
+    gosASSERT(0 && "readLong: Most probably this function should not be called!!!");
+
 	long value = 0;
 	unsigned long result = 0;
 
@@ -1368,6 +1406,49 @@ long File::writeShort (short value)
 
 //---------------------------------------------------------------------------
 long File::writeLong (long value)
+{
+    gosASSERT(0 && "writeLong: Most probably this function should not be called!!!");
+
+	unsigned long result = 0;
+	
+	if (parent == NULL)
+	{
+		if (isOpen())
+		{
+			if ( inRAM )
+			{
+				if ( logicalPosition + sizeof( value ) > physicalLength )
+					return BAD_WRITE_ERR;
+				memcpy( fileImage + logicalPosition, &value, sizeof( value ) );
+				result = sizeof( value );				
+			}
+			else
+				result = _write(handle,(&value),sizeof(value));
+
+			if (result == sizeof(value))
+			{
+				logicalPosition += sizeof(value);
+				result = NO_ERR;	
+			}
+			else
+			{
+				result = BAD_WRITE_ERR;
+			}
+		}
+		else
+		{
+			lastError = FILE_NOT_OPEN;
+		}
+	}
+	else
+	{
+		lastError = CANT_WRITE_TO_CHILD;
+	}
+
+	return(result);
+}
+
+long File::writeInt (int value)
 {
 	unsigned long result = 0;
 	
