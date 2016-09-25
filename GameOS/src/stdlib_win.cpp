@@ -17,19 +17,29 @@ void _splitpath (const char* path, char* drive, char* dir, char* fname, char* ex
     char* d = dirname(copy_dir);    
     char* b = basename(copy_base);
 
-    strcpy(dir, d);    
-    strcpy(fname, b);
+    if(dir) {
+        strcpy(dir, d);
+    }
+    if(fname) {
+        strcpy(fname, b);
+    }
 
     free(copy_dir);
     free(copy_base);
 
-    strcpy(drive, "");
-    char* dot = strrchr(fname, '.');
-    if(dot) {
-        strcpy(ext, dot+1);
-    } else {
-        strcpy(ext, "");
-    }    
+    if(drive) {
+        strcpy(drive, "");
+    }
+
+    if(ext) {
+        char* dot = strrchr(fname, '.');
+        if(dot) {
+            strcpy(ext, dot+1);
+        } else {
+            strcpy(ext, "");
+        }
+    }
+
 }
 
 static void u32toa_naive(uint32_t value, char* buffer) {
