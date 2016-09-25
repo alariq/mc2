@@ -65,9 +65,7 @@ void
 	m_effects.SetLength(len);
 	for (unsigned i=0; i<len; ++i)
 	{
-        printf("index: %d\n", i);
         gosFX::Effect::Specification* pspec = gosFX::Effect::Specification::Create(stream, version);
-        printf("spec created\n");
 		m_effects[i] = pspec;
 		Check_Object(m_effects[i]);
 		m_effects[i]->m_effectID = i;
