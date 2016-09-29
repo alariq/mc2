@@ -4,6 +4,7 @@ project(gameos)
 set(SOURCES ${SOURCES}
     gameos.cpp
     gameosmain.cpp
+    gameos_graphics.cpp
     )
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O0 -ggdb -Wno-unused-local-typedefs -std=c++0x")
@@ -14,7 +15,7 @@ add_definitions(-D_ARMOR)
 add_definitions(-DUSE_ASSEMBLER_CODE=0)
 add_definitions(-DLINUX_BUILD)
 
-include_directories("../include" )
+include_directories("../include"  ".")
 
 add_library(gameos ${SOURCES})
 
