@@ -207,13 +207,13 @@
 #define IDC_COMP18                      1126
 #define IDC_COMP19                      1127
 #define IDC_COMP20                      1128
+/*
 #define IDS_GRASS1                      10000
 #define IDS_GRASS2                      10001
 #define IDS_GRASS3                      10002
 #define IDS_GRASS4                      10003
 #define IDS_GRASS5                      10004
 #define IDS_GRASS6                      10005
-/*
 #define IDS_STRING10006                 10006
 #define IDS_STRING10007                 10007
 #define IDS_STRING10008                 10008
