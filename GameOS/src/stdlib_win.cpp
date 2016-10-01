@@ -22,6 +22,8 @@ void _splitpath (const char* path, char* drive, char* dir, char* fname, char* ex
     }
     if(fname) {
         strcpy(fname, b);
+        char* dot = strrchr(fname, '.');
+        *dot='\0';
     }
 
     free(copy_dir);
