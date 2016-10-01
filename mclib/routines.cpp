@@ -177,9 +177,11 @@ done:
 // Random Number Functions
 long RandomNumber (long range)
 {
-	gosASSERT( RAND_MAX==(1<<15)-1 );		// This is always TRUE in VC
+    //sebi
+	//gosASSERT(RAND_MAX==(1<<15)-1 );		// This is always TRUE in VC
+	//return( (gos_rand()*range)>>15 );			// Used to used mod (%) - which costs 40+ cycles (AG)
 
-	return( (gos_rand()*range)>>15 );			// Used to used mod (%) - which costs 40+ cycles (AG)
+    return gos_rand()%range;
 }
 
 //---------------------------------------------------------------------------
