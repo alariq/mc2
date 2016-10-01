@@ -44,11 +44,17 @@ SimpleCamera::SimpleCamera()
 
 SimpleCamera::~SimpleCamera()
 {
+
+    // sebi, do not see how this object cannot be on a heap..
+    // so delete unconditionally
+    /*
 	//Why did we not delete here??
 	// It was commented out.
 	// -fs
 	if ( appearanceTypeList && appearanceTypeList->pointerCanBeDeleted(pObject) )
 		delete pObject;
+    */
+    delete pObject;
 
 	pObject = NULL;
 
@@ -285,9 +291,15 @@ void SimpleCamera::setMech(const char* fileName, long baseColor, long highlight1
 
 	AltitudeTight = 650;
 
+    // sebi, do not see how this object cannot be on a heap..
+    // so delete unconditionally
+    /*
 	// moving this to above the spot where we create the appearancetypelist
 	if ( appearanceTypeList && appearanceTypeList->pointerCanBeDeleted(pObject) )
 		delete pObject;
+        */
+    delete pObject;
+
 
 	if ( !appearanceTypeList )
 		Mission::initBareMinimum();
@@ -351,8 +363,13 @@ void SimpleCamera::setVehicle(const char* fileName,long base, long highlight, lo
 
 	rotationIncrement = 90;
 	
+    // sebi, do not see how this object cannot be on a heap..
+    // so delete unconditionally
+    /*
 	if ( appearanceTypeList && appearanceTypeList->pointerCanBeDeleted(pObject) )
 		delete pObject;
+        */
+    delete pObject;
 
 	pObject = NULL;
 
@@ -409,8 +426,13 @@ void SimpleCamera::setComponent(const char* fileName )
 		Mission::initBareMinimum();
 
 	
+    // sebi, do not see how this object cannot be on a heap..
+    // so delete unconditionally
+    /*
 	if ( appearanceTypeList && appearanceTypeList->pointerCanBeDeleted(pObject) )
 		delete pObject;
+        */
+    delete pObject;
 
 	pObject = NULL;
 

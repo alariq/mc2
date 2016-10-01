@@ -208,7 +208,11 @@ class UserHeap : public HeapManager
 
 		bool heapReady (void)
 		{
+#ifdef USE_GOS_HEAP
+            return gosHeap;
+#else
 			return (heapSize != 0);
+#endif
 		}
 
 		void setMallocFatals (bool fatalFlag)
