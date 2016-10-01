@@ -747,6 +747,7 @@ typedef struct _gosIME_Appearance
 	DWORD			compColorText;
 } gosIME_Appearance;
 
+
 //
 // Opens a DLL and returns a handle
 //

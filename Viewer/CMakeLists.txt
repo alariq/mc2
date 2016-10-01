@@ -47,7 +47,7 @@ set(SOURCES
     "../code/radio.cpp"
     "../code/simplecamera.cpp"
     "../code/simplecomponentlistbox.cpp"
-    "../strings.res.cpp"
+    #    "../strings.res.cpp"
     "View.cpp"
     )
 
@@ -64,4 +64,4 @@ find_library(OPENGL NAMES "opengl32" "GL")
 include_directories("./window" "../GameOS/include" "../mclib" "../gui" "../code" "../netlib")
 
 add_executable(viewer ${SOURCES})
-target_link_libraries(viewer mclib gosfx mlr stuff gui gameos windows z ${SDL2} ${SDL2main} ${OPENGL})
+target_link_libraries(viewer mclib gosfx mlr stuff gui gameos windows z ${SDL2} ${SDL2main} ${OPENGL} dl)

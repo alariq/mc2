@@ -2,6 +2,8 @@
 
 use strict;
 
+my $debug_print = 0;
+
 my ($id_file, $rc_file);
 
 $id_file = "resource.h";
@@ -23,7 +25,7 @@ while(<$id_h>) {
         my $val = $2;
         chomp $val;
 
-        #print $key, "->", $val, "\n";
+        print $key, "->", $val, "\n";
 
         $h{$key} = [$val];
         $num_id = $num_id + 1;
@@ -48,8 +50,10 @@ while(<$rc_h>) {
 }
 
 my ($key, $val);
-while(($key, $val) = each %h) {
-    print $key, "->", @{$val}, "\n";
+if($debug_print) {
+    while(($key, $val) = each %h) {
+        print $key, "->", @{$val}, "\n";
+    }
 }
 
 my $header_file = "strings.res.h";
@@ -60,18 +64,41 @@ my ($header_h, $src_h);
 open($header_h,">", $header_file) || die "Canot open file: $!\n";
 open($src_h,">", $src_file) || die "Canot open file: $!\n";
 
-print $header_h "#ifndef STRINGS_H\n#define STRINGS_H\n\nextern const char* StringIds[];\n\nenum eStringIds {\n\tIDS_undefined_string_sebi = 0,\n";
-print $src_h "const char* StringIds[] = { \n\t\"undefined_string_sebi\",\n";
+print $header_h <<EOF;
+#ifndef STRINGS_H
+#define STRINGS_H
 
-my $i = 1;
+enum eStringIds { 
+    IDS_undefined_string_sebi = 0,
+
+EOF
+
+print $src_h <<EOF;
+#include "$header_file"
+
+StringResRecord StringRecords[] = {
+    { IDS_undefined_string_sebi, "undefined_string_sebi" },
+EOF
+
 while(($key, $val) = each %h) {
-    print $key, "->", @{$val}, "\n";
-    print $header_h "\t", $key, "\t = ", $i, ",\n";
-    print $src_h "\t\"", ${$val}[1], "\",\n";
-    $i = $i + 1;
+    #print $key, "->", @{$val}, "\n";
+    print $header_h "\t", $key, "\t = ",${$val}[0], ",\n";
+    print $src_h "\t{ ", $key, ", \"", ${$val}[1], "\" },\n";
 }
 
-print $header_h "};\n\n#endif // STRINGS_H\n";
+print $header_h <<EOF;
+};
+
+struct StringResRecord {
+    eStringIds id_;
+    const char* str_;
+};
+
+extern StringResRecord StringRecords[];
+
+#endif // STRINGS_H
+EOF
+
 print $src_h "};\n";
 
 close($header_h);

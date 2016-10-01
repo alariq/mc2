@@ -5,6 +5,7 @@ set(SOURCES ${SOURCES}
     gameos.cpp
     gameosmain.cpp
     gameos_graphics.cpp
+    gameos_res.cpp
     )
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O0 -ggdb -Wno-unused-local-typedefs -std=c++0x")

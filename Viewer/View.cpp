@@ -213,7 +213,7 @@ void __stdcall DoGameLogic()
 //---------------------------------------------------------------------------
 void __stdcall InitializeGameEngine()
 {
- 	gosResourceHandle = gos_OpenResourceDLL("mc2res.dll", StringIds, 4185);
+ 	gosResourceHandle = gos_OpenResourceDLL("./libmc2res.so", NULL, 0);
 	
 	char temp[256];
 	cLoadString( IDS_FLOAT_HELP_FONT, temp, 255 );

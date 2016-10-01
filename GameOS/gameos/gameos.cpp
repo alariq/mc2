@@ -282,30 +282,6 @@ DWORD __stdcall gos_WriteFile(HGOSFILE hfile, void const* buf, DWORD size)
 }
 ////////////////////////////////////////////////////////////////////////////////
 
-HSTRRES __stdcall gos_OpenResourceDLL(char const* FileName, const char** strings, int num)
-{
-    gos_StringRes* pstrres = new gos_StringRes();
-    pstrres->strings = strings;
-    pstrres->num_strings = num;
-    return pstrres;
-}
-void __stdcall gos_CloseResourceDLL(HSTRRES handle)
-{
-    gos_StringRes* pstrres = new gos_StringRes();
-    delete pstrres;
-}
-const char* __stdcall gos_GetResourceString(HSTRRES handle, DWORD id)
-{
-    static const char* dummy_string_res = "missing string res";
-    gosASSERT(handle);
-    gos_StringRes* pstrres = (gos_StringRes*)(handle);
-    if(id > pstrres->num_strings) {
-        fprintf(stderr, "Requested string id: %d not found, return dummy string\n", id);
-        return dummy_string_res;
-    }
-    return pstrres->strings[id];
-}
-
 static const int g_hepsStackSize = 128;
 static gos_Heap* g_heapsStack[g_hepsStackSize];
 static int g_heapStackPointer = 0;
