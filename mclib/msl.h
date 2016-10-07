@@ -71,8 +71,8 @@ class TG_TypeMultiShape
 	//-------------
 	//Data Members
 	protected:
-		long				numTG_TypeShapes;		//Number of TG_Shapes
-		long				numTextures;			//Total Textures for all shapes.
+		int                 numTG_TypeShapes;		//Number of TG_Shapes
+		int                 numTextures;			//Total Textures for all shapes.
 		TG_TypeNodePtr		*listOfTypeShapes;		//Memory holding all TG_TypeNodes and TypeShapes
 		TG_TexturePtr		listOfTextures;			//List of texture Structures for all shapes.
 		
@@ -190,7 +190,7 @@ class TG_TypeMultiShape
 			Stuff::Point3D result;
 			result.x = result.y = result.z = 0.0f;
 
-			for (long i=0;i<numTG_TypeShapes;i++)
+			for (int i=0;i<numTG_TypeShapes;i++)
 			{
 				if (stricmp(listOfTypeShapes[i]->getNodeId(),nodeId) == 0)
 					result = listOfTypeShapes[i]->GetNodeCenter();
@@ -204,19 +204,19 @@ class TG_TypeMultiShape
 
 		void SetAlphaTest (bool flag)
 		{
-			for (long i=0;i<numTG_TypeShapes;i++)
+			for (int i=0;i<numTG_TypeShapes;i++)
 				listOfTypeShapes[i]->SetAlphaTest(flag);
 		}
 
 		void SetFilter (bool flag)
 		{
-			for (long i=0;i<numTG_TypeShapes;i++)
+			for (int i=0;i<numTG_TypeShapes;i++)
 				listOfTypeShapes[i]->SetFilter(flag);
 		}
 		
 		void SetLightRGBs (DWORD hPink, DWORD hGreen, DWORD hYellow)
 		{
-			for (long i=0;i<numTG_TypeShapes;i++)
+			for (int i=0;i<numTG_TypeShapes;i++)
 				listOfTypeShapes[i]->SetLightRGBs(hPink,hGreen,hYellow);
 		}
 
@@ -248,7 +248,7 @@ class TG_MultiShape
 	//Data Members
 	protected:
 		TG_TypeMultiShapePtr	myMultiType;			//Pointer to the type
-		long					numTG_Shapes;			//Number of TG_Shapes
+		int                     numTG_Shapes;			//Number of TG_Shapes
 		TG_ShapeRecPtr			listOfShapes;			//Memory holding all TG_ShapeRecs
 		float					frameNum;				//Frame number of animation
 		bool					d_useShadows;
@@ -338,7 +338,7 @@ class TG_MultiShape
 		{
 			if (scaleFactor >= 0.0f)
 			{
-				for (long i=0;i<numTG_Shapes;i++)
+				for (int i=0;i<numTG_Shapes;i++)
 					listOfShapes[i].node->shapeScalar = scaleFactor;
 			}
 		}
@@ -424,7 +424,7 @@ class TG_MultiShape
 		{
 			Stuff::Point3D result;
 			result.x = result.y = result.z = 0.0f;
-			for (long i=0;i<numTG_Shapes;i++)
+			for (int i=0;i<numTG_Shapes;i++)
 			{
 				if (listOfShapes[i].parentNode == NULL)
 				{
@@ -439,7 +439,7 @@ class TG_MultiShape
 		{
 			Stuff::Point3D result;
 			result.x = result.y = result.z = 0.0f;
-			for (long i=0;i<numTG_Shapes;i++)
+			for (int i=0;i<numTG_Shapes;i++)
 			{
 				if (listOfShapes[i].parentNode == NULL)
 				{
@@ -460,19 +460,19 @@ class TG_MultiShape
 		//As such, the shape will stop animating and return to base pose.
 		void ClearAnimation (void)
 		{
-			for (long i=0;i<numTG_Shapes;i++)
+			for (int i=0;i<numTG_Shapes;i++)
 				listOfShapes[i].currentAnimation = NULL;
 		}
 
 		void SetARGBHighLight (DWORD argb)
 		{
-			for (long i=0;i<numTG_Shapes;i++)
+			for (int i=0;i<numTG_Shapes;i++)
 				listOfShapes[i].node->SetARGBHighLight(argb);
 		}
 		
 		void SetLightsOut (bool lightFlag)
 		{
-			for (long i=0;i<numTG_Shapes;i++)
+			for (int i=0;i<numTG_Shapes;i++)
 				listOfShapes[i].node->SetLightsOut(lightFlag);
 		}
 		
@@ -506,7 +506,7 @@ class TG_MultiShape
 		
 		long GetNodeNameId (const char * nodeId)
 		{
-			for (long i=0;i<numTG_Shapes;i++)
+			for (int  i=0;i<numTG_Shapes;i++)
 			{
 				//-----------------------------------------------------------------
 				// Scan through the list of shapes and dig out the number needed.
@@ -539,7 +539,7 @@ class TG_MultiShape
 			float mx = mouseX;
 			float my = mouseY;
 
-			for (long i=0;i<numTG_Shapes;i++)
+			for (int i=0;i<numTG_Shapes;i++)
 			{
 				if (listOfShapes[i].node->numVisibleFaces && listOfShapes[i].node->PerPolySelect(mx,my))
 					return true;
@@ -550,7 +550,7 @@ class TG_MultiShape
 		
 		void SetRecalcShadows (bool flag)
 		{
-			for (long i=0;i<numTG_Shapes;i++)
+			for (int i=0;i<numTG_Shapes;i++)
 			{
 				listOfShapes[i].node->SetRecalcShadows(flag);
 			}
@@ -579,8 +579,8 @@ class TG_AnimateShape
 	//Other then data storage, parsing, and the pointer sets, does zipp!
 	protected:
 		TG_AnimationPtr		listOfAnimation;
-		long				count;
-		long				actualCount;
+		int                 count;
+		int                 actualCount;
 		bool				shapeIdsSet;
 
 	public:

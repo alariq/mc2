@@ -313,7 +313,7 @@ typedef struct _TG_ShapeRec
 	Stuff::LinearMatrix4D		localShapeToWorld;		//Matrix to transform this TG_Shape.
 	Stuff::LinearMatrix4D		shapeToWorld;			//Matrix to transform this TG_Shape.
 	Stuff::LinearMatrix4D		worldToShape;			//Inverse of above Matrix.
-	long						calcedThisFrame;		//Turn number this matrix is current for.
+	int32_t                     calcedThisFrame;		//Turn number this matrix is current for.
 	bool						processMe;				//Flag indicating if I should transform/draw this.  Used for arms off.
 	TG_AnimationPtr				currentAnimation;		//Animation data being applied to this shape.  OK if NULL
 	_TG_ShapeRec				*parentNode;			//Parent Node.  OK if NULL but only for ROOT node!
@@ -395,12 +395,12 @@ class TG_TypeNode
 		{
 		}
 
-		virtual long GetNumTypeVertices (void)
+		virtual int GetNumTypeVertices (void)
 		{
 			return 0;
 		}
 
-		virtual long GetNodeType (void)
+		virtual int GetNodeType (void)
 		{
 			return TYPE_NODE;
 		}
@@ -432,7 +432,7 @@ class TG_TypeNode
 		//
 		// NOTE: Only takes the first GEOMOBJECT from the ASE file.  Multi-object
 		// Files will require user intervention to parse!!
-		virtual long LoadTGShapeFromASE (const char *fileName)
+		virtual int LoadTGShapeFromASE (const char *fileName)
 		{
 			return 0;
 		}
@@ -554,7 +554,7 @@ class TG_TypeShape : public TG_TypeNode
 			destroy();
 		}
 
-		virtual long GetNumTypeVertices (void)
+		virtual int GetNumTypeVertices (void)
 		{
 			return numTypeVertices;
 		}
@@ -583,7 +583,7 @@ class TG_TypeShape : public TG_TypeNode
 		//
 		// NOTE: Only takes the first GEOMOBJECT from the ASE file.  Multi-object
 		// Files will require user intervention to parse!!
-		virtual long LoadTGShapeFromASE (const char *fileName);
+		virtual int LoadTGShapeFromASE (const char *fileName);
 
 		//Function returns 0 if OK.  -1 if textureNum is out of range of numTextures.
 		//This function takes the gosTextureHandle passed in and assigns it to the
@@ -621,7 +621,7 @@ class TG_TypeShape : public TG_TypeNode
 			hotYellowRGB = hYellow;
 		}
 		
-		virtual long GetNodeType (void)
+		virtual int GetNodeType (void)
 		{
 			return SHAPE_NODE;
 		}

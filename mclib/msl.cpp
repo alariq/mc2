@@ -186,11 +186,11 @@ long TG_TypeMultiShape::LoadBinaryCopy (const char *fileName)
 	if (result != NO_ERR)
 		return -1;
 	
-	DWORD version = binFile.readLong();
+	DWORD version = binFile.readInt();
 	if (version == CURRENT_SHAPE_VERSION)
 	{
-		numTG_TypeShapes = binFile.readLong();
-		numTextures = binFile.readLong();
+		numTG_TypeShapes = binFile.readInt();
+		numTextures = binFile.readInt();
 	
 		//ListOfTextures
 		if (numTextures)
@@ -213,7 +213,7 @@ long TG_TypeMultiShape::LoadBinaryCopy (const char *fileName)
 	
 		for (long i=0;i<numTG_TypeShapes;i++)
 		{
-			long nodeType = binFile.readLong();
+			int nodeType = binFile.readInt();
 			
 			if (nodeType == SHAPE_NODE)
 			{
@@ -292,10 +292,11 @@ void TG_TypeMultiShape::SaveBinaryCopy (const char *fileName)
 {
 	File binFile;
 	binFile.create(fileName);
-	
-	binFile.writeLong(CURRENT_SHAPE_VERSION);
-	binFile.writeLong(numTG_TypeShapes);
-	binFile.writeLong(numTextures);
+
+    //sebi    
+	binFile.writeInt(CURRENT_SHAPE_VERSION);
+	binFile.writeInt(numTG_TypeShapes);
+	binFile.writeInt(numTextures);
 	
 	//ListOfTextures
 	if (numTextures)
@@ -434,7 +435,7 @@ long TG_TypeMultiShape::LoadTGMultiShapeFromASE (const char *fileName, bool forc
 			}
 			else
 			{
-				long versionId = binFile.readLong();
+				int versionId = binFile.readInt();
 				if (versionId != CURRENT_SHAPE_VERSION)
 				{
 					if (!silentMode)
@@ -601,7 +602,7 @@ long TG_TypeMultiShape::LoadTGMultiShapeFromASE (const char *fileName, bool forc
 					
 					if (baseFilename)
 					{
-						char localFilename[1024] = "Data\\TGL\\128\\";
+						char localFilename[1024] = "Data" PATH_SEPARATOR "TGL" PATH_SEPARATOR "128" PATH_SEPARATOR;
 						strcat(localFilename, baseFilename+1);
 						armAssetPtr->AddRelationship("Texture", localFilename);
 					}
@@ -634,7 +635,7 @@ long TG_TypeMultiShape::LoadTGMultiShapeFromASE (const char *fileName, bool forc
 				GetTextureName(i,txmName,256);
 		
 				char texturePath[1024];
-				sprintf(texturePath,"%s%d\\",tglPath,ObjectTextureSize);
+				sprintf(texturePath,"%s%d" PATH_SEPARATOR ,tglPath,ObjectTextureSize);
 			
 				FullPathFileName textureName;
 				textureName.init(texturePath,txmName,"");
@@ -1828,20 +1829,20 @@ void _TG_Animation::SaveBinaryCopy (File *binFile)
 	if (stricmp(nodeId,"NONE") != 0)
 	{
 		binFile->write((MemoryPtr)nodeId,TG_NODE_ID);	
-		binFile->writeLong(-1);			//ShapeIds ALWAYS start with -1.  We will scan on frame 1 please!
-		binFile->writeLong(numFrames);
+		binFile->writeInt(-1);			//ShapeIds ALWAYS start with -1.  We will scan on frame 1 please!
+		binFile->writeInt(numFrames);
 		binFile->writeFloat(frameRate);
 		binFile->writeFloat(tickRate);
 		
 		if (quat)
-			binFile->writeLong(sizeof(Stuff::UnitQuaternion) * numFrames);
+			binFile->writeInt(sizeof(Stuff::UnitQuaternion) * numFrames);
 		else
-			binFile->writeLong(0);
+			binFile->writeInt(0);
 			
 		if (pos)
-			binFile->writeLong(sizeof(Stuff::Point3D) * numFrames);
+			binFile->writeInt(sizeof(Stuff::Point3D) * numFrames);
 		else
-			binFile->writeLong(0);
+			binFile->writeInt(0);
 		
 		if (quat)
 			binFile->write((MemoryPtr)quat,sizeof(Stuff::UnitQuaternion) * numFrames);
@@ -1855,13 +1856,13 @@ void _TG_Animation::SaveBinaryCopy (File *binFile)
 void _TG_Animation::LoadBinaryCopy (File *binFile)
 {
 	binFile->read((MemoryPtr)nodeId,TG_NODE_ID);	
-	shapeId = binFile->readLong();
-	numFrames = binFile->readLong();
+	shapeId = binFile->readInt();
+	numFrames = binFile->readInt();
 	frameRate = binFile->readFloat();
 	tickRate = binFile->readFloat();
 	
-	long quatRAM = binFile->readLong();
-	long posRAM = binFile->readLong();		
+	int quatRAM = binFile->readInt();
+	int posRAM = binFile->readInt();		
 	
 	if (quatRAM)
 	{
@@ -1888,10 +1889,10 @@ long TG_AnimateShape::LoadBinaryCopy (const char *fileName)
 	if (result != NO_ERR)
 		return -1;
 		
-	long animFileVersion = binFile.readLong();
+	int animFileVersion = binFile.readInt();
 	if (animFileVersion == CURRENT_ANIM_VERSION)
 	{
-		count = binFile.readLong();
+		count = binFile.readInt();
 		
 		if (count)
 		{
@@ -1918,7 +1919,7 @@ void TG_AnimateShape::SaveBinaryCopy (const char *fileName)
 	File binFile;
 	binFile.create(fileName);
 	
-	binFile.writeLong(CURRENT_ANIM_VERSION);
+	binFile.writeInt(CURRENT_ANIM_VERSION);
 	
 	//ListOfAnimations
 	actualCount = 0;
@@ -1931,7 +1932,7 @@ void TG_AnimateShape::SaveBinaryCopy (const char *fileName)
 		}
 	}
 
-	binFile.writeLong(actualCount);
+	binFile.writeInt(actualCount);
 
 	//ListOfAnimations
 	if (count)
@@ -2007,7 +2008,7 @@ long TG_AnimateShape::LoadTGMultiShapeAnimationFromASE (const char *fileName, TG
 			}
 			else
 			{
-				long versionId = binFile.readLong();
+				long versionId = binFile.readInt();
 				if (versionId != CURRENT_ANIM_VERSION)
 					makeBinary = true;
 			}

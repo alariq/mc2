@@ -322,7 +322,7 @@ void TG_TypeNode::LoadBinaryCopy (File &binFile)
 void TG_TypeNode::SaveBinaryCopy (File &binFile)
 {
 	//What kind of thing is this
-	binFile.writeLong(TYPE_NODE);
+	binFile.writeInt(TYPE_NODE);
 	
 	//Other Data
 	binFile.writeFloat(nodeCenter.x);
@@ -451,7 +451,7 @@ TG_ShapePtr TG_TypeShape::CreateFrom (void)
 void TG_TypeShape::LoadBinaryCopy (File &binFile)
 {
 	//listOfTypeVertices
-	numTypeVertices = binFile.readLong();
+	numTypeVertices = binFile.readInt();
 	if (numTypeVertices)
 	{
 		listOfTypeVertices = (TG_TypeVertexPtr)TG_Shape::tglHeap->Malloc(sizeof(TG_TypeVertex) * numTypeVertices);
@@ -465,7 +465,7 @@ void TG_TypeShape::LoadBinaryCopy (File &binFile)
 	}
 
 	//listOfTypeTriangles
-	numTypeTriangles = binFile.readLong();
+	numTypeTriangles = binFile.readInt();
 	if (numTypeTriangles)
 	{
 		listOfTypeTriangles = (TG_TypeTrianglePtr)TG_Shape::tglHeap->Malloc(sizeof(TG_TypeTriangle) * numTypeTriangles);
@@ -479,7 +479,7 @@ void TG_TypeShape::LoadBinaryCopy (File &binFile)
 	}
 
 	//listOfTextures
-	numTextures = binFile.readLong();
+	numTextures = binFile.readInt();
 	if (numTextures)
 	{
 		listOfTextures = (TG_TinyTexturePtr)TG_Shape::tglHeap->Malloc(sizeof(TG_TinyTexture) * numTextures);
@@ -512,24 +512,24 @@ void TG_TypeShape::LoadBinaryCopy (File &binFile)
 void TG_TypeShape::SaveBinaryCopy (File &binFile)
 {
 	//What kind of thing is this
-	binFile.writeLong(SHAPE_NODE);
+	binFile.writeInt(SHAPE_NODE);
 	
 	//listOfTypeVertices
-	binFile.writeLong(numTypeVertices);
+	binFile.writeInt(numTypeVertices);
 	if (numTypeVertices)
 	{
 		binFile.write((MemoryPtr)listOfTypeVertices,sizeof(TG_TypeVertex) * numTypeVertices);
 	}
 
 	//listOfTypeTriangles
-	binFile.writeLong(numTypeTriangles);
+	binFile.writeInt(numTypeTriangles);
 	if (numTypeTriangles)
 	{
 		binFile.write((MemoryPtr)listOfTypeTriangles,sizeof(TG_TypeTriangle) * numTypeTriangles);
 	}
 
 	//listOfTextures
-	binFile.writeLong(numTextures);
+	binFile.writeInt(numTextures);
 	if (numTextures)
 	{
 		binFile.write((MemoryPtr)listOfTextures,sizeof(TG_TinyTexture) * numTextures);
@@ -766,12 +766,12 @@ long TG_TypeShape::ParseASEFile (BYTE *aseBuffer, const char *fileName)
 
 	//---------------------------
 	// Create vertex normal list
-	long *vertexNormalCount = (long *)TG_Shape::tglHeap->Malloc(sizeof(long) * numTypeVertices);
+	int *vertexNormalCount = (int*)TG_Shape::tglHeap->Malloc(sizeof(int) * numTypeVertices);
 	gosASSERT(vertexNormalCount != NULL);
 
-	memset(vertexNormalCount,0,sizeof(long) * numTypeVertices);
+	memset(vertexNormalCount,0,sizeof(int) * numTypeVertices);
 
-	for (long i=0;i<numTypeVertices;i++)
+	for (int i=0;i<numTypeVertices;i++)
 	{
 		char numberData[256];
 
@@ -865,7 +865,7 @@ long TG_TypeShape::ParseASEFile (BYTE *aseBuffer, const char *fileName)
 
 			GetNumberData(faceData,numberData);
 
-			long matLid = atol(numberData);
+			int matLid = atol(numberData);
 			if (matLid >= (numTextures/2))
 				matLid = (numTextures/2) - 1;
 
@@ -914,7 +914,7 @@ long TG_TypeShape::ParseASEFile (BYTE *aseBuffer, const char *fileName)
 			faceData = strstr((char *)aseBuffer,faceId);
 			gosASSERT(faceData != NULL);
 	
-			sprintf(faceId,"%s %d",ASE_MESH_TVERT_ID,(long)tVFaces.x);
+			sprintf(faceId,"%s %d",ASE_MESH_TVERT_ID,(int)tVFaces.x);
 	
 			faceData = strstr(faceData,faceId);
 			gosASSERT(faceData != NULL);
@@ -953,7 +953,7 @@ long TG_TypeShape::ParseASEFile (BYTE *aseBuffer, const char *fileName)
 			faceData = strstr((char *)aseBuffer,faceId);
 			gosASSERT(faceData != NULL);
 	
-			sprintf(faceId,"%s %d",ASE_MESH_TVERT_ID,(long)tVFaces.y);
+			sprintf(faceId,"%s %d",ASE_MESH_TVERT_ID,(int)tVFaces.y);
 	
 			faceData = strstr(faceData,faceId);
 			gosASSERT(faceData != NULL);
@@ -990,7 +990,7 @@ long TG_TypeShape::ParseASEFile (BYTE *aseBuffer, const char *fileName)
 			faceData = strstr((char *)aseBuffer,faceId);
 			gosASSERT(faceData != NULL);
 	
-			sprintf(faceId,"%s %d",ASE_MESH_TVERT_ID,(long)tVFaces.z);
+			sprintf(faceId,"%s %d",ASE_MESH_TVERT_ID,(int)tVFaces.z);
 	
 			faceData = strstr(faceData,faceId);
 			gosASSERT(faceData != NULL);
@@ -1072,7 +1072,7 @@ long TG_TypeShape::ParseASEFile (BYTE *aseBuffer, const char *fileName)
 			faceData = strstr((char *)aseBuffer,faceId);
 			gosASSERT(faceData != NULL);
 
-			sprintf(faceId,"%s %d",ASE_MESH_VERTCOL_ID,(long)cVFaces.x);
+			sprintf(faceId,"%s %d",ASE_MESH_VERTCOL_ID,(int)cVFaces.x);
 
 			faceData = strstr(faceData,faceId);
 			gosASSERT(faceData != NULL);
@@ -1104,7 +1104,7 @@ long TG_TypeShape::ParseASEFile (BYTE *aseBuffer, const char *fileName)
 			faceData = strstr((char *)aseBuffer,faceId);
 			gosASSERT(faceData != NULL);
 
-			sprintf(faceId,"%s %d",ASE_MESH_VERTCOL_ID,(long)cVFaces.y);
+			sprintf(faceId,"%s %d",ASE_MESH_VERTCOL_ID,(int)cVFaces.y);
 
 			faceData = strstr(faceData,faceId);
 			gosASSERT(faceData != NULL);
@@ -1136,7 +1136,7 @@ long TG_TypeShape::ParseASEFile (BYTE *aseBuffer, const char *fileName)
 			faceData = strstr((char *)aseBuffer,faceId);
 			gosASSERT(faceData != NULL);
 
-			sprintf(faceId,"%s %d",ASE_MESH_VERTCOL_ID,(long)cVFaces.z);
+			sprintf(faceId,"%s %d",ASE_MESH_VERTCOL_ID,(int)cVFaces.z);
 
 			faceData = strstr(faceData,faceId);
 			gosASSERT(faceData != NULL);
@@ -1195,7 +1195,7 @@ long TG_TypeShape::ParseASEFile (BYTE *aseBuffer, const char *fileName)
 		sprintf(vertexID,"%s",ASE_VERTEX_NORMAL_ID);
 		char *vertexData = strstr((char *)faceData,vertexID);
 		GetNumberData(vertexData,numberData);
-		long vertexNum = atol(numberData);
+		int vertexNum = atol(numberData);
 		vertexNormalCount[vertexNum]++;
 
 		vertexData += strlen(vertexID)+strlen(numberData)+1;
@@ -1282,7 +1282,7 @@ long TG_TypeShape::ParseASEFile (BYTE *aseBuffer, const char *fileName)
 //
 // NOTE: Only takes the first GEOMOBJECT from the ASE file.  Multi-object
 // Files will require user intervention to parse!!
-long TG_TypeShape::LoadTGShapeFromASE (const char *fileName)
+int TG_TypeShape::LoadTGShapeFromASE (const char *fileName)
 {
 	//-----------------------------------------------------
 	// Fully loads and parses an ASE File.  These files are
