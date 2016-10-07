@@ -13,8 +13,14 @@
 void _splitpath (const char* path, char* drive, char* dir, char* fname, char* ext)
 {
     char* copy_base = strdup(path);
-    char* copy_dir = strdup(path);
-    char* d = dirname(copy_dir);    
+    // switch \ to /
+    size_t len = strlen(copy_base);
+    for(size_t i=0; i<len; ++i) {
+        if(copy_base[i] == '\\')
+            copy_base[i] = '/';
+    }
+    char* copy_dir = strdup(copy_base);
+    char* d = dirname(copy_dir);
     char* b = basename(copy_base);
 
     if(dir) {
@@ -23,24 +29,26 @@ void _splitpath (const char* path, char* drive, char* dir, char* fname, char* ex
     if(fname) {
         strcpy(fname, b);
         char* dot = strrchr(fname, '.');
-        *dot='\0';
+        if(dot) {
+            *dot='\0';
+        }
     }
-
-    free(copy_dir);
-    free(copy_base);
 
     if(drive) {
         strcpy(drive, "");
     }
 
     if(ext) {
-        char* dot = strrchr(fname, '.');
+        char* dot = strrchr(b, '.');
         if(dot) {
-            strcpy(ext, dot+1);
+            strcpy(ext, dot); // including '.'
         } else {
             strcpy(ext, "");
         }
     }
+
+    free(copy_dir);
+    free(copy_base);
 
 }
 
