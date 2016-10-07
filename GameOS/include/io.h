@@ -16,7 +16,8 @@
 #define _lseek ::lseek 
 #define _chmod ::chmod 
 
-#define _S_IWRITE S_IWUSR
+// on Windows write means read also, there are no write-only wiles
+#define _S_IWRITE (S_IWUSR|S_IRUSR|S_IRGRP|S_IROTH)
 #define _S_IREAD S_IREAD
 #define _O_RDONLY O_RDONLY
 
