@@ -7,6 +7,7 @@
 #include "strres.h"
 #include <vector>
 
+
 struct gosTextureInfo {
     int width_;
     int height_;
@@ -212,74 +213,6 @@ gosAudio_PlayMode __stdcall gosAudio_GetChannelPlayMode( int Channel )
 {
 }
 
-////////////////////////////////////////////////////////////////////////////////
-// toolos.hpp
-void __stdcall gos_FileSetReadWrite(char const* FileName)
-{
-}
-DWORD __stdcall gos_FileSize(char const* FileName)
-{
-    return 0;
-}
-__int64 __stdcall gos_FileTimeStamp(char const* FileName)
-{
-    return 0;
-}
-// HGOSFILE = gosFileStream*
-void __stdcall gos_OpenFile(gosFileStream**, char const* path, gosEnum_FileWriteStatus)
-{
-}
-void __stdcall gos_CloseFile(gosFileStream* hfile)
-{
-}
-bool __stdcall gos_DoesFileExist(char const* FileName)
-{
-    return false;
-}
-bool __stdcall gos_CreateDirectory(char const* FileName)
-{
-    return false;
-}
-char* __stdcall gos_FindDirectories(char const* DirectoryName)
-{
-    return NULL;
-}
-void __stdcall gos_FindDirectoriesClose()
-{
-}
-char* __stdcall gos_FindDirectoriesNext()
-{
-    return NULL;
-}
-char* __stdcall gos_FindFiles(char const* PathFileName)
-{
-    return NULL;
-}
-void __stdcall gos_FindFilesClose()
-{
-}
-char* __stdcall gos_FindFilesNext()
-{
-    return NULL;
-}
-
-void __stdcall gos_GetCurrentPath(char* Buffer, int buf_len)
-{
-
-}
-DWORD __stdcall gos_ReadFile(HGOSFILE hfile, void* buf, DWORD size)
-{
-    return 0;
-}
-
-// gameos.hpp
-void __stdcall gos_GetFile(char const* FileName, BYTE** MemoryImage, DWORD* Size)
-{
-}
-DWORD __stdcall gos_WriteFile(HGOSFILE hfile, void const* buf, DWORD size)
-{
-    return 0;
-}
 ////////////////////////////////////////////////////////////////////////////////
 
 static const int g_hepsStackSize = 128;
