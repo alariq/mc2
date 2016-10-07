@@ -280,7 +280,7 @@ RenderContextHandle init_render_context(RenderWindowHandle render_window)
 
     status = SDL_GL_GetAttribute(SDL_GL_ACCELERATED_VISUAL, &value);
     if (!status) {
-        printf("SDL_GL_ACCELERATED_VISUAL: requested %d, got %d\n", value);
+        printf("SDL_GL_ACCELERATED_VISUAL: %d\n", value);
     } else {
         printf("Failed to get SDL_GL_ACCELERATED_VISUAL: %s\n",
                 SDL_GetError());
