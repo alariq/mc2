@@ -1,5 +1,5 @@
 #include "gameos.hpp"
-#include "gameos_graphics.h"
+#include "gos_render.h"
 #include <stdio.h>
 
 int main(int argc, char** argv)

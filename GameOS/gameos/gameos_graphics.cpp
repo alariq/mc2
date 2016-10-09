@@ -1,476 +1,226 @@
-#include "gameos_graphics.h"
+#include "gameos.hpp"
+#include <vector>
 
-#ifdef PLATFORM_WINDOWS
-#include <windows.h>
-#endif
-#include <stdio.h>
-#include <assert.h>
-#include <SDL2/SDL.h>
-#include <GL/gl.h>
-
-namespace graphics {
-
-static bool VERBOSE_VIDEO = true;
-static bool VERBOSE_RENDER = true;
-static bool VERBOSE_MODES = true;
-static bool ENABLE_VSYNC = true;
-
-struct RenderWindow {
-    SDL_Window* window_;
+struct gosTextureInfo {
     int width_;
     int height_;
+    gos_TextureFormat format_;
 };
 
-struct RenderContext {
-   SDL_GLContext glcontext_;
-};
-
-static void PrintRenderer(SDL_RendererInfo * info);
-
-//==============================================================================
-RenderWindow* create_window(const char* pwinname, int width, int height)
-{
-	int i, j, m, n;
-	SDL_DisplayMode fullscreen_mode;
-    SDL_Window* window = NULL; 
-
-    if (VERBOSE_VIDEO) {
-        n = SDL_GetNumVideoDrivers();
-        if (n == 0) {
-            fprintf(stderr, "No built-in video drivers\n");
-        } else {
-            fprintf(stderr, "Built-in video drivers:");
-            for (i = 0; i < n; ++i) {
-                if (i > 0) {
-                    fprintf(stderr, ",");
-                }
-                fprintf(stderr, " %s", SDL_GetVideoDriver(i));
-            }
-            fprintf(stderr, "\n");
-        }
-    }
-
-    // initialize using 0 videodriver
-    if (SDL_VideoInit(0) < 0) {
-        fprintf(stderr, "Couldn't initialize video driver: %s\n", SDL_GetError());
-        return NULL;
-    }
-    if (VERBOSE_VIDEO) {
-        fprintf(stderr, "Video driver: %s\n", SDL_GetCurrentVideoDriver());
-    }
-
-    SDL_GL_SetAttribute( SDL_GL_RED_SIZE, 8 );
-    SDL_GL_SetAttribute( SDL_GL_GREEN_SIZE, 8 );
-    SDL_GL_SetAttribute( SDL_GL_BLUE_SIZE, 8 );
-    SDL_GL_SetAttribute( SDL_GL_ALPHA_SIZE, 8);
-    SDL_GL_SetAttribute( SDL_GL_DEPTH_SIZE, 16 );
-    SDL_GL_SetAttribute( SDL_GL_DOUBLEBUFFER, 1 );
-
-    SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
-
-
-    // select core profile if needed
-    // COMPATIBILITY, ES,...
-    //SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
-
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_DEBUG_FLAG);
-
-    if (VERBOSE_MODES) {
-        SDL_DisplayMode mode;
-        int bpp;
-        Uint32 Rmask, Gmask, Bmask, Amask;
-
-        n = SDL_GetNumVideoDisplays();
-        fprintf(stderr, "Number of displays: %d\n", n);
-        for (i = 0; i < n; ++i) {
-            fprintf(stderr, "Display %d:\n", i);
-
-            SDL_GetDesktopDisplayMode(i, &mode);
-            SDL_PixelFormatEnumToMasks(mode.format, &bpp, &Rmask, &Gmask,
-                    &Bmask, &Amask);
-            fprintf(stderr,
-                    "  Current mode: %dx%d@%dHz, %d bits-per-pixel (%s)\n",
-                    mode.w, mode.h, mode.refresh_rate, bpp,
-                    SDL_GetPixelFormatName(mode.format));
-            if (Rmask || Gmask || Bmask) {
-                fprintf(stderr, "      Red Mask   = 0x%.8x\n", Rmask);
-                fprintf(stderr, "      Green Mask = 0x%.8x\n", Gmask);
-                fprintf(stderr, "      Blue Mask  = 0x%.8x\n", Bmask);
-                if (Amask)
-                    fprintf(stderr, "      Alpha Mask = 0x%.8x\n", Amask);
-            }
-
-            /* Print available fullscreen video modes */
-            m = SDL_GetNumDisplayModes(i);
-            if (m == 0) {
-                fprintf(stderr, "No available fullscreen video modes\n");
+class gosTexture {
+    public:
+        gosTexture(gos_TextureFormat fmt, const char* fname, DWORD hints, BYTE* pdata, DWORD size)
+        {
+            format_ = fmt;
+            if(fname) {
+                filename_ = new char[strlen(fname)+1];
+                strcpy(filename_, fname);
             } else {
-                fprintf(stderr, "  Fullscreen video modes:\n");
-                for (j = 0; j < m; ++j) {
-                    SDL_GetDisplayMode(i, j, &mode);
-                    SDL_PixelFormatEnumToMasks(mode.format, &bpp, &Rmask,
-                            &Gmask, &Bmask, &Amask);
-                    fprintf(stderr,
-                            "    Mode %d: %dx%d@%dHz, %d bits-per-pixel (%s)\n",
-                            j, mode.w, mode.h, mode.refresh_rate, bpp,
-                            SDL_GetPixelFormatName(mode.format));
-                    if (Rmask || Gmask || Bmask) {
-                        fprintf(stderr, "        Red Mask   = 0x%.8x\n",
-                                Rmask);
-                        fprintf(stderr, "        Green Mask = 0x%.8x\n",
-                                Gmask);
-                        fprintf(stderr, "        Blue Mask  = 0x%.8x\n",
-                                Bmask);
-                        if (Amask)
-                            fprintf(stderr,
-                                    "        Alpha Mask = 0x%.8x\n",
-                                    Amask);
-                    }
-                }
+                filename_ = 0;
             }
+            hints_ = hints;
+            
+            size_ = size;
+            pdata_ = new BYTE[size];
+            memcpy(pdata_, pdata, size);
+
+            is_locked_ = false;
+
+            // TODO: correctly set width and height
+            width_ = 16;
+            height_ = 16;
+            
         }
-    }
-
-    if (VERBOSE_RENDER) {
-        SDL_RendererInfo info;
-
-        n = SDL_GetNumRenderDrivers();
-        if (n == 0) {
-            fprintf(stderr, "No built-in render drivers\n");
-        } else {
-            fprintf(stderr, "Built-in render drivers:\n");
-            for (i = 0; i < n; ++i) {
-                SDL_GetRenderDriverInfo(i, &info);
-                PrintRenderer(&info);
-            }
-        }
-    }
-
-    SDL_zero(fullscreen_mode);
-    switch (/*state->depth*/0) {
-        case 8:
-            fullscreen_mode.format = SDL_PIXELFORMAT_INDEX8;
-            break;
-        case 15:
-            fullscreen_mode.format = SDL_PIXELFORMAT_RGB555;
-            break;
-        case 16:
-            fullscreen_mode.format = SDL_PIXELFORMAT_RGB565;
-            break;
-        case 24:
-            fullscreen_mode.format = SDL_PIXELFORMAT_RGB24;
-            break;
-        default:
-            fullscreen_mode.format = SDL_PIXELFORMAT_RGB888;
-            break;
-    }
-    //fullscreen_mode.refresh_rate = state->refresh_rate;
-
-    {
-        window = SDL_CreateWindow(pwinname ? pwinname : "--", 
-                100, 100, width, height, SDL_WINDOW_OPENGL);
-
-        if (!window) {
-            fprintf(stderr, "Couldn't create window: %s\n", SDL_GetError());
-            return NULL;
-        }
-        SDL_GetWindowSize(window, &width, &height);
-
-        // NULL to use window width and height and display refresh rate
-        // only need to set mode if wanted fullscreen
-        if (SDL_SetWindowDisplayMode(window, NULL) < 0) {
-            fprintf(stderr, "Can't set up display mode: %s\n", SDL_GetError());
-            SDL_DestroyWindow(window);
-            return NULL;
+        ~gosTexture() {
+            delete[] pdata_;
+            delete[] filename_;
         }
 
-        SDL_ShowWindow(window);
-    }
-
-    RenderWindow* rw = new RenderWindow();
-    rw->window_ = window;
-    rw->width_ = width;
-    rw->height_ = height;
-
-    return rw;
-}
-
-//==============================================================================
-RenderContextHandle init_render_context(RenderWindowHandle render_window)
-{
-    RenderWindow* rw = (RenderWindow*)render_window;
-    assert(rw && rw->window_);
-
-	SDL_GLContext glcontext = SDL_GL_CreateContext(rw->window_);
-    if (!glcontext ) {
-        fprintf(stderr, "SDL_GL_CreateContext(): %s\n", SDL_GetError());
-        return NULL;
-    }
-
-    if (SDL_GL_MakeCurrent(rw->window_, glcontext) < 0) {
-        SDL_GL_DeleteContext(glcontext);
-        return NULL;
-    } 
-
-    if (ENABLE_VSYNC) {
-        SDL_GL_SetSwapInterval(1);
-    } else {
-        SDL_GL_SetSwapInterval(0);
-    }
-
-	SDL_DisplayMode mode;
-    SDL_GetCurrentDisplayMode(0, &mode);
-    printf("Current Display Mode:\n");
-    printf("Screen BPP: %d\n", SDL_BITSPERPIXEL(mode.format));
-    printf("\n");
-    printf("Vendor     : %s\n", glGetString(GL_VENDOR));
-    printf("Renderer   : %s\n", glGetString(GL_RENDERER));
-    printf("Version    : %s\n", glGetString(GL_VERSION));
-    const GLubyte* exts = glGetString(GL_EXTENSIONS);
-    printf("Extensions : %s\n", exts);
-    printf("\n");
-
-	int value;
-	int status = 0;
-
-    /*
-    status = SDL_GL_GetAttribute(SDL_GL_RED_SIZE, &value);
-    if (!status) {
-        printf("SDL_GL_RED_SIZE: requested %d, got %d\n", 5, value);
-    } else {
-        printf("Failed to get SDL_GL_RED_SIZE: %s\n", SDL_GetError());
-    }
-    status = SDL_GL_GetAttribute(SDL_GL_GREEN_SIZE, &value);
-    if (!status) {
-        printf("SDL_GL_GREEN_SIZE: requested %d, got %d\n", 5, value);
-    } else {
-        printf("Failed to get SDL_GL_GREEN_SIZE: %s\n", SDL_GetError());
-    }
-    status = SDL_GL_GetAttribute(SDL_GL_BLUE_SIZE, &value);
-    if (!status) {
-        printf("SDL_GL_BLUE_SIZE: requested %d, got %d\n", 5, value);
-    } else {
-        printf("Failed to get SDL_GL_BLUE_SIZE: %s\n", SDL_GetError());
-    }
-    */
-    status = SDL_GL_GetAttribute(SDL_GL_DEPTH_SIZE, &value);
-    if (!status) {
-        printf("SDL_GL_DEPTH_SIZE: requested %d, got %d\n", 16, value);
-    } else {
-        printf("Failed to get SDL_GL_DEPTH_SIZE: %s\n", SDL_GetError());
-    }
-
-    status = SDL_GL_GetAttribute(SDL_GL_MULTISAMPLEBUFFERS, &value);
-    if (!status) {
-        printf("SDL_GL_MULTISAMPLEBUFFERS: %d\n", value);
-    } else {
-        printf("Failed to get SDL_GL_MULTISAMPLEBUFFERS: %s\n",
-                SDL_GetError());
-    }
-
-    status = SDL_GL_GetAttribute(SDL_GL_MULTISAMPLESAMPLES, &value);
-    if (!status) {
-        printf("SDL_GL_MULTISAMPLESAMPLES: %d\n", value);
-    } else {
-        printf("Failed to get SDL_GL_MULTISAMPLESAMPLES: %s\n",
-                SDL_GetError());
-    }
-
-    status = SDL_GL_GetAttribute(SDL_GL_ACCELERATED_VISUAL, &value);
-    if (!status) {
-        printf("SDL_GL_ACCELERATED_VISUAL: %d\n", value);
-    } else {
-        printf("Failed to get SDL_GL_ACCELERATED_VISUAL: %s\n",
-                SDL_GetError());
-    }
-
-    status = SDL_GL_GetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, &value);
-    if (!status) {
-        printf("SDL_GL_CONTEXT_MAJOR_VERSION: %d\n", value);
-    } else {
-        printf("Failed to get SDL_GL_CONTEXT_MAJOR_VERSION: %s\n", SDL_GetError());
-    }
-
-    status = SDL_GL_GetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, &value);
-    if (!status) {
-        printf("SDL_GL_CONTEXT_MINOR_VERSION: %d\n", value);
-    } else {
-        printf("Failed to get SDL_GL_CONTEXT_MINOR_VERSION: %s\n", SDL_GetError());
-    }
-
-
-    RenderContext* rc = new RenderContext();
-    rc->glcontext_ = glcontext;
-
-	return rc;
-}
-
-void destroy_render_context(RenderContextHandle rc_handle)
-{
-    RenderContext* rc = (RenderContext*)rc_handle;
-    assert(rc);
-
-    SDL_GL_DeleteContext(rc->glcontext_);
-    delete rc;
-}
-
-void destroy_window(RenderWindowHandle rw_handle)
-{
-    RenderWindow* rw = (RenderWindow*)rw_handle;
-    SDL_DestroyWindow(rw->window_);
-    delete rw;
-}
-
-static void PrintRendererFlag(Uint32 flag)
-{
-	switch (flag) {
-	case SDL_RENDERER_PRESENTVSYNC:
-		fprintf(stderr, "PresentVSync");
-		break;
-	case SDL_RENDERER_ACCELERATED:
-		fprintf(stderr, "Accelerated");
-		break;
-	default:
-		fprintf(stderr, "0x%8.8x", flag);
-		break;
-	}
-}
-
-static void PrintPixelFormat(Uint32 format)
-{
-	switch (format) {
-	case SDL_PIXELFORMAT_UNKNOWN:
-		fprintf(stderr, "Unknwon");
-		break;
-	case SDL_PIXELFORMAT_INDEX1LSB:
-		fprintf(stderr, "Index1LSB");
-		break;
-	case SDL_PIXELFORMAT_INDEX1MSB:
-		fprintf(stderr, "Index1MSB");
-		break;
-	case SDL_PIXELFORMAT_INDEX4LSB:
-		fprintf(stderr, "Index4LSB");
-		break;
-	case SDL_PIXELFORMAT_INDEX4MSB:
-		fprintf(stderr, "Index4MSB");
-		break;
-	case SDL_PIXELFORMAT_INDEX8:
-		fprintf(stderr, "Index8");
-		break;
-	case SDL_PIXELFORMAT_RGB332:
-		fprintf(stderr, "RGB332");
-		break;
-	case SDL_PIXELFORMAT_RGB444:
-		fprintf(stderr, "RGB444");
-		break;
-	case SDL_PIXELFORMAT_RGB555:
-		fprintf(stderr, "RGB555");
-		break;
-	case SDL_PIXELFORMAT_BGR555:
-		fprintf(stderr, "BGR555");
-		break;
-	case SDL_PIXELFORMAT_ARGB4444:
-		fprintf(stderr, "ARGB4444");
-		break;
-	case SDL_PIXELFORMAT_ABGR4444:
-		fprintf(stderr, "ABGR4444");
-		break;
-	case SDL_PIXELFORMAT_ARGB1555:
-		fprintf(stderr, "ARGB1555");
-		break;
-	case SDL_PIXELFORMAT_ABGR1555:
-		fprintf(stderr, "ABGR1555");
-		break;
-	case SDL_PIXELFORMAT_RGB565:
-		fprintf(stderr, "RGB565");
-		break;
-	case SDL_PIXELFORMAT_BGR565:
-		fprintf(stderr, "BGR565");
-		break;
-	case SDL_PIXELFORMAT_RGB24:
-		fprintf(stderr, "RGB24");
-		break;
-	case SDL_PIXELFORMAT_BGR24:
-		fprintf(stderr, "BGR24");
-		break;
-	case SDL_PIXELFORMAT_RGB888:
-		fprintf(stderr, "RGB888");
-		break;
-	case SDL_PIXELFORMAT_BGR888:
-		fprintf(stderr, "BGR888");
-		break;
-	case SDL_PIXELFORMAT_ARGB8888:
-		fprintf(stderr, "ARGB8888");
-		break;
-	case SDL_PIXELFORMAT_RGBA8888:
-		fprintf(stderr, "RGBA8888");
-		break;
-	case SDL_PIXELFORMAT_ABGR8888:
-		fprintf(stderr, "ABGR8888");
-		break;
-	case SDL_PIXELFORMAT_BGRA8888:
-		fprintf(stderr, "BGRA8888");
-		break;
-	case SDL_PIXELFORMAT_ARGB2101010:
-		fprintf(stderr, "ARGB2101010");
-		break;
-	case SDL_PIXELFORMAT_YV12:
-		fprintf(stderr, "YV12");
-		break;
-	case SDL_PIXELFORMAT_IYUV:
-		fprintf(stderr, "IYUV");
-		break;
-	case SDL_PIXELFORMAT_YUY2:
-		fprintf(stderr, "YUY2");
-		break;
-	case SDL_PIXELFORMAT_UYVY:
-		fprintf(stderr, "UYVY");
-		break;
-	case SDL_PIXELFORMAT_YVYU:
-		fprintf(stderr, "YVYU");
-		break;
-	default:
-		fprintf(stderr, "0x%8.8x", format);
-		break;
-	}
-}
-
-static void PrintRenderer(SDL_RendererInfo * info)
-{
-    size_t i, count;
-
-    fprintf(stderr, "  Renderer %s:\n", info->name);
-
-    fprintf(stderr, "    Flags: 0x%8.8X", info->flags);
-    fprintf(stderr, " (");
-    count = 0;
-    for (i = 0; i < sizeof(info->flags) * 8; ++i) {
-        Uint32 flag = (1 << i);
-        if (info->flags & flag) {
-            if (count > 0) {
-                fprintf(stderr, " | ");
-            }
-            PrintRendererFlag(flag);
-            ++count;
+        BYTE* Lock(int mipl_level, float is_read_only, int* pitch) {
+            gosASSERT(is_locked_ == false);
+            is_locked_ = true;
+            // TODO:
+            gosASSERT(pitch);
+            *pitch = width_;
+            return pdata_;
         }
-    }
-    fprintf(stderr, ")\n");
 
-    fprintf(stderr, "    Texture formats (%d): ", info->num_texture_formats);
-    for (i = 0; i < info->num_texture_formats; ++i) {
-        if (i > 0) {
-			fprintf(stderr, ", ");
-		}
-		PrintPixelFormat(info->texture_formats[i]);
-	}
-	fprintf(stderr, "\n");
+        void Unlock() {
+            gosASSERT(is_locked_ == true);
+            is_locked_ = false;
+        }
 
-	if (info->max_texture_width || info->max_texture_height) {
-		fprintf(stderr, "    Max Texture Size: %dx%d\n",
-				info->max_texture_width, info->max_texture_height);
-	}
+        void getTextureInfo(gosTextureInfo* texinfo) {
+            gosASSERT(texinfo);
+            texinfo->width_ = width_;
+            texinfo->height_ = height_;
+            texinfo->format_ = format_;
+        }
+
+    private:
+        int width_;
+        int height_;
+
+        BYTE* pdata_;
+        DWORD size_;
+
+        gos_TextureFormat format_;
+        char* filename_;
+        DWORD hints_;
+
+        bool is_locked_;
+};
+
+class gosRenderer {
+    public:
+        DWORD addTexture(gosTexture* texture) {
+            gosASSERT(texture);
+            textureList_.push_back(texture);
+            return textureList_.size()-1;
+        }
+
+        gosTexture* getTexture(DWORD texture_id) {
+            gosASSERT(textureList_.size() > texture_id);
+            gosASSERT(textureList_[texture_id] != 0);
+            return textureList_[texture_id];
+        }
+
+        void deleteTexture(DWORD texture_id) {
+            // FIXME: bad use object list, with stable ids
+            // to not waste space
+            gosASSERT(textureList_.size() > texture_id);
+            delete textureList_[texture_id];
+            textureList_[texture_id] = 0;
+        }
+
+    private:
+        std::vector<gosTexture*> textureList_;
+};
+
+static gosRenderer g_renderer;
+
+////////////////////////////////////////////////////////////////////////////////
+// graphics
+//
+void _stdcall gos_DrawLines(gos_VERTEX* Vertices, int NumVertices)
+{
+}
+void _stdcall gos_DrawPoints(gos_VERTEX* Vertices, int NumVertices)
+{
+}
+void _stdcall gos_DrawQuads(gos_VERTEX* Vertices, int NumVertices)
+{
+}
+void _stdcall gos_DrawTriangles(gos_VERTEX* Vertices, int NumVertices)
+{
 }
 
-}; // namespace graphics
+void __stdcall gos_GetViewport( float* pViewportMulX, float* pViewportMulY, float* pViewportAddX, float* pViewportAddY )
+{
+}
+
+HGOSFONT3D __stdcall gos_LoadFont( const char* FontFile, DWORD StartLine/* = 0*/, int CharCount/* = 256*/, DWORD TextureHandle/*=0*/)
+{
+    return NULL;
+}
+void __stdcall gos_DeleteFont( HGOSFONT3D Fonthandle )
+{
+}
+
+DWORD __stdcall gos_NewEmptyTexture( gos_TextureFormat Format, const char* Name, DWORD HeightWidth, DWORD Hints/*=0*/, gos_RebuildFunction pFunc/*=0*/, void *pInstance/*=0*/)
+{
+    gosASSERT(0 && "Not implemented");
+    return -1;
+}
+DWORD __stdcall gos_NewTextureFromMemory( gos_TextureFormat Format, const char* FileName, BYTE* pBitmap, DWORD Size, DWORD Hints/*=0*/, gos_RebuildFunction pFunc/*=0*/, void *pInstance/*=0*/)
+{
+    //gosASSERT(0 && "Not implemented");
+
+    gosTexture* ptex = new gosTexture(Format, FileName, Hints, pBitmap, Size);
+    return g_renderer.addTexture(ptex);
+}
+void __stdcall gos_DestroyTexture( DWORD Handle )
+{
+    //gosASSERT(0 && "Not implemented");
+    g_renderer.deleteTexture(Handle);
+}
+
+void __stdcall gos_LockTexture( DWORD Handle, DWORD MipMapSize, bool ReadOnly, TEXTUREPTR* TextureInfo )
+{
+    // not implemented yet
+    gosASSERT(MipMapSize == 0);
+    int mip_level = 0; //func(MipMapSize);
+
+    gosTextureInfo info;
+    int pitch = 0;
+    gosTexture* ptex = g_renderer.getTexture(Handle);
+    ptex->getTextureInfo(&info);
+    BYTE* pdata = ptex->Lock(mip_level, ReadOnly, &pitch);
+
+    TextureInfo->pTexture = (DWORD*)pdata;
+    TextureInfo->Width = info.width_;
+    TextureInfo->Height = info.height_;
+    TextureInfo->Pitch = pitch;
+    TextureInfo->Type = info.format_;
+
+    //gosASSERT(0 && "Not implemented");
+}
+
+void __stdcall gos_UnLockTexture( DWORD Handle )
+{
+    gosTexture* ptex = g_renderer.getTexture(Handle);
+    ptex->Unlock();
+
+    //gosASSERT(0 && "Not implemented");
+}
+
+void __stdcall gos_PushRenderStates()
+{
+}
+void __stdcall gos_PopRenderStates()
+{
+}
+
+void __stdcall gos_RenderIndexedArray( gos_VERTEX* pVertexArray, DWORD NumberVertices, WORD* lpwIndices, DWORD NumberIndices )
+{
+}
+
+void __stdcall gos_RenderIndexedArray( gos_VERTEX_2UV* pVertexArray, DWORD NumberVertices, WORD* lpwIndices, DWORD NumberIndices )
+{
+}
+
+void __stdcall gos_SetRenderState( gos_RenderState RenderState, int Value )
+{
+}
+//void __stdcall gos_SetRenderState( gos_RenderState RenderState, DWORD Value ) // sebi
+//{
+//}
+
+void __stdcall gos_SetScreenMode( DWORD Width, DWORD Height, DWORD bitDepth/*=16*/, DWORD Device/*=0*/, bool disableZBuffer/*=0*/, bool AntiAlias/*=0*/, bool RenderToVram/*=0*/, bool GotoFullScreen/*=0*/, int DirtyRectangle/*=0*/, bool GotoWindowMode/*=0*/, bool EnableStencil/*=0*/, DWORD Renderer/*=0*/)
+{
+}
+
+void __stdcall gos_SetupViewport( bool FillZ, float ZBuffer, bool FillBG, DWORD BGColor, float top, float left, float bottom, float right, bool ClearStencil/*=0*/, DWORD StencilValue/*=0*/)
+{
+}
+
+void __stdcall gos_TextDraw( const char *Message, ... )
+{
+}
+
+void __stdcall gos_TextSetAttributes( HGOSFONT3D FontHandle, DWORD Foreground, float Size, bool WordWrap, bool Proportional, bool Bold, bool Italic, DWORD WrapType/*=0*/, bool DisableEmbeddedCodes/*=0*/)
+{
+}
+
+void __stdcall gos_TextSetPosition( int XPosition, int YPosition )
+{
+}
+
+void __stdcall gos_TextSetRegion( int Left, int Top, int Right, int Bottom )
+{
+}
+
+void __stdcall gos_TextStringLength( DWORD* Width, DWORD* Height, const char *Message, ... )
+{
+}
+

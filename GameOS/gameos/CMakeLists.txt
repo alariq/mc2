@@ -8,6 +8,7 @@ set(SOURCES ${SOURCES}
     gameos_res.cpp
     gameos_fileio.cpp
     gameos_debugging.cpp
+    gos_render.cpp
     )
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O0 -ggdb -Wno-unused-local-typedefs -std=c++0x")
