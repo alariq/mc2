@@ -217,7 +217,7 @@ gosAudio_PlayMode __stdcall gosAudio_GetChannelPlayMode( int Channel )
 
 static const int g_hepsStackSize = 128;
 static gos_Heap* g_heapsStack[g_hepsStackSize];
-static int g_heapStackPointer = 0;
+static int g_heapStackPointer = -1;
 
 ////////////////////////////////////////////////////////////////////////////////
 HGOSHEAP __stdcall gos_CreateMemoryHeap(char const* HeapName, DWORD MaximumSize/* = 0*/, HGOSHEAP parentHeap/* = ParentClientHeap*/)
@@ -243,16 +243,18 @@ void __stdcall gos_DestroyMemoryHeap(HGOSHEAP Heap, bool shouldBeEmpty/* = true*
 void __stdcall gos_PushCurrentHeap(HGOSHEAP Heap)
 {
     gosASSERT(g_heapStackPointer < g_hepsStackSize);
-    g_heapsStack[g_heapStackPointer++] = Heap;
+    g_heapsStack[++g_heapStackPointer] = Heap;
 }
 void __stdcall gos_PopCurrentHeap()
 {
-    gosASSERT(g_heapStackPointer > 0 && g_heapStackPointer < g_hepsStackSize);
-    g_heapsStack[--g_heapStackPointer] = nullptr;
+    gosASSERT(g_heapStackPointer >= 0 && g_heapStackPointer < g_hepsStackSize);
+    g_heapsStack[g_heapStackPointer--] = nullptr;
 }
 
 HGOSHEAP __stdcall gos_GetCurrentHeap()
 {
+    if(g_heapStackPointer == -1)
+        return NULL;
     return g_heapsStack[g_heapStackPointer];
 }
 
@@ -339,7 +341,7 @@ void __stdcall gos_GetMouseInfo( float* pXPosition, float* pYPosition, int* pXDe
 
 int __stdcall gos_rand()
 {
-    return rand();
+    return rand() % (1<<15);
 }
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -461,29 +463,6 @@ void __stdcall gos_TerminateApplication()
 {
 }
 ////////////////////////////////////////////////////////////////////////////////
-
-// those are game specific callbacks (should move them outside to game)
-int __cdecl InternalFunctionStop( const char* Message, ... )
-{
-    return 1;
-}
-int __cdecl InternalFunctionStop( const char* Message, const char* value)
-{
-    printf(Message, value);
-    return 1;
-}
-int __cdecl InternalFunctionPause( const char* Message, ... )
-{
-    return 0;
-}
-void __cdecl InternalFunctionSpew( const char* Group, const char* Message, ... )
-{
-    fprintf(stderr, "Spew: %s", Group);
-}
-int __stdcall ErrorHandler( int Flags, const char* Text )
-{
-    fprintf(stderr, Text);
-}
 ////////////////////////////////////////////////////////////////////////////////
 
 bool mc2IsInDisplayBackBuffer = false;
