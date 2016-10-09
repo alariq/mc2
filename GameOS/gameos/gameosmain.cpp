@@ -2,6 +2,8 @@
 #include "gos_render.h"
 #include <stdio.h>
 
+extern void gos_CreateRenderer();
+
 int main(int argc, char** argv)
 {
     // fills in Environment structure
@@ -17,6 +19,8 @@ int main(int argc, char** argv)
     graphics::RenderContextHandle ctx = graphics::init_render_context(win);
     if(!ctx)
         return 1;
+
+    gos_CreateRenderer();
 
     Environment.InitializeGameEngine();
 
