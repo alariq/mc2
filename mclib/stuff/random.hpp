@@ -52,8 +52,12 @@ namespace Stuff {
 		// Random number functions
 		//------------------------
 		//
+
+        // sebi: that was RAND_MAX when MC2 was written, see routines.cpp
+        static int GetRandMax() { return (1<<15)-1; }
+
 		static int
-			GetInt()						// returns 0 .. RAND_MAX
+			GetInt()						// returns 0 ..GetRandMax() 
 				{return GetRandomInt();}
 		static Scalar
 			GetFraction();				// returns 0.0f <= x < 1.0f

@@ -60,7 +60,7 @@ void Random::Init()
 	// 01xx..., 001xx..., 0001xx..., ...
 	//--------------------------------------------------------------------
 	//
-	int mask = RAND_MAX >> 1;
+	int mask = GetRandMax() >> 1;
 	int msb = mask + 1;
 	int rand_size;
 	for (rand_size=0; !(msb&(1<<rand_size)); ++rand_size);
@@ -120,8 +120,7 @@ Scalar
 
 	result = static_cast<Scalar>(GetRandomInt());
     // sebi
-    //result /= static_cast<Scalar>(RAND_MAX + 1);
-	result /= static_cast<Scalar>(RAND_MAX);
+	result /= static_cast<Scalar>(GetRandMax() + 1);
 	return result;
 }
 
@@ -135,9 +134,7 @@ int
 	int
 		result,
 		max;
-    //sebi
-	//max = RAND_MAX - ((RAND_MAX + 1)%range);
-	max = RAND_MAX - ((RAND_MAX)%range);
+	max = GetRandMax() - ((GetRandMax() + 1)%range);
 	do
 	{
 		result = GetRandomInt();
@@ -152,9 +149,7 @@ int
 Die::Die(int n)
 {
 	dieSides = (n>1)?n:2;
-    // sebi
-	//highestRandom = RAND_MAX - ((RAND_MAX+1)%dieSides);
-	highestRandom = RAND_MAX - ((RAND_MAX)%dieSides);
+	highestRandom = Random::GetRandMax() - ((Random::GetRandMax()+1)%dieSides);
 }
 
 //
