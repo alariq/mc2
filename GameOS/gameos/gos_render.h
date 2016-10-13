@@ -12,6 +12,9 @@ typedef RenderContext*   RenderContextHandle;
 RenderWindowHandle  create_window(const char* pwinname, int width, int height);
 RenderContextHandle init_render_context(RenderWindowHandle render_window);
 
+void swap_window(RenderWindowHandle h);
+void make_current_context(RenderContextHandle ctx_h, RenderWindowHandle win_h);
+
 void destroy_render_context(RenderContextHandle rc_handle);
 void destroy_window(RenderWindowHandle rw_handle);
 

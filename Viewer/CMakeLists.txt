@@ -60,8 +60,20 @@ add_definitions(-DLINUX_BUILD)
 find_library(SDL2 NAMES "SDL2")
 find_library(SDL2main NAMES "SDL2main")
 find_library(OPENGL NAMES "opengl32" "GL")
+find_library(GLEW NAMES "GLEW" "glew32")
+
+if(NOT GLEW)
+    message("${GLEW} library not found")
+else(NOT GLEW)
+    message("GLEW library found in ${GLEW}")
+endif(NOT GLEW)
+
+message("OPENCL library found in ${OPENCL}")
+message("OPENGL library found in ${OPENGL}")
+message("GLEW library found in ${GLEW}")
+message("AntTweakBar library found in ${AntTweakBar}")
 
 include_directories("./window" "../GameOS/include" "../mclib" "../gui" "../code" "../netlib")
 
 add_executable(viewer ${SOURCES})
-target_link_libraries(viewer mclib gosfx mlr stuff gui gameos windows z ${SDL2} ${SDL2main} ${OPENGL} dl)
+target_link_libraries(viewer mclib gosfx mlr stuff gui gameos windows z ${SDL2} ${SDL2main} ${OPENGL} ${GLEW} dl)

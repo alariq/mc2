@@ -95,6 +95,11 @@ class gosRenderer {
     typedef std::vector<StatePair> StateList;
 
     public:
+        gosRenderer(int w, int h) {
+            width_ = w;
+            height_ = h;
+        }
+
         DWORD addTexture(gosTexture* texture) {
             gosASSERT(texture);
             textureList_.push_back(texture);
@@ -124,15 +129,47 @@ class gosRenderer {
             curTextBottom_ = Bottom;
         }
 
+        void setupViewport(bool FillZ, float ZBuffer, bool FillBG, DWORD BGColor, float top, float left, float bottom, float right, bool ClearStencil = 0, DWORD StencilValue = 0) {
+
+            clearDepth_ = FillZ;
+            clearDepthValue_ = ZBuffer;
+            clearColor_ = FillBG;
+            clearColorValue_ = BGColor;
+            clearStencil_ = ClearStencil;
+            clearStencilValue_ = StencilValue;
+            viewportTop_ = top;
+            viewportLeft_ = left;
+            viewportBottom_ = bottom;
+            viewportRight_ = right;
+        }
+
+        void getViewportTransform(float* viewMulX, float* viewMulY, float* viewAddX, float* viewAddY) {
+            gosASSERT(viewMulX && viewMulY && viewAddX && viewAddY);
+            *viewMulX = (viewportRight_ - viewportLeft_)*width_;
+            *viewMulY = (viewportBottom_ - viewportTop_)*height_;
+            *viewAddX = viewportLeft_ * width_;
+            *viewAddY = viewportTop_ * height_;
+        }
+
+        void setRenderState(gos_RenderState RenderState, int Value) {
+            renderStates_[RenderState] = Value;
+        }
+
         void init();
 
     private:
+
+        // render target size
+        int width_;
+        int height_;
+
         void initRenderStates();
 
         std::vector<gosTexture*> textureList_;
 
         // states data
         unsigned int curStates_[gos_MaxState];
+        unsigned int renderStates_[gos_MaxState];
 
         int statesStackPointer;
         StateList statesStack_[16];
@@ -149,10 +186,28 @@ class gosRenderer {
         int curTextRight_;
         int curTextBottom_;
         //
+        
+        // viewport config
+        bool clearDepth_;
+        float clearDepthValue_;
+        bool clearColor_;
+        DWORD clearColorValue_;
+        bool clearStencil_;
+        DWORD clearStencilValue_;
+        float viewportTop_;
+        float viewportLeft_;
+        float viewportBottom_;
+        float viewportRight_;
+        //
+
+
 };
 
 void gosRenderer::init() {
     initRenderStates();
+
+    // setup viewport
+    setupViewport(true, 1.0f, true, 0, 0.0f, 0.0f, 1.0f, 1.0f);
 }
 
 void gosRenderer::initRenderStates() {
@@ -189,13 +244,15 @@ void gosRenderer::initRenderStates() {
 	curStates_[gos_State_Lighting] = 0;
 	curStates_[gos_State_NormalizeNormals] = 0;
 	curStates_[gos_State_VertexBlend] = 0;
+
+    memcpy(renderStates_, curStates_, sizeof(curStates_));
 }
 
 static gosRenderer* g_gos_renderer = NULL;
 
-void gos_CreateRenderer()
+void gos_CreateRenderer(int w, int h)
 {
-    g_gos_renderer = new gosRenderer();
+    g_gos_renderer = new gosRenderer(w, h);
     g_gos_renderer->init();
 }
 
@@ -204,24 +261,25 @@ void gos_CreateRenderer()
 //
 void _stdcall gos_DrawLines(gos_VERTEX* Vertices, int NumVertices)
 {
-    gosASSERT(0 && "Not implemented");
+ //   gosASSERT(0 && "Not implemented");
 }
 void _stdcall gos_DrawPoints(gos_VERTEX* Vertices, int NumVertices)
 {
-    gosASSERT(0 && "Not implemented");
+ //   gosASSERT(0 && "Not implemented");
 }
 void _stdcall gos_DrawQuads(gos_VERTEX* Vertices, int NumVertices)
 {
-    gosASSERT(0 && "Not implemented");
+ //   gosASSERT(0 && "Not implemented");
 }
 void _stdcall gos_DrawTriangles(gos_VERTEX* Vertices, int NumVertices)
 {
-    gosASSERT(0 && "Not implemented");
+  //  gosASSERT(0 && "Not implemented");
 }
 
 void __stdcall gos_GetViewport( float* pViewportMulX, float* pViewportMulY, float* pViewportAddX, float* pViewportAddY )
 {
-    gosASSERT(0 && "Not implemented");
+    gosASSERT(g_gos_renderer);
+    g_gos_renderer->getViewportTransform(pViewportMulX, pViewportMulY, pViewportAddX, pViewportAddY);
 }
 /*
 typedef struct _FontInfo
@@ -324,26 +382,27 @@ void __stdcall gos_UnLockTexture( DWORD Handle )
 
 void __stdcall gos_PushRenderStates()
 {
-    gosASSERT(0 && "not implemented");
+    //gosASSERT(0 && "not implemented");
 }
 void __stdcall gos_PopRenderStates()
 {
-    gosASSERT(0 && "not implemented");
+    //gosASSERT(0 && "not implemented");
 }
 
 void __stdcall gos_RenderIndexedArray( gos_VERTEX* pVertexArray, DWORD NumberVertices, WORD* lpwIndices, DWORD NumberIndices )
 {
-    gosASSERT(0 && "not implemented");
+ //   gosASSERT(0 && "not implemented");
 }
 
 void __stdcall gos_RenderIndexedArray( gos_VERTEX_2UV* pVertexArray, DWORD NumberVertices, WORD* lpwIndices, DWORD NumberIndices )
 {
-    gosASSERT(0 && "not implemented");
+ //   gosASSERT(0 && "not implemented");
 }
 
 void __stdcall gos_SetRenderState( gos_RenderState RenderState, int Value )
 {
-    gosASSERT(0 && "not implemented");
+    gosASSERT(g_gos_renderer);
+    g_gos_renderer->setRenderState(RenderState, Value);
 }
 
 void __stdcall gos_SetScreenMode( DWORD Width, DWORD Height, DWORD bitDepth/*=16*/, DWORD Device/*=0*/, bool disableZBuffer/*=0*/, bool AntiAlias/*=0*/, bool RenderToVram/*=0*/, bool GotoFullScreen/*=0*/, int DirtyRectangle/*=0*/, bool GotoWindowMode/*=0*/, bool EnableStencil/*=0*/, DWORD Renderer/*=0*/)
@@ -353,12 +412,13 @@ void __stdcall gos_SetScreenMode( DWORD Width, DWORD Height, DWORD bitDepth/*=16
 
 void __stdcall gos_SetupViewport( bool FillZ, float ZBuffer, bool FillBG, DWORD BGColor, float top, float left, float bottom, float right, bool ClearStencil/*=0*/, DWORD StencilValue/*=0*/)
 {
-    gosASSERT(0 && "not implemented");
+    gosASSERT(g_gos_renderer);
+    g_gos_renderer->setupViewport(FillZ, ZBuffer, FillBG, BGColor, top, left, bottom, right, ClearStencil, StencilValue);
 }
 
 void __stdcall gos_TextDraw( const char *Message, ... )
 {
-    gosASSERT(0 && "not implemented");
+ //   gosASSERT(0 && "not implemented");
 }
 
 void __stdcall gos_TextSetAttributes( HGOSFONT3D FontHandle, DWORD Foreground, float Size, bool WordWrap, bool Proportional, bool Bold, bool Italic, DWORD WrapType/*=0*/, bool DisableEmbeddedCodes/*=0*/)

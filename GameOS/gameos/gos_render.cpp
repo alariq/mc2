@@ -196,6 +196,13 @@ RenderWindow* create_window(const char* pwinname, int width, int height)
 
     return rw;
 }
+//==============================================================================
+void swap_window(RenderWindowHandle h)
+{
+    RenderWindow* rw = (RenderWindow*)h;
+    assert(rw && rw->window_);
+    SDL_GL_SwapWindow(rw->window_);
+}
 
 //==============================================================================
 RenderContextHandle init_render_context(RenderWindowHandle render_window)
@@ -314,6 +321,16 @@ void destroy_render_context(RenderContextHandle rc_handle)
 
     SDL_GL_DeleteContext(rc->glcontext_);
     delete rc;
+}
+
+void make_current_context(RenderContextHandle ctx_h, RenderWindowHandle win_h)
+{
+    RenderContext* rc = (RenderContext*)ctx_h;
+    RenderWindow* rw = (RenderWindow*)win_h;
+    
+    assert(rc && rc->glcontext_ && rw && rw->window_);
+
+    SDL_GL_MakeCurrent(rw->window_, rc->glcontext_);
 }
 
 void destroy_window(RenderWindowHandle rw_handle)
@@ -472,5 +489,6 @@ static void PrintRenderer(SDL_RendererInfo * info)
 				info->max_texture_width, info->max_texture_height);
 	}
 }
+
 
 }; // namespace graphics

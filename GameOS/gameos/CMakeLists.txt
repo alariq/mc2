@@ -9,6 +9,16 @@ set(SOURCES ${SOURCES}
     gameos_fileio.cpp
     gameos_debugging.cpp
     gos_render.cpp
+
+    utils/stream.cpp
+    utils/camera.cpp
+    utils/gl_utils.cpp
+    utils/gl_render_constants.cpp
+    utils/Image.cpp
+    utils/logging.cpp
+    utils/shader_builder.cpp
+    utils/matrix.cpp
+    utils/vec.cpp
     )
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O0 -ggdb -Wno-unused-local-typedefs -std=c++0x")
