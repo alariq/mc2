@@ -40,6 +40,7 @@ HSTRRES __stdcall gos_OpenResourceDLL(char const* FileName, const char** strings
 
     gos_StringRes* pstrres = new gos_StringRes();
     pstrres->getStringByIdFptr = fptr;
+    pstrres->module = module;
 
     /* deprecated */
     pstrres->strings = NULL;
