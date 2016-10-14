@@ -9,6 +9,7 @@
 #include "utils/gl_utils.h"
 
 extern void gos_CreateRenderer(int w, int h);
+extern void gos_RendererEndFrame();
 
 static bool g_exit = false;
 static camera g_camera;
@@ -45,8 +46,11 @@ static void process_events( void ) {
     }
 }
 
+extern bool g_disable_quads;
+
 static void draw_screen( void )
 {
+    g_disable_quads = false;
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
     //CHECK_GL_ERROR;
     
@@ -62,6 +66,26 @@ static void draw_screen( void )
 
     float aspect = (float)w/(float)h;
     glViewport(0, 0, w, h);
+
+    // flush all content to screen
+    gos_RendererEndFrame();
+
+#if 0
+    gos_VERTEX q[4];
+    q[0].x = 10; q[0].y = 10;
+    q[0].z = 0.0;
+    q[0].rhw = 1;
+    q[0].argb = 0xffff0000;
+    q[1] = q[2] = q[3] = q[0];
+
+    q[1].x = 210; q[1].y = 10;
+    q[2].x = 110; q[2].y = 210;
+    q[3].x = 10; q[3].y = 210;
+
+    g_disable_quads = false;
+    gos_DrawQuads(&q[0], 4);
+    g_disable_quads = true;
+#endif
 
     glMatrixMode(GL_PROJECTION);
     glPushMatrix();

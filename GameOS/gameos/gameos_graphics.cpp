@@ -7,11 +7,186 @@
 #include <cstdarg>
 #endif
 
+#include "utils/shader_builder.h"
+#include "utils/gl_utils.h"
+
 struct gosTextureInfo {
     int width_;
     int height_;
     gos_TextureFormat format_;
 };
+
+class gosShaderMaterial {
+    public:
+        static gosShaderMaterial* load(const char* shader) {
+            gosASSERT(shader);
+            gosShaderMaterial* pmat = new gosShaderMaterial();
+            char vs[256];
+            char ps[256];
+            snprintf(vs, 255, "data/shaders/%s.vert", shader);
+            snprintf(ps, 255, "data/shaders/%s.frag", shader);
+            pmat->program_ = glsl_program::makeProgram(shader, vs, ps);
+            if(!pmat->program_) {
+                SPEW(("SHADERS", "Failed to create %s material\n", shader));
+                delete pmat;
+                return NULL;
+            }
+            
+            pmat->pos_loc = pmat->program_->getAttribLocation("pos");
+            pmat->color_loc = pmat->program_->getAttribLocation("color");
+            pmat->texcoord_loc = pmat->program_->getAttribLocation("texcoord");
+
+            return pmat;
+        }
+
+        void applyVertexDeclaration() {
+
+            const int stride = sizeof(gos_VERTEX);
+            
+            // gos_VERTEX structure
+	        //float x,y;
+	        //float z;
+	        //float rhw;
+	        //DWORD argb;
+	        //DWORD frgb;
+	        //float u,v;	
+
+            gosASSERT(pos_loc >= 0);
+            glEnableVertexAttribArray(pos_loc);
+            glVertexAttribPointer(pos_loc, 4, GL_FLOAT, GL_FALSE, stride, (void*)0);
+
+            if(color_loc != -1) {
+                glEnableVertexAttribArray(color_loc);
+                glVertexAttribPointer(color_loc, 4, GL_UNSIGNED_BYTE, GL_TRUE, stride, 
+                        BUFFER_OFFSET(4*sizeof(float)));
+            }
+
+            if(texcoord_loc != -1) {
+                glEnableVertexAttribArray(texcoord_loc);
+                glVertexAttribPointer(texcoord_loc, 2, GL_FLOAT, GL_FALSE, stride, 
+                        BUFFER_OFFSET(4*sizeof(float) + 2*sizeof(uint32_t)));
+            }
+        }
+
+        void apply() {
+            gosASSERT(program_);
+            program_->apply();
+        }
+
+        void end() {
+
+            glDisableVertexAttribArray(pos_loc);
+
+            if(color_loc != -1) {
+                glDisableVertexAttribArray(color_loc);
+            }
+
+            if(texcoord_loc != -1) {
+                glDisableVertexAttribArray(texcoord_loc);
+            }
+        }
+
+    private:
+        gosShaderMaterial():
+            program_(NULL)
+            , pos_loc(-1)
+            , color_loc(-1)
+            , texcoord_loc(-1)
+        {
+        }
+
+        glsl_program* program_;
+        GLint pos_loc;
+        GLint color_loc;
+        GLint texcoord_loc;
+};
+
+class gosMesh {
+    public:
+        static gosMesh* makeMesh(gosPRIMITIVETYPE prim_type, int vertex_capacity) {
+            GLuint vb = makeBuffer(GL_ARRAY_BUFFER, 0, sizeof(gos_VERTEX)*vertex_capacity, GL_DYNAMIC_DRAW);
+            if(vb < 0)
+                return NULL;
+
+            gosMesh* mesh = new gosMesh(prim_type, vertex_capacity);
+            mesh->vb_ = vb;
+            mesh->pdata_ = new gos_VERTEX[vertex_capacity];
+            return mesh;
+        }
+
+        bool addVertices(gos_VERTEX* vertices, int count) {
+            if(num_vertices_ + count <= capacity_) {
+                memcpy(pdata_ + num_vertices_, vertices, sizeof(gos_VERTEX)*count);
+                num_vertices_ += count;
+                return true;
+            }
+            return false;
+        }
+
+        int getCapacity() const { return capacity_; }
+        int getNumVertices() const { return num_vertices_; }
+        const gos_VERTEX* getVertices() const { return pdata_; }
+
+        void rewind() { num_vertices_ = 0; }
+
+        void draw(gosShaderMaterial* material) const;
+
+    private:
+
+        gosMesh(gosPRIMITIVETYPE prim_type, int vertex_capacity)
+            : capacity_(vertex_capacity)
+            , num_vertices_(0)
+            , pdata_(NULL)    
+            , prim_type_(prim_type)
+         {
+         }
+
+        int capacity_;
+        int num_vertices_;
+        gos_VERTEX* pdata_;
+        gosPRIMITIVETYPE prim_type_;
+
+        GLuint vb_;
+};
+
+void gosMesh::draw(gosShaderMaterial* material) const
+{
+    gosASSERT(material);
+
+    if(num_vertices_ == 0)
+        return;
+
+    updateBuffer(vb_, GL_ARRAY_BUFFER, pdata_, num_vertices_*sizeof(gos_VERTEX), GL_DYNAMIC_DRAW);
+
+    material->apply();
+
+	glBindBuffer(GL_ARRAY_BUFFER, vb_);
+
+    material->applyVertexDeclaration();
+    CHECK_GL_ERROR;
+
+    GLenum pt = GL_TRIANGLES;
+    switch(prim_type_) {
+        case PRIMITIVE_POINTLIST:
+            pt = GL_POINTS;
+            break;
+        case PRIMITIVE_LINELIST:
+            pt = GL_LINES;
+            break;
+        case PRIMITIVE_TRIANGLELIST:
+            pt = GL_TRIANGLES;
+            break;
+        default:
+            gosASSERT(0 && "Wrong primitive type");
+    }
+
+    glDrawArrays(pt, 0, num_vertices_);
+
+    material->end();
+
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+}
 
 class gosTexture {
     public:
@@ -25,7 +200,7 @@ class gosTexture {
                 filename_ = 0;
             }
             hints_ = hints;
-            
+
             size_ = size;
             pdata_ = new BYTE[size];
             memcpy(pdata_, pdata, size);
@@ -35,7 +210,7 @@ class gosTexture {
             // TODO: correctly set width and height
             width_ = 16;
             height_ = 16;
-            
+
         }
         ~gosTexture() {
             delete[] pdata_;
@@ -155,7 +330,15 @@ class gosRenderer {
             renderStates_[RenderState] = Value;
         }
 
+        void applyRenderStates();
+
+        void drawQuads(gos_VERTEX* vertices, int count);
+        void drawLines(gos_VERTEX* vertices, int count);
+        void drawPoints(gos_VERTEX* vertices, int count);
+        void drawTris(gos_VERTEX* vertices, int count);
+
         void init();
+        void flush();
 
     private:
 
@@ -199,6 +382,12 @@ class gosRenderer {
         float viewportBottom_;
         float viewportRight_;
         //
+        
+        gosMesh* quads_;
+        gosMesh* tris_;
+        gosMesh* lines_;
+        gosMesh* points_;
+        gosShaderMaterial* basic_material_;
 
 
 };
@@ -208,52 +397,201 @@ void gosRenderer::init() {
 
     // setup viewport
     setupViewport(true, 1.0f, true, 0, 0.0f, 0.0f, 1.0f, 1.0f);
+
+    quads_ = gosMesh::makeMesh(PRIMITIVE_TRIANGLELIST, 1024);
+    tris_ = gosMesh::makeMesh(PRIMITIVE_TRIANGLELIST, 1024);
+    lines_ = gosMesh::makeMesh(PRIMITIVE_LINELIST, 1024);
+    points_= gosMesh::makeMesh(PRIMITIVE_POINTLIST, 1024);
+    basic_material_ = gosShaderMaterial::load("gos_vertex");
 }
 
 void gosRenderer::initRenderStates() {
 
-	curStates_[gos_State_Texture] = 0;
-	curStates_[gos_State_Texture2] = 0;
-    curStates_[gos_State_Texture3] = 0;
-	curStates_[gos_State_Filter] = gos_FilterNone;
-	curStates_[gos_State_ZCompare] = 1; 
-    curStates_[gos_State_ZWrite] = 1;
-	curStates_[gos_State_AlphaTest] = 0;
-	curStates_[gos_State_Perspective] = 1;
-	curStates_[gos_State_Specular] = 0;
-	curStates_[gos_State_Dither] = 0;
-	curStates_[gos_State_Clipping] = 0;	
-	curStates_[gos_State_WireframeMode] = 0;
-	curStates_[gos_State_AlphaMode] = gos_Alpha_OneZero;
-	curStates_[gos_State_TextureAddress] = gos_TextureWrap;
-	curStates_[gos_State_ShadeMode] = gos_ShadeGouraud;
-	curStates_[gos_State_TextureMapBlend] = gos_BlendModulateAlpha;
-	curStates_[gos_State_MipMapBias] = 0;
-	curStates_[gos_State_Fog]= 0;
-	curStates_[gos_State_MonoEnable] = 0;
-	curStates_[gos_State_Culling] = gos_Cull_None;
-	curStates_[gos_State_StencilEnable] = 0;
-	curStates_[gos_State_StencilFunc] = gos_Cmp_Never;
-	curStates_[gos_State_StencilRef] = 0;
-	curStates_[gos_State_StencilMask] = 0xffffffff;
-	curStates_[gos_State_StencilZFail] = gos_Stencil_Keep;
-	curStates_[gos_State_StencilFail] = gos_Stencil_Keep;
-	curStates_[gos_State_StencilPass] = gos_Stencil_Keep;
-	curStates_[gos_State_Multitexture] = gos_Multitexture_None;
-	curStates_[gos_State_Ambient] = 0xffffff;
-	curStates_[gos_State_Lighting] = 0;
-	curStates_[gos_State_NormalizeNormals] = 0;
-	curStates_[gos_State_VertexBlend] = 0;
+	renderStates_[gos_State_Texture] = 0;
+	renderStates_[gos_State_Texture2] = 0;
+    renderStates_[gos_State_Texture3] = 0;
+	renderStates_[gos_State_Filter] = gos_FilterNone;
+	renderStates_[gos_State_ZCompare] = 1; 
+    renderStates_[gos_State_ZWrite] = 1;
+	renderStates_[gos_State_AlphaTest] = 0;
+	renderStates_[gos_State_Perspective] = 1;
+	renderStates_[gos_State_Specular] = 0;
+	renderStates_[gos_State_Dither] = 0;
+	renderStates_[gos_State_Clipping] = 0;	
+	renderStates_[gos_State_WireframeMode] = 0;
+	renderStates_[gos_State_AlphaMode] = gos_Alpha_OneZero;
+	renderStates_[gos_State_TextureAddress] = gos_TextureWrap;
+	renderStates_[gos_State_ShadeMode] = gos_ShadeGouraud;
+	renderStates_[gos_State_TextureMapBlend] = gos_BlendModulateAlpha;
+	renderStates_[gos_State_MipMapBias] = 0;
+	renderStates_[gos_State_Fog]= 0;
+	renderStates_[gos_State_MonoEnable] = 0;
+	renderStates_[gos_State_Culling] = gos_Cull_None;
+	renderStates_[gos_State_StencilEnable] = 0;
+	renderStates_[gos_State_StencilFunc] = gos_Cmp_Never;
+	renderStates_[gos_State_StencilRef] = 0;
+	renderStates_[gos_State_StencilMask] = 0xffffffff;
+	renderStates_[gos_State_StencilZFail] = gos_Stencil_Keep;
+	renderStates_[gos_State_StencilFail] = gos_Stencil_Keep;
+	renderStates_[gos_State_StencilPass] = gos_Stencil_Keep;
+	renderStates_[gos_State_Multitexture] = gos_Multitexture_None;
+	renderStates_[gos_State_Ambient] = 0xffffff;
+	renderStates_[gos_State_Lighting] = 0;
+	renderStates_[gos_State_NormalizeNormals] = 0;
+	renderStates_[gos_State_VertexBlend] = 0;
 
-    memcpy(renderStates_, curStates_, sizeof(curStates_));
+    applyRenderStates();
+}
+
+void gosRenderer::applyRenderStates() {
+
+   ////////////////////////////////////////////////////////////////////////////////
+   if(0 == renderStates_[gos_State_ZCompare]) {
+       glDisable(GL_DEPTH_TEST);
+   } else {
+       glEnable(GL_DEPTH_TEST);
+   }
+   switch(renderStates_[gos_State_ZCompare]) {
+       case 0: glDepthFunc(GL_ALWAYS); break;
+       case 1: glDepthFunc(GL_LEQUAL); break;
+       case 2: glDepthFunc(GL_LESS); break;
+       default: gosASSERT(0 && "Wrong depth test value");
+   }
+   curStates_[gos_State_ZCompare] = renderStates_[gos_State_ZCompare];
+
+   ////////////////////////////////////////////////////////////////////////////////
+   switch(renderStates_[gos_State_ZWrite]) {
+       case 0: glDepthMask(GL_FALSE); break;
+       case 1: glDepthMask(GL_TRUE); break;
+       default: gosASSERT(0 && "Wrong depth write value");
+   }
+   curStates_[gos_State_ZWrite] = renderStates_[gos_State_ZWrite];
+
+   ////////////////////////////////////////////////////////////////////////////////
+   bool disable_blending = renderStates_[gos_State_AlphaMode] == gos_Alpha_OneZero;
+   if(disable_blending) {
+       glDisable(GL_BLEND);
+   } else {
+       glEnable(GL_BLEND);
+   }
+   switch(renderStates_[gos_State_AlphaMode]) {
+       case gos_Alpha_OneZero:          glBlendFunc(GL_ONE, GL_ZERO); break;
+       case gos_Alpha_OneOne:           glBlendFunc(GL_ONE, GL_ONE); break;
+       case gos_Alpha_AlphaInvAlpha:    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); break;
+       case gos_Alpha_OneInvAlpha:      glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA); break;
+       case gos_Alpha_AlphaOne:         glBlendFunc(GL_SRC_ALPHA, GL_ONE); break;
+       default: gosASSERT(0 && "Wrong alpha mode value");
+   }
+   curStates_[gos_State_AlphaMode] = renderStates_[gos_State_AlphaMode];
+
+   ////////////////////////////////////////////////////////////////////////////////
+
+}
+
+void gosRenderer::drawQuads(gos_VERTEX* vertices, int count) {
+    gosASSERT(vertices);
+
+    int num_quads = count / 4;
+    int num_vertices = num_quads * 6;
+
+
+    if(quads_->getNumVertices() + num_vertices > quads_->getCapacity()) {
+        applyRenderStates();
+        quads_->draw(basic_material_);
+        quads_->rewind();
+    } 
+
+    gosASSERT(quads_->getNumVertices() + num_vertices <= quads_->getCapacity());
+    for(int i=0; i<count;i+=4) {
+
+        quads_->addVertices(vertices + 4*i + 0, 1);
+        quads_->addVertices(vertices + 4*i + 1, 1);
+        quads_->addVertices(vertices + 4*i + 2, 1);
+
+        quads_->addVertices(vertices + 4*i + 0, 1);
+        quads_->addVertices(vertices + 4*i + 2, 1);
+        quads_->addVertices(vertices + 4*i + 3, 1);
+    }
+
+    // for now draw anyway because no render state saved for draw calls
+    applyRenderStates();
+    quads_->draw(basic_material_);
+    quads_->rewind();
+}
+
+void gosRenderer::drawLines(gos_VERTEX* vertices, int count) {
+    gosASSERT(vertices);
+
+    if(lines_->getNumVertices() + count > lines_->getCapacity()) {
+        applyRenderStates();
+        lines_->draw(basic_material_);
+        lines_->rewind();
+    }
+
+    gosASSERT(lines_->getNumVertices() + count <= lines_->getCapacity());
+    lines_->addVertices(vertices, count);
+
+    // for now draw anyway because no render state saved for draw calls
+    applyRenderStates();
+    lines_->draw(basic_material_);
+    lines_->rewind();
+}
+
+void gosRenderer::drawPoints(gos_VERTEX* vertices, int count) {
+    gosASSERT(vertices);
+
+    if(points_->getNumVertices() + count > points_->getCapacity()) {
+        applyRenderStates();
+        points_->draw(basic_material_);
+        points_->rewind();
+    } 
+
+    gosASSERT(points_->getNumVertices() + count <= points_->getCapacity());
+    points_->addVertices(vertices, count);
+
+    // for now draw anyway because no render state saved for draw calls
+    applyRenderStates();
+    points_->draw(basic_material_);
+    points_->rewind();
+}
+
+void gosRenderer::drawTris(gos_VERTEX* vertices, int count) {
+    gosASSERT(vertices);
+
+    gosASSERT((count % 3) == 0);
+
+    if(tris_->getNumVertices() + count > tris_->getCapacity()) {
+        applyRenderStates();
+        tris_->draw(basic_material_);
+        tris_->rewind();
+    } 
+
+    gosASSERT(tris_->getNumVertices() + count <= tris_->getCapacity());
+    tris_->addVertices(vertices, count);
+
+    // for now draw anyway because no render state saved for draw calls
+    applyRenderStates();
+    tris_->draw(basic_material_);
+    tris_->rewind();
+}
+
+void gosRenderer::flush()
+{
+    quads_->draw(basic_material_);
+    quads_->rewind();
 }
 
 static gosRenderer* g_gos_renderer = NULL;
 
-void gos_CreateRenderer(int w, int h)
-{
+void gos_CreateRenderer(int w, int h) {
+
     g_gos_renderer = new gosRenderer(w, h);
     g_gos_renderer->init();
+}
+
+void gos_RendererEndFrame() {
+    gosASSERT(g_gos_renderer);
+    g_gos_renderer->flush();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -261,19 +599,30 @@ void gos_CreateRenderer(int w, int h)
 //
 void _stdcall gos_DrawLines(gos_VERTEX* Vertices, int NumVertices)
 {
- //   gosASSERT(0 && "Not implemented");
+    //gosASSERT(0 && "Not implemented");
+    gosASSERT(g_gos_renderer);
+    g_gos_renderer->drawLines(Vertices, NumVertices);
 }
 void _stdcall gos_DrawPoints(gos_VERTEX* Vertices, int NumVertices)
 {
  //   gosASSERT(0 && "Not implemented");
+    gosASSERT(g_gos_renderer);
+    g_gos_renderer->drawPoints(Vertices, NumVertices);
 }
+
+bool g_disable_quads = true;
 void _stdcall gos_DrawQuads(gos_VERTEX* Vertices, int NumVertices)
 {
- //   gosASSERT(0 && "Not implemented");
+    //gosASSERT(0 && "Not implemented");
+    gosASSERT(g_gos_renderer);
+    if(g_disable_quads == false )
+        g_gos_renderer->drawQuads(Vertices, NumVertices);
 }
 void _stdcall gos_DrawTriangles(gos_VERTEX* Vertices, int NumVertices)
 {
   //  gosASSERT(0 && "Not implemented");
+    gosASSERT(g_gos_renderer);
+    g_gos_renderer->drawTris(Vertices, NumVertices);
 }
 
 void __stdcall gos_GetViewport( float* pViewportMulX, float* pViewportMulY, float* pViewportAddX, float* pViewportAddY )
