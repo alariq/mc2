@@ -9,6 +9,9 @@
 
 #include "utils/shader_builder.h"
 #include "utils/gl_utils.h"
+#include "utils/Image.h"
+
+class gosRenderer;
 
 struct gosTextureInfo {
     int width_;
@@ -65,6 +68,14 @@ class gosShaderMaterial {
                 glEnableVertexAttribArray(texcoord_loc);
                 glVertexAttribPointer(texcoord_loc, 2, GL_FLOAT, GL_FALSE, stride, 
                         BUFFER_OFFSET(4*sizeof(float) + 2*sizeof(uint32_t)));
+            }
+        }
+
+        bool setSamplerUnit(const char* sampler_name, uint32_t unit) {
+            gosASSERT(sampler_name);
+            // TODO: may also check that current program is equal to our program
+            if(program_->samplers_.count(sampler_name)) {
+                glUniform1i(program_->samplers_[sampler_name]->index_, 0);
             }
         }
 
@@ -160,6 +171,8 @@ void gosMesh::draw(gosShaderMaterial* material) const
 
     material->apply();
 
+    material->setSamplerUnit("tex1", 0);
+
 	glBindBuffer(GL_ARRAY_BUFFER, vb_);
 
     material->applyVertexDeclaration();
@@ -206,23 +219,23 @@ class gosTexture {
             memcpy(pdata_, pdata, size);
 
             is_locked_ = false;
-
-            // TODO: correctly set width and height
-            width_ = 16;
-            height_ = 16;
-
         }
+
+        bool createHardwareTexture();
+
         ~gosTexture() {
             delete[] pdata_;
             delete[] filename_;
         }
+
+        uint32_t getTextureId() { return tex_.id; }
 
         BYTE* Lock(int mipl_level, float is_read_only, int* pitch) {
             gosASSERT(is_locked_ == false);
             is_locked_ = true;
             // TODO:
             gosASSERT(pitch);
-            *pitch = width_;
+            *pitch = tex_.w;
             return pdata_;
         }
 
@@ -233,17 +246,15 @@ class gosTexture {
 
         void getTextureInfo(gosTextureInfo* texinfo) {
             gosASSERT(texinfo);
-            texinfo->width_ = width_;
-            texinfo->height_ = height_;
+            texinfo->width_ = tex_.w;
+            texinfo->height_ = tex_.h;
             texinfo->format_ = format_;
         }
 
     private:
-        int width_;
-        int height_;
-
         BYTE* pdata_;
         DWORD size_;
+        Texture tex_;
 
         gos_TextureFormat format_;
         char* filename_;
@@ -263,6 +274,29 @@ struct gosTextAttribs {
     DWORD WrapType;
     bool DisableEmbeddedCodes;
 };
+
+bool gosTexture::createHardwareTexture() {
+
+    gosASSERT(filename_);
+
+    Image img;
+    if(!img.loadFromFile(filename_)) {
+        return false;
+    }
+
+    FORMAT img_fmt = img.getFormat();
+    if(img_fmt != FORMAT_RGB8 && img_fmt != FORMAT_RGBA8) {
+        STOP(("Unsupported texture format when loading %s\n", filename_));
+    }
+
+    TexFormat tf = img_fmt == FORMAT_RGB8 ? TF_RGB8 : TF_RGBA8;
+
+    tex_ = create2DTexture(img.getWidth(), img.getHeight(), tf, img.getPixels());
+
+    return tex_.isValid();
+}
+
+
 
 class gosRenderer {
 
@@ -388,6 +422,7 @@ class gosRenderer {
         gosMesh* lines_;
         gosMesh* points_;
         gosShaderMaterial* basic_material_;
+        gosShaderMaterial* basic_tex_material_;
 
 
 };
@@ -403,6 +438,7 @@ void gosRenderer::init() {
     lines_ = gosMesh::makeMesh(PRIMITIVE_LINELIST, 1024);
     points_= gosMesh::makeMesh(PRIMITIVE_POINTLIST, 1024);
     basic_material_ = gosShaderMaterial::load("gos_vertex");
+    basic_tex_material_ = gosShaderMaterial::load("gos_tex_vertex");
 }
 
 void gosRenderer::initRenderStates() {
@@ -485,6 +521,21 @@ void gosRenderer::applyRenderStates() {
    curStates_[gos_State_AlphaMode] = renderStates_[gos_State_AlphaMode];
 
    ////////////////////////////////////////////////////////////////////////////////
+   uint32_t tex_states[] = { gos_State_Texture, gos_State_Texture2, gos_State_Texture3 };
+   for(int i=0; i<sizeof(tex_states) / sizeof(tex_states[0]); ++i) {
+       DWORD gosTextureHandle = renderStates_[tex_states[i]];
+
+       glActiveTexture(GL_TEXTURE0 + i);
+       if(gosTextureHandle != 0) {
+           gosTexture* tex = this->getTexture(gosTextureHandle);
+           gosASSERT(tex);
+
+           glBindTexture(GL_TEXTURE_2D, tex->getTextureId());
+       } else {
+           glBindTexture(GL_TEXTURE_2D, 0);
+       }
+       curStates_[tex_states[i]] = gosTextureHandle;
+   }
 
 }
 
@@ -497,7 +548,9 @@ void gosRenderer::drawQuads(gos_VERTEX* vertices, int count) {
 
     if(quads_->getNumVertices() + num_vertices > quads_->getCapacity()) {
         applyRenderStates();
-        quads_->draw(basic_material_);
+        gosShaderMaterial* mat = 
+            curStates_[gos_State_Texture]!=0 ? basic_tex_material_ : basic_material_;
+        quads_->draw(mat);
         quads_->rewind();
     } 
 
@@ -515,7 +568,9 @@ void gosRenderer::drawQuads(gos_VERTEX* vertices, int count) {
 
     // for now draw anyway because no render state saved for draw calls
     applyRenderStates();
-    quads_->draw(basic_material_);
+    gosShaderMaterial* mat = 
+        curStates_[gos_State_Texture]!=0 ? basic_tex_material_ : basic_material_;
+    quads_->draw(mat);
     quads_->rewind();
 }
 
@@ -562,7 +617,9 @@ void gosRenderer::drawTris(gos_VERTEX* vertices, int count) {
 
     if(tris_->getNumVertices() + count > tris_->getCapacity()) {
         applyRenderStates();
-        tris_->draw(basic_material_);
+        gosShaderMaterial* mat = 
+            curStates_[gos_State_Texture]!=0 ? basic_tex_material_ : basic_material_;
+        tris_->draw(mat);
         tris_->rewind();
     } 
 
@@ -571,7 +628,9 @@ void gosRenderer::drawTris(gos_VERTEX* vertices, int count) {
 
     // for now draw anyway because no render state saved for draw calls
     applyRenderStates();
-    tris_->draw(basic_material_);
+    gosShaderMaterial* mat = 
+        curStates_[gos_State_Texture]!=0 ? basic_tex_material_ : basic_material_;
+    tris_->draw(mat);
     tris_->rewind();
 }
 
@@ -692,6 +751,10 @@ DWORD __stdcall gos_NewTextureFromMemory( gos_TextureFormat Format, const char* 
     //gosASSERT(0 && "Not implemented");
 
     gosTexture* ptex = new gosTexture(Format, FileName, Hints, pBitmap, Size);
+    if(!ptex->createHardwareTexture()) {
+        STOP(("Failed to create texture\n"));
+    }
+
     return g_gos_renderer->addTexture(ptex);
 }
 void __stdcall gos_DestroyTexture( DWORD Handle )
@@ -702,6 +765,8 @@ void __stdcall gos_DestroyTexture( DWORD Handle )
 
 void __stdcall gos_LockTexture( DWORD Handle, DWORD MipMapSize, bool ReadOnly, TEXTUREPTR* TextureInfo )
 {
+    // TODO: does not really locks texture
+    
     // not implemented yet
     gosASSERT(MipMapSize == 0);
     int mip_level = 0; //func(MipMapSize);

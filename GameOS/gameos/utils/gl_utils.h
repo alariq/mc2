@@ -13,6 +13,7 @@ uint32_t vec4_to_uint32(const vec4& v);
 
 struct Texture {
 	Texture():id(0), w(0), h(0), depth(1), fmt_(TF_NONE) {}
+    bool isValid() { return id > 0; }
 
 	GLuint id;
 	GLenum format;
@@ -74,8 +75,8 @@ static int ogl_check_val(T input, T reference, const char* message)
     }
 }
 
+Texture create2DTexture(int w, int h, TexFormat fmt, const uint8_t* texdata);
 Texture createDynamicTexture(int w, int h, TexFormat fmt);
-Texture createDynamicTexture(int w, int h, GLenum fmt = GL_RED);
 Texture create3DTextureF(int w, int h, int depth);
 void updateTexture(const Texture& t , char* pdata);
 Texture createPBO(int w, int h, GLenum fmt, int el_size);

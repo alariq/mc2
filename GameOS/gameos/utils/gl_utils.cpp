@@ -99,6 +99,30 @@ getTexFormatPixelSize(TexFormat fmt) {
     return textureFormatChannelSize[fmt] * textureFormatNumChannels[fmt];
 }
 
+Texture create2DTexture(int w, int h, TexFormat fmt, const uint8_t* texdata)
+{
+    
+	GLuint texID;
+	glGenTextures(1, &texID);
+	glBindTexture(GL_TEXTURE_2D, texID);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexImage2D(GL_TEXTURE_2D, 0, textureInternalFormats[fmt], 
+            w, h, 0, textureFormats[fmt], textureFormatChannelType[fmt], texdata);
+    CHECK_GL_ERROR
+
+	Texture t;
+	t.id = texID;
+	t.w = w;
+	t.h = h;
+	t.fmt_ = fmt;
+    t.format = (GLenum)-1;
+
+	return t;
+}
 
 
 Texture createDynamicTexture(int w, int h, TexFormat fmt)
@@ -122,30 +146,6 @@ Texture createDynamicTexture(int w, int h, TexFormat fmt)
 	t.h = h;
 	t.fmt_ = fmt;
     t.format = (GLenum)-1;
-
-	return t;
-}
-
-Texture createDynamicTexture(int w, int h, GLenum fmt)
-{
-#pragma message("Deprecated!!!")
-
-   	GLuint texID;
-	glGenTextures(1, &texID);
-	glBindTexture(GL_TEXTURE_2D, texID);
-
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, fmt, GL_UNSIGNED_BYTE, NULL);
-    CHECK_GL_ERROR
-
-	Texture t;
-	t.id = texID;
-	t.w = w;
-	t.h = h;
-	t.format = fmt;
 
 	return t;
 }
