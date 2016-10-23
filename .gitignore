@@ -16,9 +16,11 @@ data
 Assets
 ARM
 ABLT
+Tools
 .codelite
 *.session
 *.log
 *.lib
+*.LIB
 *.so
 *.a
