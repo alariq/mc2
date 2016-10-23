@@ -28,6 +28,14 @@ struct RenderContext {
 static void PrintRenderer(SDL_RendererInfo * info);
 
 //==============================================================================
+void set_verbose(bool is_verbose)
+{
+    VERBOSE_VIDEO = is_verbose;
+    VERBOSE_RENDER = is_verbose;
+    VERBOSE_MODES = is_verbose;
+}
+
+//==============================================================================
 RenderWindow* create_window(const char* pwinname, int width, int height)
 {
 	int i, j, m, n;
@@ -210,7 +218,7 @@ RenderContextHandle init_render_context(RenderWindowHandle render_window)
     RenderWindow* rw = (RenderWindow*)render_window;
     assert(rw && rw->window_);
 
-	SDL_GLContext glcontext = SDL_GL_CreateContext(rw->window_);
+    SDL_GLContext glcontext = SDL_GL_CreateContext(rw->window_);
     if (!glcontext ) {
         fprintf(stderr, "SDL_GL_CreateContext(): %s\n", SDL_GetError());
         return NULL;
@@ -227,86 +235,87 @@ RenderContextHandle init_render_context(RenderWindowHandle render_window)
         SDL_GL_SetSwapInterval(0);
     }
 
-	SDL_DisplayMode mode;
-    SDL_GetCurrentDisplayMode(0, &mode);
-    printf("Current Display Mode:\n");
-    printf("Screen BPP: %d\n", SDL_BITSPERPIXEL(mode.format));
-    printf("\n");
-    printf("Vendor     : %s\n", glGetString(GL_VENDOR));
-    printf("Renderer   : %s\n", glGetString(GL_RENDERER));
-    printf("Version    : %s\n", glGetString(GL_VERSION));
-    const GLubyte* exts = glGetString(GL_EXTENSIONS);
-    printf("Extensions : %s\n", exts);
-    printf("\n");
+    if(VERBOSE_RENDER) {
+        SDL_DisplayMode mode;
+        SDL_GetCurrentDisplayMode(0, &mode);
+        printf("Current Display Mode:\n");
+        printf("Screen BPP: %d\n", SDL_BITSPERPIXEL(mode.format));
+        printf("\n");
+        printf("Vendor     : %s\n", glGetString(GL_VENDOR));
+        printf("Renderer   : %s\n", glGetString(GL_RENDERER));
+        printf("Version    : %s\n", glGetString(GL_VERSION));
+        const GLubyte* exts = glGetString(GL_EXTENSIONS);
+        printf("Extensions : %s\n", exts);
+        printf("\n");
 
-	int value;
-	int status = 0;
+        int value;
+        int status = 0;
 
-    /*
-    status = SDL_GL_GetAttribute(SDL_GL_RED_SIZE, &value);
-    if (!status) {
-        printf("SDL_GL_RED_SIZE: requested %d, got %d\n", 5, value);
-    } else {
-        printf("Failed to get SDL_GL_RED_SIZE: %s\n", SDL_GetError());
-    }
-    status = SDL_GL_GetAttribute(SDL_GL_GREEN_SIZE, &value);
-    if (!status) {
-        printf("SDL_GL_GREEN_SIZE: requested %d, got %d\n", 5, value);
-    } else {
-        printf("Failed to get SDL_GL_GREEN_SIZE: %s\n", SDL_GetError());
-    }
-    status = SDL_GL_GetAttribute(SDL_GL_BLUE_SIZE, &value);
-    if (!status) {
-        printf("SDL_GL_BLUE_SIZE: requested %d, got %d\n", 5, value);
-    } else {
-        printf("Failed to get SDL_GL_BLUE_SIZE: %s\n", SDL_GetError());
-    }
-    */
-    status = SDL_GL_GetAttribute(SDL_GL_DEPTH_SIZE, &value);
-    if (!status) {
-        printf("SDL_GL_DEPTH_SIZE: requested %d, got %d\n", 16, value);
-    } else {
-        printf("Failed to get SDL_GL_DEPTH_SIZE: %s\n", SDL_GetError());
-    }
+        /*
+           status = SDL_GL_GetAttribute(SDL_GL_RED_SIZE, &value);
+           if (!status) {
+           printf("SDL_GL_RED_SIZE: requested %d, got %d\n", 5, value);
+           } else {
+           printf("Failed to get SDL_GL_RED_SIZE: %s\n", SDL_GetError());
+           }
+           status = SDL_GL_GetAttribute(SDL_GL_GREEN_SIZE, &value);
+           if (!status) {
+           printf("SDL_GL_GREEN_SIZE: requested %d, got %d\n", 5, value);
+           } else {
+           printf("Failed to get SDL_GL_GREEN_SIZE: %s\n", SDL_GetError());
+           }
+           status = SDL_GL_GetAttribute(SDL_GL_BLUE_SIZE, &value);
+           if (!status) {
+           printf("SDL_GL_BLUE_SIZE: requested %d, got %d\n", 5, value);
+           } else {
+           printf("Failed to get SDL_GL_BLUE_SIZE: %s\n", SDL_GetError());
+           }
+           */
+        status = SDL_GL_GetAttribute(SDL_GL_DEPTH_SIZE, &value);
+        if (!status) {
+            printf("SDL_GL_DEPTH_SIZE: requested %d, got %d\n", 16, value);
+        } else {
+            printf("Failed to get SDL_GL_DEPTH_SIZE: %s\n", SDL_GetError());
+        }
 
-    status = SDL_GL_GetAttribute(SDL_GL_MULTISAMPLEBUFFERS, &value);
-    if (!status) {
-        printf("SDL_GL_MULTISAMPLEBUFFERS: %d\n", value);
-    } else {
-        printf("Failed to get SDL_GL_MULTISAMPLEBUFFERS: %s\n",
-                SDL_GetError());
-    }
+        status = SDL_GL_GetAttribute(SDL_GL_MULTISAMPLEBUFFERS, &value);
+        if (!status) {
+            printf("SDL_GL_MULTISAMPLEBUFFERS: %d\n", value);
+        } else {
+            printf("Failed to get SDL_GL_MULTISAMPLEBUFFERS: %s\n",
+                    SDL_GetError());
+        }
 
-    status = SDL_GL_GetAttribute(SDL_GL_MULTISAMPLESAMPLES, &value);
-    if (!status) {
-        printf("SDL_GL_MULTISAMPLESAMPLES: %d\n", value);
-    } else {
-        printf("Failed to get SDL_GL_MULTISAMPLESAMPLES: %s\n",
-                SDL_GetError());
-    }
+        status = SDL_GL_GetAttribute(SDL_GL_MULTISAMPLESAMPLES, &value);
+        if (!status) {
+            printf("SDL_GL_MULTISAMPLESAMPLES: %d\n", value);
+        } else {
+            printf("Failed to get SDL_GL_MULTISAMPLESAMPLES: %s\n",
+                    SDL_GetError());
+        }
 
-    status = SDL_GL_GetAttribute(SDL_GL_ACCELERATED_VISUAL, &value);
-    if (!status) {
-        printf("SDL_GL_ACCELERATED_VISUAL: %d\n", value);
-    } else {
-        printf("Failed to get SDL_GL_ACCELERATED_VISUAL: %s\n",
-                SDL_GetError());
-    }
+        status = SDL_GL_GetAttribute(SDL_GL_ACCELERATED_VISUAL, &value);
+        if (!status) {
+            printf("SDL_GL_ACCELERATED_VISUAL: %d\n", value);
+        } else {
+            printf("Failed to get SDL_GL_ACCELERATED_VISUAL: %s\n",
+                    SDL_GetError());
+        }
 
-    status = SDL_GL_GetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, &value);
-    if (!status) {
-        printf("SDL_GL_CONTEXT_MAJOR_VERSION: %d\n", value);
-    } else {
-        printf("Failed to get SDL_GL_CONTEXT_MAJOR_VERSION: %s\n", SDL_GetError());
-    }
+        status = SDL_GL_GetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, &value);
+        if (!status) {
+            printf("SDL_GL_CONTEXT_MAJOR_VERSION: %d\n", value);
+        } else {
+            printf("Failed to get SDL_GL_CONTEXT_MAJOR_VERSION: %s\n", SDL_GetError());
+        }
 
-    status = SDL_GL_GetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, &value);
-    if (!status) {
-        printf("SDL_GL_CONTEXT_MINOR_VERSION: %d\n", value);
-    } else {
-        printf("Failed to get SDL_GL_CONTEXT_MINOR_VERSION: %s\n", SDL_GetError());
+        status = SDL_GL_GetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, &value);
+        if (!status) {
+            printf("SDL_GL_CONTEXT_MINOR_VERSION: %d\n", value);
+        } else {
+            printf("Failed to get SDL_GL_CONTEXT_MINOR_VERSION: %s\n", SDL_GetError());
+        }
     }
-
 
     RenderContext* rc = new RenderContext();
     rc->glcontext_ = glcontext;

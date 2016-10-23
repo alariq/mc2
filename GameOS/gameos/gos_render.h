@@ -9,6 +9,8 @@ struct RenderContext;
 typedef RenderWindow*   RenderWindowHandle;
 typedef RenderContext*   RenderContextHandle;
 
+void set_verbose(bool is_verbose);
+
 RenderWindowHandle  create_window(const char* pwinname, int width, int height);
 RenderContextHandle init_render_context(RenderWindowHandle render_window);
 
