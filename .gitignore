@@ -13,7 +13,7 @@ CMakeFiles/
 Editor
 data
 1033
-Assets
+assets
 ARM
 ABLT
 Tools
@@ -24,3 +24,5 @@ Tools
 *.LIB
 *.so
 *.a
+viewer
+text_tool
