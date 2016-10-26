@@ -1,17 +1,28 @@
 #include "gameos.hpp"
 #include "font3d.hpp"
+#include "gos_font.h"
 #include <vector>
 #include <map>
+#include <algorithm>
 
 #ifdef LINUX_BUILD
 #include <cstdarg>
 #endif
+
+#include "stdlib_win.h"
 
 #include "utils/shader_builder.h"
 #include "utils/gl_utils.h"
 #include "utils/Image.h"
 
 class gosRenderer;
+class gosFont;
+
+static gosRenderer* g_gos_renderer = NULL;
+
+gosRenderer* getGosRenderer() {
+    return g_gos_renderer;
+}
 
 struct gosTextureInfo {
     int width_;
@@ -215,8 +226,12 @@ class gosTexture {
             hints_ = hints;
 
             size_ = size;
-            pdata_ = new BYTE[size];
-            memcpy(pdata_, pdata, size);
+            if(size) {
+                pdata_ = new BYTE[size];
+                memcpy(pdata_, pdata, size);
+            } else {
+                pdata = NULL;
+            }
 
             is_locked_ = false;
         }
@@ -297,7 +312,6 @@ bool gosTexture::createHardwareTexture() {
 }
 
 
-
 class gosRenderer {
 
     typedef std::map<gos_RenderState, unsigned int> StatePair;
@@ -315,6 +329,12 @@ class gosRenderer {
             return textureList_.size()-1;
         }
 
+        DWORD addFont(gosFont* font) {
+            gosASSERT(font);
+            fontList_.push_back(font);
+            return fontList_.size()-1;
+        }
+
         gosTexture* getTexture(DWORD texture_id) {
             gosASSERT(textureList_.size() > texture_id);
             gosASSERT(textureList_[texture_id] != 0);
@@ -328,6 +348,31 @@ class gosRenderer {
             delete textureList_[texture_id];
             textureList_[texture_id] = 0;
         }
+
+        // TODO: do sae as with texture?
+        void deleteFont(gosFont* font) {
+            // FIXME: bad use object list, with stable ids
+            // to not waste space
+            
+            struct equals_to {
+                gosFont* fnt_;
+                bool operator()(gosFont* fnt) {
+                    return fnt == fnt_;
+                }
+            };
+
+            equals_to eq;
+            eq.fnt_ = font;
+
+            std::vector<gosFont*>::iterator it = 
+                std::find_if(fontList_.begin(), fontList_.end(), eq);
+            if(it != fontList_.end())
+            {
+                gosFont* font = *it;
+                fontList_.erase(it);
+            }
+        }
+
 
         gosTextAttribs& getTextAttributes() { return curTextAttribs_; }
         void setTextPos(int x, int y) { curTextPosX_ = x; curTextPosY_ = y; }
@@ -383,6 +428,7 @@ class gosRenderer {
         void initRenderStates();
 
         std::vector<gosTexture*> textureList_;
+        std::vector<gosFont*> fontList_;
 
         // states data
         unsigned int curStates_[gos_MaxState];
@@ -640,8 +686,6 @@ void gosRenderer::flush()
     quads_->rewind();
 }
 
-static gosRenderer* g_gos_renderer = NULL;
-
 void gos_CreateRenderer(int w, int h) {
 
     g_gos_renderer = new gosRenderer(w, h);
@@ -651,6 +695,61 @@ void gos_CreateRenderer(int w, int h) {
 void gos_RendererEndFrame() {
     gosASSERT(g_gos_renderer);
     g_gos_renderer->flush();
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+class gosFont {
+    public:
+        static gosFont* load(const char* fontFile);
+
+        int getMaxCharWidth() { return gi_.max_advance_; }
+        int getMaxCharHeight() { return gi_.font_line_skip_; }
+
+    private:
+        gosFont(){};
+
+        char* font_name_;
+        gosGlyphInfo gi_;
+        DWORD tex_id_;
+};
+
+gosFont* gosFont::load(const char* fontFile) {
+
+    char fname[256];
+    char dir[256];
+    _splitpath(fontFile, NULL, dir, fname, NULL);
+    const char* tex_ext = ".bmp";
+    const char* glyph_ext = ".glyph";
+    
+    char* textureName = new char[strlen(fname) + strlen(dir) + strlen(tex_ext) + 1];
+    char* glyphName = new char[strlen(fname) + strlen(dir) + strlen(glyph_ext) + 1];
+    sprintf(textureName, "%s/%s%s", dir, fname, tex_ext);
+    sprintf(glyphName, "%s/%s%s", dir, fname, glyph_ext);
+
+    gosTexture* ptex = new gosTexture(gos_Texture_Detect, textureName, 0, NULL, 0);
+    if(!ptex || !ptex->createHardwareTexture()) {
+        STOP(("Failed to create font texture: %s\n", textureName));
+    }
+
+    DWORD tex_id = getGosRenderer()->addTexture(ptex);
+
+    gosFont* font = new gosFont();
+    if(!gos_load_glyphs(glyphName, font->gi_)) {
+        delete font;
+        STOP(("Failed to load font glyphs: %s\n", glyphName));
+        return NULL;
+    }
+
+    font->font_name_ = new char[strlen(fname) + 1];
+    strcpy(font->font_name_, fname);
+    font->tex_id_ = tex_id;
+
+    delete[] textureName;
+    delete[] glyphName;
+
+    return font;
+
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -718,6 +817,7 @@ typedef struct _FontInfo
 */
 HGOSFONT3D __stdcall gos_LoadFont( const char* FontFile, DWORD StartLine/* = 0*/, int CharCount/* = 256*/, DWORD TextureHandle/*=0*/)
 {
+    /*
     gosASSERT(FontFile);
     _FontInfo* fi = new _FontInfo();
     memset(fi, 0, sizeof(fi));
@@ -733,12 +833,18 @@ HGOSFONT3D __stdcall gos_LoadFont( const char* FontFile, DWORD StartLine/* = 0*/
 
     //gosASSERT(0 && "Not implemented");
     return fi;
+    */
+
+    gosFont* font = gosFont::load(FontFile);
+    getGosRenderer()->addFont(font);
+    return font;
 }
 
-void __stdcall gos_DeleteFont( HGOSFONT3D Fonthandle )
+void __stdcall gos_DeleteFont( HGOSFONT3D FontHandle )
 {
-    gosASSERT(Fonthandle);
-    delete (_FontInfo*)Fonthandle;
+    gosASSERT(FontHandle);
+    gosFont* font = FontHandle;
+    getGosRenderer()->deleteFont(font);
 }
 
 DWORD __stdcall gos_NewEmptyTexture( gos_TextureFormat Format, const char* Name, DWORD HeightWidth, DWORD Hints/*=0*/, gos_RebuildFunction pFunc/*=0*/, void *pInstance/*=0*/)
@@ -796,11 +902,11 @@ void __stdcall gos_UnLockTexture( DWORD Handle )
 
 void __stdcall gos_PushRenderStates()
 {
-    //gosASSERT(0 && "not implemented");
+    gosASSERT(0 && "not implemented");
 }
 void __stdcall gos_PopRenderStates()
 {
-    //gosASSERT(0 && "not implemented");
+    gosASSERT(0 && "not implemented");
 }
 
 void __stdcall gos_RenderIndexedArray( gos_VERTEX* pVertexArray, DWORD NumberVertices, WORD* lpwIndices, DWORD NumberIndices )
@@ -897,10 +1003,12 @@ void __stdcall gos_TextStringLength( DWORD* Width, DWORD* Height, const char *fm
     int h = num_newlines + 1;
 
     const gosTextAttribs& ta = g_gos_renderer->getTextAttributes();
-    _FontInfo* fi = ta.FontHandle;
+    //_FontInfo* fi = ta.FontHandle;
+    gosFont* fi = ta.FontHandle;
     gosASSERT(fi);
-    w *= fi->Width;
-    h *= fi->Height;
+    // TODO: get actual character width [and height]
+    w *= fi->getMaxCharWidth();
+    h *= fi->getMaxCharHeight();
 
     *Width = w;
     *Height = h;
