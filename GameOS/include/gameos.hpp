@@ -144,7 +144,8 @@ typedef struct	SoundResource*	HGOSAUDIO;
 typedef struct	gos_Music*		HGOSMUSIC;
 typedef struct	gos_Video*		HGOSVIDEO;
 typedef struct	gosFileStream*	HGOSFILE;
-typedef struct	_FontInfo*		HGOSFONT3D;
+//typedef struct	_FontInfo*		HGOSFONT3D;
+typedef struct	gosFont*		HGOSFONT3D;
 typedef struct  gosForceEffect*	HGOSFORCEEFFECT;
 typedef struct	gos_Heap*		HGOSHEAP;
 typedef struct gos_StringRes*   HSTRRES; //sebi

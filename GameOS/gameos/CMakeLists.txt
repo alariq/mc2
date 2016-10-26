@@ -9,6 +9,7 @@ set(SOURCES ${SOURCES}
     gameos_fileio.cpp
     gameos_debugging.cpp
     gos_render.cpp
+    gos_font.cpp
 
     utils/stream.cpp
     utils/camera.cpp

@@ -224,7 +224,7 @@ void __stdcall InitializeGameEngine()
 		*pStr = 0;
 	}
 	char path [256];
-	strcpy( path, "assets\\graphics\\" );
+	strcpy( path, "assets" PATH_SEPARATOR "graphics" PATH_SEPARATOR );
 	strcat( path, temp );	
 
 	gosFontHandle = gos_LoadFont(path);
