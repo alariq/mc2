@@ -1,5 +1,6 @@
 #include "gameos.hpp"
 #include "gos_render.h"
+#include "gos_font.h"
 #include <stdio.h>
 
 // errno + strerror
@@ -12,33 +13,74 @@
 #include "utils/shader_builder.h"
 #include "utils/gl_utils.h"
 
-typedef struct {
-	int minx,
-		maxx,
-		miny,
-		maxy,
-		advance;
-    int valid;    
-} GlyphMetrics;
+static const uint32_t NUM_GLYPHS = 255 - 32;
+static const uint32_t START_GLYPH = 32;
 
-static const uint32_t NUM_GLYPHS = 255;
-GlyphMetrics gm[NUM_GLYPHS];
+gosGlyphMetrics gm[NUM_GLYPHS];
 SDL_Surface* gs[NUM_GLYPHS];
 
 void usage(char** argv) {
-    printf("%s <font.ttf>\n", argv[0]);
+    printf("%s <font_name.ttf> <size> <out_font_name>\n", argv[0]);
+}
+
+bool gos_save_glyphs(const char* glyphFile, const gosGlyphInfo& gi)
+{
+    FILE* glyph_info = fopen(glyphFile, "wb");
+    if(!glyph_info) {
+        int last_err = errno;
+        printf("fopen: %s\n", strerror(errno));
+        return false;
+    }
+
+    fwrite(&gi.num_glyphs_, sizeof(gi.num_glyphs_), 1, glyph_info);
+    fwrite(&gi.start_glyph_, sizeof(gi.start_glyph_), 1, glyph_info);
+
+    fwrite(&gi.max_advance_, sizeof(gi.max_advance_), 1, glyph_info);
+    fwrite(&gi.font_line_skip_, sizeof(gi.font_line_skip_), 1, glyph_info);
+
+    size_t num_structs_written = 0;
+
+    while(num_structs_written != gi.num_glyphs_) {
+        num_structs_written += fwrite(&gi.glyphs_[num_structs_written], 
+                sizeof(gosGlyphMetrics), 
+                gi.num_glyphs_ - num_structs_written, 
+                glyph_info);
+    }
+
+    fclose(glyph_info);
+
+    return true;
 }
 
 int main(int argc, char** argv)
 {
-    char* fontFile = {0};
+    char* glyphFile = {0};
+    char* textureFile = {0};
+    const char* tex_ext = ".bmp";
+    const char* glyph_ext = ".glyph";
 
-    if(argc < 2) {
+    if(argc < 4) {
         usage(argv);
-        exit(1);
-    } else {
-        fontFile = argv[1];
+        return 1;
     }
+
+    const char* const fontFile = argv[1];
+    const char* size = argv[2];
+    const char* outFile = argv[3];
+
+    int fontSize = atoi(size);
+    if(fontSize<=0 || fontSize>=100) {
+        printf("Invalid font size: %d\n", fontSize);
+        return 1;
+    }
+
+    int size_width = 2; // 2 chars enough to store 0 to 99
+    textureFile = new char[strlen(outFile) + strlen(tex_ext) + size_width + 1];
+    glyphFile = new char[strlen(outFile) + strlen(glyph_ext) + size_width + 1];
+
+    sprintf(textureFile, "%s%d%s", outFile, fontSize, tex_ext);
+    sprintf(glyphFile, "%s%d%s", outFile, fontSize, glyph_ext);
+
 
     graphics::set_verbose(false);
 
@@ -73,7 +115,6 @@ int main(int argc, char** argv)
         exit(1);
     }
 
-    int fontSize = 16;
     int outlinePixelSize = 0;
 
     // load font.ttf at size 16 into font
@@ -105,27 +146,19 @@ int main(int argc, char** argv)
 	const SDL_Color fg = { 255, 255, 255, 255 };
 	const SDL_Color bg = { 0, 0, 0, 0};
 
-    FILE* glyph_info = fopen("out.glyph", "wb");
-    if(!glyph_info) {
-        int last_err = errno;
-        printf("fopen: %s\n", strerror(errno));
-        exit(last_err);
-    }
-
-    fwrite(&NUM_GLYPHS, sizeof(NUM_GLYPHS), 1, glyph_info);
-
     for(int i=0;i<NUM_GLYPHS;++i) {
 
-        gs[i] = TTF_RenderGlyph_Blended(font, i, fg);
+        const int glyph_id = i + START_GLYPH;
+        gs[i] = TTF_RenderGlyph_Blended(font, glyph_id, fg);
         gm[i].valid = true;
 
         if(!gs[i]) {
-            printf("TTF_RenderGlyph+Blended: %d : %s\n", i, TTF_GetError());
+            printf("TTF_RenderGlyph+Blended: %d : %s\n", glyph_id, TTF_GetError());
             gm[i].valid = false;
             continue;
         }
 
-        TTF_GlyphMetrics(font, i,
+        TTF_GlyphMetrics(font, glyph_id,
                 &gm[i].minx, &gm[i].maxx,
                 &gm[i].miny, &gm[i].maxy,
                 &gm[i].advance);
@@ -134,21 +167,9 @@ int main(int argc, char** argv)
 
     }
 
-    fwrite(&max_advance, sizeof(max_advance), 1, glyph_info);
-    fwrite(&fontLineSkip, sizeof(fontLineSkip), 1, glyph_info);
-
-    size_t num_structs_written = fwrite(&gm[0], sizeof(GlyphMetrics), NUM_GLYPHS, glyph_info);
-    while(num_structs_written != NUM_GLYPHS) {
-        num_structs_written += fwrite(&gm[num_structs_written], 
-                sizeof(GlyphMetrics), 
-                NUM_GLYPHS - num_structs_written, 
-                glyph_info);
-    }
-
     // calculate required texture width and height
-    int total_width = (max_advance * NUM_GLYPHS);
-    int fontTextureWidth = 512;
-    int num_chars_in_line = (fontTextureWidth + max_advance - 1) / max_advance;
+    int num_chars_in_line = 32;;
+    int fontTextureWidth = num_chars_in_line * max_advance;
     int num_lines = (NUM_GLYPHS + num_chars_in_line - 1) / num_chars_in_line;
     int fontTextureHeight = num_lines * fontLineSkip;
 
@@ -179,14 +200,15 @@ int main(int argc, char** argv)
 
         SDL_Rect r;
 
-		r.x = x + gm[i].minx;
-		r.y = y + maxFontAscent - gm[i].maxy;
+		r.x = x;// + gm[i].minx;
+		r.y = y;// + maxFontAscent - gm[i].maxy;
 
         //r.x -= outlinePixelSize;
         //r.y -= outlinePixelSize;
 
         x += max_advance;
-        if(0 == (i % num_chars_in_line - 1))
+        
+        if(i>0 && (0 == (i+1) % num_chars_in_line))
         {
             x = 0;
             y += fontLineSkip;
@@ -194,12 +216,24 @@ int main(int argc, char** argv)
 
 		SDL_BlitSurface(gs[i], 0, fontTexture, &r);
 
-        fwrite(&r, 2 * sizeof(int), 1, glyph_info);
+        gm[i].u = r.x;
+        gm[i].v = r.y;
     }
 
-    fclose(glyph_info);
+    gosGlyphInfo gi;
+    gi.num_glyphs_ = NUM_GLYPHS;
+    gi.start_glyph_ = START_GLYPH;
+    gi.glyphs_ = gm;
+    gi.max_advance_ = max_advance;
+    gi.font_line_skip_ = fontLineSkip;
 
-    SDL_SaveBMP(fontTexture, "out.bmp");
+    // save glyph information
+    gos_save_glyphs(glyphFile, gi);
+    
+    SDL_SaveBMP(fontTexture, textureFile);
+
+    delete[] textureFile;
+    delete[] glyphFile;
 
     TTF_CloseFont(font);
 
