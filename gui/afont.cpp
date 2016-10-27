@@ -286,7 +286,7 @@ HGOSFONT3D aFont::loadFont( long resourceID, long& size )
 	}
 
 	char path[256];
-	strcpy( path, "assets\\graphics\\" );
+	strcpy( path, "assets" PATH_SEPARATOR "graphics" PATH_SEPARATOR );
 	strcat( path, buffer );
 	_strlwr( path );
 	HGOSFONT3D retFont = gos_LoadFont( path );

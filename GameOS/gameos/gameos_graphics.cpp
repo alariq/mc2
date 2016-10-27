@@ -225,12 +225,14 @@ class gosTexture {
             }
             hints_ = hints;
 
-            size_ = size;
+            plocked_area_ = NULL;
+
+            size_ = 0;
+            pcompdata_ = NULL;
             if(size) {
-                pdata_ = new BYTE[size];
-                memcpy(pdata_, pdata, size);
-            } else {
-                pdata = NULL;
+                size_ = size;
+                pcompdata_ = new BYTE[size];
+                memcpy(pcompdata_, pdata, size);
             }
 
             is_locked_ = false;
@@ -239,11 +241,18 @@ class gosTexture {
         bool createHardwareTexture();
 
         ~gosTexture() {
-            delete[] pdata_;
-            delete[] filename_;
+
+            //SPEW(("Destroying texture: %s\n", filename_));
+
+            gosASSERT(is_locked_ == false);
+
+            if(pcompdata_)
+                delete[] pcompdata_;
+            if(filename_)
+                delete[] filename_;
         }
 
-        uint32_t getTextureId() { return tex_.id; }
+        uint32_t getTextureId() const { return tex_.id; }
 
         BYTE* Lock(int mipl_level, float is_read_only, int* pitch) {
             gosASSERT(is_locked_ == false);
@@ -251,15 +260,28 @@ class gosTexture {
             // TODO:
             gosASSERT(pitch);
             *pitch = tex_.w;
-            return pdata_;
+
+            // TODO: get real data if is_read_only is true
+
+            gosASSERT(!plocked_area_);
+            // for now assume all have 4 channels
+            // need to ensure that user code actually checks texture format and do not assumes
+            // that all textures are GRBA8 when locking them
+            plocked_area_ = new BYTE[tex_.w*tex_.h*4];
+            return plocked_area_;
         }
 
         void Unlock() {
             gosASSERT(is_locked_ == true);
+
+            // TODO: update texture
+            delete[] plocked_area_;
+            plocked_area_ = NULL;
+
             is_locked_ = false;
         }
 
-        void getTextureInfo(gosTextureInfo* texinfo) {
+        void getTextureInfo(gosTextureInfo* texinfo) const {
             gosASSERT(texinfo);
             texinfo->width_ = tex_.w;
             texinfo->height_ = tex_.h;
@@ -267,7 +289,8 @@ class gosTexture {
         }
 
     private:
-        BYTE* pdata_;
+        BYTE* pcompdata_;
+        BYTE* plocked_area_;
         DWORD size_;
         Texture tex_;
 
@@ -292,6 +315,7 @@ struct gosTextAttribs {
 
 bool gosTexture::createHardwareTexture() {
 
+    SPEW(("DBG", "creating texture: %s\n", filename_));
     gosASSERT(filename_);
 
     Image img;
@@ -311,7 +335,28 @@ bool gosTexture::createHardwareTexture() {
     return tex_.isValid();
 }
 
+////////////////////////////////////////////////////////////////////////////////
+class gosFont {
+    public:
+        static gosFont* load(const char* fontFile);
 
+        int getMaxCharWidth() const { return gi_.max_advance_; }
+        int getMaxCharHeight() const { return gi_.font_line_skip_; }
+
+        void getCharUV(int c, uint32_t& u, uint32_t& v) const;
+        DWORD getTextureId() const { return tex_id_; }
+
+    private:
+        gosFont(){};
+        // TODO: free texture and other stuff
+        ~gosFont(){};
+
+        char* font_name_;
+        gosGlyphInfo gi_;
+        DWORD tex_id_;
+};
+
+////////////////////////////////////////////////////////////////////////////////
 class gosRenderer {
 
     typedef std::map<gos_RenderState, unsigned int> StatePair;
@@ -376,6 +421,7 @@ class gosRenderer {
 
         gosTextAttribs& getTextAttributes() { return curTextAttribs_; }
         void setTextPos(int x, int y) { curTextPosX_ = x; curTextPosY_ = y; }
+        void getTextPos(int& x, int& y) { x = curTextPosX_; y = curTextPosY_; }
         void setTextRegion(int Left, int Top, int Right, int Bottom) {
             curTextLeft_ = Left;
             curTextTop_ = Top;
@@ -409,12 +455,17 @@ class gosRenderer {
             renderStates_[RenderState] = Value;
         }
 
+        int getRenderState(gos_RenderState RenderState) const {
+            return renderStates_[RenderState];
+        }
+
         void applyRenderStates();
 
         void drawQuads(gos_VERTEX* vertices, int count);
         void drawLines(gos_VERTEX* vertices, int count);
         void drawPoints(gos_VERTEX* vertices, int count);
         void drawTris(gos_VERTEX* vertices, int count);
+        void drawText(const char* text);
 
         void init();
         void flush();
@@ -467,9 +518,10 @@ class gosRenderer {
         gosMesh* tris_;
         gosMesh* lines_;
         gosMesh* points_;
+        gosMesh* text_;
         gosShaderMaterial* basic_material_;
         gosShaderMaterial* basic_tex_material_;
-
+        gosShaderMaterial* text_material_;
 
 };
 
@@ -483,8 +535,10 @@ void gosRenderer::init() {
     tris_ = gosMesh::makeMesh(PRIMITIVE_TRIANGLELIST, 1024);
     lines_ = gosMesh::makeMesh(PRIMITIVE_LINELIST, 1024);
     points_= gosMesh::makeMesh(PRIMITIVE_POINTLIST, 1024);
+    text_ = gosMesh::makeMesh(PRIMITIVE_TRIANGLELIST, 4024 * 6);
     basic_material_ = gosShaderMaterial::load("gos_vertex");
     basic_tex_material_ = gosShaderMaterial::load("gos_tex_vertex");
+    text_material_ = gosShaderMaterial::load("gos_text");
 }
 
 void gosRenderer::initRenderStates() {
@@ -680,6 +734,113 @@ void gosRenderer::drawTris(gos_VERTEX* vertices, int count) {
     tris_->rewind();
 }
 
+void gosRenderer::drawText(const char* text) {
+    gosASSERT(text);
+
+    const int count = (int)strlen(text);  
+/*
+    if(text_->getNumVertices() + count > text_->getCapacity()) {
+        applyRenderStates();
+        gosShaderMaterial* mat = 
+            curStates_[gos_State_Texture]!=0 ? basic_tex_material_ : basic_material_;
+        text_->draw(mat);
+        text_->rewind();
+    } 
+*/
+
+    // TODO: take text region into account!!!!
+
+    int x, y;
+    getTextPos(x, y);
+
+    const gosTextAttribs& ta = g_gos_renderer->getTextAttributes();
+    const gosFont* font = ta.FontHandle;
+    const int char_w = font->getMaxCharWidth();
+    const int char_h = font->getMaxCharHeight();
+
+
+    const DWORD tex_id = font->getTextureId();
+    const gosTexture* tex = getTexture(tex_id);
+    gosTextureInfo ti;
+    tex->getTextureInfo(&ti);
+    const float tex_width = (float)ti.width_;
+    const float tex_height = (float)ti.height_;
+    
+    const float char_du = (float)char_w / tex_width;
+    const float char_dv = (float)char_h / tex_height;
+
+    gosASSERT(text_->getNumVertices() + 6 * count <= text_->getCapacity());
+    for(int i=0;i<count;++i) {
+        gos_VERTEX tr, tl, br, bl;
+
+        uint32_t iu, iv;
+        font->getCharUV(text[i], iu, iv);
+
+        float u = (float)iu / tex_width;
+        float v = (float)iv / tex_height;
+
+        tl.x = x;
+        tl.y = y;
+        tl.u = u;
+        tl.v = v;
+
+        tr.x = x + char_w;
+        tr.y = y;
+        tr.u = u + char_du;
+        tr.v = v;
+
+        bl.x = x;
+        bl.y = y + char_h;
+        bl.u = u;
+        bl.v = v + char_dv;
+
+        br.x = x + char_w;
+        br.y = y + char_h;
+        br.u = u + char_du;
+        br.v = v + char_dv;
+
+        text_->addVertices(&tl, 1);
+        text_->addVertices(&tr, 1);
+        text_->addVertices(&bl, 1);
+
+        text_->addVertices(&tr, 1);
+        text_->addVertices(&br, 1);
+        text_->addVertices(&bl, 1);
+
+        x += char_w;
+    }
+
+    // FIXME: save states before messing with it, because user code can set its ow and does not know that something was changed by us
+    
+    int prev_texture = getRenderState(gos_State_Texture);
+    int prev_alpha_state = getRenderState(gos_State_AlphaMode);
+    
+    setRenderState(gos_State_Texture, tex_id);
+    //setRenderState(gos_State_Filter, gos_FilterNone);
+    //setRenderState(gos_State_ZCompare, 0);
+    setRenderState(gos_State_AlphaMode, gos_Alpha_OneZero);
+
+    // for now draw anyway because no render state saved for draw calls
+    applyRenderStates();
+    gosShaderMaterial* mat = text_material_;
+
+    //ta.Foreground 
+    //ta.Size 
+    //ta.WordWrap 
+    //ta.Proportional
+    //ta.Bold
+    //ta.Italic
+    //ta.WrapType
+    //ta.DisableEmbeddedCodes
+
+    text_->draw(mat);
+    text_->rewind();
+
+    setRenderState(gos_State_Texture, prev_texture);
+    setRenderState(gos_State_AlphaMode, prev_alpha_state);
+
+}
+
 void gosRenderer::flush()
 {
     quads_->draw(basic_material_);
@@ -698,22 +859,6 @@ void gos_RendererEndFrame() {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-
-class gosFont {
-    public:
-        static gosFont* load(const char* fontFile);
-
-        int getMaxCharWidth() { return gi_.max_advance_; }
-        int getMaxCharHeight() { return gi_.font_line_skip_; }
-
-    private:
-        gosFont(){};
-
-        char* font_name_;
-        gosGlyphInfo gi_;
-        DWORD tex_id_;
-};
-
 gosFont* gosFont::load(const char* fontFile) {
 
     char fname[256];
@@ -752,6 +897,19 @@ gosFont* gosFont::load(const char* fontFile) {
 
 }
 
+void gosFont::getCharUV(int c, uint32_t& u, uint32_t& v) const {
+
+    int pos = c - gi_.start_glyph_;
+    if(pos < 0 || pos >= gi_.num_glyphs_) {
+        u = v = 0;
+        return;
+    }
+
+    u = gi_.glyphs_[pos].u;
+    v = gi_.glyphs_[pos].v;
+}
+
+
 ////////////////////////////////////////////////////////////////////////////////
 // graphics
 //
@@ -788,56 +946,13 @@ void __stdcall gos_GetViewport( float* pViewportMulX, float* pViewportMulY, floa
     gosASSERT(g_gos_renderer);
     g_gos_renderer->getViewportTransform(pViewportMulX, pViewportMulY, pViewportAddX, pViewportAddY);
 }
-/*
-typedef struct _FontInfo
-	DWORD		MagicNumber;			// Valid font check
-	_FontInfo*	pNext;					// Pointer to next font
-	DWORD		ReferenceCount;			// Reference count
-	char		FontFile[MAX_PATH];		// Path name of font texture
-	DWORD		StartLine;				// texture line where font starts
-	int			CharCount;				// number of chars in font (valid range 33 to 256)
-	DWORD		TextureSize;			// Width and Height of texture
-	float		rhSize;					// 1.0 / Size
-	DWORD		TexturePitch;			// Pitch of texture
-	int			Width;					// Width of font grid
-	int			Height;					// Height of font grid
-	DWORD		Across;					// Number of characters across one line
-	DWORD		Aliased;				// True if 4444 texture (may be aliased - else 1555 keyed)
-	DWORD		FromTextureHandle;		// True is from a texture handle
-	BYTE		BlankPixels[256-32];	// Empty pixels before character
-	BYTE		UsedPixels[256-32];		// Width of character
-	BYTE		TopU[256-32];
-	BYTE		TopV[256-32];			// Position of character
-	BYTE		TopOffset[256-32];		// Offset from top (number of blank lines)
-	BYTE		RealHeight[256-32];		// Height of character
-	BYTE		TextureHandle[256-32];	// Which texture handle to use
-	DWORD		NumberOfTextures;		// Number of texture handles used (normally 1)
-	HFONT		hFontTTF;				// handle to a GDI font
-	DWORD		Texture[8];				// Texture handle array
-*/
+
 HGOSFONT3D __stdcall gos_LoadFont( const char* FontFile, DWORD StartLine/* = 0*/, int CharCount/* = 256*/, DWORD TextureHandle/*=0*/)
 {
-    /*
-    gosASSERT(FontFile);
-    _FontInfo* fi = new _FontInfo();
-    memset(fi, 0, sizeof(fi));
-    strncpy(fi->FontFile, FontFile, sizeof(fi->FontFile));
-    fi->StartLine = StartLine;
-    fi->CharCount = CharCount;
-    fi->NumberOfTextures = TextureHandle!=0 ? 1 : 0;
-    fi->TextureHandle[0] = TextureHandle;
-
-    // TODO: actually load some font
-    fi->Width = 16;
-    fi->Height = 16;
-
-    //gosASSERT(0 && "Not implemented");
-    return fi;
-    */
-
     gosFont* font = gosFont::load(FontFile);
     getGosRenderer()->addFont(font);
     return font;
+    return 0;
 }
 
 void __stdcall gos_DeleteFont( HGOSFONT3D FontHandle )
@@ -902,11 +1017,11 @@ void __stdcall gos_UnLockTexture( DWORD Handle )
 
 void __stdcall gos_PushRenderStates()
 {
-    gosASSERT(0 && "not implemented");
+    //gosASSERT(0 && "not implemented");
 }
 void __stdcall gos_PopRenderStates()
 {
-    gosASSERT(0 && "not implemented");
+    //gosASSERT(0 && "not implemented");
 }
 
 void __stdcall gos_RenderIndexedArray( gos_VERTEX* pVertexArray, DWORD NumberVertices, WORD* lpwIndices, DWORD NumberIndices )
@@ -938,7 +1053,24 @@ void __stdcall gos_SetupViewport( bool FillZ, float ZBuffer, bool FillBG, DWORD 
 
 void __stdcall gos_TextDraw( const char *Message, ... )
 {
- //   gosASSERT(0 && "not implemented");
+	assert(Message);
+	if (!strlen(Message)) return;
+
+	va_list	ap;
+    va_start(ap, Message);
+
+    static const int MAX_TEXT_LEN = 4096;
+	char text[MAX_TEXT_LEN] = {0};
+
+	vsnprintf(text, MAX_TEXT_LEN - 1, Message, ap);
+
+	size_t len = strlen(text);
+	text[len] = '\0';
+
+    va_end(ap);
+
+    gosASSERT(g_gos_renderer);
+    g_gos_renderer->drawText(text);
 }
 
 void __stdcall gos_TextSetAttributes( HGOSFONT3D FontHandle, DWORD Foreground, float Size, bool WordWrap, bool Proportional, bool Bold, bool Italic, DWORD WrapType/*=0*/, bool DisableEmbeddedCodes/*=0*/)
@@ -1003,7 +1135,7 @@ void __stdcall gos_TextStringLength( DWORD* Width, DWORD* Height, const char *fm
     int h = num_newlines + 1;
 
     const gosTextAttribs& ta = g_gos_renderer->getTextAttributes();
-    //_FontInfo* fi = ta.FontHandle;
+
     gosFont* fi = ta.FontHandle;
     gosASSERT(fi);
     // TODO: get actual character width [and height]
@@ -1012,6 +1144,5 @@ void __stdcall gos_TextStringLength( DWORD* Width, DWORD* Height, const char *fm
 
     *Width = w;
     *Height = h;
-
 }
 
