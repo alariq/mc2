@@ -100,6 +100,7 @@ unsigned long aFont::height( const char* st, int areaWidth ) const
 		char* pTmp = (char*)st;
 		char* pTmpLine = (char*)pLine;
 
+		int lineStart = 0;
 		int numberOfWordsPerLine = 0;
 
 
@@ -119,6 +120,7 @@ unsigned long aFont::height( const char* st, int areaWidth ) const
 				curLineWidth = 0;	
 				pTmpLine = pLine;
 				pLastWord = pTmp+1;
+				lineStart = pLastWord - st;
 			}
 			else if ( !bHasSpaces )
 			{
@@ -133,10 +135,10 @@ unsigned long aFont::height( const char* st, int areaWidth ) const
 						{
 							lineCount++;
 							pTmp--;
+							lineStart = pTmpLine - pLine;
 							pTmpLine = pLine;
 							curLineWidth = 0;
 							numberOfWordsPerLine = 0;
-
 						}
 
 					}
@@ -151,7 +153,10 @@ unsigned long aFont::height( const char* st, int areaWidth ) const
 				gos_TextStringLength( &curLineWidth, &height, pLine );
 				if ( curLineWidth > areaWidth )
 				{
-					gos_TextStringLength( &curLineWidth, &height, pLastWord );
+					int last_word_offset = pLastWord - st - lineStart;
+					pLine[last_word_offset] = '\0';
+					//gos_TextStringLength( &curLineWidth, &height, pLastWord );
+					gos_TextStringLength( &curLineWidth, &height, pLine);
 					if ( numberOfWordsPerLine == 0 || curLineWidth > areaWidth )
 					{
 						static bool firstTime = true;
@@ -166,12 +171,15 @@ unsigned long aFont::height( const char* st, int areaWidth ) const
 						//return height;
 
 						pLastWord = pTmp;
+					} else {
+						SPEW(("DBG", "line: %s\n", pLine));
 					}
 					lineCount++;
 					pTmpLine = pLine;
-					pTmp = pLastWord - 1;
+					pTmp = pLastWord;
 					curLineWidth = 0;
 					numberOfWordsPerLine = 0;
+					lineStart = pLastWord - st;
 
 				}
 		
