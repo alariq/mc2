@@ -343,7 +343,10 @@ class gosFont {
         int getMaxCharWidth() const { return gi_.max_advance_; }
         int getMaxCharHeight() const { return gi_.font_line_skip_; }
 
-        void getCharUV(int c, uint32_t& u, uint32_t& v) const;
+        int getCharWidth(int c) const;
+        void getCharUV(int c, uint32_t* u, uint32_t* v) const;
+        int getCharAdvance(int c) const;
+
         DWORD getTextureId() const { return tex_id_; }
 
     private:
@@ -428,6 +431,9 @@ class gosRenderer {
             curTextRight_ = Right;
             curTextBottom_ = Bottom;
         }
+
+        int getTextRegionWidth() { return curTextRight_ - curTextLeft_; }
+        int getTextRegionHeight() { return curTextBottom_ - curTextTop_; }
 
         void setupViewport(bool FillZ, float ZBuffer, bool FillBG, DWORD BGColor, float top, float left, float bottom, float right, bool ClearStencil = 0, DWORD StencilValue = 0) {
 
@@ -734,6 +740,22 @@ void gosRenderer::drawTris(gos_VERTEX* vertices, int count) {
     tris_->rewind();
 }
 
+static int get_next_break(const char* text) {
+    const char* pc = strchr(text, ' ');
+    const char* pc2 = strchr(text, '\n');
+    if(!pc && !pc2) {
+        return -1;
+    }
+    int closest = 0;
+    if(pc) {
+        closest = pc - text;
+    }
+    
+    if(pc2 && (pc2 - text < closest)) {
+        closest = (pc2 - text);
+    }
+}
+
 void gosRenderer::drawText(const char* text) {
     gosASSERT(text);
 
@@ -749,9 +771,12 @@ void gosRenderer::drawText(const char* text) {
 */
 
     // TODO: take text region into account!!!!
+    
+    gosASSERT(text_->getNumVertices() + 6 * count <= text_->getCapacity());
 
     int x, y;
     getTextPos(x, y);
+    const int start_x = x;
 
     const gosTextAttribs& ta = g_gos_renderer->getTextAttributes();
     const gosFont* font = ta.FontHandle;
@@ -769,33 +794,68 @@ void gosRenderer::drawText(const char* text) {
     const float char_du = (float)char_w / tex_width;
     const float char_dv = (float)char_h / tex_height;
 
-    gosASSERT(text_->getNumVertices() + 6 * count <= text_->getCapacity());
+    const int font_height = font->getMaxCharHeight();
+
+    const int region_width = getTextRegionWidth();
+    const int region_height = getTextRegionHeight();
+
     for(int i=0;i<count;++i) {
         gos_VERTEX tr, tl, br, bl;
 
+        const char c = text[i];
+        if(c == '\n') {
+            x = start_x;
+            y += font_height;
+            continue;
+        }
+
+        // potential break
+        if(c == ' ') {
+            int break_pos = get_next_break(text+i+1);
+            if(break_pos != -1) {
+
+                int width = 0;
+                for(int j=0;j<break_pos;++j) {
+                    width += font->getCharAdvance(text[i+j]);
+                }
+                // if next possible break will not fit, then break now
+                if(x + width - start_x > region_width) {
+                    x = start_x;
+                    y += font_height;
+                    continue;
+                }
+            }
+        }
+
         uint32_t iu, iv;
-        font->getCharUV(text[i], iu, iv);
+        int advance;
+        font->getCharUV(c, &iu, &iv);
+        advance = font->getCharAdvance(c);
 
         float u = (float)iu / tex_width;
         float v = (float)iv / tex_height;
 
         tl.x = x;
         tl.y = y;
+        tl.z = 0;
         tl.u = u;
         tl.v = v;
 
         tr.x = x + char_w;
         tr.y = y;
+        tr.z = 0;
         tr.u = u + char_du;
         tr.v = v;
 
         bl.x = x;
         bl.y = y + char_h;
+        bl.z = 0;
         bl.u = u;
         bl.v = v + char_dv;
 
         br.x = x + char_w;
         br.y = y + char_h;
+        br.z = 0;
         br.u = u + char_du;
         br.v = v + char_dv;
 
@@ -807,18 +867,17 @@ void gosRenderer::drawText(const char* text) {
         text_->addVertices(&br, 1);
         text_->addVertices(&bl, 1);
 
-        x += char_w;
+        x += advance;
     }
 
     // FIXME: save states before messing with it, because user code can set its ow and does not know that something was changed by us
     
     int prev_texture = getRenderState(gos_State_Texture);
-    int prev_alpha_state = getRenderState(gos_State_AlphaMode);
     
+    // All states are set by client code
+    // so we only set font texture
     setRenderState(gos_State_Texture, tex_id);
-    //setRenderState(gos_State_Filter, gos_FilterNone);
-    //setRenderState(gos_State_ZCompare, 0);
-    setRenderState(gos_State_AlphaMode, gos_Alpha_OneZero);
+    setRenderState(gos_State_Filter, gos_FilterNone);
 
     // for now draw anyway because no render state saved for draw calls
     applyRenderStates();
@@ -837,8 +896,6 @@ void gosRenderer::drawText(const char* text) {
     text_->rewind();
 
     setRenderState(gos_State_Texture, prev_texture);
-    setRenderState(gos_State_AlphaMode, prev_alpha_state);
-
 }
 
 void gosRenderer::flush()
@@ -897,7 +954,9 @@ gosFont* gosFont::load(const char* fontFile) {
 
 }
 
-void gosFont::getCharUV(int c, uint32_t& u, uint32_t& v) const {
+void gosFont::getCharUV(int c, uint32_t* u, uint32_t* v) const {
+
+    gosASSERT(u && v);
 
     int pos = c - gi_.start_glyph_;
     if(pos < 0 || pos >= gi_.num_glyphs_) {
@@ -905,8 +964,18 @@ void gosFont::getCharUV(int c, uint32_t& u, uint32_t& v) const {
         return;
     }
 
-    u = gi_.glyphs_[pos].u;
-    v = gi_.glyphs_[pos].v;
+    *u = gi_.glyphs_[pos].u;
+    *v = gi_.glyphs_[pos].v;
+}
+
+int gosFont::getCharAdvance(int c) const
+{
+    int pos = c - gi_.start_glyph_;
+    if(pos < 0 || pos >= gi_.num_glyphs_) {
+        return getMaxCharWidth();
+    }
+
+    return gi_.glyphs_[pos].advance;
 }
 
 
@@ -952,7 +1021,6 @@ HGOSFONT3D __stdcall gos_LoadFont( const char* FontFile, DWORD StartLine/* = 0*/
     gosFont* font = gosFont::load(FontFile);
     getGosRenderer()->addFont(font);
     return font;
-    return 0;
 }
 
 void __stdcall gos_DeleteFont( HGOSFONT3D FontHandle )
@@ -1116,33 +1184,33 @@ void __stdcall gos_TextStringLength( DWORD* Width, DWORD* Height, const char *fm
 	size_t len = strlen(text);
     text[len] = '\0';
 
+    const gosTextAttribs& ta = g_gos_renderer->getTextAttributes();
+    const gosFont* font = ta.FontHandle;
+    gosASSERT(font);
+
     int num_newlines = 0;
     int max_width = 0;
     int cur_width = 0;
     const char* txtptr = text;
+
+    int curTextLeft_;
+    int curTextTop_;
+    int curTextRight_;
+    int curTextBottom_;
+
     while(*txtptr) {
         if(*txtptr++ == '\n') {
             num_newlines++;
             max_width = max_width > cur_width ? max_width : cur_width;
             cur_width = 0;
         } else {
-            cur_width++;
+            const int cw = font->getCharAdvance(*txtptr);
+            cur_width += cw;
         }
     }
     max_width = max_width > cur_width ? max_width : cur_width;
 
-    int w = max_width;
-    int h = num_newlines + 1;
-
-    const gosTextAttribs& ta = g_gos_renderer->getTextAttributes();
-
-    gosFont* fi = ta.FontHandle;
-    gosASSERT(fi);
-    // TODO: get actual character width [and height]
-    w *= fi->getMaxCharWidth();
-    h *= fi->getMaxCharHeight();
-
-    *Width = w;
-    *Height = h;
+    *Width = max_width;
+    *Height = (num_newlines + 1) * font->getMaxCharHeight();
 }
 
