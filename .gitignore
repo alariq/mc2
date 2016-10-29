@@ -26,3 +26,9 @@ Tools
 *.a
 viewer
 text_tool
+.ycm_extra_conf.py
+.ycm_extra_conf.pyc
+*.ico
+*.rc
+vidcard.csv
+*.s14
