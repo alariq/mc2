@@ -30,6 +30,7 @@
 //typedef int64_t __int64;
 #include<stdlib.h> // size_t 
 #include<errno.h> // size_t 
+#include<signal.h> // size_t 
 #include "windows.h"
 
 static __inline__ unsigned long long rdtsc(void)
@@ -57,8 +58,7 @@ static __inline__ unsigned long long rdtsc(void)
 // Enter the visual C debugger
 //
 #ifdef LINUX_BUILD
-#define ENTER_DEBUGGER __builtin_trap(); // GCC
-// raise(SIGTRAP) could be better
+#define ENTER_DEBUGGER raise(SIGTRAP); // __builtin_trap(); // GCC
 //asm volatile ("int 3;");
 #else
 #define ENTER_DEBUGGER _asm int 3
@@ -1258,8 +1258,8 @@ enum gosEnum_KeyIndex
 	KEY_NUMLOCK		= 0x90,		// NUMLOCK
 	KEY_PAUSE		= 0x13,		// PAUSE Key
 	KEY_LMOUSE		= 1,		// Left mouse button
-	KEY_RMOUSE		= 2,		// Right mouse button
-	KEY_MMOUSE		= 3,		// Middle mouse button
+	KEY_MMOUSE		= 2,		// Middle mouse button
+	KEY_RMOUSE		= 3,		// Right mouse button
 	KEY_MOUSEX1		= 4,		// New mouse button 1
 	KEY_MOUSEX2		= 5,		// New mouse button 2
 };
@@ -1284,7 +1284,7 @@ enum { KEYDEV_MASK = 0xff000000 };
 // Get the status of key <index>. TRUE means it is pressed, while FALSE means
 // it is unpressed.
 //
-// Mouse buttons are keys, 1,2,3,4 and 5  (1 is Left, 2 is right, 3 is middle, 4 and 5 are on the 5 button mice)
+// Mouse buttons are keys, 1,2,3,4 and 5  (1 is Left, 3 is right, 2 is middle, 4 and 5 are on the 5 button mice)
 //
 gosEnum_KeyStatus __stdcall gos_GetKeyStatus( gosEnum_KeyIndex index );
 

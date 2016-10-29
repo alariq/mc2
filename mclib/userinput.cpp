@@ -181,16 +181,20 @@ void UserInput::update (void)
 	// Poll the mouse.
 	DWORD buttonStates;
 	gos_GetMouseInfo(&mouseXPosition,&mouseYPosition,(int *)&mouseXDelta,(int *)&mouseYDelta,(int *)&mouseWheelDelta,&buttonStates);
-//	leftMouseButtonState = buttonStates & 1;
-//	rightMouseButtonState = (buttonStates & 2) >> 1;
-//	middleMouseButtonState = (buttonStates & 4) >> 2;
 
+    // sebi: actually use gos
+	leftMouseButtonState = buttonStates & 1 ?           MC2_MOUSE_DOWN : MC2_MOUSE_UP;
+	middleMouseButtonState = (buttonStates & 2) >> 1 ?  MC2_MOUSE_DOWN : MC2_MOUSE_UP;
+	rightMouseButtonState = (buttonStates & 4) >> 2 ?   MC2_MOUSE_DOWN : MC2_MOUSE_UP;;
+
+    /*
 	SHORT code = GetAsyncKeyState(LEFT_MOUSE_CODE);
 	SHORT rCode = GetAsyncKeyState( RIGHT_MOUSE_CODE );
 	SHORT mCode = GetAsyncKeyState( VK_MBUTTON );
 	leftMouseButtonState = code ? MC2_MOUSE_DOWN : MC2_MOUSE_UP;
 	rightMouseButtonState = rCode ? MC2_MOUSE_DOWN : MC2_MOUSE_UP;
 	middleMouseButtonState = mCode ? MC2_MOUSE_DOWN : MC2_MOUSE_UP;
+    */
 
 	//---------------------------------------------------------
 	// Adjust MouseWheelDelta to get old Broken Win2K values.

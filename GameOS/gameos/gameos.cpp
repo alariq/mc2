@@ -186,30 +186,11 @@ void __stdcall gos_Free(void* ptr)
 }
 ////////////////////////////////////////////////////////////////////////////////
 
-void __stdcall gos_GetMouseInfo( float* pXPosition, float* pYPosition, int* pXDelta, int* pYDelta, int* pWheelDelta, DWORD* pButtonsPressed )
-{
-}
-////////////////////////////////////////////////////////////////////////////////
-
 int __stdcall gos_rand()
 {
     return rand() % (1<<15);
 }
 ////////////////////////////////////////////////////////////////////////////////
-DWORD __stdcall gos_GetKey()
-{
-    return 0;
-}
-void __stdcall gos_KeyboardFlush()
-{
-
-}
-gosEnum_KeyStatus __stdcall gos_GetKeyStatus(gosEnum_KeyIndex index)
-{
-    return KEY_FREE;
-}
-////////////////////////////////////////////////////////////////////////////////
-
 void __stdcall gos_EnableIME(bool enabledDisabled)
 {
 }

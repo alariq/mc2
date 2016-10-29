@@ -7,9 +7,11 @@ set(SOURCES ${SOURCES}
     gameos_graphics.cpp
     gameos_res.cpp
     gameos_fileio.cpp
+    gameos_input.cpp
     gameos_debugging.cpp
     gos_render.cpp
     gos_font.cpp
+    gos_input.cpp
 
     utils/stream.cpp
     utils/camera.cpp
@@ -21,8 +23,8 @@ set(SOURCES ${SOURCES}
     utils/matrix.cpp
     utils/vec.cpp
     )
-
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O0 -ggdb -Wno-unused-local-typedefs -std=c++0x")
+# add -Wall sometime later
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O0 -ggdb -Wno-unused-local-typedefs -Wunused-variable -std=c++0x")
 # -Wno-unused-local-typedefs - to disable "typedef was ignored on this declaration"
 
 add_definitions(-D_DEBUG)

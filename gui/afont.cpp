@@ -172,7 +172,7 @@ unsigned long aFont::height( const char* st, int areaWidth ) const
 
 						pLastWord = pTmp;
 					} else {
-						SPEW(("DBG", "line: %s\n", pLine));
+						//SPEW(("DBG", "line: %s\n", pLine));
 					}
 					lineCount++;
 					pTmpLine = pLine;

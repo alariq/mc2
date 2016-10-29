@@ -2,8 +2,9 @@
 #include "gos_render.h"
 #include <stdio.h>
 
-// TODO:remove
 #include <SDL2/SDL.h>
+#include "gos_input.h"
+
 #include "utils/camera.h"
 #include "utils/shader_builder.h"
 #include "utils/gl_utils.h"
@@ -14,6 +15,8 @@ extern void gos_RendererEndFrame();
 static bool g_exit = false;
 static camera g_camera;
 static glsl_program* g_myprogram = NULL;
+
+input::MouseInfo g_mouse_info;
 
 static void handle_key_down( SDL_Keysym* keysym ) {
     switch( keysym->sym ) {
@@ -42,8 +45,20 @@ static void process_events( void ) {
                 SPEW(("INPUT", "resize event: w: %f h:%f\n", w, h));
 			}
 			break;
+        case SDL_MOUSEMOTION:
+            input::handleMouseMotion(&event, &g_mouse_info); 
+            break;
+        case SDL_MOUSEBUTTONDOWN:
+        case SDL_MOUSEBUTTONUP:
+            //input::handleMouseButton(&event, &g_mouse_info);
+            break;
+        case SDL_MOUSEWHEEL:
+            input::handleMouseWheel(&event, &g_mouse_info);
+            break;
         }
     }
+
+    input::updateMouseState(&g_mouse_info);
 }
 
 extern bool g_disable_quads;
@@ -64,7 +79,6 @@ static void draw_screen( void )
     mat4 viewM;
     g_camera.get_view(&viewM);
 
-    float aspect = (float)w/(float)h;
     glViewport(0, 0, w, h);
 
     // flush all content to screen
