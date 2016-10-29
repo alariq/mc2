@@ -95,6 +95,9 @@ class gosShaderMaterial {
             program_->apply();
         }
 
+        // TODO: think how to not expose this
+        glsl_program* getShader() { return program_; }
+
         void end() {
 
             glDisableVertexAttribArray(pos_loc);
@@ -809,6 +812,11 @@ void gosRenderer::drawText(const char* text) {
             continue;
         }
 
+        uint32_t iu, iv;
+        int advance;
+        font->getCharUV(c, &iu, &iv);
+        advance = font->getCharAdvance(c);
+
         // potential break
         if(c == ' ') {
             int break_pos = get_next_break(text+i+1);
@@ -819,7 +827,7 @@ void gosRenderer::drawText(const char* text) {
                     width += font->getCharAdvance(text[i+j]);
                 }
                 // if next possible break will not fit, then break now
-                if(x + width - start_x > region_width) {
+                if(x + advance + width + - start_x > region_width) {
                     x = start_x;
                     y += font_height;
                     continue;
@@ -827,10 +835,6 @@ void gosRenderer::drawText(const char* text) {
             }
         }
 
-        uint32_t iu, iv;
-        int advance;
-        font->getCharUV(c, &iu, &iv);
-        advance = font->getCharAdvance(c);
 
         float u = (float)iu / tex_width;
         float v = (float)iv / tex_height;
@@ -883,7 +887,14 @@ void gosRenderer::drawText(const char* text) {
     applyRenderStates();
     gosShaderMaterial* mat = text_material_;
 
-    //ta.Foreground 
+    //ta.Foreground
+    vec4 fg;
+    fg.x = (ta.Foreground & 0xFF0000) >> 16;
+    fg.y = (ta.Foreground & 0xFF00) >> 8;
+    fg.z = ta.Foreground & 0xFF;
+    fg.w = 255;//(ta.Foreground & 0xFF000000) >> 24;
+    fg = fg / 255.0f; 
+    mat->getShader()->setFloat4("Foreground", fg);
     //ta.Size 
     //ta.WordWrap 
     //ta.Proportional
