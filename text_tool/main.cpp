@@ -117,7 +117,6 @@ int main(int argc, char** argv)
 
     int outlinePixelSize = 0;
 
-    // load font.ttf at size 16 into font
     TTF_Font* font = TTF_OpenFont(fontFile, fontSize);
     if(!font) {
         printf("TTF_OpenFont: %s\n", TTF_GetError());
@@ -132,6 +131,7 @@ int main(int argc, char** argv)
     const int maxFontAscent = TTF_FontAscent(font);
     const int maxFontDescent = TTF_FontDescent(font);
     const int fontLineSkip = TTF_FontLineSkip(font);
+    //TTF_SetFontHinting(font, TTF_HINTING_MONO);
 
     printf("The font max height is: %d\n", maxFontHeight);
     printf("The font ascent is: %d\n", maxFontAscent);
@@ -149,7 +149,7 @@ int main(int argc, char** argv)
     for(int i=0;i<NUM_GLYPHS;++i) {
 
         const int glyph_id = i + START_GLYPH;
-        gs[i] = TTF_RenderGlyph_Blended(font, glyph_id, fg);
+        gs[i] = TTF_RenderGlyph_Solid(font, glyph_id, fg);
         gm[i].valid = true;
 
         if(!gs[i]) {
