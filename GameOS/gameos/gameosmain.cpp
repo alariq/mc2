@@ -11,6 +11,7 @@
 
 extern void gos_CreateRenderer(int w, int h);
 extern void gos_RendererEndFrame();
+extern bool gosExitGameOS();
 
 static bool g_exit = false;
 static camera g_camera;
@@ -178,6 +179,8 @@ int main(int argc, char** argv)
         graphics::make_current_context(ctx, win);
         draw_screen();
         graphics::swap_window(win);
+
+        g_exit |= gosExitGameOS();
     }
     
     Environment.TerminateGameEngine();

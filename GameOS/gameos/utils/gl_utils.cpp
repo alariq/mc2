@@ -99,6 +99,15 @@ getTexFormatPixelSize(TexFormat fmt) {
     return textureFormatChannelSize[fmt] * textureFormatNumChannels[fmt];
 }
 
+void destroyTexture(Texture* tex)
+{
+    assert(tex);
+
+    if(tex->isValid())
+        glDeleteTextures(1, &tex->id);
+}
+
+
 Texture create2DTexture(int w, int h, TexFormat fmt, const uint8_t* texdata)
 {
     

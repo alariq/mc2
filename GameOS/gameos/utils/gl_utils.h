@@ -79,6 +79,7 @@ Texture create2DTexture(int w, int h, TexFormat fmt, const uint8_t* texdata);
 Texture createDynamicTexture(int w, int h, TexFormat fmt);
 Texture create3DTextureF(int w, int h, int depth);
 void updateTexture(const Texture& t , char* pdata);
+void destroyTexture(Texture* tex);
 Texture createPBO(int w, int h, GLenum fmt, int el_size);
 void draw_quad(float x0, float y0, float x1, float y1);
 

@@ -253,6 +253,8 @@ class gosTexture {
                 delete[] pcompdata_;
             if(filename_)
                 delete[] filename_;
+
+            destroyTexture(&tex_);
         }
 
         uint32_t getTextureId() const { return tex_.id; }
@@ -342,6 +344,7 @@ bool gosTexture::createHardwareTexture() {
 class gosFont {
     public:
         static gosFont* load(const char* fontFile);
+        static void destroy(gosFont* font);
 
         int getMaxCharWidth() const { return gi_.max_advance_; }
         int getMaxCharHeight() const { return gi_.font_line_skip_; }
@@ -365,8 +368,7 @@ class gosFont {
 ////////////////////////////////////////////////////////////////////////////////
 class gosRenderer {
 
-    typedef std::map<gos_RenderState, unsigned int> StatePair;
-    typedef std::vector<StatePair> StateList;
+    typedef unsigned int RenderState[gos_MaxState];
 
     public:
         gosRenderer(int w, int h) {
@@ -421,6 +423,7 @@ class gosRenderer {
             {
                 gosFont* font = *it;
                 fontList_.erase(it);
+                gosFont::destroy(font);
             }
         }
 
@@ -468,6 +471,9 @@ class gosRenderer {
             return renderStates_[RenderState];
         }
 
+        void pushRenderStates();
+        void popRenderStates();
+
         void applyRenderStates();
 
         void drawQuads(gos_VERTEX* vertices, int count);
@@ -491,11 +497,12 @@ class gosRenderer {
         std::vector<gosFont*> fontList_;
 
         // states data
-        unsigned int curStates_[gos_MaxState];
-        unsigned int renderStates_[gos_MaxState];
+        RenderState curStates_;
+        RenderState renderStates_;
 
-        int statesStackPointer;
-        StateList statesStack_[16];
+        static const int RENDER_STATES_STACK_SIZE = 16;
+        int renderStatesStackPointer;
+        RenderState statesStack_[RENDER_STATES_STACK_SIZE];
         //
 
         // text data
@@ -586,6 +593,30 @@ void gosRenderer::initRenderStates() {
 	renderStates_[gos_State_VertexBlend] = 0;
 
     applyRenderStates();
+    renderStatesStackPointer = -1;
+}
+
+void gosRenderer::pushRenderStates()
+{
+    gosASSERT(renderStatesStackPointer>=-1 && renderStatesStackPointer < RENDER_STATES_STACK_SIZE - 1);
+    if(!(renderStatesStackPointer>=-1 && renderStatesStackPointer < RENDER_STATES_STACK_SIZE - 1)) {
+        return;
+    }
+
+    renderStatesStackPointer++;
+    memcpy(&statesStack_[renderStatesStackPointer], &renderStates_, sizeof(renderStates_));
+}
+
+void gosRenderer::popRenderStates()
+{
+    gosASSERT(renderStatesStackPointer>=0 && renderStatesStackPointer < RENDER_STATES_STACK_SIZE);
+    
+    if(!(renderStatesStackPointer>=0 && renderStatesStackPointer < RENDER_STATES_STACK_SIZE)) {
+        return;
+    }
+
+    memcpy(&renderStates_, &statesStack_[renderStatesStackPointer], sizeof(renderStates_));
+    renderStatesStackPointer--;
 }
 
 void gosRenderer::applyRenderStates() {
@@ -800,7 +831,7 @@ void gosRenderer::drawText(const char* text) {
     const int font_height = font->getMaxCharHeight();
 
     const int region_width = getTextRegionWidth();
-    const int region_height = getTextRegionHeight();
+    //const int region_height = getTextRegionHeight();
 
     for(int i=0;i<count;++i) {
         gos_VERTEX tr, tl, br, bl;
@@ -965,6 +996,10 @@ gosFont* gosFont::load(const char* fontFile) {
 
 }
 
+void gosFont::destroy(gosFont* font) {
+    delete font;
+}
+
 void gosFont::getCharUV(int c, uint32_t* u, uint32_t* v) const {
 
     gosASSERT(u && v);
@@ -995,13 +1030,11 @@ int gosFont::getCharAdvance(int c) const
 //
 void _stdcall gos_DrawLines(gos_VERTEX* Vertices, int NumVertices)
 {
-    //gosASSERT(0 && "Not implemented");
     gosASSERT(g_gos_renderer);
     g_gos_renderer->drawLines(Vertices, NumVertices);
 }
 void _stdcall gos_DrawPoints(gos_VERTEX* Vertices, int NumVertices)
 {
- //   gosASSERT(0 && "Not implemented");
     gosASSERT(g_gos_renderer);
     g_gos_renderer->drawPoints(Vertices, NumVertices);
 }
@@ -1009,14 +1042,12 @@ void _stdcall gos_DrawPoints(gos_VERTEX* Vertices, int NumVertices)
 bool g_disable_quads = true;
 void _stdcall gos_DrawQuads(gos_VERTEX* Vertices, int NumVertices)
 {
-    //gosASSERT(0 && "Not implemented");
     gosASSERT(g_gos_renderer);
     if(g_disable_quads == false )
         g_gos_renderer->drawQuads(Vertices, NumVertices);
 }
 void _stdcall gos_DrawTriangles(gos_VERTEX* Vertices, int NumVertices)
 {
-  //  gosASSERT(0 && "Not implemented");
     gosASSERT(g_gos_renderer);
     g_gos_renderer->drawTris(Vertices, NumVertices);
 }
@@ -1048,8 +1079,6 @@ DWORD __stdcall gos_NewEmptyTexture( gos_TextureFormat Format, const char* Name,
 }
 DWORD __stdcall gos_NewTextureFromMemory( gos_TextureFormat Format, const char* FileName, BYTE* pBitmap, DWORD Size, DWORD Hints/*=0*/, gos_RebuildFunction pFunc/*=0*/, void *pInstance/*=0*/)
 {
-    //gosASSERT(0 && "Not implemented");
-
     gosTexture* ptex = new gosTexture(Format, FileName, Hints, pBitmap, Size);
     if(!ptex->createHardwareTexture()) {
         STOP(("Failed to create texture\n"));
@@ -1059,7 +1088,6 @@ DWORD __stdcall gos_NewTextureFromMemory( gos_TextureFormat Format, const char* 
 }
 void __stdcall gos_DestroyTexture( DWORD Handle )
 {
-    //gosASSERT(0 && "Not implemented");
     g_gos_renderer->deleteTexture(Handle);
 }
 
@@ -1096,11 +1124,14 @@ void __stdcall gos_UnLockTexture( DWORD Handle )
 
 void __stdcall gos_PushRenderStates()
 {
-    //gosASSERT(0 && "not implemented");
-}
+    gosASSERT(g_gos_renderer);
+    g_gos_renderer->pushRenderStates();
+} 
+
 void __stdcall gos_PopRenderStates()
 {
-    //gosASSERT(0 && "not implemented");
+    gosASSERT(g_gos_renderer);
+    g_gos_renderer->popRenderStates();
 }
 
 void __stdcall gos_RenderIndexedArray( gos_VERTEX* pVertexArray, DWORD NumberVertices, WORD* lpwIndices, DWORD NumberIndices )
@@ -1203,11 +1234,6 @@ void __stdcall gos_TextStringLength( DWORD* Width, DWORD* Height, const char *fm
     int max_width = 0;
     int cur_width = 0;
     const char* txtptr = text;
-
-    int curTextLeft_;
-    int curTextTop_;
-    int curTextRight_;
-    int curTextBottom_;
 
     while(*txtptr) {
         if(*txtptr++ == '\n') {

@@ -40,9 +40,15 @@ void EnterWindowMode(void)
     Environment.fullScreen = false;
 }
 
+static bool g_gos_exit_game_os = false;
+
 void ExitGameOS()
 {
+    g_gos_exit_game_os = true;
+}
 
+bool gosExitGameOS() {
+    return g_gos_exit_game_os;
 }
 
 float frameRate = 30.0f; // apparently tiny geometry needs this
@@ -214,6 +220,12 @@ void _stdcall gos_SetIMELevel(DWORD dwImeLevel)
 
 void __stdcall gos_TerminateApplication()
 {
+    g_gos_exit_game_os = true;
+}
+
+void __stdcall gos_AbortTermination()
+{
+    g_gos_exit_game_os = false;
 }
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
