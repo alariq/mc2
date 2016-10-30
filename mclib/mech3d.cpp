@@ -206,19 +206,24 @@ void Mech3DAppearanceType::init (char * fileName)
 		sprintf(blockId,"Gestures%d",i);
 
 		result = mechFile.seekBlock(blockId);
-		gosASSERT(result == NO_ERR);
+		// sebi
+		//gosASSERT(result == NO_ERR);
 
 		result = mechFile.readIdFloat("StartVel",gestures[i].startVel);
-		gosASSERT(result == NO_ERR);
+		//sebi
+		//gosASSERT(result == NO_ERR);
 
 		result = mechFile.readIdFloat("EndVel",gestures[i].endVel);
-		gosASSERT(result == NO_ERR);
+		//sebi
+		//gosASSERT(result == NO_ERR);
 
 		result = mechFile.readIdLong("StartFrame",gestures[i].frameStart);
-		gosASSERT(result == NO_ERR);
+		//sebi
+		//gosASSERT(result == NO_ERR);
 
 		result = mechFile.readIdBoolean("Reverse",gestures[i].reverse);
-		gosASSERT(result == NO_ERR);
+		//sebi
+		//gosASSERT(result == NO_ERR);
 		
 		result = mechFile.readIdLong("RightFootDown0",gestures[i].rightFootDownFrame0);
 		if (result != NO_ERR)

@@ -505,7 +505,11 @@ void __stdcall InitializeGameEngine()
 	
 	gos_PushCurrentHeap(MidLevelRenderer::Heap);
 
-	MidLevelRenderer::TGAFilePool *pool = new MidLevelRenderer::TGAFilePool("data/Effects/");
+	// sebi NB! changed, but maybe original data/Effects is ok, if we use ".fst"s
+	//MidLevelRenderer::TGAFilePool *pool = new MidLevelRenderer::TGAFilePool("data/Effects/");
+	MidLevelRenderer::TGAFilePool *pool = new MidLevelRenderer::TGAFilePool("data/tgl/128/");
+	//
+	
 	MidLevelRenderer::MLRTexturePool::Instance = new MidLevelRenderer::MLRTexturePool(pool);
 
 	MidLevelRenderer::MLRSortByOrder *cameraSorter = new MidLevelRenderer::MLRSortByOrder(MidLevelRenderer::MLRTexturePool::Instance);
