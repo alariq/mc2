@@ -81,7 +81,34 @@ FastFile *FastFileFind (const char *fname, long &fastFileHandle)
 
 			currentFastFile++;
 		}
+
+        // sebi NB!
+        // if we are here file was not found, try with backslashes
+        char* fname2 = strdup(fname);
+        int len = (int)strlen(fname2);
+        for(int i=0;i<len;++i) {
+            if(fname2[i]=='/')
+                fname2[i] = '\\';
+        }
+
+		thisHash = elfHash(fname2);
+		currentFastFile = 0;
+		tempHandle = -1;
+		while (currentFastFile < numFastFiles)
+		{
+			tempHandle = fastFiles[currentFastFile]->openFast(thisHash,fname2);
+			if (tempHandle != -1)
+			{
+				fastFileHandle = tempHandle;
+				return fastFiles[currentFastFile];
+			}
+
+			currentFastFile++;
+		}
+
+
 	}
+
 
 	return NULL;
 }

@@ -34,9 +34,9 @@
 #pragma pack(1)
 typedef struct 
 {
-    long	offset;
-    long	size;						//LZ Compressed Size
-	long	realSize;					//Uncompressed Size
+    DWORD	offset;
+    DWORD	size;						//LZ Compressed Size
+	DWORD	realSize;					//Uncompressed Size
 	DWORD	hash;						//Hash Compare to weed out stinky files faster then StrCmp
     char	name[MAX_FILENAME_SIZE];
 } FILEENTRY;
@@ -44,8 +44,8 @@ typedef struct
 
 typedef struct 
 {
-    long		inuse;
-    long		pos;
+    DWORD       inuse;
+    DWORD       pos;
     FILEENTRY	*pfe;
 } FILE_HANDLE;
 
@@ -54,16 +54,16 @@ typedef struct
 class FastFile
 {
 	protected:
-		long					numFiles;
-		FILE_HANDLE				*files;
+		DWORD		numFiles;
+		FILE_HANDLE	*files;
 
-		char 					*fileName;
-		FILE					*handle;
+		char 		*fileName;
+		FILE		*handle;
 
-		unsigned long 			length;
-		unsigned long 			logicalPosition;
+		DWORD 		length;
+		DWORD 		logicalPosition;
 
-		bool					useLZCompress;
+		bool		useLZCompress;
 
 	public:
 		FastFile (void);
