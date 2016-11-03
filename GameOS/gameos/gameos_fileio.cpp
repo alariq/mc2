@@ -196,4 +196,12 @@ void __stdcall gos_GetFile(char const* FileName, BYTE** MemoryImage, DWORD* Size
     STOP(("gos function not implemented"));
 }
 
+// sebi
+bool __stdcall gos_FileExists(char const* FileName)
+{
+    if(0 == access(FileName, F_OK))
+        return true;
+    return false;
+}
+
 ////////////////////////////////////////////////////////////////////////////////

@@ -184,8 +184,10 @@ void __stdcall gos_FileSetReadWrite( const char* FileName );
 //
 void __stdcall gos_FileSetReadOnly( const char* FileName );
 
-
-
+//
+// sebi: checks if file exists
+//
+bool __stdcall gos_FileExists( const char* FileName );
 
 
 
