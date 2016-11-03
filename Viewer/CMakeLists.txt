@@ -71,7 +71,6 @@ endif(NOT GLEW)
 message("OPENCL library found in ${OPENCL}")
 message("OPENGL library found in ${OPENGL}")
 message("GLEW library found in ${GLEW}")
-message("AntTweakBar library found in ${AntTweakBar}")
 
 include_directories("./window" "../GameOS/include" "../mclib" "../gui" "../code" "../netlib")
 
