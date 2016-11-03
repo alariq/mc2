@@ -56,7 +56,7 @@ int __cdecl InternalFunctionStop( const char* fmt, ... )
     va_end(ap);
 
     //exit(1);
-    return 0;
+    return enter_debugger;
 }
 
 int __cdecl InternalFunctionStop( const char* Message, const char* value)
