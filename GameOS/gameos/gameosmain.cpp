@@ -68,12 +68,13 @@ static void draw_screen( void )
 {
     g_disable_quads = false;
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
+    glCullFace(GL_FRONT);
+    glEnable(GL_TEXTURE_2D);
     //CHECK_GL_ERROR;
     
     const int w = Environment.screenWidth;
     const int h = Environment.screenHeight;
 
-    Environment.UpdateRenderers();
 
     mat4 proj;
     g_camera.get_projection(&proj);
@@ -83,7 +84,7 @@ static void draw_screen( void )
     glViewport(0, 0, w, h);
 
     // flush all content to screen
-    gos_RendererEndFrame();
+    //gos_RendererEndFrame();
 
 #if 0
     gos_VERTEX q[4];
@@ -110,9 +111,14 @@ static void draw_screen( void )
     glPushMatrix();
     glLoadTransposeMatrixf((const float*)viewM);
 
-	mat4 viewproj = proj*viewM;
-	g_myprogram->setMat4("ModelViewProjectionMatrix", (const float*)viewproj);
-    draw_textured_cube(0);
+    // TODO: reset all states to sane defaults!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    glDepthMask(GL_TRUE);
+    glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
+    Environment.UpdateRenderers();
+
+	//mat4 viewproj = proj*viewM;
+	//g_myprogram->setMat4("ModelViewProjectionMatrix", (const float*)viewproj);
+    //draw_textured_cube(0);
 
     glPopMatrix();
     glMatrixMode(GL_PROJECTION);

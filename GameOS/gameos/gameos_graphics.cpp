@@ -54,7 +54,7 @@ class gosShaderMaterial {
         }
 
         void applyVertexDeclaration() {
-
+            
             const int stride = sizeof(gos_VERTEX);
             
             // gos_VERTEX structure
@@ -109,6 +109,8 @@ class gosShaderMaterial {
             if(texcoord_loc != -1) {
                 glDisableVertexAttribArray(texcoord_loc);
             }
+
+            glUseProgram(0);
         }
 
     private:
@@ -128,50 +130,85 @@ class gosShaderMaterial {
 
 class gosMesh {
     public:
-        static gosMesh* makeMesh(gosPRIMITIVETYPE prim_type, int vertex_capacity) {
+        typedef WORD INDEX_TYPE;
+
+        static gosMesh* makeMesh(gosPRIMITIVETYPE prim_type, int vertex_capacity, int index_capacity = 0) {
             GLuint vb = makeBuffer(GL_ARRAY_BUFFER, 0, sizeof(gos_VERTEX)*vertex_capacity, GL_DYNAMIC_DRAW);
             if(vb < 0)
                 return NULL;
 
-            gosMesh* mesh = new gosMesh(prim_type, vertex_capacity);
+            GLuint ib = -1;
+            if(index_capacity > 0) {
+                ib = makeBuffer(GL_ELEMENT_ARRAY_BUFFER, 0, sizeof(INDEX_TYPE)*index_capacity, GL_DYNAMIC_DRAW);
+                if(ib < 0)
+                    return NULL;
+            }
+
+            gosMesh* mesh = new gosMesh(prim_type, vertex_capacity, index_capacity);
             mesh->vb_ = vb;
-            mesh->pdata_ = new gos_VERTEX[vertex_capacity];
+            mesh->ib_ = ib;
+            mesh->pvertex_data_ = new gos_VERTEX[vertex_capacity];
+            mesh->pindex_data_ = new INDEX_TYPE[index_capacity];
             return mesh;
         }
 
         bool addVertices(gos_VERTEX* vertices, int count) {
-            if(num_vertices_ + count <= capacity_) {
-                memcpy(pdata_ + num_vertices_, vertices, sizeof(gos_VERTEX)*count);
+            if(num_vertices_ + count <= vertex_capacity_) {
+                memcpy(pvertex_data_ + num_vertices_, vertices, sizeof(gos_VERTEX)*count);
                 num_vertices_ += count;
                 return true;
             }
             return false;
         }
 
-        int getCapacity() const { return capacity_; }
-        int getNumVertices() const { return num_vertices_; }
-        const gos_VERTEX* getVertices() const { return pdata_; }
+        bool addIndices(INDEX_TYPE* indices, int count) {
+            if(num_indices_ + count <= index_capacity_) {
+                memcpy(pindex_data_ + num_indices_, indices, sizeof(INDEX_TYPE)*count);
+                num_indices_ += count;
+                return true;
+            }
+            return false;
+        }
 
-        void rewind() { num_vertices_ = 0; }
+        int getVertexCapacity() const { return vertex_capacity_; }
+        int getIndexCapacity() const { return index_capacity_; }
+        int getNumVertices() const { return num_vertices_; }
+        int getNumIndices() const { return num_indices_; }
+        const gos_VERTEX* getVertices() const { return pvertex_data_; }
+        const WORD* getIndices() const { return pindex_data_; }
+
+        int getIndexSizeBytes() const { return sizeof(INDEX_TYPE); }
+
+        void rewind() { num_vertices_ = 0; num_indices_ = 0; }
 
         void draw(gosShaderMaterial* material) const;
+        void drawIndexed(gosShaderMaterial* material) const;
 
     private:
 
-        gosMesh(gosPRIMITIVETYPE prim_type, int vertex_capacity)
-            : capacity_(vertex_capacity)
+        gosMesh(gosPRIMITIVETYPE prim_type, int vertex_capacity, int index_capacity)
+            : vertex_capacity_(vertex_capacity)
+            , index_capacity_(index_capacity)
             , num_vertices_(0)
-            , pdata_(NULL)    
+            , num_indices_(0)
+            , pvertex_data_(NULL)    
+            , pindex_data_(NULL)    
             , prim_type_(prim_type)
+            , vb_(-1)  
+            ,ib_(-1) 
          {
          }
 
-        int capacity_;
+        int vertex_capacity_;
+        int index_capacity_;
         int num_vertices_;
-        gos_VERTEX* pdata_;
+        int num_indices_;
+        gos_VERTEX* pvertex_data_;
+        INDEX_TYPE* pindex_data_;
         gosPRIMITIVETYPE prim_type_;
 
         GLuint vb_;
+        GLuint ib_;
 };
 
 void gosMesh::draw(gosShaderMaterial* material) const
@@ -181,7 +218,7 @@ void gosMesh::draw(gosShaderMaterial* material) const
     if(num_vertices_ == 0)
         return;
 
-    updateBuffer(vb_, GL_ARRAY_BUFFER, pdata_, num_vertices_*sizeof(gos_VERTEX), GL_DYNAMIC_DRAW);
+    updateBuffer(vb_, GL_ARRAY_BUFFER, pvertex_data_, num_vertices_*sizeof(gos_VERTEX), GL_DYNAMIC_DRAW);
 
     material->apply();
 
@@ -212,6 +249,51 @@ void gosMesh::draw(gosShaderMaterial* material) const
     material->end();
 
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+}
+
+void gosMesh::drawIndexed(gosShaderMaterial* material) const
+{
+    gosASSERT(material);
+
+    if(num_vertices_ == 0)
+        return;
+
+    updateBuffer(vb_, GL_ARRAY_BUFFER, pvertex_data_, num_vertices_*sizeof(gos_VERTEX), GL_DYNAMIC_DRAW);
+    updateBuffer(ib_, GL_ELEMENT_ARRAY_BUFFER, pindex_data_, num_indices_*sizeof(INDEX_TYPE), GL_DYNAMIC_DRAW);
+
+    material->apply();
+
+    material->setSamplerUnit("tex1", 0);
+
+	glBindBuffer(GL_ARRAY_BUFFER, vb_);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ib_);
+    CHECK_GL_ERROR;
+
+    material->applyVertexDeclaration();
+    CHECK_GL_ERROR;
+
+    GLenum pt = GL_TRIANGLES;
+    switch(prim_type_) {
+        case PRIMITIVE_POINTLIST:
+            pt = GL_POINTS;
+            break;
+        case PRIMITIVE_LINELIST:
+            pt = GL_LINES;
+            break;
+        case PRIMITIVE_TRIANGLELIST:
+            pt = GL_TRIANGLES;
+            break;
+        default:
+            gosASSERT(0 && "Wrong primitive type");
+    }
+
+    glDrawElements(pt, num_indices_, getIndexSizeBytes()==2 ? GL_UNSIGNED_SHORT : GL_UNSIGNED_INT, NULL);
+
+    material->end();
+
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
 }
 
@@ -480,6 +562,7 @@ class gosRenderer {
         void drawLines(gos_VERTEX* vertices, int count);
         void drawPoints(gos_VERTEX* vertices, int count);
         void drawTris(gos_VERTEX* vertices, int count);
+        void drawIndexedTris(gos_VERTEX* vertices, int num_vertices, WORD* indices, int num_indices);
         void drawText(const char* text);
 
         void init();
@@ -532,6 +615,7 @@ class gosRenderer {
         
         gosMesh* quads_;
         gosMesh* tris_;
+        gosMesh* indexed_tris_;
         gosMesh* lines_;
         gosMesh* points_;
         gosMesh* text_;
@@ -549,6 +633,7 @@ void gosRenderer::init() {
 
     quads_ = gosMesh::makeMesh(PRIMITIVE_TRIANGLELIST, 1024);
     tris_ = gosMesh::makeMesh(PRIMITIVE_TRIANGLELIST, 1024);
+    indexed_tris_ = gosMesh::makeMesh(PRIMITIVE_TRIANGLELIST, 1024, 1024);
     lines_ = gosMesh::makeMesh(PRIMITIVE_LINELIST, 1024);
     points_= gosMesh::makeMesh(PRIMITIVE_POINTLIST, 1024);
     text_ = gosMesh::makeMesh(PRIMITIVE_TRIANGLELIST, 4024 * 6);
@@ -622,6 +707,14 @@ void gosRenderer::popRenderStates()
 void gosRenderer::applyRenderStates() {
 
    ////////////////////////////////////////////////////////////////////////////////
+   switch(renderStates_[gos_State_ZWrite]) {
+       case 0: glDepthMask(GL_FALSE); break;
+       case 1: glDepthMask(GL_TRUE); break;
+       default: gosASSERT(0 && "Wrong depth write value");
+   }
+   curStates_[gos_State_ZWrite] = renderStates_[gos_State_ZWrite];
+
+   ////////////////////////////////////////////////////////////////////////////////
    if(0 == renderStates_[gos_State_ZCompare]) {
        glDisable(GL_DEPTH_TEST);
    } else {
@@ -634,14 +727,6 @@ void gosRenderer::applyRenderStates() {
        default: gosASSERT(0 && "Wrong depth test value");
    }
    curStates_[gos_State_ZCompare] = renderStates_[gos_State_ZCompare];
-
-   ////////////////////////////////////////////////////////////////////////////////
-   switch(renderStates_[gos_State_ZWrite]) {
-       case 0: glDepthMask(GL_FALSE); break;
-       case 1: glDepthMask(GL_TRUE); break;
-       default: gosASSERT(0 && "Wrong depth write value");
-   }
-   curStates_[gos_State_ZWrite] = renderStates_[gos_State_ZWrite];
 
    ////////////////////////////////////////////////////////////////////////////////
    bool disable_blending = renderStates_[gos_State_AlphaMode] == gos_Alpha_OneZero;
@@ -685,8 +770,7 @@ void gosRenderer::drawQuads(gos_VERTEX* vertices, int count) {
     int num_quads = count / 4;
     int num_vertices = num_quads * 6;
 
-
-    if(quads_->getNumVertices() + num_vertices > quads_->getCapacity()) {
+    if(quads_->getNumVertices() + num_vertices > quads_->getVertexCapacity()) {
         applyRenderStates();
         gosShaderMaterial* mat = 
             curStates_[gos_State_Texture]!=0 ? basic_tex_material_ : basic_material_;
@@ -694,7 +778,7 @@ void gosRenderer::drawQuads(gos_VERTEX* vertices, int count) {
         quads_->rewind();
     } 
 
-    gosASSERT(quads_->getNumVertices() + num_vertices <= quads_->getCapacity());
+    gosASSERT(quads_->getNumVertices() + num_vertices <= quads_->getVertexCapacity());
     for(int i=0; i<count;i+=4) {
 
         quads_->addVertices(vertices + 4*i + 0, 1);
@@ -708,6 +792,7 @@ void gosRenderer::drawQuads(gos_VERTEX* vertices, int count) {
 
     // for now draw anyway because no render state saved for draw calls
     applyRenderStates();
+
     gosShaderMaterial* mat = 
         curStates_[gos_State_Texture]!=0 ? basic_tex_material_ : basic_material_;
     quads_->draw(mat);
@@ -717,13 +802,13 @@ void gosRenderer::drawQuads(gos_VERTEX* vertices, int count) {
 void gosRenderer::drawLines(gos_VERTEX* vertices, int count) {
     gosASSERT(vertices);
 
-    if(lines_->getNumVertices() + count > lines_->getCapacity()) {
+    if(lines_->getNumVertices() + count > lines_->getVertexCapacity()) {
         applyRenderStates();
         lines_->draw(basic_material_);
         lines_->rewind();
     }
 
-    gosASSERT(lines_->getNumVertices() + count <= lines_->getCapacity());
+    gosASSERT(lines_->getNumVertices() + count <= lines_->getVertexCapacity());
     lines_->addVertices(vertices, count);
 
     // for now draw anyway because no render state saved for draw calls
@@ -735,13 +820,13 @@ void gosRenderer::drawLines(gos_VERTEX* vertices, int count) {
 void gosRenderer::drawPoints(gos_VERTEX* vertices, int count) {
     gosASSERT(vertices);
 
-    if(points_->getNumVertices() + count > points_->getCapacity()) {
+    if(points_->getNumVertices() + count > points_->getVertexCapacity()) {
         applyRenderStates();
         points_->draw(basic_material_);
         points_->rewind();
     } 
 
-    gosASSERT(points_->getNumVertices() + count <= points_->getCapacity());
+    gosASSERT(points_->getNumVertices() + count <= points_->getVertexCapacity());
     points_->addVertices(vertices, count);
 
     // for now draw anyway because no render state saved for draw calls
@@ -755,7 +840,7 @@ void gosRenderer::drawTris(gos_VERTEX* vertices, int count) {
 
     gosASSERT((count % 3) == 0);
 
-    if(tris_->getNumVertices() + count > tris_->getCapacity()) {
+    if(tris_->getNumVertices() + count > tris_->getVertexCapacity()) {
         applyRenderStates();
         gosShaderMaterial* mat = 
             curStates_[gos_State_Texture]!=0 ? basic_tex_material_ : basic_material_;
@@ -763,7 +848,7 @@ void gosRenderer::drawTris(gos_VERTEX* vertices, int count) {
         tris_->rewind();
     } 
 
-    gosASSERT(tris_->getNumVertices() + count <= tris_->getCapacity());
+    gosASSERT(tris_->getNumVertices() + count <= tris_->getVertexCapacity());
     tris_->addVertices(vertices, count);
 
     // for now draw anyway because no render state saved for draw calls
@@ -772,6 +857,34 @@ void gosRenderer::drawTris(gos_VERTEX* vertices, int count) {
         curStates_[gos_State_Texture]!=0 ? basic_tex_material_ : basic_material_;
     tris_->draw(mat);
     tris_->rewind();
+}
+
+void gosRenderer::drawIndexedTris(gos_VERTEX* vertices, int num_vertices, WORD* indices, int num_indices) {
+    gosASSERT(vertices && indices);
+
+    gosASSERT((num_indices % 3) == 0);
+
+    bool not_enough_vertices = indexed_tris_->getNumVertices() + num_vertices > indexed_tris_->getVertexCapacity();
+    bool not_enough_indices = indexed_tris_->getNumIndices() + num_indices > indexed_tris_->getIndexCapacity();
+    if(not_enough_vertices || not_enough_indices){
+        applyRenderStates();
+        gosShaderMaterial* mat = 
+            curStates_[gos_State_Texture]!=0 ? basic_tex_material_ : basic_material_;
+        indexed_tris_->drawIndexed(mat);
+        indexed_tris_->rewind();
+    } 
+
+    gosASSERT(indexed_tris_->getNumVertices() + num_vertices <= indexed_tris_->getVertexCapacity());
+    gosASSERT(indexed_tris_->getNumIndices() + num_indices <= indexed_tris_->getIndexCapacity());
+    indexed_tris_->addVertices(vertices, num_vertices);
+    indexed_tris_->addIndices(indices, num_indices);
+
+    // for now draw anyway because no render state saved for draw calls
+    applyRenderStates();
+    gosShaderMaterial* mat = 
+        curStates_[gos_State_Texture]!=0 ? basic_tex_material_ : basic_material_;
+    indexed_tris_->drawIndexed(mat);
+    indexed_tris_->rewind();
 }
 
 static int get_next_break(const char* text) {
@@ -806,7 +919,7 @@ void gosRenderer::drawText(const char* text) {
 
     // TODO: take text region into account!!!!
     
-    gosASSERT(text_->getNumVertices() + 6 * count <= text_->getCapacity());
+    gosASSERT(text_->getNumVertices() + 6 * count <= text_->getVertexCapacity());
 
     int x, y;
     getTextPos(x, y);
@@ -1136,7 +1249,8 @@ void __stdcall gos_PopRenderStates()
 
 void __stdcall gos_RenderIndexedArray( gos_VERTEX* pVertexArray, DWORD NumberVertices, WORD* lpwIndices, DWORD NumberIndices )
 {
- //   gosASSERT(0 && "not implemented");
+    gosASSERT(g_gos_renderer);
+    g_gos_renderer->drawIndexedTris(pVertexArray, NumberVertices, lpwIndices, NumberIndices);
 }
 
 void __stdcall gos_RenderIndexedArray( gos_VERTEX_2UV* pVertexArray, DWORD NumberVertices, WORD* lpwIndices, DWORD NumberIndices )
