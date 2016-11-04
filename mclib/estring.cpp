@@ -20,6 +20,7 @@
 #include<ctype.h> // isspace
 #include<stdarg.h> // va_start
 #include<wchar.h> // wcslen
+#include "mathfunc.h" // max, min
 #endif
 
 #pragma warning( disable:4505 )

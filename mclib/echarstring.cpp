@@ -33,6 +33,7 @@
 #ifdef LINUX_BUILD
 #include<stdarg.h> // va_start and cpmpany
 #include<wchar.h> // wcslen
+#include"mathfunc.h" // max
 #endif
 #include"echarstring.h"
 

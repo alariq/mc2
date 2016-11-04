@@ -361,13 +361,13 @@ float PilotCheckHalfRate = 5.0;
 
 float DamageRateFrequency = 10.0;
 
-byte AttitudeEffect[NUM_ATTITUDES][6] = {
+char AttitudeEffect[NUM_ATTITUDES][6] = {
 	{50, 75, 5, -2, 0, 3},
 	{40, 60, 10, -1, 1, 5},
 	{30, 50, 15, 0, 2, 10},
 	{20, 40, 20, 1, 3, 15},
 	{10, 25, 25, 1, 4, 20},
-	{0, 0, 32, 2, 5, 128}
+	{0, 0, 32, 2, 5, 127}
 };
 
 //extern bool SensorAutomaticSuccess;
