@@ -39,8 +39,8 @@ class gosShaderMaterial {
             gosShaderMaterial* pmat = new gosShaderMaterial();
             char vs[256];
             char ps[256];
-            snprintf(vs, 255, "data/shaders/%s.vert", shader);
-            snprintf(ps, 255, "data/shaders/%s.frag", shader);
+            snprintf(vs, 255, "shaders/%s.vert", shader);
+            snprintf(ps, 255, "shaders/%s.frag", shader);
             pmat->program_ = glsl_program::makeProgram(shader, vs, ps);
             if(!pmat->program_) {
                 SPEW(("SHADERS", "Failed to create %s material\n", shader));

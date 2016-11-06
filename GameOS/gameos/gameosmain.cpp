@@ -160,7 +160,7 @@ int main(int argc, char** argv)
 
     graphics::make_current_context(ctx, win);
 
-	g_myprogram = glsl_program::makeProgram("object_tex", "data/shaders/object_tex.vert", "data/shaders/object_tex.frag");
+	g_myprogram = glsl_program::makeProgram("object_tex", "shaders/object_tex.vert", "shaders/object_tex.frag");
     if(!g_myprogram) {
 		SPEW(("SHADERS", "Failed to create object_tex material\n"));
         return 1;
