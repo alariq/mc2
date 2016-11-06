@@ -9,7 +9,7 @@ MPDirectTcpip.cpp			: Implementation of the MPDirectTcpip component.
 #include"mpdirecttcpip.h"
 #include"prefs.h"
 #include"inifile.h"
-#include "../MCLib/UserInput.h"
+#include"../userinput.h"
 #include "..\resource.h"
 
 #ifndef GAMESOUND_H

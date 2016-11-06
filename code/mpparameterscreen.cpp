@@ -10,8 +10,8 @@ MPParameterScreen.cpp			: Implementation of the MPParameterScreen component.
 #include"mpparameterscreen.h"
 #include"prefs.h"
 #include"inifile.h"
-#include "../MCLib/UserInput.h"
-#include "..\resource.h"
+#include"userinput.h"
+#include "../resource.h"
 #include"assert.h"
 #include"multplyr.h"
 #include"mechbayscreen.h"
@@ -71,7 +71,6 @@ MPParameterScreen* MPParameterScreen::s_instance = NULL;
 
 GUID NO_VERSION_GUID = {
 	0,0,0,0,0,0,0,0,0,0,0
-
 };
 
 
@@ -174,7 +173,7 @@ void MPParameterScreen::init(FitIniFile* file)
 	if ( NO_ERR != mpFile.open( path ) )
 	{
 		char error[256];
-		sprintf( error, "couldn't open file %s", path );
+		sprintf( error, "couldn't open file %s", (const char*)path );
 		Assert( 0, 0, error );
 		return;		
 	}
@@ -182,7 +181,7 @@ void MPParameterScreen::init(FitIniFile* file)
 	mpLoadMap.init( &mpFile );
 	mapInfoDlg.init();
 
-	for ( i = 0; i < editCount; i++ )
+	for (int i = 0; i < editCount; i++ )
 	{
 		edits[i].setNumeric( true );
 		edits[i].allowIME( false );
@@ -990,7 +989,7 @@ void MPParameterScreen::update()
 				}
 			}
 
-			for ( i = MP_DECREMENT_CBILLS+1; i < MP_RP_FORMMECHS+1; i++ )
+			for (int i = MP_DECREMENT_CBILLS+1; i < MP_RP_FORMMECHS+1; i++ )
 			{
 				aButton* pButton = getButton( i );
 				if ( pButton )
@@ -999,7 +998,7 @@ void MPParameterScreen::update()
 				}
 			}
 
-			for ( i = 0; i < 3; i++ )
+			for (int i = 0; i < 3; i++ )
 				edits[i].setReadOnly( true );
 
 			getButton( 101/*load map button*/ )->showGUIWindow( false );
@@ -1061,7 +1060,7 @@ void MPParameterScreen::update()
 				}
 			}
 
-			for ( i = 0; i < 3; i++ )
+			for (int i = 0; i < 3; i++ )
 				edits[i].setReadOnly( false );
 
 
@@ -1124,7 +1123,7 @@ void MPParameterScreen::update()
 
 
 
-			for( i = 0; i < playerCount; i++ )
+			for(int i = 0; i < playerCount; i++ )
 			{
 				if ( playerParameters[i].hasFocus() )
 				{
@@ -1182,7 +1181,7 @@ void MPParameterScreen::update()
 
 		
 	/// now make all enabled so they draw correctly...
-		for ( i = MP_AIRSTRIKES; i < MP_RP_FORMMECHS+1; i++ )
+		for (int i = MP_AIRSTRIKES; i < MP_RP_FORMMECHS+1; i++ )
 		{
 			aButton* pButton = getButton( i );
 			if ( pButton )
@@ -1222,7 +1221,7 @@ void MPParameterScreen::update()
 
 			qsort( sortedPlayers, playerCount, sizeof( MC2Player* ), sortPlayers );
 
-			for( i = 0; i < playerCount; i++ )
+			for(int i = 0; i < playerCount; i++ )
 			{
 				playerParameters[i].setData( sortedPlayers[i] );
 			}
@@ -1230,7 +1229,7 @@ void MPParameterScreen::update()
 			if ( playerCount )
 				team = sortedPlayers[0]->team;
 			bool bUniqueTeam = 0;
-			for( i = 0; i < playerCount; i++ )
+			for(int i = 0; i < playerCount; i++ )
 			{
 //				if ( !ChatWindow::instance()->pointInside(userInput->getMouseX(), userInput->getMouseY() ) )
 					playerParameters[i].update();

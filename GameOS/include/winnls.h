@@ -54,6 +54,8 @@ int MultiByteToWideChar(UINT,DWORD,LPCSTR,int,LPWSTR,int);
 BOOL GetStringTypeExA(LCID,DWORD,LPCSTR,int,LPWORD);
 BOOL GetStringTypeExW(LCID,DWORD,LPCWSTR,int,LPWORD);
 
+BOOL IsDBCSLeadByte(BYTE);
+
 #ifdef __cplusplus
 }
 #endif

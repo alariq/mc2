@@ -29,6 +29,9 @@ namespace Stuff {
 	class Point3D;
 	class UnitQuaternion;
 	class YawPitchRange;
+    class Vector3D;
+
+    bool Close_Enough( const Vector3D &v1, const Vector3D &v2, Scalar e = SMALL);
 
 	enum Axes {
 		X_Axis,
@@ -173,7 +176,7 @@ namespace Stuff {
 			Close_Enough(
 				const Vector3D &v1,
 				const Vector3D &v2,
-				Scalar e=SMALL
+				Scalar e
 			);
 		bool
 			operator==(const Vector3D& v) const

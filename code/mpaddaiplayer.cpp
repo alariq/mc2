@@ -9,7 +9,7 @@ MPAddAIPlayer.cpp			: Implementation of the MPAddAIPlayer component.
 #include"mpaddaiplayer.h"
 #include"prefs.h"
 #include"inifile.h"
-#include "../MCLib/UserInput.h"
+#include"../userinput.h"
 #include "..\resource.h"
 
 #ifndef GAMESOUND_H

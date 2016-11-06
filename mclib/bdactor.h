@@ -158,7 +158,7 @@ class BldgAppearanceType : public AppearanceType
 			return false;
 		}
 		
-  		virtual void init (char *fileName);
+  		virtual void init (const char *fileName);
 		
 		virtual void destroy (void);
 
@@ -284,7 +284,7 @@ class BldgAppearance : public ObjectAppearance
 
 		virtual bool isMouseOver (float px, float py);
 		
-		virtual void setObjectParameters (Stuff::Vector3D &pos, float rot, long selected, long alignment, long homeRelations);
+		virtual void setObjectParameters (const Stuff::Vector3D &pos, float rot, long selected, long alignment, long homeRelations);
 		
 		virtual void setMoverParameters (float turretRot, float lArmRot = 0.0f, float rArmRot = 0.0f, bool isAirborne = false);
 		
@@ -433,7 +433,7 @@ class TreeAppearanceType : public AppearanceType
 			destroy();
 		}
 
-		virtual void init (char *fileName);
+		virtual void init (const char *fileName);
 		
 		virtual void destroy (void);
 };
@@ -512,7 +512,7 @@ class TreeAppearance : public ObjectAppearance
 
 		virtual bool isMouseOver (float px, float py);
 		
-		virtual void setObjectParameters (Stuff::Vector3D &pos, float rot, long selected, long alignment, long homeRelations);
+		virtual void setObjectParameters (const Stuff::Vector3D &pos, float rot, long selected, long alignment, long homeRelations);
 		
 		virtual void setMoverParameters (float pitchAngle, float lArmRot = 0.0f, float rArmRot = 0.0f, bool isAirborne = false);
 		

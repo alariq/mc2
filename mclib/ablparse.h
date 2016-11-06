@@ -95,7 +95,7 @@ TypePtr stdRandom (void);
 TypePtr standardRoutineCall (SymTableNodePtr routineIdPtr);
 
 // FILE routines
-long openSourceFile (char* sourceFileName);
+long openSourceFile (const char* sourceFileName);
 long closeSourceFile (void);
 
 #if !ANALYZE_ON

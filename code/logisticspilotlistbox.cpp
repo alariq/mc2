@@ -8,7 +8,7 @@ LogisticsPilotListBox.cpp			: Implementation of the LogisticsPilotListBox compon
 
 #include"logisticspilotlistbox.h"
 #include"logisticspilot.h"
-#include "..\resource.h"
+#include "../resource.h"
 #include"pilotreadyscreen.h"
 
 LogisticsPilotListBoxItem* LogisticsPilotListBoxItem::s_templateItem = NULL;
@@ -74,7 +74,7 @@ LogisticsPilotListBoxItem::LogisticsPilotListBoxItem( LogisticsPilot* pNewPilot 
 		pChildAnimations[i] = s_templateItem->pChildAnimations[i];
 	}
 
-	for ( i = 0; i < 3; i++ )
+	for (int i = 0; i < 3; i++ )
 		animations[i] = s_templateItem->animations[i];
 
 	addChild( &nameText );
@@ -151,7 +151,7 @@ void LogisticsPilotListBoxItem::setAnimation( FitIniFile& file, int whichOne )
 		{
 			if ( isdigit( animationText[i] ) )
 			{
-				animationText[i+1] = NULL;
+				animationText[i+1] = '\0';
 				s_templateItem->pChildAnimations[whichOne] = atoi( &animationText[i] );
 				return;
 			}

@@ -1,1 +1,3 @@
 ASE is tha same as AGL, but agl is binary
+
+*prefs.cfg files and testtxm.tga should be in root folder for mc2 sniffer (starts when game launched without options.cfg) to work

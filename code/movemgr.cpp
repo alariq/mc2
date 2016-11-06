@@ -20,7 +20,7 @@
 #include"warrior.h"
 #endif
 
-#include<gameos/gameos.hpp>
+#include"gameos.hpp"
 
 
 long MovePathManager::numPaths = 0;
@@ -71,7 +71,7 @@ long MovePathManager::init (void) {
 
 	numPaths = 0;
 	peakPaths = 0;
-	for (i =0; i < 50; i++)
+	for (int i =0; i < 50; i++)
 		sourceTally[i] = 0;
 
 	return(NO_ERR);

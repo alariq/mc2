@@ -18,6 +18,8 @@
 class gosRenderer;
 class gosFont;
 
+static const DWORD INVALID_TEXTURE_ID = -1;
+
 static gosRenderer* g_gos_renderer = NULL;
 
 gosRenderer* getGosRenderer() {
@@ -87,7 +89,9 @@ class gosShaderMaterial {
             // TODO: may also check that current program is equal to our program
             if(program_->samplers_.count(sampler_name)) {
                 glUniform1i(program_->samplers_[sampler_name]->index_, 0);
+                return true;
             }
+            return false;
         }
 
         void apply() {
@@ -133,14 +137,15 @@ class gosMesh {
         typedef WORD INDEX_TYPE;
 
         static gosMesh* makeMesh(gosPRIMITIVETYPE prim_type, int vertex_capacity, int index_capacity = 0) {
-            GLuint vb = makeBuffer(GL_ARRAY_BUFFER, 0, sizeof(gos_VERTEX)*vertex_capacity, GL_DYNAMIC_DRAW);
-            if(vb < 0)
+            GLuint vb = -1U;
+            vb = makeBuffer(GL_ARRAY_BUFFER, 0, sizeof(gos_VERTEX)*vertex_capacity, GL_DYNAMIC_DRAW);
+            if(vb == -1U)
                 return NULL;
 
-            GLuint ib = -1;
+            GLuint ib = -1U;
             if(index_capacity > 0) {
                 ib = makeBuffer(GL_ELEMENT_ARRAY_BUFFER, 0, sizeof(INDEX_TYPE)*index_capacity, GL_DYNAMIC_DRAW);
-                if(ib < 0)
+                if(ib == -1U)
                     return NULL;
             }
 
@@ -407,6 +412,7 @@ bool gosTexture::createHardwareTexture() {
 
     Image img;
     if(!img.loadFromFile(filename_)) {
+        SPEW(("DBG", "failed to load texture from file: %s\n", filename_));
         return false;
     }
 
@@ -471,6 +477,10 @@ class gosRenderer {
         }
 
         gosTexture* getTexture(DWORD texture_id) {
+            // TODO: return default texture
+            if(texture_id == INVALID_TEXTURE_ID) {
+                return NULL;
+            }
             gosASSERT(textureList_.size() > texture_id);
             gosASSERT(textureList_[texture_id] != 0);
             return textureList_[texture_id];
@@ -553,6 +563,14 @@ class gosRenderer {
             return renderStates_[RenderState];
         }
 
+        void setScreenMode(DWORD width, DWORD height, DWORD bit_depth, bool GotoFullScreen, bool anti_alias) {
+            reqWidth = width;
+            reqHeight = height;
+            reqBitDepth = bit_depth;
+            reqAntiAlias = anti_alias;
+            pendingRequest = true;
+        }
+
         void pushRenderStates();
         void popRenderStates();
 
@@ -578,6 +596,12 @@ class gosRenderer {
 
         std::vector<gosTexture*> textureList_;
         std::vector<gosFont*> fontList_;
+
+        DWORD reqWidth;
+        DWORD reqHeight;
+        DWORD reqBitDepth;
+        DWORD reqAntiAlias;
+        bool pendingRequest;
 
         // states data
         RenderState curStates_;
@@ -631,15 +655,24 @@ void gosRenderer::init() {
     // setup viewport
     setupViewport(true, 1.0f, true, 0, 0.0f, 0.0f, 1.0f, 1.0f);
 
-    quads_ = gosMesh::makeMesh(PRIMITIVE_TRIANGLELIST, 1024);
-    tris_ = gosMesh::makeMesh(PRIMITIVE_TRIANGLELIST, 1024);
-    indexed_tris_ = gosMesh::makeMesh(PRIMITIVE_TRIANGLELIST, 1024, 1024);
-    lines_ = gosMesh::makeMesh(PRIMITIVE_LINELIST, 1024);
-    points_= gosMesh::makeMesh(PRIMITIVE_POINTLIST, 1024);
+    quads_ = gosMesh::makeMesh(PRIMITIVE_TRIANGLELIST, 1024*10);
+    gosASSERT(quads_);
+    tris_ = gosMesh::makeMesh(PRIMITIVE_TRIANGLELIST, 1024*10);
+    gosASSERT(tris_);
+    indexed_tris_ = gosMesh::makeMesh(PRIMITIVE_TRIANGLELIST, 1024*10, 1024*10);
+    gosASSERT(indexed_tris_);
+    lines_ = gosMesh::makeMesh(PRIMITIVE_LINELIST, 1024*10);
+    gosASSERT(lines_);
+    points_= gosMesh::makeMesh(PRIMITIVE_POINTLIST, 1024*10);
+    gosASSERT(points_);
     text_ = gosMesh::makeMesh(PRIMITIVE_TRIANGLELIST, 4024 * 6);
+    gosASSERT(text_);
     basic_material_ = gosShaderMaterial::load("gos_vertex");
+    gosASSERT(basic_material_);
     basic_tex_material_ = gosShaderMaterial::load("gos_tex_vertex");
+    gosASSERT(basic_tex_material_);
     text_material_ = gosShaderMaterial::load("gos_text");
+    gosASSERT(text_material_);
 }
 
 void gosRenderer::initRenderStates() {
@@ -901,6 +934,8 @@ static int get_next_break(const char* text) {
     if(pc2 && (pc2 - text < closest)) {
         closest = (pc2 - text);
     }
+
+    return 0;
 }
 
 void gosRenderer::drawText(const char* text) {
@@ -1188,16 +1223,48 @@ void __stdcall gos_DeleteFont( HGOSFONT3D FontHandle )
 DWORD __stdcall gos_NewEmptyTexture( gos_TextureFormat Format, const char* Name, DWORD HeightWidth, DWORD Hints/*=0*/, gos_RebuildFunction pFunc/*=0*/, void *pInstance/*=0*/)
 {
     gosASSERT(0 && "Not implemented");
-    return -1;
+    return INVALID_TEXTURE_ID;
 }
 DWORD __stdcall gos_NewTextureFromMemory( gos_TextureFormat Format, const char* FileName, BYTE* pBitmap, DWORD Size, DWORD Hints/*=0*/, gos_RebuildFunction pFunc/*=0*/, void *pInstance/*=0*/)
 {
+    gosASSERT(pFunc == 0);
+
     gosTexture* ptex = new gosTexture(Format, FileName, Hints, pBitmap, Size);
     if(!ptex->createHardwareTexture()) {
         STOP(("Failed to create texture\n"));
+        return INVALID_TEXTURE_ID;
     }
 
     return g_gos_renderer->addTexture(ptex);
+}
+
+DWORD __stdcall gos_NewTextureFromFile( gos_TextureFormat Format, const char* FileName, DWORD Hints/*=0*/, gos_RebuildFunction pFunc/*=0*/, void *pInstance/*=0*/)
+{
+    gosASSERT(FileName);
+    FILE* f = fopen(FileName, "rb");
+    if(f == NULL) {
+        int last_error = errno;
+        STOP(("gos_NewTextureFromFile: fopen: %s", strerror(last_error)));
+        return INVALID_TEXTURE_ID;
+    }
+
+    fseek(f, 0, SEEK_END);
+    long fsize = ftell(f);
+    fseek(f, 0, SEEK_SET);
+    BYTE* pdata = new BYTE[fsize];
+
+    long num_bytes_read = 0;
+    while(!feof(f) && num_bytes_read < fsize) {
+        int nr = fread(pdata + num_bytes_read, 32*1024, 1, f);
+        num_bytes_read += nr * 32*1024;
+    }
+
+    DWORD handle = gos_NewTextureFromMemory(Format, FileName, pdata, fsize, Hints, pFunc, pInstance);
+
+    delete[] pdata;
+
+    return handle;
+
 }
 void __stdcall gos_DestroyTexture( DWORD Handle )
 {
@@ -1266,7 +1333,10 @@ void __stdcall gos_SetRenderState( gos_RenderState RenderState, int Value )
 
 void __stdcall gos_SetScreenMode( DWORD Width, DWORD Height, DWORD bitDepth/*=16*/, DWORD Device/*=0*/, bool disableZBuffer/*=0*/, bool AntiAlias/*=0*/, bool RenderToVram/*=0*/, bool GotoFullScreen/*=0*/, int DirtyRectangle/*=0*/, bool GotoWindowMode/*=0*/, bool EnableStencil/*=0*/, DWORD Renderer/*=0*/)
 {
-    gosASSERT(0 && "not implemented");
+    gosASSERT(g_gos_renderer);
+    gosASSERT((GotoFullScreen && !GotoWindowMode) || (!GotoFullScreen&&GotoWindowMode) || (!GotoFullScreen&&!GotoWindowMode));
+
+    g_gos_renderer->setScreenMode(Width, Height, bitDepth, GotoFullScreen, AntiAlias);
 }
 
 void __stdcall gos_SetupViewport( bool FillZ, float ZBuffer, bool FillBG, DWORD BGColor, float top, float left, float bottom, float right, bool ClearStencil/*=0*/, DWORD StencilValue/*=0*/)
@@ -1295,6 +1365,38 @@ void __stdcall gos_TextDraw( const char *Message, ... )
 
     gosASSERT(g_gos_renderer);
     g_gos_renderer->drawText(text);
+}
+
+void __stdcall gos_TextDrawBackground( int Left, int Top, int Right, int Bottom, DWORD Color )
+{
+    gosASSERT(g_gos_renderer);
+
+    PAUSE((""));
+
+    gos_VERTEX v[4];
+    v[0].x = Left;
+    v[0].y = Top;
+    v[0].z = 0;
+	v[0].argb = Color;
+	v[0].frgb = 0;
+	v[0].u = 0;	
+	v[0].v = 0;	
+    memcpy(&v[1], &v[0], sizeof(gos_VERTEX));
+    memcpy(&v[2], &v[0], sizeof(gos_VERTEX));
+    memcpy(&v[3], &v[0], sizeof(gos_VERTEX));
+    v[1].x = Right;
+    v[1].u = 1.0f;
+
+    v[2].x = Right;
+    v[2].y = Bottom;
+    v[2].u = 1.0f;
+    v[2].v = 0.0f;
+
+    v[1].y = Bottom;
+    v[1].v = 1.0f;
+
+    if(g_disable_quads == false )
+        g_gos_renderer->drawQuads(v, 4);
 }
 
 void __stdcall gos_TextSetAttributes( HGOSFONT3D FontHandle, DWORD Foreground, float Size, bool WordWrap, bool Proportional, bool Bold, bool Italic, DWORD WrapType/*=0*/, bool DisableEmbeddedCodes/*=0*/)

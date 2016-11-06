@@ -19,6 +19,11 @@ namespace Stuff {class YawPitchRange;}
 
 namespace Stuff {
 
+	class YawPitchRange;
+
+    bool Small_Enough( const YawPitchRange &a, Scalar e =SMALL);
+    bool Close_Enough( const YawPitchRange &a1, const YawPitchRange &a2, Scalar e = SMALL);
+
 	class YawPitchRange
 	{
 	public:
@@ -69,7 +74,7 @@ namespace Stuff {
 		friend bool
 			Small_Enough(
 				const YawPitchRange &a,
-				Scalar e=SMALL
+				Scalar e/*=SMALL*/
 			);
 		bool
 			operator!() const
@@ -79,7 +84,7 @@ namespace Stuff {
 			Close_Enough(
 				const YawPitchRange &a1,
 				const YawPitchRange &a2,
-				Scalar e=SMALL
+				Scalar e/*=SMALL*/
 			);
 		bool
 			operator==(const YawPitchRange& a) const

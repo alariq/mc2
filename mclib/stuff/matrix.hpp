@@ -106,7 +106,7 @@ namespace Stuff {
 			Close_Enough(
 				const Matrix4D &m1,
 				const Matrix4D &m2,
-				Scalar e=SMALL
+				Scalar e/*=SMALL*/
 			);
 		bool
 			operator==(const Matrix4D& a) const

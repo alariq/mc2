@@ -30,7 +30,7 @@ inline signed int double2long(double _in)
 // EXTERNALS
 
 extern long				level;
-extern long				execLineNumber;
+extern int              execLineNumber;
 extern long				FileNumber;
 extern char*			codeSegmentPtr;
 extern TokenCodeType	codeToken;
@@ -80,11 +80,11 @@ char ABLi_popChar (void) {
 
 //---------------------------------------------------------------------------
 
-long ABLi_popInteger (void) {
+int ABLi_popInteger (void) {
 
 	getCodeToken();
 	execExpression();
-	long val = tos->integer;
+	int val = tos->integer;
 	pop();
 	
 	return(val);
@@ -656,7 +656,7 @@ void execStdFileOpen (void) {
 
 void execStdFileWrite (void) {
 
-	long fileHandle = ABLi_popInteger();
+	int fileHandle = ABLi_popInteger();
 	char* string = ABLi_popCharPtr();
 
 	UserFile* userFile = UserFile::files[fileHandle];
@@ -668,7 +668,7 @@ void execStdFileWrite (void) {
 
 void execStdFileClose (void) {
 
-	long fileHandle = ABLi_popInteger();
+	int fileHandle = ABLi_popInteger();
 
 	UserFile* userFile = UserFile::files[fileHandle];
 	if (userFile->inUse)
@@ -728,7 +728,7 @@ void execStdFatal (void) {
 	//
 	//----------------------------------------------------------------------
 
-	long code = ABLi_popInteger();
+	int code = ABLi_popInteger();
 	char* s = ABLi_popCharPtr();
 
 	char message[512];
@@ -773,8 +773,8 @@ void execStdAssert (void) {
 	//
 	//----------------------------------------------------------------------
 
-	long expression = ABLi_popInteger();
-	long code = ABLi_popInteger();
+	int expression = ABLi_popInteger();
+	int code = ABLi_popInteger();
 	char* s = ABLi_popCharPtr();
 
 	if (!expression) {
@@ -966,7 +966,7 @@ void initStandardRoutines (void) {
 
 TypePtr execStandardRoutineCall (SymTableNodePtr routineIdPtr, bool skipOrder) {
 
-	long key = routineIdPtr->defn.info.routine.key;
+	int key = routineIdPtr->defn.info.routine.key;
 	switch (key) {
 		case RTN_RETURN:
 			execStdReturn();
@@ -1004,6 +1004,7 @@ TypePtr execStandardRoutineCall (SymTableNodePtr routineIdPtr, bool skipOrder) {
 					return(RealTypePtr);
 				case RETURN_TYPE_BOOLEAN:
 					return(BooleanTypePtr);
+                default:;
 			}
 		}
 	}

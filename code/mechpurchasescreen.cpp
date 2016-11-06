@@ -11,7 +11,7 @@ MechPurchaseScreen.cpp			: Implementation of the MechPurchaseScreen component.
 #include"logisticsdata.h"
 #include"mechbayscreen.h"
 #include"gamesound.h"
-#include "..\resource.h"
+#include "../resource.h"
 #include"simplecamera.h"
 #include"attributemeter.h"
 #include"chatwindow.h"

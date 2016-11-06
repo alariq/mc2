@@ -9,8 +9,8 @@ MPHostGame.cpp			: Implementation of the MPHostGame component.
 #include"mphostgame.h"
 #include"prefs.h"
 #include"inifile.h"
-#include "../MCLib/UserInput.h"
-#include "..\resource.h"
+#include"userinput.h"
+#include "../resource.h"
 #include"multplyr.h"
 
 #ifndef GAMESOUND_H
@@ -61,7 +61,7 @@ void MPHostGame::init()
 	if ( NO_ERR != file.open( path ) )
 	{
 		char error[256];
-		sprintf( error, "couldn't open file %s", path );
+		sprintf( error, "couldn't open file %s", (const char*)path );
 		Assert( 0, 0, error );
 		return;		
 	}

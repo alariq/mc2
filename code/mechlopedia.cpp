@@ -10,7 +10,7 @@ Mechlopedia.cpp			: Implementation of the Mechlopedia component.
 #include"inifile.h"
 #include"mclib.h"
 #include"logisticsdata.h"
-#include "../resource.h"
+#include"../resource.h"
 #include"prefs.h"
 #include"cmponent.h"
 

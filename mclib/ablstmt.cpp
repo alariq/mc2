@@ -78,7 +78,7 @@ TokenCodeType	CaseLabelStartList[] = {
 					TKN_NONE
 				};
 
-SymTableNodePtr forwardState (char* stateName);
+SymTableNodePtr forwardState (const char* stateName);
 
 //***************************************************************************
 

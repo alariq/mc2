@@ -1248,7 +1248,9 @@ int
 #if HUNT_CLIP_ERROR
 					DEBUG_STREAM << "TheOR: " << hex << theNewOr.GetClippingState() << dec << '\n';
 #endif
-					theOr == theNewOr;
+                    // sebi:??? tank you, clang
+					//theOr == theNewOr;
+					theOr = theNewOr;
 				} while (theNewOr != 0 && loop--);
 
 				//

@@ -75,7 +75,7 @@ enum { CPU_UNKNOWN, CPU_PENTIUM, CPU_MMX, CPU_KATMAI } Processor = CPU_PENTIUM;	
 #endif
 
 bool	reloadBounds = false;
-long	ObjectTextureSize = 128;
+int     ObjectTextureSize = 128;
 char	missionName[1024];
 float	gosFontScale = 1.0;
 
@@ -430,15 +430,20 @@ void __stdcall InitializeGameEngine()
 				}
 			}
 
-			result = prefs->readIdLong("TerrainTextureRes",TERRAIN_TXM_SIZE);
+            long tmp;
+			result = prefs->readIdLong("TerrainTextureRes", tmp);
 			if (result != NO_ERR)
 				TERRAIN_TXM_SIZE = 64;
+            else {
+                TERRAIN_TXM_SIZE = tmp;
+            }
 
-
-			result = prefs->readIdLong("ObjectTextureRes",ObjectTextureSize);
+			result = prefs->readIdLong("ObjectTextureRes", tmp);
 			if (result != NO_ERR)
 				ObjectTextureSize = 128;
-
+            else {
+                ObjectTextureSize = tmp;
+            }
 
 			result = prefs->readIdLong("Brightness",gammaLevel);
 			if (result != NO_ERR)

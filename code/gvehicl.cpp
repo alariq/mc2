@@ -111,7 +111,7 @@
 #include"comndr.h"
 #endif
 
-#include "..\resource.h"
+#include "../resource.h"
 
 extern unsigned long		NextIdNumber;
 
@@ -291,7 +291,7 @@ void GroundVehicleType::destroy (void)
 
 long GroundVehicleType::init (FilePtr objFile, unsigned long fileSize) {
 
-	char* bodyLocationString[NUM_GROUNDVEHICLE_LOCATIONS] = {
+	const char* bodyLocationString[NUM_GROUNDVEHICLE_LOCATIONS] = {
 		"Front",
 		"Left",
 		"Right",
@@ -984,7 +984,7 @@ void GroundVehicle::setControl (ControlType ctrlType) {
 //----------------------------------------------------------------------------------
 long GroundVehicle::init (FitIniFile* vehicleFile) 
 {
-	char* BodyLocationBlockString[NUM_GROUNDVEHICLE_LOCATIONS] = {
+	const char* BodyLocationBlockString[NUM_GROUNDVEHICLE_LOCATIONS] = {
 		"Front",
 		"Left",
 		"Right",
@@ -998,7 +998,7 @@ long GroundVehicle::init (FitIniFile* vehicleFile)
 	if (result != NO_ERR)
 		return(result);
 
-	name[0] = NULL;
+	name[0] = '\0';
 
 	result = vehicleFile->seekBlock("General");
 	if (result != NO_ERR)
@@ -1300,7 +1300,8 @@ long GroundVehicle::calcCV (bool calcMax) {
 
 	//-------------------
 	// Movement Factor...
-	for (long i = 0; i < 5; i++)
+    int i = 0;
+	for (; i < 5; i++)
 		if (maxMoveSpeed <= TargetMoveModifierTable[i][0])
 			break;
 	defensiveBR += (TargetMoveModifierTable[i][1] * 10);
@@ -1369,7 +1370,7 @@ void GroundVehicle::mineCheck (void) {
 			if (MPlayer) 
 			{
 				WeaponShotInfo shot;
-				shot.init(NULL, -2, 1.0, GROUNDVEHICLE_LOCATION_FRONT, 0);
+				shot.init(0, -2, 1.0, GROUNDVEHICLE_LOCATION_FRONT, 0);
 				MPlayer->addWeaponHitChunk(this, &shot);
 			}
 			
@@ -1406,7 +1407,7 @@ void GroundVehicle::mineCheck (void) {
 				curPos = getPosition();
 				ObjectManager->createExplosion(MINE_EXPLOSION_ID, NULL, curPos, MineSplashDamage, MineSplashRange * worldUnitsPerMeter);
 				WeaponShotInfo shot;
-				shot.init(NULL, -2, MineDamage, calcHitLocation(NULL,-1,ATTACKSOURCE_MINE,0), 0);
+				shot.init(0, -2, MineDamage, calcHitLocation(NULL,-1,ATTACKSOURCE_MINE,0), 0);
 				handleWeaponHit(&shot, (MPlayer != NULL));
 					
 				pilot->pausePath();		//Force the pilot to recalc based on new data.

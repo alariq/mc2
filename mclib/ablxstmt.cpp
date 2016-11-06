@@ -45,12 +45,12 @@
 
 extern long				level;
 extern long				CallStackLevel;
-extern long				execLineNumber;
-extern long				execStatementCount;
+extern int              execLineNumber;
+extern int              execStatementCount;
 extern char*			codeSegmentPtr;
 extern char*			statementStartPtr;
 extern TokenCodeType	codeToken;
-extern long				NumExecutions;
+extern int              NumExecutions;
 
 extern StackItem*		stack;
 extern StackItemPtr		tos;
@@ -350,7 +350,7 @@ TypePtr execDeclaredRoutineCall (SymTableNodePtr routineIdPtr, bool skipOrder) {
 			for (long i = 0; i < CallStackLevel; i++)
 				strcat(s, " ");
 			char s1[512];
-			sprintf(s1, "%s (%d)\n", routineIdPtr->name, functionExecTime);
+			sprintf(s1, "%s (%ld)\n", routineIdPtr->name, functionExecTime);
 			strcat(s, s1);
 			ABL_AddToProfileLog(s);
 		}
@@ -418,7 +418,7 @@ void execActualParams (SymTableNodePtr routineIdPtr) {
 
 			//----------------------------------------------------------
 			// Formal parameter is an array or record, so make a copy...
-			if ((formalTypePtr->form == FRM_ARRAY)/* || (formalTypePtr->form == FRM_RECORD)*/) {
+			if (formalTypePtr->form == FRM_ARRAY/* || (formalTypePtr->form == FRM_RECORD)*/) {
 				//------------------------------------------------------------------------------
 				// The following is a little inefficient, but is kept this way to keep it clear.
 				// Once it's verified to work, optimize...

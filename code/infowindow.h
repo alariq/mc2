@@ -126,7 +126,7 @@ class InfoWindow
 
 		static GUI_RECT NameRect;
 
-		static void InfoWindow::init( FitIniFile& file );
+		static void init( FitIniFile& file );
 
 		static InfoWindow* s_instance;
 

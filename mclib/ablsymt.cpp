@@ -394,7 +394,7 @@ SymTableNodePtr searchSymTableDisplay (const char* name) {
 
 //***************************************************************************
 
-SymTableNodePtr enterSymTable (char* name, SymTableNodePtr* ptrToNodePtr) {
+SymTableNodePtr enterSymTable (const char* name, SymTableNodePtr* ptrToNodePtr) {
 
 	//-------------------------------------
 	// First, create the new symbol node...

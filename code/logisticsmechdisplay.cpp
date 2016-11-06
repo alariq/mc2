@@ -9,7 +9,7 @@ LogisticsMechDisplay.cpp			: Implementation of the LogisticsMechDisplay componen
 #include"logisticsmechdisplay.h"
 #include"logisticsmech.h"
 #include"mclib.h"
-#include "..\resource.h"
+#include "../resource.h"
 #include"prefs.h"
 
 LogisticsMechDisplay::LogisticsMechDisplay(  )

@@ -42,7 +42,7 @@
 #define START_CEMENT_TYPE			13
 #define END_CEMENT_TYPE				20
 
-extern long TERRAIN_TXM_SIZE;
+extern int TERRAIN_TXM_SIZE;
 //---------------------------------------------------------------------------
 // Class Definitions
 extern long tileCacheReqs;
@@ -244,7 +244,7 @@ class TerrainTextures
 
 		long setOverlay (DWORD overlayInfo);
 		long getOverlayHandle( Overlays id, int Offset );
-		void getOverlayInfoFromHandle( long handle, Overlays& id, unsigned long& Offset );
+		void getOverlayInfoFromHandle( long handle, Overlays& id, DWORD& Offset );
 
 		void purgeTransitions (void);
 		

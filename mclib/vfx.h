@@ -352,7 +352,7 @@ extern long VFX_deltaShape_scan (PANE *shapePane, UBYTE xparentColor, UBYTE Hsx,
 
 extern long VFX_tile_scan (PANE *shapePane, UBYTE xparentColor, UBYTE Hsx, UBYTE Hsy, unsigned char* *shapeBuffer);
 								  
-extern LONG  VFX_shape_bounds(void *shape_table, LONG shape_num);
+extern int VFX_shape_bounds(void *shape_table, LONG shape_num);
 extern LONG  VFX_shape_origin(void *shape_table, LONG shape_num);
 extern LONG  VFX_shape_resolution(void *shape_table, LONG shape_num);
 extern LONG  VFX_shape_minxy(void *shape_table, LONG shape_num);

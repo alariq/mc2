@@ -61,7 +61,7 @@ class Commander {
 
 	public:
 
-		long					id;
+		int                     id;
 		TeamPtr					team;
 		MoverGroupPtr			groups[MAX_MOVERGROUPS];
 
@@ -86,11 +86,11 @@ class Commander {
 			destroy();
 		}
 
-		virtual long getId (void) {
+		virtual int getId (void) {
 			return(id);
 		}
 
-		virtual void setId (long _id) {
+		virtual void setId (int _id) {
 			id = _id;
 			commanders[id] = this;
 		}

@@ -8,7 +8,7 @@
 #include"logisticsdata.h"
 #include"inifile.h"
 #include"packet.h"
-#include "..\resource.h"
+#include "../resource.h"
 #include"objective.h"
 #include"multplyr.h"
 #include"chatwindow.h"
@@ -276,6 +276,8 @@ long	MissionBriefingScreen::getMissionTGA( const char* missionName )
 	FullPathFileName path;
 	path.init( missionPath, missionName, ".pak" );
 
+    // sebi: check that file was removed? NB!
+#ifndef LINUX_BUILD
 	if ( 1 == fileExists( path ) )
 	{
 
@@ -289,6 +291,7 @@ long	MissionBriefingScreen::getMissionTGA( const char* missionName )
 
 		CloseHandle( hFile );
 	}
+#endif
 
 	// read the tga out of the pak file
 	PacketFile file;
@@ -309,7 +312,7 @@ long	MissionBriefingScreen::getMissionTGA( const char* missionName )
 			flipTopToBottom( (BYTE*)(pHeader + 1), pHeader->pixel_depth, bmpWidth, bmpHeight );
 			
 			// set up the texture
-			long tmpMapTextureHandle = mcTextureManager->textureFromMemory( (unsigned long*)(pHeader+1), gos_Texture_Solid, 0, bmpWidth );
+			long tmpMapTextureHandle = mcTextureManager->textureFromMemory( (DWORD*)(pHeader+1), gos_Texture_Solid, 0, bmpWidth );
 
 			delete mem;
 
@@ -572,8 +575,8 @@ void MissionBriefingScreen::addObjectiveButton( float fX, float fY, int count, i
 						 (iIndex+1) * textWidth, (jIndex+1) * textHeight + lineOffset );
 
 	pButtonText->moveTo( xLoc, yLoc );
-	
-	for ( int i = 0; i < MAX_OBJECTIVES; i++ )
+	int i = 0;
+	for (; i < MAX_OBJECTIVES; i++ )
 	{
 		if ( !objectiveButtons[i])
 		{

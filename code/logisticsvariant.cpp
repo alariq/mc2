@@ -9,7 +9,7 @@ LogisticsVariant.cpp			: Implementation of the LogisticsVariant component.
 #include"logisticsvariant.h"
 #include"mclib.h"
 #include"logisticsdata.h"
-#include "../resource.h"
+#include"../resource.h"
 #include"cmponent.h" 
 #include"logisticserrors.h"
 

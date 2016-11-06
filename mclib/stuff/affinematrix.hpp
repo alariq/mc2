@@ -109,7 +109,7 @@ namespace Stuff {
 			Close_Enough(
 				const AffineMatrix4D &m1,
 				const AffineMatrix4D &m2,
-				Scalar e=SMALL
+				Scalar e/*=SMALL*/
 			);
 		bool
 			operator==(const AffineMatrix4D& a) const

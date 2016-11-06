@@ -58,7 +58,7 @@ extern void GetNumberData (char *rawData, char *result);
 extern void GetNameData (char *rawData, char *result);
 extern void GetWordData (char *rawData, char *result);
 
-extern long		ObjectTextureSize;
+extern int ObjectTextureSize;
 
 #define CURRENT_SHAPE_VERSION		0xBAFDECAF
 #define CURRENT_ANIM_VERSION		0xBADDECAF
@@ -464,10 +464,11 @@ long TG_TypeMultiShape::LoadTGMultiShapeFromASE (const char *fileName, bool forc
 	else
 	{
 		//------------------------------------------
-		// Check if exists by getting size
-		long aseFileSize = gos_FileSize(fileName);
-		if (aseFileSize <= 0)
+		// Check if exists 
+		if (!gos_FileExists(fileName))
 			return(-1);
+
+		long aseFileSize = gos_FileSize(fileName);
 	
 		//---------------------------------------
 		// Create Buffer to read entire file into
@@ -563,12 +564,13 @@ long TG_TypeMultiShape::LoadTGMultiShapeFromASE (const char *fileName, bool forc
 			memset(listOfTextures,0x0,sizeof(TG_Texture) * numTextures);
 
 			char *txmData = (char *)aseContents;
-			for (long i=0;i<(numTextures/2);i++)
+			for (int i=0;i<(numTextures/2);i++)
 			{
 				//-------------------------------------------------------------------------------
 				// Get and store texture Name.  Will need multiple for Multi-Sub if implemented
 				char textId[256];
-				sprintf(textId,"%s",ASE_MATERIAL_BITMAP_ID,i);
+                // sebi: added %d, oh my how did it worked before??? thank you clang!
+				sprintf(textId,"%s%d",ASE_MATERIAL_BITMAP_ID,i);
 		
 				char *txmTemp = txmData;
 				txmData = strstr(txmData,textId);
@@ -2039,10 +2041,11 @@ long TG_AnimateShape::LoadTGMultiShapeAnimationFromASE (const char *fileName, TG
 		shapeIdsSet = false;
 	
 		//------------------------------------------
-		// Check if exists by getting size
-		long aseFileSize = gos_FileSize(fileName);
-		if (aseFileSize <= 0)
+		// Check if exists 
+		if (!gos_FileExists(fileName))
 			return(-1);
+		
+		long aseFileSize = gos_FileSize(fileName);
 	
 		//---------------------------------------
 		// Create Buffer to read entire file into
@@ -2215,7 +2218,7 @@ long TG_AnimateShape::LoadTGMultiShapeAnimationFromASE (const char *fileName, TG
 						for (long j=0;j<listOfAnimation[i].numFrames;j++)
 						{
 							char *scanData;
-							sprintf(nodeName,"%s %d",ASE_ANIM_POS_SAMPLE,(long)timeStamp);
+							sprintf(nodeName,"%s %d",ASE_ANIM_POS_SAMPLE,(int)timeStamp);
 							scanData = strstr(LineData,nodeName);
 		
 							if (scanData)
@@ -2287,7 +2290,7 @@ long TG_AnimateShape::LoadTGMultiShapeAnimationFromASE (const char *fileName, TG
 						for (long j=0;j<listOfAnimation[i].numFrames;j++)
 						{
 							char *scanData;
-							sprintf(nodeName,"%s %d",ASE_ANIM_ROT_SAMPLE,(long)timeStamp);
+							sprintf(nodeName,"%s %d",ASE_ANIM_ROT_SAMPLE,(int)timeStamp);
 							scanData = strstr(LineData,nodeName);
 		
 							Stuff::UnitQuaternion thisFrame;

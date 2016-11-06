@@ -80,7 +80,7 @@
 #include"logisticsdata.h"
 #endif
 
-#include "..\resource.h"
+#include "../resource.h"
 
 #define BLIP_FRAME_RATE		0.067
 //extern unsigned long NextIdNumber;
@@ -343,7 +343,7 @@ bool BuildingType::handleCollision (GameObjectPtr collidee, GameObjectPtr collid
 		case EXPLOSION:
 		case FIRE: {
 			WeaponShotInfo shot;
-			shot.init(NULL, -1, 10, 0, 0);
+			shot.init(0, -1, 10, 0, 0);
 			if (collider->getCollisionFreeTime() < scenarioTime)
 				return(true);
 			collidee->handleWeaponHit(&shot, (MPlayer != NULL));
@@ -1550,7 +1550,7 @@ long Building::handleWeaponHit (WeaponShotInfoPtr shotInfo, bool addMultiplayChu
 									for (long k=0;k<50;k++)
 									{
 										WeaponShotInfo shotInfo;
-										shotInfo.init(NULL, 160, 50.0f, pMover->calcHitLocation(NULL,-1,ATTACKSOURCE_WEAPONFIRE,0), 0);
+										shotInfo.init(0, 160, 50.0f, pMover->calcHitLocation(NULL,-1,ATTACKSOURCE_WEAPONFIRE,0), 0);
 										pMover->handleWeaponHit(&shotInfo);
 										if (MPlayer && MPlayer->isServer())
 											MPlayer->addWeaponHitChunk((GameObjectPtr)this, &shotInfo);
@@ -1582,7 +1582,7 @@ float Building::getDamageLevel (void) {
 //---------------------------------------------------------------------------
 bool Building::isLinked (void)
 {
-	return (parent != NULL);
+	return (parent != 0);
 }
 
 //---------------------------------------------------------------------------

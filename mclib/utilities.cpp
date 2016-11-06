@@ -250,7 +250,7 @@ void StaticInfo::getData(unsigned char * buffer)
 	}
 }
 
-void StaticInfo::init( FitIniFile& file, char* blockName, long hiResOffsetX, long hiResOffsetY, DWORD neverFlush )
+void StaticInfo::init( FitIniFile& file, const char* blockName, long hiResOffsetX, long hiResOffsetY, DWORD neverFlush )
 {
 	memset( location, 0, sizeof( location ) );
 	char fileName[256];

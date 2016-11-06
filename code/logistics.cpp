@@ -80,8 +80,8 @@ extern float loadProgress;
 
 extern bool aborted;
 
-#include "..\resource.h"
-void DEBUGWINS_print (char* s, long window = 0);
+#include "../resource.h"
+void DEBUGWINS_print (const char* s, long window = 0);
 
 
 //----------------------------------------------------------------------------------
@@ -545,7 +545,7 @@ int _stdcall Logistics::beginMission(void*, int, void*[])
 			missionLoadType = MISSION_LOAD_MP_LOGISTICS;
 		}
 		long maxTeam = -1;
-		for (i = 0; i < MAX_MC_PLAYERS; i++)
+		for (int i = 0; i < MAX_MC_PLAYERS; i++)
 			if (MPlayer->playerInfo[i].team > maxTeam)
 				maxTeam = MPlayer->playerInfo[i].team;
 		MPlayer->numTeams = maxTeam + 1;
@@ -693,7 +693,7 @@ int _stdcall Logistics::beginMission(void*, int, void*[])
 
 			if ( pTeam )
 			{
-				for ( i = pTeam->getRosterSize() - 1; i > -1; i-- )
+				for (int i = pTeam->getRosterSize() - 1; i > -1; i-- )
 				{
 					Mover* pMover = (Mover*)pTeam->getMover( i );
 					if ( pMover && pMover->getCommander()->getId() == Commander::home->getId() )
@@ -859,7 +859,7 @@ void Logistics::initializeLogData()
 			Mover* pMover = (Mover*)pTeam->getMover( i );
 			LogisticsPilot* pPilot = LogisticsData::instance->getPilot(pMover->getPilot()->getName());
 
-			unsigned long base, highlight1, highlight2;
+			DWORD base, highlight1, highlight2;
 			((Mech3DAppearance*)pMover->getAppearance())->getPaintScheme( highlight1, 
 				highlight2, base );
 			

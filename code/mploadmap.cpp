@@ -9,9 +9,13 @@ MPLoadMap.cpp			: Implementation of the MPLoadMap component.
 #include"mploadmap.h"
 #include"prefs.h"
 #include"inifile.h"
-#include "../MCLib/UserInput.h"
-#include "..\resource.h"
+#include"userinput.h"
+#include "../resource.h"
+#ifdef LINUX_BUILD
+#include "windows.h"
+#else
 #include<windows.h>
+#endif
 #include"missionbriefingscreen.h"
 
 #ifndef GAMESOUND_H
@@ -136,13 +140,8 @@ void MPLoadMap::seedDialog( bool bSeedSingle )
 		{
 			if ((findResult.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) == 0)
 			{
-
 				addFile( findResult.cFileName, bSeedSingle );
 			}
-
-				
-				
-			
 		} while (FindNextFile(searchHandle,&findResult) != 0);
 	}
 
@@ -188,7 +187,7 @@ void MPLoadMap::addFile( const char* pFileName, bool bSeedSingle )
 					pExt = (char*)(strstr( pFileName, ".FIT" ) );
 				}
 				if ( pExt )
-					*pExt = NULL;
+					*pExt = '\0';
 
 								
 				
@@ -636,10 +635,10 @@ void MPLoadMap::getMapNameFromFile( const char* pFileName, char* missionName, lo
 
 	FitIniFile file;
 
-	if ( NO_ERR != file.open( (char*)(const char*)path ) )
+	if ( NO_ERR != file.open( (const char*)path ) )
 	{
 		char errorStr[256];
-		sprintf( errorStr, "couldn't open file %s", path );
+		sprintf( errorStr, "couldn't open file %s", (const char*)path );
 		Assert( 0, 0, errorStr );
 	}
 

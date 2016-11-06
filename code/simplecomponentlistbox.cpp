@@ -7,7 +7,7 @@ SimpleComponentListBox.cpp			: Implementation of the SimpleComponentListBox comp
 \*************************************************************************************************/
 
 #include"simplecomponentlistbox.h"
-#include "../resource.h"
+#include"../resource.h"
 #include"logisticsvariant.h"
 #include"logisticscomponent.h"
 #include"logisticsdata.h"

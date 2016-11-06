@@ -56,7 +56,7 @@ extern TokenCodeType	statementEndList[];
 
 extern bool  EnterStateSymbol;
 extern ABLModulePtr		CurFSM;
-SymTableNodePtr forwardState (char* stateName);
+SymTableNodePtr forwardState (const char* stateName);
 extern SymTableNodePtr	CurModuleIdPtr;
 
 //***************************************************************************

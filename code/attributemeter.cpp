@@ -94,7 +94,7 @@ void AttributeMeter::render( long xOffset, long yOffset )
 		tmpRect.right = tmpRect.left + unitWidth;
 	}
 
-	for ( i = 0; i < nAddedCount; i++ )
+	for (int i = 0; i < nAddedCount; i++ )
 	{
 		drawRect( tmpRect, color );
 		color = interpolateColor( addedColorMin, addedColorMax, ((float)i)/(float)numBars );
@@ -105,7 +105,7 @@ void AttributeMeter::render( long xOffset, long yOffset )
 
 	tmpRect.bottom -= skipWidth;
 	tmpRect.right -= 1;
-	for ( i = nBarCount + nAddedCount; i < numBars; i++ )
+	for (int i = nBarCount + nAddedCount; i < numBars; i++ )
 	{
 		drawEmptyRect( tmpRect, rectColor, rectColor );
 		

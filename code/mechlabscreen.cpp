@@ -12,7 +12,7 @@ MechLabScreen.cpp			: Implementation of the MechLabScreen component.
 #include"mechbayscreen.h"
 #include"cmponent.h"
 #include"windows.h"
-#include "..\resource.h"
+#include "../resource.h"
 #include"logisticsdialog.h"
 #include<malloc.h>
 #include"gamesound.h"
@@ -137,7 +137,7 @@ int MechLabScreen::init( FitIniFile& file )
 		attributeMeters[i].init( &file, blockName );
 	}
 
-	for ( i= 0; i < buttonCount; i++ )
+	for (int i= 0; i < buttonCount; i++ )
 	{
 		switch( buttons[i].getID() )
 		{
@@ -171,7 +171,7 @@ int MechLabScreen::init( FitIniFile& file )
 	if ( NO_ERR != comboFile.open( path ) )
 	{
 		char errorStr[255];
-		sprintf( errorStr, "couldn't open file %s", (char*)path );
+		sprintf( errorStr, "couldn't open file %s", (const char*)path );
 		Assert( 0, 0, errorStr );
 	}
 
@@ -197,7 +197,7 @@ int MechLabScreen::init( FitIniFile& file )
 
 	
 	// initialize the selection rectangles
-	for ( i = 0; i < 5; i++ )
+	for (int i = 0; i < 5; i++ )
 	{
 		for ( int j = 0; j < 2; j++ )
 		{
@@ -310,7 +310,7 @@ void MechLabScreen::begin()
 		statics[50].setTexture( path );
 
 
-		for ( i = COMPONENT_FORM_WEAPON_ENERGY; i < COMPONENT_FORM_JUMPJET + 1; i++ )
+		for (int i = COMPONENT_FORM_WEAPON_ENERGY; i < COMPONENT_FORM_JUMPJET + 1; i++ )
 		{
 			aButton* pButton = getButton( i );
 			if ( pButton )
@@ -421,7 +421,7 @@ void MechLabScreen::update()
 		}
 		vals[3] = pVariant->getECM() > 0;
 
-		for ( i = 0; i < 4; i++ )
+		for (int i = 0; i < 4; i++ )
 		{
 			if ( vals[i] )
 			{
@@ -809,7 +809,7 @@ void MechLabScreen::render(int xOffset, int yOffset)
 
 
 
-	for ( i = 0; i < componentCount; i++ )
+	for (int i = 0; i < componentCount; i++ )
 		componentIcons[i].render(xOffset, yOffset);
 
 	if ( pSelectedComponent && pVariant )
@@ -1339,7 +1339,7 @@ void	MechLabScreen::setComponent( LogisticsComponent* pComponent, bool bMessageF
 
 		textObjects[13].setText( "" );
 
-		for ( i = 0; i < 5; i++ )
+		for (int i = 0; i < 5; i++ )
 		{
 			attributeMeters[i].setValue( 0 );
 			attributeMeters[i].showGUIWindow( 0 );
@@ -1386,7 +1386,7 @@ void MechLabScreen::showJumpJetItems( bool bShow )
 		}
 
 		// weapon stuff
-		for ( i = 1; i < 3; i++ )
+		for (int i = 1; i < 3; i++ )
 		{
 			attributeMeters[i].showGUIWindow( !bShow );
 		}

@@ -14,7 +14,7 @@
 
 #ifndef WARRIOR_H
 #include"warrior.h"
-#endif`
+#endif
 
 #ifndef GAMEOBJ_H
 #include"gameobj.h"
@@ -148,7 +148,7 @@ float FireOddsTable[NUM_FIREODDS] = {
 	80.0
 };
 
-char* pilotAlarmFunctionName[NUM_PILOT_ALARMS] = {
+const char* pilotAlarmFunctionName[NUM_PILOT_ALARMS] = {
 	"handletargetofweaponfire",
 	"handlehitbyweaponfire",
 	"handledamagetakenrate",
@@ -170,7 +170,9 @@ char* pilotAlarmFunctionName[NUM_PILOT_ALARMS] = {
 	"handlenewmover"
 };
 
-char ProfessionalismOffsetTable[NUM_OFFSET_RANGES][2] = {
+// sebi: those are not used, only filled in mover.cpp
+/*
+const char ProfessionalismOffsetTable[NUM_OFFSET_RANGES][2] = {
 	{10, 10},
 	{20, 5},
 	{30, 0},
@@ -178,7 +180,7 @@ char ProfessionalismOffsetTable[NUM_OFFSET_RANGES][2] = {
 	{100, -10}
 };
 
-char DecorumOffsetTable[NUM_OFFSET_RANGES][2] = {
+const char DecorumOffsetTable[NUM_OFFSET_RANGES][2] = {
 	{10, 10},
 	{20, 5},
 	{30, 0},
@@ -186,12 +188,13 @@ char DecorumOffsetTable[NUM_OFFSET_RANGES][2] = {
 	{100, -10}
 };
 
-char AmmoConservationModifiers[2][2] = {
+const char AmmoConservationModifiers[2][2] = {
 	{50, -5},
 	{20, -10}
 };
+*/
 
-char* SkillsTable[NUM_SKILLS] = {
+const char* SkillsTable[NUM_SKILLS] = {
 	"Piloting",
 	"Sensors",
 	"Gunnery"
@@ -241,7 +244,7 @@ float WarriorRankScale[NUM_WARRIOR_RANKS] = {
 
 
 
-char *SpecialtySkillsTable[NUM_SPECIALTY_SKILLS] = {
+const char *SpecialtySkillsTable[NUM_SPECIALTY_SKILLS] = {
 	"LightMechSpecialist",
 	"LaserSpecialist",
 	"LightACSpecialist",
@@ -671,7 +674,8 @@ long TargetPriorityList::calcTarget (MechWarriorPtr pilot, Stuff::Vector3D locat
 				// For now, we'll pick the closest Turret...
 				float shortestDistance = 999999.0;
 				GameObjectPtr closestTurret = NULL;
-				for (long i = 0; i < ObjectManager->getNumTurrets(); i++) {
+                int i;
+				for (i = 0; i < ObjectManager->getNumTurrets(); i++) {
 					GameObjectPtr turret = (GameObjectPtr)ObjectManager->getTurret(i);
 					if (!turret->getTeam()->isFriendly(pilot->getTeam())/* && turret->isCaptureable(pilot->getTeam()->getId())*/) {
 						float distance = pilot->getVehicle()->distanceFrom(turret->getPosition());
@@ -840,16 +844,16 @@ void MechWarrior::lobotomy (void) {
 void MechWarrior::init (bool create) {
 
 	used = false;
-	name[0] = NULL;
-	callsign[0] = NULL;
-	videoStr[0] = NULL;
-	audioStr[0] = NULL;
-	brainStr[0] = NULL;
+	name[0] = '\0';
+	callsign[0] = '\0';
+	videoStr[0] = '\0';
+	audioStr[0] = '\0';
+	brainStr[0] = '\0';
 	photoIndex = 0;
 	
 	rank = WARRIOR_RANK_GREEN;
-	for (long i = 0; i < NUM_SKILLS; i++) {
-		for (long j = 0; j < NUM_COMBAT_STATS; j++) {
+	for (int i = 0; i < NUM_SKILLS; i++) {
+		for (int j = 0; j < NUM_COMBAT_STATS; j++) {
 			numSkillUses[i][j] = 0;
 			numSkillSuccesses[i][j] = 0;
 		}
@@ -884,15 +888,15 @@ void MechWarrior::init (bool create) {
 	numKilled = 0;
 	memset( killed, 0, sizeof( GameObject* ) * MAX_MOVERS / 3 );
 
-	for (i = 0; i < NUM_VEHICLE_CLASSES; i++)
-		for (long j = 0; j < NUM_COMBAT_STATS; j++)
+	for (int i = 0; i < NUM_VEHICLE_CLASSES; i++)
+		for (int j = 0; j < NUM_COMBAT_STATS; j++)
 			numMechKills[i][j] = 0;
 
-	for (i = 0; i < NUM_PHYSICAL_ATTACKS; i++)
-		for (long j = 0; j < NUM_COMBAT_STATS; j++)
+	for (int i = 0; i < NUM_PHYSICAL_ATTACKS; i++)
+		for (int j = 0; j < NUM_COMBAT_STATS; j++)
 			numPhysicalAttacks[i][j] = 0;
 
-	for (i = 0; i < NUM_SPECIALTY_SKILLS; i++)
+	for (int i = 0; i < NUM_SPECIALTY_SKILLS; i++)
 		specialtySkills[i] = false;
 
 	descID = 0;
@@ -906,14 +910,14 @@ void MechWarrior::init (bool create) {
 
 	//---------------------
 	// ABL Brain and Memory
-	for (i = 0; i < NUM_MEMORY_CELLS; i++)
+	for (int i = 0; i < NUM_MEMORY_CELLS; i++)
 		memory[i].integer = 0;
 	brain = NULL;
-	for (i = 0; i < NUM_PILOT_ALARMS; i++)
+	for (int i = 0; i < NUM_PILOT_ALARMS; i++)
 		brainAlarmCallback[i] = NULL;
 
-	for (i = 0; i < NUM_PILOT_DEBUG_STRINGS; i++)
-		debugStrings[i][0] = NULL;
+	for (int i = 0; i < NUM_PILOT_DEBUG_STRINGS; i++)
+		debugStrings[i][0] = '\0';
 
 	brainUpdate = (float)(numWarriors % 30) * 0.2;
 	combatUpdate = (float)(numWarriors % 15) * 0.1;
@@ -976,7 +980,7 @@ void MechWarrior::init (bool create) {
 
 	if (create)
 	{
-		for (i = 0; i < 2; i++) 
+		for (int i = 0; i < 2; i++) 
 		{
 			moveOrders.path[i] = new MovePath;
 			if (!moveOrders.path[i])
@@ -1096,7 +1100,7 @@ long MechWarrior::init (FitIniFile* warriorFile) {
 	if (result != NO_ERR)
 		return(result);
 		
-	i=0;
+	int i=0;
 	for (i = 0; i < NUM_SKILLS; i++) {
 		result = warriorFile->readIdChar(SkillsTable[i], skills[i]);
 		if (result != NO_ERR)
@@ -1353,15 +1357,15 @@ void MechWarrior::clear (void) {
 	//------------------------
 	// Now, let's clear 'em...
 	used = false;
-	name[0] = NULL;
-	callsign[0] = NULL;
-	videoStr[0] = NULL;
-	audioStr[0] = NULL;
-	brainStr[0] = NULL;
+	name[0] = '\0';
+	callsign[0] = '\0';
+	videoStr[0] = '\0';
+	audioStr[0] = '\0';
+	brainStr[0] = '\0';
 	
 	rank = WARRIOR_RANK_GREEN;
-	for (long i = 0; i < NUM_SKILLS; i++) {
-		for (long j = 0; j < NUM_COMBAT_STATS; j++) {
+	for (int i = 0; i < NUM_SKILLS; i++) {
+		for (int j = 0; j < NUM_COMBAT_STATS; j++) {
 			numSkillUses[i][j] = 0;
 			numSkillSuccesses[i][j] = 0;
 		}
@@ -1395,15 +1399,15 @@ void MechWarrior::clear (void) {
 	numKilled = 0;
 	memset( killed, 0, sizeof( GameObject* ) * MAX_MOVERS / 3 );
 
-	for (i = 0; i < NUM_VEHICLE_CLASSES; i++)
-		for (long j = 0; j < NUM_COMBAT_STATS; j++)
+	for (int i = 0; i < NUM_VEHICLE_CLASSES; i++)
+		for (int j = 0; j < NUM_COMBAT_STATS; j++)
 			numMechKills[i][j] = 0;
 
-	for (i = 0; i < NUM_PHYSICAL_ATTACKS; i++)
-		for (long j = 0; j < NUM_COMBAT_STATS; j++)
+	for (int i = 0; i < NUM_PHYSICAL_ATTACKS; i++)
+		for (int j = 0; j < NUM_COMBAT_STATS; j++)
 			numPhysicalAttacks[i][j] = 0;
 
-	for (i = 0; i < NUM_SPECIALTY_SKILLS; i++)
+	for (int i = 0; i < NUM_SPECIALTY_SKILLS; i++)
 		specialtySkills[i] = false;
 
 	descID = 0;
@@ -1415,18 +1419,18 @@ void MechWarrior::clear (void) {
 
 	//---------------------
 	// ABL Brain and Memory
-	for (i = 0; i < NUM_MEMORY_CELLS; i++)
+	for (int i = 0; i < NUM_MEMORY_CELLS; i++)
 		memory[i].integer = 0;
 
 	//OK if brain is NULL. Like for Infantry!!
 	if (brain)
 		brain->init(-1);
 
-	for (i = 0; i < NUM_PILOT_ALARMS; i++)
+	for (int i = 0; i < NUM_PILOT_ALARMS; i++)
 		brainAlarmCallback[i] = NULL;
 
-	for (i = 0; i < NUM_PILOT_DEBUG_STRINGS; i++)
-		debugStrings[i][0] = NULL;
+	for (int i = 0; i < NUM_PILOT_DEBUG_STRINGS; i++)
+		debugStrings[i][0] = '\0';
 
 	//brainUpdate = (float)(numWarriors % 30) * 0.2;
 	//combatUpdate = (float)(numWarriors % 15) * 0.1;
@@ -2058,10 +2062,10 @@ void MechWarrior::setVehicle (GameObjectPtr vehicle) {
 }
 
 //---------------------------------------------------------------------------
-void MechWarrior::setBrainName (char *brainName)
+void MechWarrior::setBrainName (const char *brainName)
 {
 	strncpy(brainStr, brainName, MAXLEN_PILOT_BRAIN - 1);
-	brainStr[MAXLEN_PILOT_BRAIN - 1] = NULL;
+	brainStr[MAXLEN_PILOT_BRAIN - 1] = '\0';
 }
 
 //---------------------------------------------------------------------------
@@ -2223,12 +2227,12 @@ GameObjectPtr MechWarrior::calcTurretThreats (float threatRange, long minThreat)
 
 	long turretThreat[256];
 	long turretControlThreat[256];
-	for (long i = 0; i < ObjectManager->getNumTurretControls(); i++)
+	for (int i = 0; i < ObjectManager->getNumTurretControls(); i++)
 		turretControlThreat[i] = 0;
-	for (i = 0; i < ObjectManager->getNumTurrets(); i++)
+	for (int i = 0; i < ObjectManager->getNumTurrets(); i++)
 		turretThreat[i] = 0;
 	unsigned long vehicleWID = getVehicle()->getWatchID();
-	for (i = 0; i < ObjectManager->getNumTurrets(); i++) {
+	for (int i = 0; i < ObjectManager->getNumTurrets(); i++) {
 		Turret* turret = ObjectManager->getTurret(i);
 		if (!turret->isDisabled() && (turret->targetWID == vehicleWID)) {
 			turretThreat[i] += turret->getThreatRating();
@@ -2238,7 +2242,7 @@ GameObjectPtr MechWarrior::calcTurretThreats (float threatRange, long minThreat)
 	}
 
 	long biggestThreat = -1;
-	for (i = 0; i < ObjectManager->getNumTurretControls(); i++) {
+	for (int i = 0; i < ObjectManager->getNumTurretControls(); i++) {
 		BuildingPtr controlBuilding = ObjectManager->getTurretControl(i);
 		float distance = getVehicle()->distanceFrom(controlBuilding->getPosition());
 		if (distance > threatRange)
@@ -6728,7 +6732,7 @@ long MechWarrior::orderDeployElementals (long origin, unsigned long params) {
 long MechWarrior::orderCapture (long origin, GameObjectPtr target, long fromArea, unsigned long params) {
 
 	if (!target || /*!target->isCaptureable(getTeam()->getId()) ||*/ target->isFriendly(getVehicle()) || 
-			target->getCaptureBlocker(getVehicle()) != NULL)
+			target->getCaptureBlocker(getVehicle()) != 0)
 		return(1);
 
 	bool run = ((params & TACORDER_PARAM_RUN) != 0);
@@ -7302,7 +7306,7 @@ long MechWarrior::loadBrainParameters (FitIniFile* brainFile, long warriorId) {
 		}
 	}
 
-	for (i = 0; i < numStaticVars; i++) {
+	for (int i = 0; i < numStaticVars; i++) {
 		char blockName[64];
 		sprintf(blockName, "%sStatic%d", warriorName, i);
 		long result = brainFile->seekBlock(blockName);
@@ -7538,7 +7542,7 @@ void MechWarrior::shutdown (void) {
 	}
 }
 
-BldgAppearance* MechWarrior::getWayPointMarker( const Stuff::Vector3D& pos, char* name )
+BldgAppearance* MechWarrior::getWayPointMarker( const Stuff::Vector3D& pos, const char* name )
 {
 	int appearanceType = (BLDG_TYPE << 24);
 	AppearanceTypePtr buildingAppearanceType = appearanceTypeList->getAppearance(appearanceType, name );

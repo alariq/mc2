@@ -537,7 +537,7 @@ public:
 	virtual ~CObjectiveAction() {}
 	int Alignment() { return m_alignment; }
 	void Alignment(int alignment) { m_alignment = alignment; }
-	bool DoCommonEditDialog() {}
+	bool DoCommonEditDialog() { return false; /* sebi: what else can I return here? */}
 	virtual action_species_type Species() = 0;
 	virtual bool Init() = 0;
 	virtual bool Read( FitIniFile* missionFile ) = 0;

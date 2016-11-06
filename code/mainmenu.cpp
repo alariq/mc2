@@ -6,8 +6,14 @@ MainMenu.cpp			: Implementation of the MainMenu component.
 //===========================================================================//
 \*************************************************************************************************/
 
+#ifdef LINUX_BUILD
+#include "windows.h"
+struct DDSURFACEDESC2 {
+};
+#else
 #include<windows.h>
 #include<ddraw.h>
+#endif
 #include"mainmenu.h"
 #include"mclib.h"
 #include"inifile.h"
@@ -15,8 +21,7 @@ MainMenu.cpp			: Implementation of the MainMenu component.
 #include"logisticsdialog.h"
 #include"abutton.h"
 #include"optionsscreenwrapper.h"
-#include<windows.h>
-#include "..\resource.h"
+#include "../resource.h"
 #include"mechlopedia.h"
 #include"gamesound.h"
 #include"aanimobject.h"
@@ -59,7 +64,7 @@ void SplashIntro::init()
 	if ( NO_ERR != file.open( path ) )
 	{
 		char errorStr[256];
-		sprintf( errorStr, "couldn't open file %s", (char*)path );
+		sprintf( errorStr, "couldn't open file %s", (const char*)path );
 		Assert(0,0,errorStr );
 	}
 
@@ -104,7 +109,7 @@ int MainMenu::init( FitIniFile& file )
 	if ( NO_ERR != file2.open( name ) )
 	{
 		char errorStr[256];
-		sprintf( errorStr, "couldn't open file %s", (char*)name );
+		sprintf( errorStr, "couldn't open file %s", (const char*)name );
 		Assert(0,0,errorStr );
 	}
 
@@ -131,7 +136,7 @@ int MainMenu::init( FitIniFile& file )
 	if ( NO_ERR != mpFile.open( path ) )
 	{
 		char error[256];
-		sprintf( error, "couldn't open file %s", path );
+		sprintf( error, "couldn't open file %s", (const char*)path );
 		Assert( 0, 0, error );
 		return -1;		
 	}
@@ -394,7 +399,7 @@ int	MainMenu::handleMessage( unsigned long what, unsigned long who )
 				char realText[2048];
 				cLoadString(IDS_LAWYER_BABBLE, realText, 2047 );
 				char lawyerBabble[2048];
-				unsigned long pIDLen = 64;
+				DWORD pIDLen = 64;
 				char pID[64];
 				sprintf( pID, "INVALID ID" );
 				gos_LoadDataFromRegistry("PID", pID, &pIDLen);

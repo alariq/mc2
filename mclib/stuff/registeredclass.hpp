@@ -24,7 +24,7 @@ namespace Stuff {
 			: public Stuff::Signature
 		#endif
 	{
-		friend RegisteredClass__ClassData;
+		friend class RegisteredClass__ClassData;
 
 	public:
 		static void

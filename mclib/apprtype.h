@@ -85,7 +85,7 @@ class AppearanceType
 			init();
 		}
 
-		virtual void init (char *fileName);
+		virtual void init (const char *fileName) = 0;
 		
 		virtual void destroy (void);
 
@@ -138,7 +138,7 @@ class AppearanceTypeList
 
 		void init (unsigned long heapSize);
 
-		AppearanceTypePtr getAppearance (unsigned long apprNum, char * apprFile);
+		AppearanceTypePtr getAppearance (unsigned long apprNum, const char * apprFile);
 		
 		long removeAppearance (AppearanceTypePtr which);
 		

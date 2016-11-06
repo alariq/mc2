@@ -267,9 +267,9 @@ typedef struct _MC2Player {
 	long			resourcePoints;
 	long			rank;
 	bool			ready;
-	long			score;
-	long			kills;
-	long			losses;
+	int             score;
+	int             kills;
+	int             losses;
 	bool			winner;
 	bool			leftSession;
 	bool			booted;
@@ -850,9 +850,9 @@ class MCMSG_EndMission {
 	public:
 
 		unsigned char	type;
-		long			teamScore[MAX_MC_PLAYERS];
-		long			playerScore[MAX_MC_PLAYERS];
-		long			result;
+		int             teamScore[MAX_MC_PLAYERS];
+		int             playerScore[MAX_MC_PLAYERS];
+		int             result;
 
 	public:
 
@@ -1007,8 +1007,8 @@ class MCMSG_MoverUpdate {
 	public:
 
 		unsigned char		type;
-		long				teamScore[MAX_MC_PLAYERS];
-		long				playerScore[MAX_MC_PLAYERS];
+		int                 teamScore[MAX_MC_PLAYERS];
+		int                 playerScore[MAX_MC_PLAYERS];
 		//long				resourcePoints[MAX_MC_PLAYERS];
 		unsigned short		updateId;
 		unsigned char		numRLEs;
@@ -1334,7 +1334,7 @@ class MultiPlayer {
 		long				numSalvageCraftUsed[MAX_MC_PLAYERS];
 
 		long				numTeams;
-		long				teamScore[MAX_TEAMS];
+		int                 teamScore[MAX_TEAMS];
 		long				winningTeam;
 		BuildingPtr			mainHqBuildings[MAX_TEAMS];
 		long				numHqBuildings;
@@ -1542,7 +1542,7 @@ class MultiPlayer {
 			return(inProgress);
 		}
 
-		void addTeamScore (long teamID, long score);
+		void addTeamScore (int teamID, int score);
 
 		long closeSession (void);
 
@@ -1762,7 +1762,7 @@ class MultiPlayer {
 
 		void sendEndMission (long result);
 
-		void sendReinforcement (long vehicleID, long rosterIndex, char pilotName[16], long commanderID, Stuff::Vector3D pos, unsigned char stage);
+		void sendReinforcement (long vehicleID, long rosterIndex, const char pilotName[16], long commanderID, Stuff::Vector3D pos, unsigned char stage);
 
 		void sendNewServer (void);
 

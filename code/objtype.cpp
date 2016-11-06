@@ -218,7 +218,7 @@ bool ObjectType::handleDestruction (GameObjectPtr collidee, GameObjectPtr collid
 //* GAMEOBJECT TYPE MANAGER class
 //***************************************************************************
 
-long ObjectTypeManager::init (char* objectFileName, long objectTypeCacheSize, long objectCacheSize, long maxObjectTypes) {
+long ObjectTypeManager::init (const char* objectFileName, long objectTypeCacheSize, long objectCacheSize, long maxObjectTypes) {
 
 	FullPathFileName objectName;
 	objectName.init(objectPath,objectFileName,".pak");

@@ -109,7 +109,7 @@ class CraterManager
 			init();
 		}
 		
-		long init (long numCraters, unsigned long craterTypeSize, char *craterFileName);
+		long init (long numCraters, unsigned long craterTypeSize, const char *craterFileName);
 		
 		~CraterManager (void)
 		{

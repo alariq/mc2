@@ -20,7 +20,7 @@ class FitIniFile;
 
 struct tagRECT;
 struct _DDSURFACEDESC2;
-
+struct DDSURFACEDESC2;
 
 
 //*************************************************************************************************
@@ -54,6 +54,7 @@ public:
 
 class LoadScreen: public LogisticsScreen
 {
+    friend void ProgressTimer(	RECT& WinRect, DDSURFACEDESC2& mouseSurfaceDesc );
 	public:
 
 		LoadScreen();

@@ -12,7 +12,7 @@ bool gos_load_glyphs(const char* glyphFile, gosGlyphInfo& gi)
     FILE* glyph_info = fopen(glyphFile, "rb");
     if(!glyph_info) {
         int last_err = errno;
-        SPEW(("fopen: %s\n", strerror(errno)));
+        SPEW(("fopen: %s\n", strerror(last_err)));
         return false;
     }
 

@@ -12,7 +12,7 @@ ForceGroupBar.cpp			: Implementation of the ForceGroupBar component.
 #include"team.h"
 #include"missiongui.h"
 #include"controlgui.h"
-#include "..\resource.h"
+#include "../resource.h"
 #include"multplyr.h"
 #include"mc2movie.h"
 #include"comndr.h"
@@ -192,7 +192,7 @@ void ForceGroupBar::update( )
 	}
 	
 
-	for ( i = 0; i < iconCount; ++i )
+	for (int i = 0; i < iconCount; ++i )
 	{
 		if ( icons[i]->inRegion( screen.x, screen.y ) )
 		{
@@ -498,7 +498,7 @@ bool ForceGroupBar::setPilotVideo( const char* pVideo, MechWarrior* pPilot )
 							cLoadString(IDS_MC2_movieMISSING,msg1,511);
 							cLoadString(IDS_MC2_CDMISSING,msg,1023);
 							cLoadString(IDS_MC2_MISSING_TITLE,title,255);
-							sprintf(data,msg1,path,msg);
+							sprintf(data,msg1,(const char*)path,msg);
 							DWORD result = MessageBox(NULL,data,title,MB_OKCANCEL | MB_ICONWARNING);
 							if (result == IDCANCEL)
 							{

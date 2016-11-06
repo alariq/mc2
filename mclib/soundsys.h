@@ -250,7 +250,7 @@ class SoundSystem
 		void stopBettySample (void);
 
 		
-		long playSupportSample (unsigned long supportSampleId, char* fileName = NULL);
+		long playSupportSample (unsigned long supportSampleId, const char* fileName = NULL);
 		
  		void stopDigitalSample (unsigned long sampleHandleNumber);
 		void stopDigitalMusic (void);

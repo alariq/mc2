@@ -126,7 +126,7 @@ extern long				dummyCount;
 extern long				lineNumber;
 extern long				FileNumber;
 extern long				errorCount;
-extern long				execStatementCount;
+extern int              execStatementCount;
 extern long				NumSourceFiles;
 extern char				SourceFiles[MAX_SOURCE_FILES][MAXLEN_FILENAME];
  
@@ -572,7 +572,7 @@ profile = true;
 
 //***************************************************************************
 
-long ABLi_preProcess (char* sourceFileName, long* numErrors, long* numLinesProcessed, long* numFilesProcessed, bool printLines) {
+long ABLi_preProcess (const char* sourceFileName, long* numErrors, long* numLinesProcessed, long* numFilesProcessed, bool printLines) {
 
     char* source_fn = strdup(sourceFileName);
     source_fn = strlwr(source_fn);
@@ -715,7 +715,10 @@ long ABLi_preProcess (char* sourceFileName, long* numErrors, long* numLinesProce
 	ModuleRegistry[NumModulesRegistered].fileName = (char*)ABLStackMallocCallback(strlen(sourceFileName) + 1);
 	if (!ModuleRegistry[NumModulesRegistered].fileName)
 		ABL_Fatal(0, " ABL: Unable to AblStackHeap->malloc module filename ");
-	strcpy(ModuleRegistry[NumModulesRegistered].fileName, strlwr(sourceFileName));
+    // sebi
+	//strcpy(ModuleRegistry[NumModulesRegistered].fileName, strlwr(sourceFileName));
+	strcpy(ModuleRegistry[NumModulesRegistered].fileName, sourceFileName);
+    strlwr(ModuleRegistry[NumModulesRegistered].fileName);
 	ModuleRegistry[NumModulesRegistered].moduleIdPtr = moduleIdPtr;
 
 	ModuleRegistry[NumModulesRegistered].numSourceFiles = NumSourceFiles;
@@ -867,7 +870,7 @@ long ABLi_execute (SymTableNodePtr moduleIdPtr, SymTableNodePtr functionIdPtr, A
 
 				//----------------------------------------------------------
 				// Formal parameter is an array or record, so make a copy...
-				if ((formalTypePtr->form == FRM_ARRAY)/* || (formalTypePtr->form == FRM_RECORD)*/) {
+				if (formalTypePtr->form == FRM_ARRAY/* || (formalTypePtr->form == FRM_RECORD)*/) {
 					//------------------------------------------------------------------------------
 					// The following is a little inefficient, but is kept this way to keep it clear.
 					// Once it's verified to work, optimize...
@@ -961,7 +964,7 @@ void ABLi_close (void) {
 
 //***************************************************************************
 
-ABLModulePtr ABLi_loadLibrary (char* sourceFileName, long* numErrors, long* numLinesProcessed, long* numFilesProcessed, bool printLines, bool createInstance) {
+ABLModulePtr ABLi_loadLibrary (const char* sourceFileName, long* numErrors, long* numLinesProcessed, long* numFilesProcessed, bool printLines, bool createInstance) {
 
 	//--------------------------------------------------------------------
 	// Create an instance of it so it may be used from other modules. Note
@@ -1064,10 +1067,10 @@ bool ABLi_enabled (void) {
 
 //***************************************************************************
 
-void ABLi_addFunction (char* name,
+void ABLi_addFunction (const char* name,
 					   bool isOrder,
-					   char* paramList,
-					   char* returnType,
+					   const char* paramList,
+					   const char* returnType,
 					   void (*codeCallback)(void)) {
 
 	enterStandardRoutine(name, -1, isOrder, paramList, returnType, codeCallback);
@@ -1338,7 +1341,7 @@ void routine (void) {
 
 //***************************************************************************
 
-SymTableNodePtr forwardState (char* stateName) {
+SymTableNodePtr forwardState (const char* stateName) {
 
 	SymTableNodePtr stateSymbol = searchSymTableForState(stateName, SymTableDisplay[1]);
 	if (stateSymbol)

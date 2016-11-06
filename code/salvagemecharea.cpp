@@ -13,7 +13,7 @@ SalvageMechArea.cpp			: Implementation of the SalvageMechArea component.
 #include"logisticsvariant.h"
 #include"mechicon.h"
 #include"logisticsdata.h"
-#include "..\resource.h"
+#include "../resource.h"
 #include"gamesound.h"
 #include<malloc.h>
 
@@ -150,7 +150,7 @@ void SalvageMechScreen::init(FitIniFile* file)
 
 	BattleMech** pSortedMechs = (BattleMech**)_alloca( ObjectManager->numMechs * sizeof( BattleMech* ) );
 	int count = 0;
-	for ( i = 0; i < ObjectManager->numMechs; i++ )
+	for (int i = 0; i < ObjectManager->numMechs; i++ )
 	{
 		BattleMech* pMech = ObjectManager->getMech( i );
 		if ( pMech->isDisabled() && !pMech->isDestroyed() && pMech->moveLevel != 2 )
@@ -159,7 +159,7 @@ void SalvageMechScreen::init(FitIniFile* file)
 
 	qsort( pSortedMechs, count, sizeof ( BattleMech* ), sortMechs );
 
-	for ( i = 0; i < count; i++ )
+	for (int i = 0; i < count; i++ )
 	{
 		BattleMech* pMech = pSortedMechs[i];
 		if ( pMech->isDisabled() && !pMech->isDestroyed() && pMech->moveLevel != 2 ) // don't put copters in the list
@@ -703,7 +703,7 @@ void SalvageMechArea::render(long xOffset, long yOffset)
 
 		}
 
-		for ( i = 0; i < 3; i++ )
+		for (int i = 0; i < 3; i++ )
 		{
 			attributeMeters[i].render(xOffset, yOffset);
 		}

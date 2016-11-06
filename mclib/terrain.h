@@ -202,20 +202,20 @@ class Terrain
 				volatile float& percent,
 					float percentRange); // pass in null for a blank new map
 
-		float getTerrainElevation (Stuff::Vector3D &position);
-		short getTerrainType (Stuff::Vector3D &position);
-		float getTerrainAngle (Stuff::Vector3D &position, Stuff::Vector3D* normal = NULL);
-		Stuff::Vector3D getTerrainNormal (Stuff::Vector3D &position);
-		float getTerrainLight (Stuff::Vector3D& position);
-		bool isVisible (Stuff::Vector3D &looker, Stuff::Vector3D &looked_at);
+		float getTerrainElevation (const Stuff::Vector3D &position);
+		short getTerrainType (const Stuff::Vector3D &position);
+		float getTerrainAngle (const Stuff::Vector3D &position, Stuff::Vector3D* normal = NULL);
+		Stuff::Vector3D getTerrainNormal (const Stuff::Vector3D &position);
+		float getTerrainLight (const Stuff::Vector3D& position);
+		bool isVisible (const Stuff::Vector3D &looker, const Stuff::Vector3D &looked_at);
 
 		float getWaterElevation ()
 		{
 			return mapData->waterElevation();
 		}
 
-		void markSeen (Stuff::Vector3D &looker, byte who, float specialUnitExpand);
-		void markRadiusSeen (Stuff::Vector3D &looker, float dist, byte who);
+		void markSeen (const Stuff::Vector3D &looker, byte who, float specialUnitExpand);
+		void markRadiusSeen (const Stuff::Vector3D &looker, float dist, byte who);
 
 		long update (void);
 		void render (void);
@@ -225,9 +225,9 @@ class Terrain
 
 		void drawTopView (void);
 
-		static bool IsValidTerrainPosition (Stuff::Vector3D pos);
-		static bool IsEditorSelectTerrainPosition (Stuff::Vector3D pos);
-		static bool IsGameSelectTerrainPosition (Stuff::Vector3D pos);
+		static bool IsValidTerrainPosition (const Stuff::Vector3D pos);
+		static bool IsEditorSelectTerrainPosition (const Stuff::Vector3D pos);
+		static bool IsGameSelectTerrainPosition (const Stuff::Vector3D pos);
 
 		long save( PacketFile* fileName, int whichPacket, bool QuickSave = false);
 		bool save( FitIniFile* fitFile ); // save stuff like water info
@@ -238,8 +238,8 @@ class Terrain
 		long getOverlayTile (long block, long vertex);
 	
 		// new overlay stuff
-		void setOverlay( long tileR, long tileC, Overlays type, unsigned long Offset );
-		void getOverlay( long tileR, long tileC, Overlays& type, unsigned long& Offset );
+		void setOverlay( long tileR, long tileC, Overlays type, DWORD Offset );
+		void getOverlay( long tileR, long tileC, Overlays& type, DWORD& Offset );
 		void setTerrain( long tileR, long tileC, int terrainType );
 		int	 getTerrain( long tileR, long tileC );
 		unsigned long getTexture( long tileR, long tileC ); 
@@ -281,7 +281,7 @@ class Terrain
 		void reCalcLight(bool doShadows = false);
 		void clearShadows();
 
-		long getWater (Stuff::Vector3D& worldPos);
+		long getWater (const Stuff::Vector3D& worldPos);
 
 		float getClipRange()
 		{

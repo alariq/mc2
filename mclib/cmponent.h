@@ -552,8 +552,8 @@ class MasterComponent {
 
 		void multiplyWeaponRanges (float factor);
 
-		static long loadMasterList (char* fileName, long numComponents, float baseSensorRange);
-		static long saveMasterList (char* fileName, long numComponents,float baseSensorRange);
+		static long loadMasterList (const char* fileName, long numComponents, float baseSensorRange);
+		static long saveMasterList (const char* fileName, long numComponents,float baseSensorRange);
 
 		static long freeMasterList (void);
 

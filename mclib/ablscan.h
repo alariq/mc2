@@ -18,6 +18,8 @@
 #include"ablerr.h"
 #endif
 
+#include<cstddef>
+
 //***************************************************************************
 
 #define	TAB_SIZE				4
@@ -195,7 +197,7 @@ class ABLFile {
 			destroy();
 		}
 		
-		long set (void* fPtr) {
+		void set (void* fPtr) {
 			file = fPtr;
 		}
 

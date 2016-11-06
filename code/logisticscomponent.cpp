@@ -11,7 +11,7 @@ LogisticsComponent.cpp			: Implementation of the LogisticsComponent component.
 #include<gameos.hpp>
 #include"cmponent.h"
 
-#include "../resource.h"
+#include"../resource.h"
 #include"utilities.h"
 
 

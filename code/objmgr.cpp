@@ -274,7 +274,7 @@ void GameObjectManager::init (void) {
 
 //---------------------------------------------------------------------------
 
-void GameObjectManager::init (char* objTypeDataFile, long objTypeHeapSize, long objHeapSize) {
+void GameObjectManager::init (const char* objTypeDataFile, long objTypeHeapSize, long objHeapSize) {
 
 	if (objTypeManager)
 		delete objTypeManager;
@@ -844,7 +844,7 @@ void GameObjectManager::countTerrainObjects (PacketFile* terrainFile, long first
 
 	// fix up handles
 	long curHandle = firstHandle;
-	for ( i = 0; i < Terrain::numObjBlocks; ++i )
+	for (int i = 0; i < Terrain::numObjBlocks; ++i )
 	{
 		Terrain::objBlockInfo[i].firstHandle = curHandle;
 		curHandle += Terrain::objBlockInfo[i].numObjects;						
@@ -946,7 +946,7 @@ void GameObjectManager::loadTerrainObjects (PacketFile* terrainFile,
 	float increment = 0.0f;
 	if (totalObjCount)
 		increment = progressRange/totalObjCount;
-	for ( i = 0; i < totalObjCount; ++i )
+	for (int i = 0; i < totalObjCount; ++i )
 	{
 		addObject( data, 
 			curTerrainObjectIndex, curBuildingIndex, 
@@ -967,7 +967,7 @@ void GameObjectManager::loadTerrainObjects (PacketFile* terrainFile,
 
 	//---------------------------------------------------
 	// Finally, let's build the control building lists...
-	for (i = 0; i < numTurrets; i++) 
+	for (int i = 0; i < numTurrets; i++) 
 	{
 		if ((turrets[i]->parentId != 0xffffffff) && (turrets[i]->parentId != 0)) 
 		{
@@ -990,7 +990,7 @@ void GameObjectManager::loadTerrainObjects (PacketFile* terrainFile,
 		}
 	}
 
-	for (i = 0; i < numGates; i++) 
+	for (int i = 0; i < numGates; i++) 
 	{
 		if ((gates[i]->parentId != 0xffffffff) && (gates[i]->parentId != 0))
 		{
@@ -1014,7 +1014,7 @@ void GameObjectManager::loadTerrainObjects (PacketFile* terrainFile,
 	// every frame regardless of where they are on the terrain and what is visible.
 	// This is because perimeter alarms and lookout buildings and ????? must work even
 	// if the player is NOT looking at them!!
-	for (i=0;i<numBuildings;i++)
+	for (int i=0;i<numBuildings;i++)
 	{
 		if (buildings[i]->isSpecialBuilding())
 		{
@@ -1024,7 +1024,7 @@ void GameObjectManager::loadTerrainObjects (PacketFile* terrainFile,
 	
  	//--------------------------------------------------------------------
 	//Now, lets point every lit building to at least one power generator.
-	for (i=0;i<numBuildings;i++)
+	for (int i=0;i<numBuildings;i++)
 	{
 		if (buildings[i]->isPowerSource())
 		{
@@ -1034,7 +1034,7 @@ void GameObjectManager::loadTerrainObjects (PacketFile* terrainFile,
 	
 	if (numPowerGenerators)
 	{
-		for (i=0;i<numBuildings;i++)
+		for (int i=0;i<numBuildings;i++)
 		{
 			Stuff::Vector3D maxDist;
 			long generatorIndex = 0;
@@ -1056,7 +1056,7 @@ void GameObjectManager::loadTerrainObjects (PacketFile* terrainFile,
 			buildings[i]->setPowerSupply(powerGenerators[generatorIndex]);
 		}
 		
-		for (i=0;i<numTerrainObjects;i++)
+		for (int i=0;i<numTerrainObjects;i++)
 		{
 			Stuff::Vector3D maxDist;
 			long generatorIndex = 0;
@@ -1239,7 +1239,7 @@ void GameObjectManager::addObject (ObjDataLoader *objData, long& curTerrainObjec
 								break;
 							}
 					((GatePtr)obj)->openSubAreas();
-					for (i = 0; i < ((GatePtr)obj)->numSubAreas0; i++) {
+					for (int i = 0; i < ((GatePtr)obj)->numSubAreas0; i++) {
 						GlobalMoveMap[0]->setAreaOwnerWID(((GatePtr)obj)->subAreas0[i], ((GatePtr)obj)->getWatchID());
 						GlobalMoveMap[1]->setAreaOwnerWID(((GatePtr)obj)->subAreas1[i], ((GatePtr)obj)->getWatchID());
 						if (((GatePtr)obj)->status == OBJECT_STATUS_DESTROYED) {
@@ -1253,7 +1253,7 @@ void GameObjectManager::addObject (ObjDataLoader *objData, long& curTerrainObjec
 					}
 					((GatePtr)obj)->setTeamId(obj->getTeamId(), true);
 					short* curCoord = ((GatePtr)obj)->cellsCovered;
-					for (i = 0; i < ((GatePtr)obj)->numCellsCovered; i++) {
+					for (int i = 0; i < ((GatePtr)obj)->numCellsCovered; i++) {
 						long r = *curCoord++;
 						long c = *curCoord++;
 						GameMap->setGate(r, c, true);
@@ -1940,7 +1940,7 @@ long GameObjectManager::buildMoverLists (void) {
 			badMoverList[numBadMovers++] = mover;
 	}
 
-	for (i = 0; i < numVehicles; i++) {
+	for (int i = 0; i < numVehicles; i++) {
 		MoverPtr mover = dynamic_cast<MoverPtr>(vehicles[i]);
 		if (!mover->getTeam())
 			continue;
@@ -2537,22 +2537,22 @@ long GameObjectManager::buildCollidableList (void)
 	for (long i = 0; i < numMechs; i++)
 		collidableList[curIndex++] = mechs[i];
 
-	for (i = 0; i < numVehicles; i++)
+	for (int i = 0; i < numVehicles; i++)
 		collidableList[curIndex++] = vehicles[i];
 
-	for (i = 0; i < numElementals; i++)
+	for (int i = 0; i < numElementals; i++)
 		collidableList[curIndex++] = (GameObjectPtr)elementals[i];
 
-	for (i=0;i<numTurrets;i++)
+	for (int i=0;i<numTurrets;i++)
 		collidableList[curIndex++] = turrets[i];
 
-	for (i=0;i<numGates;i++)
+	for (int i=0;i<numGates;i++)
 		collidableList[curIndex++] = gates[i];
 
-	for (i=0;i<numCarnage;i++)
+	for (int i=0;i<numCarnage;i++)
 		collidableList[curIndex++] = carnage[i];
 		
-	for (i=0;i<numArtillery;i++)
+	for (int i=0;i<numArtillery;i++)
 		collidableList[curIndex++] = artillery[i];
 
 	Assert(curIndex == numCollidables, curIndex, " GameObjectManager.buildCollidableList: oof ");
@@ -2594,9 +2594,9 @@ void GameObjectManager::detectStaticCollision (GameObjectPtr obj1, GameObjectPtr
 
 void GameObjectManager::updateCaptureList (void) {
 
-	for (long i = 0; i < MAX_TEAMS; i++)
+	for (int i = 0; i < MAX_TEAMS; i++)
 		numCaptures[i] = 0;
-	for (i = 0; i < getNumMovers(); i++) {
+	for (int i = 0; i < getNumMovers(); i++) {
 		MoverPtr mover = getMover(i);
 		if (mover->isDisabled())
 			continue;

@@ -874,7 +874,7 @@ long SoundSystem::playBettySample (unsigned long bettySampleId)
 }
 
 //---------------------------------------------------------------------------
-long SoundSystem::playSupportSample (unsigned long supportSampleId, char* fileName)
+long SoundSystem::playSupportSample (unsigned long supportSampleId, const char* fileName)
 {
 	if (useSound && (supportSoundBite == NULL))		//Playing Support takes precedence
 	{

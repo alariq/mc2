@@ -773,7 +773,7 @@ void TeamSensorSystem::update (void) {
 
 		//--------------------------------
 		// Now, update current contacts...
-		for (i = 0; i < numContactUpdatesPerPass; i++) {
+		for (int i = 0; i < numContactUpdatesPerPass; i++) {
 			if (curContactUpdate >= numSensors)
 				curContactUpdate = 0;
 			sensors[curContactUpdate]->updateContacts();
@@ -927,7 +927,7 @@ long TeamSensorSystem::getContacts (GameObjectPtr looker, long* contactList, lon
 			SensorSystem::sortList->setValue(contact, sortValues[contact]);
 		}
 		SensorSystem::sortList->sort(descendSort);
-		for (contact = 0; contact < numValidContacts; contact++)
+		for (int contact = 0; contact < numValidContacts; contact++)
 			contactList[contact] = SensorSystem::sortList->getId(contact);
 		}
 	else if (contactList)
@@ -1168,7 +1168,7 @@ long SensorSystemManager::init (bool debug) {
 	sensorPool[0]->prev = NULL;
 	sensorPool[0]->next = sensorPool[1];
 
-	for (i = 1; i < (MAX_SENSORS - 1); i++) {
+	for (int i = 1; i < (MAX_SENSORS - 1); i++) {
 		sensorPool[i]->id = i;
 		sensorPool[i]->prev = sensorPool[i - 1];
 		sensorPool[i]->next = sensorPool[i + 1];
@@ -1183,12 +1183,12 @@ long SensorSystemManager::init (bool debug) {
 	freeList = sensorPool[0];
 	freeSensors = MAX_SENSORS;
 
-	for (i = 0; i < MAX_TEAMS; i++)
+	for (int i = 0; i < MAX_TEAMS; i++)
 		teamSensors[i] = NULL;
 
 	Assert (!debug || (Team::numTeams > 0), 0, " SensorSystemManager.init: 0 teams ");
 
-	for (i = 0; i < Team::numTeams; i++) {
+	for (int i = 0; i < Team::numTeams; i++) {
 		teamSensors[i] = new TeamSensorSystem;
 		teamSensors[i]->teamId = i;
 	}

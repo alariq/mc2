@@ -15,6 +15,9 @@ namespace Stuff {
 	//~~~~~~~~~~~~~~~~~~~~~~~~~~ UnitVector3D ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 	class LinearMatrix4D;
+	class UnitVector3D;
+
+    bool Close_Enough( const UnitVector3D &V1, const UnitVector3D &V2, Scalar e = SMALL);
 
 	class UnitVector3D:
 		public Vector3D

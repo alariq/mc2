@@ -73,7 +73,7 @@ extern long		ObjectTextureSize;
 extern bool reloadBounds;
 //-----------------------------------------------------------------------------
 // class GenericAppearanceType
-void GenericAppearanceType::init (char * fileName)
+void GenericAppearanceType::init (const char * fileName)
 {
 	AppearanceType::init(fileName);
 
@@ -469,7 +469,7 @@ void GenericAppearance::setMoverParameters (float turretRot, float lArmRot, floa
 }
 
 //-----------------------------------------------------------------------------
-void GenericAppearance::setObjectParameters (Stuff::Vector3D &pos, float Rot, long sel, long team, long homeRelations)
+void GenericAppearance::setObjectParameters (const Stuff::Vector3D &pos, float Rot, long sel, long team, long homeRelations)
 {
 	rotation = Rot;
 

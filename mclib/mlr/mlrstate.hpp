@@ -522,8 +522,8 @@ namespace MidLevelRenderer {
 					Check_Pointer(this);
 					return
 						renderState > s.renderState
-						 || renderState == s.renderState
-							 && processState > s.processState;
+						 || (renderState == s.renderState
+							 && processState > s.processState);
 				}
 
 		bool

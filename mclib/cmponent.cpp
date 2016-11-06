@@ -627,7 +627,7 @@ bool MasterComponent::isDefensiveWeapon (void) {
 
 //---------------------------------------------------------------------------
 
-long MasterComponent::loadMasterList (char* fileName, long listSize, float baseSensorRange) {
+long MasterComponent::loadMasterList (const char* fileName, long listSize, float baseSensorRange) {
 
 	if (masterList) 
 	{
@@ -679,7 +679,7 @@ long MasterComponent::loadMasterList (char* fileName, long listSize, float baseS
 
 
 //---------------------------------------------------------------------------
-long MasterComponent::saveMasterList (char* fileName, long listSize, float baseSensorRange) 
+long MasterComponent::saveMasterList (const char* fileName, long listSize, float baseSensorRange) 
 {
 	//-----------------------------------------------------------------
 	// All components are in one data file. Save it in CSV format!

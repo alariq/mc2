@@ -47,9 +47,13 @@ Objective.cpp			: Implementation of the Objective component.
 
 #include"controlgui.h"
 
-#include "..\resource.h"
+#include "../resource.h"
 
+#ifdef LINUX_BUILD
+#include "tchar.h"
+#else
 #include<tchar.h>
+#endif
 
 #include<assert.h>
 

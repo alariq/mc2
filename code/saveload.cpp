@@ -110,9 +110,14 @@
 #include"loadscreen.h"
 #endif
 
-#include "..\resource.h"
+#include "../resource.h"
 #include<gameos.hpp>
+#ifndef LINUX_BUILD
 #include<ddraw.h>
+#else
+struct DDSURFACEDESC2 {
+};
+#endif
 
 //----------------------------------------------------------------------------------------------------
 // Globals
@@ -1249,7 +1254,7 @@ void Mission::load (const char *loadFileName)
 												//-fs 12/7/99
 
 			result = missionFile.readIdULong("Pilot", parts[i].pilot);
-			gosASSERT(result == NO_ERR,);
+			gosASSERT(result == NO_ERR);
 			
 			//------------------------------------------------------------------
 			// Read the object's position, initial velocity and rotation.

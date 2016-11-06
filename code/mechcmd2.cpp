@@ -58,7 +58,7 @@
 
 #ifndef LOGISTICSDIALOG_H
 #include"logisticsdialog.h"
-#endif'
+#endif
 
 #ifndef PREFS_H
 #include"prefs.h"
@@ -66,13 +66,16 @@
 
 extern CPrefs prefs;
 
-#include "..\resource.h"
+#include "../resource.h"
 
 #include<gameos.hpp>
 #include<toolos.hpp>
 #include<stuff/stuff.hpp>
 #include<mlr/mlr.hpp>
 #include<gosfx/gosfxheaders.hpp>
+
+//sebi
+#include "strings.h"
 
 //------------------------------------------------------------------------------------------------------------
 // MechCmdr2 Global Instances of Things
@@ -122,7 +125,9 @@ bool KillAmbientLight = false;
 
 void InitDW (void);
 
-extern DWORD					NumDevices;
+// sebi:? num graphics cards?
+//extern DWORD					NumDevices;
+DWORD					NumDevices = 1;
 
 unsigned long elementHeapSize = 1024000;
 unsigned long maxElements = 2048;
@@ -139,17 +144,21 @@ unsigned long polyHeapSize = 1024000;
 extern float ProcessorSpeed;
 void __stdcall ExitGameOS();
 
-DWORD gosResourceHandle = 0;
+HSTRRES gosResourceHandle = 0;
 HGOSFONT3D gosFontHandle = 0;
 float		gosFontScale = 1.0;
-extern HGOSFONT3D	FontHandle;
+// sebi: whe the f**k should this be defined? It is not even used
+//extern HGOSFONT3D	FontHandle;
+HGOSFONT3D	FontHandle;
+
 FloatHelpPtr globalFloatHelp = NULL;
 unsigned long currentFloatHelp = 0;
 float MaxMinUV = 8.0f;
 
 DWORD BaseVertexColor = 0x00000000;		//This color is applied to all vertices in game as Brightness correction.
 
-enum { CPU_UNKNOWN, CPU_PENTIUM, CPU_MMX, CPU_KATMAI } Processor = CPU_PENTIUM;		//Needs to be set when GameOS supports ProcessorID -- MECHCMDR2
+enum ProcType { CPU_UNKNOWN, CPU_PENTIUM, CPU_MMX, CPU_KATMAI };
+ProcType Processor = CPU_PENTIUM;		//Needs to be set when GameOS supports ProcessorID -- MECHCMDR2
 extern float frameRate;
 void EnterWindowMode();
 
@@ -172,8 +181,8 @@ char* ExceptionGameMsg = NULL;
 
 char buildNumber[80];
 
-extern long TERRAIN_TXM_SIZE;
-long ObjectTextureSize = 128;
+extern int TERRAIN_TXM_SIZE;
+int ObjectTextureSize = 128;
 
 extern unsigned long MultiPlayCommanderId;
 extern bool	useRealLOS;
@@ -186,7 +195,9 @@ extern long GameVisibleVertices;
 bool EULAShown = false;
 SoundSystem* sndSystem;
 
-extern bool gNoDialogs;
+// sebi: donot know where it used, probably in some closed source linked lib
+//extern bool gNoDialogs;
+bool gNoDialogs = false;
 
 //DEBUG
 #define MAX_SHAPES	0
@@ -293,7 +304,7 @@ bool DebugWindowOpen[NUM_DEBUG_WINDOWS] = {false, false, false, false};
 bool DebugStatusBarOpen = false;
 bool DebugScoreBoardOpen = false;
 bool DebugHelpOpen = false;
-void DEBUGWINS_print (char* s, long window = 0);
+void DEBUGWINS_print (const char* s, long window = 0);
 
 //---------------------------------------------------------------------------
 
@@ -355,7 +366,7 @@ void initDialogs()
 	if ( NO_ERR != file.open( path ) )
 	{
 		char error[256];
-		sprintf( error, "couldn't open file %s", (char*)path );
+		sprintf( error, "couldn't open file %s", (const char*)path );
 		Assert( 0, 0, error );
 		return;
 	}
@@ -368,7 +379,7 @@ void initDialogs()
 	if ( NO_ERR != file.open( path ) )
 	{
 		char error[256];
-		sprintf( error, "couldn't open file %s", (char*)path );
+		sprintf( error, "couldn't open file %s", (const char*)path );
 		Assert( 0, 0, error );
 		return;
 	}
@@ -380,7 +391,7 @@ void initDialogs()
 	if ( NO_ERR != file.open( path ) )
 	{
 		char error[256];
-		sprintf( error, "couldn't open file %s", (char*)path );
+		sprintf( error, "couldn't open file %s", (const char*)path );
 		Assert( 0, 0, error );
 		return;
 	}
@@ -449,7 +460,7 @@ void DEBUGWINS_display (bool* windowsOpen) {
 
 //---------------------------------------------------------------------------
 
-void DEBUGWINS_print (char* s, long window) {
+void DEBUGWINS_print (const char* s, long window) {
 
 	DebugWindow[window]->print(s);
 }
@@ -509,7 +520,7 @@ void DEBUGWINS_renderSpecialWindows (void) {
 	if (DebugScoreBoardOpen) {
 		if (MPlayer) {
 			long curY = Environment.screenHeight - 390;
-			for (long i = 0; i < MPlayer->numTeams; i++) {
+			for (int i = 0; i < MPlayer->numTeams; i++) {
 				char s[256];
 				sprintf(s, "Team %d score = %d", i, MPlayer->teamScore[i]);
 				gos_TextSetPosition(Environment.screenWidth - 380, curY);
@@ -517,7 +528,7 @@ void DEBUGWINS_renderSpecialWindows (void) {
 				curY += 10;
 			}
 			curY += 10;
-			for (i = 0; i < MAX_MC_PLAYERS; i++)
+			for (int i = 0; i < MAX_MC_PLAYERS; i++)
 				if (MPlayer->playerInfo[i].commanderID > -1) {
 					char s[256];
 					sprintf(s, "Player %d (%s) score = %d, %d kills, %d losses",
@@ -773,8 +784,10 @@ void UpdateRenderers()
 				gos_SetRenderState( gos_State_TextureAddress, gos_TextureWrap);
 				gos_SetRenderState( gos_State_ZCompare, 1);
 				gos_SetRenderState(	gos_State_ZWrite, 1);
-				DWORD fogColor = 0x009f9f9f;
-				gos_SetRenderState( gos_State_Fog, (int)&fogColor);
+				int fogColor = 0x009f9f9f;
+                // sebi
+				//gos_SetRenderState( gos_State_Fog, (int)&fogColor);
+				gos_SetRenderState( gos_State_Fog, fogColor);
 			}
 
 			//Send down 5000 triangles
@@ -811,10 +824,15 @@ extern MidLevelRenderer::MLRClipper * theClipper;
 bool gameStarted = false;
 void InitializeGameEngine()
 {
-	__asm push esi;
+    // sebi WTF? do we ned to do it for InitDW?
+	//__asm push esi;
 
 	// gotta have this no matter what
-	gosResourceHandle = gos_OpenResourceDLL("mc2res.dll");
+#ifndef LINUX_BUILD
+	gosResourceHandle = gos_OpenResourceDLL("mc2res.dll", NULL, 0);
+#else
+	gosResourceHandle = gos_OpenResourceDLL("./libmc2res.so", NULL, 0);
+#endif
 
 	//Check for enough SwapFile Space FIRST!!!
 	// In order to do that, we must force Win2K/XP to enlarge
@@ -822,6 +840,7 @@ void InitializeGameEngine()
 	// the message does not come up during game run.
 	void *testMem = VirtualAlloc(NULL,123000000,MEM_COMMIT,PAGE_READWRITE);
 
+#ifndef LINUX_BUILD
    	MEMORYSTATUS ms;
    	GlobalMemoryStatus( &ms );
    	
@@ -840,6 +859,7 @@ void InitializeGameEngine()
    		gos_TerminateApplication();
    		return;
    	}
+#endif
 
 	if (testMem)
 		VirtualFree(testMem,0,MEM_RELEASE);
@@ -872,6 +892,8 @@ void InitializeGameEngine()
 			ExitGameOS();
 	}
 
+    //sebi: we are probably NOT Voodoo 3 
+#if LINUX_BUILD && 0
 	//Check if we are a Voodoo 3.  If so, ONLY allow editor to run IF
 	// Starting resolution is 1024x768x16 or LOWER.  NO 32-BIT ALLOWED!
 	if ((gos_GetMachineInformation(gos_Info_GetDeviceVendorID,0) == 0x121a) &&
@@ -893,6 +915,7 @@ void InitializeGameEngine()
 			ExitGameOS();
 		}
 	}
+#endif
 
 	//Then, we should check to see if the options.cfg exists.  if NOT, 
 	// Bring up a sniffer warning dialog, sniff, bring up sniffer end dialog and end.
@@ -927,7 +950,9 @@ void InitializeGameEngine()
 		//---------------------------------------------------------------------
 
 		float doubleClickThreshold = 0.2f;
-		long dragThreshold = .016667;
+        //sebi :????
+		//long dragThreshold = .016667;
+		float dragThreshold = .016667;
 	
 		Environment.Key_Exit=-1; // so escape doesn't kill your app
 	
@@ -940,7 +965,8 @@ void InitializeGameEngine()
 		//gos_LoadDataFromRegistry("CDPath", CDInstallPath, &maxPathLength);
 		//if (!maxPathLength)
 		//	strcpy(CDInstallPath,"..\\");
-		strcpy(CDInstallPath,".\\");
+		// to find necessary files
+		strcpy(CDInstallPath,"../FinalBuild/");
 
 		//--------------------------------------------------------------
 		// Start the SystemHeap and globalHeapList
@@ -1083,7 +1109,7 @@ void InitializeGameEngine()
 					fastFiles = (FastFile **)malloc(maxFastFiles*sizeof(FastFile *));
 					memset(fastFiles,0,maxFastFiles*sizeof(FastFile *));
 	
-					long fileNum = 0;
+					int fileNum = 0;
 					char fastFileId[10];
 					char fileName[100];
 					sprintf(fastFileId,"File%d",fileNum);
@@ -1320,19 +1346,28 @@ void InitializeGameEngine()
 					}
 				}
 	
-				result = prefsFile->readIdLong("TerrainTextureRes",TERRAIN_TXM_SIZE);
+                long tmp;
+				result = prefsFile->readIdLong("TerrainTextureRes", tmp);
 				if (result != NO_ERR)
 					TERRAIN_TXM_SIZE = 64;
+                else {
+                    TERRAIN_TXM_SIZE = (int)tmp;
+                }
 	
-				result = prefsFile->readIdLong("ObjectTextureRes",ObjectTextureSize);
+				result = prefsFile->readIdLong("ObjectTextureRes", tmp);
 				if (result != NO_ERR)
 					ObjectTextureSize = 128;
+                else {
+                    ObjectTextureSize = tmp;
+                }
 	
 				result = prefsFile->readIdFloat("DoubleClickThreshold",doubleClickThreshold);
 				if (result != NO_ERR)
 					doubleClickThreshold = 0.2f;
 	
-				result = prefsFile->readIdLong("DragThreshold",dragThreshold);
+                // sebi??
+				//result = prefsFile->readIdLong("DragThreshold",dragThreshold);
+				result = prefsFile->readIdFloat("DragThreshold",dragThreshold);
 				if (result != NO_ERR)
 					dragThreshold = .01667f;
 					
@@ -1467,7 +1502,7 @@ void InitializeGameEngine()
 			*pStr = 0;
 		}
 		char path [256];
-		strcpy( path, "assets\\graphics\\" );
+		strcpy( path, "assets" PATH_SEPARATOR "graphics" PATH_SEPARATOR );
 		strcat( path, temp );	
 	
 		gosFontHandle = gos_LoadFont(path);
@@ -1588,7 +1623,8 @@ void InitializeGameEngine()
 		
 		logistics = new Logistics;
 	
-		GameDebugWindow::setFont("assets\\graphics\\arial8.tga");
+        const char* dbgfont = "assets" PATH_SEPARATOR "graphics" PATH_SEPARATOR "arial8.tga";
+		GameDebugWindow::setFont(dbgfont);
 		DEBUGWINS_init();
 	
 		StartupNetworking();
@@ -1714,7 +1750,7 @@ void InitializeGameEngine()
 			indexArray[i] = i;
 		}
 
-		testTextureHandle = gos_NewTextureFromFile(gos_Texture_Solid,"testTxm.tga");
+		testTextureHandle = gos_NewTextureFromFile(gos_Texture_Solid,"testtxm.tga");
 	}
 
 	//Make any directories we need which should be empty.
@@ -1724,7 +1760,8 @@ void InitializeGameEngine()
 	//Startup the Office Watson Handler.
 	InitDW();
 
-	__asm pop esi;
+    // sebi WTF? do we ned to do it for InitDW?
+	//__asm pop esi;
 }
 
 //---------------------------------------------------------------------------
@@ -2292,7 +2329,7 @@ void DoGameLogic()
 }
 
 //---------------------------------------------------------------------------
-long textToLong (char *num)
+static long textToLong (char *num)
 {
 	long result = 0;
 	
@@ -2345,7 +2382,7 @@ long textToLong (char *num)
 
 //----------------------------------------------------------------------------
 // Same command line Parser as MechCommander
-void ParseCommandLine(char *command_line)
+void ParseCommandLine(const char *command_line)
 {
 	int i;
 	int n_args = 0;
@@ -2374,7 +2411,7 @@ void ParseCommandLine(char *command_line)
 	i=0;
 	while (i<n_args)
 	{
-		if (strcmpi(argv[i],"-mission") == 0)
+		if (stricmp(argv[i],"-mission") == 0)
 		{
 			i++;
 			if (i < n_args)
@@ -2414,7 +2451,7 @@ void ParseCommandLine(char *command_line)
 					strcpy(missionName,argv[i]);
 			}
 		}
-		else if (strcmpi(argv[i],"-viewer") == 0)
+		else if (stricmp(argv[i],"-viewer") == 0)
 		{
 			i++;
 			if (i < n_args)
@@ -2425,29 +2462,29 @@ void ParseCommandLine(char *command_line)
 				strcpy(missionName,"mis0101");
 			}
 		}
-		else if (strcmpi(argv[i],"-nodialog") == 0)
+		else if (stricmp(argv[i],"-nodialog") == 0)
 		{
 			gNoDialogs = true;
 		}
-		else if (strcmpi(argv[i],"-sniffer") == 0)
+		else if (stricmp(argv[i],"-sniffer") == 0)
 		{
 			SnifferMode = true;
 		}
-		else if (strcmpi(argv[i], "-braindead") == 0) {
+		else if (stricmp(argv[i], "-braindead") == 0) {
 			i++;
 			if (i < n_args) {
 				long teamID = textToLong(argv[i]);
 				MechWarrior::brainsEnabled[teamID] = false;
 			}
 		}
-		else if (strcmpi(argv[i], "-turrets_off") == 0) {
+		else if (stricmp(argv[i], "-turrets_off") == 0) {
 			i++;
 			if (i < n_args) {
 				long teamID = textToLong(argv[i]);
 				Turret::turretsEnabled[teamID] = false;
 			}
 		}
-		else if (strcmpi(argv[i], "-debugwins") == 0) {
+		else if (stricmp(argv[i], "-debugwins") == 0) {
 			i++;
 			if (i < n_args) {
 				long winState = textToLong(argv[i]);
@@ -2466,7 +2503,7 @@ void ParseCommandLine(char *command_line)
 				}
 			}
 		}
-		else if (strcmpi(argv[i], "-objectwins") == 0) {
+		else if (stricmp(argv[i], "-objectwins") == 0) {
 			i++;
 			if (i < n_args) {
 				long partNumber = textToLong(argv[i]);
@@ -2474,7 +2511,7 @@ void ParseCommandLine(char *command_line)
 					GameObjectWindowList[NumGameObjectsToDisplay++] = partNumber;
 			}
 		}
-		else if (strcmpi(argv[i], "-debugcells") == 0) {
+		else if (stricmp(argv[i], "-debugcells") == 0) {
 			i++;
 			if (i < n_args) {
 				long setting = textToLong(argv[i]);
@@ -2482,65 +2519,65 @@ void ParseCommandLine(char *command_line)
 					DrawDebugCells = setting;
 			}
 		}
-		else if (strcmpi(argv[i], "-nopain") == 0) {
+		else if (stricmp(argv[i], "-nopain") == 0) {
 			i++;
 			if (i < n_args) {
 				long teamID = textToLong(argv[i]);
 				Team::noPain[teamID] = true;
 			}
 		}
-		else if (strcmpi(argv[i], "-disable") == 0) {
+		else if (stricmp(argv[i], "-disable") == 0) {
 			i++;
 			if (i < n_args) {
 				long partID = textToLong(argv[i]);
 				DisableAtStart[NumDisableAtStart++] = partID;
 			}
 		}
-		else if (strcmpi(argv[i], "-log") == 0) {
+		else if (stricmp(argv[i], "-log") == 0) {
 			i++;
 			initGameLogs = true;
 			if (i < n_args) {
-				if (strcmpi(argv[i], "net") == 0)
+				if (stricmp(argv[i], "net") == 0)
 					initNetLog = true;
-				if (strcmpi(argv[i], "weaponfire") == 0)
+				if (stricmp(argv[i], "weaponfire") == 0)
 					initCombatLog = true;
-				if (strcmpi(argv[i], "bugs") == 0)
+				if (stricmp(argv[i], "bugs") == 0)
 					initBugLog = true;
-				if (strcmpi(argv[i], "lrmove") == 0)
+				if (stricmp(argv[i], "lrmove") == 0)
 					initLRMoveLog = true;
 			}
 		}
-		else if (strcmpi(argv[i], "-show") == 0) {
+		else if (stricmp(argv[i], "-show") == 0) {
 			i++;
 			if (i < n_args) {
-				if (strcmpi(argv[i], "movers") == 0)
+				if (stricmp(argv[i], "movers") == 0)
 					ShowMovers = true;
 			}
 		}
-		else if (strcmpi(argv[i], "-goalplan") == 0) {
+		else if (stricmp(argv[i], "-goalplan") == 0) {
 			i++;
 			if (i < n_args) {
-				if (strcmpi(argv[i], "enemies") == 0)
+				if (stricmp(argv[i], "enemies") == 0)
 					EnemiesGoalPlan = true;
 			}
 		}
-		else if (strcmpi(argv[i], "-killambient") == 0) {
+		else if (stricmp(argv[i], "-killambient") == 0) {
 			KillAmbientLight = true;
 		}
-		else if (strcmpi(argv[i], "-movegoals") == 0) {
+		else if (stricmp(argv[i], "-movegoals") == 0) {
 			i++;
 			if (i < n_args)
 				MaxMoveGoalChecks = textToLong(argv[i]);
 		}
-		else if (strcmpi(argv[i], "-rps") == 0) {
+		else if (stricmp(argv[i], "-rps") == 0) {
 			i++;
 			if (i < n_args)
 				MaxResourcePoints = textToLong(argv[i]);
 		}
-		else if (strcmpi(argv[i], "-registerzone") == 0) {
+		else if (stricmp(argv[i], "-registerzone") == 0) {
 			MultiPlayer::registerZone = true;
 		}
-		else if (strcmpi(argv[i], "-dropzones") == 0) {
+		else if (stricmp(argv[i], "-dropzones") == 0) {
 			i++;
 			if (i < n_args) {
 				long numPlayers = strlen(argv[i]);
@@ -2559,7 +2596,7 @@ bool notFirstTime = false;
 //
 // Setup the GameOS structure -- This tells GameOS what I am using
 //
-void GetGameOSEnvironment( char* CommandLine )
+void GetGameOSEnvironment(const char* CommandLine )
 {
 	ParseCommandLine(CommandLine);
 
@@ -2624,6 +2661,7 @@ void GetGameOSEnvironment( char* CommandLine )
 	Environment.bitDepth				= 16;
 	Environment.fullScreen				= 0;
 
+#ifndef LINUX_BUILD
 	HKEY hKey;
 	LONG result;
 	char pData[1024];
@@ -2644,6 +2682,7 @@ void GetGameOSEnvironment( char* CommandLine )
 
 		RegCloseKey(hKey);
 	}
+#endif
 
 	Environment.version					= versionStamp;
 	Environment.FullScreenDevice		= 0;

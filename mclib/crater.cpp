@@ -113,7 +113,7 @@ float craterUVTable [136] =
 
 //---------------------------------------------------------------------
 // class CraterManager
-long CraterManager::init (long numCraters, unsigned long craterTypeSize, char *craterFileName)
+long CraterManager::init (long numCraters, unsigned long craterTypeSize, const char *craterFileName)
 {
 	init();
 	
@@ -146,7 +146,7 @@ long CraterManager::init (long numCraters, unsigned long craterTypeSize, char *c
 	// Preload all of the craters for the mission.
 	// This should just be one texture with all of the craters on it
 	// and a generic set of UVs to mark each one.
-	for (long i=0;i<numCraterTextures;i++)
+	for (int i=0;i<numCraterTextures;i++)
 	{
 		char craterName[1024];
 		sprintf(craterName,"defaults\\feet%04d",i);

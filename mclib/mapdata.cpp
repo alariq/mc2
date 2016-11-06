@@ -926,7 +926,7 @@ void MapData::setOverlayTile (long block, long vertex, long offset)
 }	
 
 //---------------------------------------------------------------------------
-void MapData::setOverlay( long indexY, long indexX, Overlays type, unsigned long offset )
+void MapData::setOverlay( long indexY, long indexX, Overlays type, DWORD offset )
 {
 	long index = indexX + indexY * Terrain::realVerticesMapSide;
 
@@ -1038,7 +1038,7 @@ long MapData::getTerrain( long tileR, long tileC )
 }
 
 //---------------------------------------------------------------------------
-void MapData::getOverlay( long tileR, long tileC, Overlays& type, unsigned long& Offset )
+void MapData::getOverlay( long tileR, long tileC, Overlays& type, DWORD& Offset )
 {
 	gosASSERT( tileR < Terrain::realVerticesMapSide && tileR > -1 );
 	gosASSERT( tileC < Terrain::realVerticesMapSide && tileC > -1 );
@@ -1067,7 +1067,7 @@ long MapData::getOverlayTile (long block, long vertex)
 }	
 
 //---------------------------------------------------------------------------
-float MapData::terrainAngle (Stuff::Vector3D &position, Stuff::Vector3D* normal)
+float MapData::terrainAngle (const Stuff::Vector3D &position, Stuff::Vector3D* normal)
 {
 	//-------------------------------------------------------------------
 	// Recoded for real 3D terrain on march 3, 1999.  Uses new triangle
@@ -1290,7 +1290,7 @@ float MapData::terrainAngle (Stuff::Vector3D &position, Stuff::Vector3D* normal)
 }
 
 //---------------------------------------------------------------------------
-float MapData::terrainLight (Stuff::Vector3D &position)
+float MapData::terrainLight (const Stuff::Vector3D &position)
 {
 	if (!Terrain::IsValidTerrainPosition(position))
 		return(1.0f);
@@ -1380,7 +1380,7 @@ float MapData::terrainLight (Stuff::Vector3D &position)
 }
 
 //---------------------------------------------------------------------------
-Stuff::Vector3D MapData::terrainNormal (Stuff::Vector3D& position)
+Stuff::Vector3D MapData::terrainNormal (const Stuff::Vector3D& position)
 {
 	//-------------------------------------------------------------------
 	// Recoded for real 3D terrain on march 3, 1999.  Uses new triangle
@@ -1581,7 +1581,7 @@ Stuff::Vector3D MapData::terrainNormal (Stuff::Vector3D& position)
 }
 
 //---------------------------------------------------------------------------
-float MapData::terrainElevation (Stuff::Vector3D &position)
+float MapData::terrainElevation (const Stuff::Vector3D &position)
 {
 	//-------------------------------------------------------------------
 	// Recoded for real 3D terrain on march 3, 1999.  Uses new triangle

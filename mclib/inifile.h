@@ -127,8 +127,8 @@ class FitIniFile : public File
 		virtual long open (const char* fName, FileMode _mode = READ, long numChildren = 50);
 		virtual long open (FilePtr _parent, unsigned long fileSize, long numChildren = 50);
 		
-		virtual long create (char* fName);
-		virtual long createWithCase( char* fName );
+		virtual long create (const char* fName);
+		virtual long createWithCase(const char* fName );
 
 
 		virtual void close (void);

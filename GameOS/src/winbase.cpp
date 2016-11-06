@@ -1,6 +1,8 @@
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <fcntl.h>
 #include <time.h>
+#include <utime.h>
 #include <sys/time.h>
 #include <sys/mman.h>
 #include <unistd.h>
@@ -60,6 +62,60 @@ BOOL DeleteFile(LPCSTR file)
     return 0 == unlink(file);
 }
 
+BOOL CopyFile(  LPCTSTR lpExistingFileName,
+                LPCTSTR lpNewFileName,
+                BOOL    bFailIfExists)
+{
+    int src = open(lpExistingFileName, O_RDONLY);
+    if(src == -1) {
+        return FALSE;
+    }
+
+    /* rw-rw-rw- */
+    int permissions = S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH;      
+
+    int dst_flags = O_CREAT | O_WRONLY | O_TRUNC;
+    if(bFailIfExists)
+        dst_flags |= O_EXCL;
+
+    int dst = open(lpNewFileName, dst_flags, permissions);
+    if(dst == -1) {
+        return FALSE;
+    }
+
+    const int BUF_SIZE = 1024;
+    char buf[BUF_SIZE];
+    int num_read = 0;
+
+    bool error = false;
+    while ((num_read = read(src, buf, BUF_SIZE)) > 0) {
+        if(write(dst, buf, num_read) != num_read) {
+            error = true;
+            break;
+        }
+    }
+
+
+    if (num_read != -1 && !error)
+    {
+        struct stat file_info = {0};
+        fstat(src, &file_info);
+
+        struct utimbuf ut;
+        ut.actime = file_info.st_atim.tv_sec;
+        ut.modtime = file_info.st_mtim.tv_sec;
+        utime(lpExistingFileName, &ut);
+    }
+
+    close(src);
+    close(dst);
+
+    if (num_read == -1 || error)
+        return FALSE;
+
+    return TRUE;
+}
+
 int lstrlen(LPCSTR str)
 {
     return strlen(str);
@@ -93,6 +149,18 @@ WINBASEAPI PVOID WINAPI VirtualAlloc(PVOID lpAddress, DWORD dwSize, DWORD flAllo
     }
     else if(flAllocationType == MEM_COMMIT)
     {
+        void* memptr;
+        if(lpAddress == 0) {
+            memptr = mmap(0, dwSize, PROT_NONE, MAP_PRIVATE | MAP_ANON, -1, 0);
+            if(memptr == MAP_FAILED)
+                gGetLastError = errno;
+
+            if(memptr == MAP_FAILED)
+               return 0;
+
+            lpAddress = memptr;
+        }
+
         assert(lpAddress!=0);
 
         // to COMMIT memory in Linux, use mprotect on the range of memory you'd like to commit, and
@@ -133,4 +201,27 @@ WINBASEAPI DWORD WINAPI GetLastError()
 {
     return gGetLastError;
 }
+
+HANDLE WINAPI FindFirstFileA( LPCTSTR lpFileName, LPWIN32_FIND_DATAA lpFindFileData)
+{
+    // scandir + fnmatch
+    assert(0 && "Not implemented");
+    return 0;
+}
+
+BOOL WINAPI FindNextFileA(HANDLE hFindFile, LPWIN32_FIND_DATAA lpFindFileData)
+{
+    assert(0 && "Not implemented");
+    return FALSE;
+}
+
+BOOL WINAPI FindClose(HANDLE hFindFile)
+{
+    assert(0 && "Not implemented");
+    return FALSE;
+}
+
+
+
+
 

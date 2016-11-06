@@ -25,7 +25,7 @@ LogisticsPilotListBox:
 class LogisticsPilotListBoxItem : public aListItem
 {
 public:
-	static int LogisticsPilotListBoxItem::init( FitIniFile* file);
+	static int init( FitIniFile* file);
 	LogisticsPilotListBoxItem( LogisticsPilot* pPilot );
 
 	virtual ~LogisticsPilotListBoxItem();

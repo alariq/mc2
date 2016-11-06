@@ -17,7 +17,7 @@ namespace Stuff {
 	template <class T> class Vector2DOf;
 
 	template <class T> bool
-		Small_Enough(const Vector2DOf<T> &v,Scalar e);
+		Small_Enough(const Vector2DOf<T> &v,Scalar e = SMALL);
 
 	template <class T> bool
 		Close_Enough(

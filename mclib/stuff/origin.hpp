@@ -85,7 +85,7 @@ namespace Stuff {
 			Close_Enough(
 				const Origin3D &a1,
 				const Origin3D &a2,
-				Scalar e=SMALL
+				Scalar e/*=SMALL*/
 			);
 		bool
 			operator==(const Origin3D& a) const

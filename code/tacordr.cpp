@@ -1496,13 +1496,13 @@ long TacticalOrder::status (MechWarriorPtr warrior) {
 									pointsAvailable = 255.0f;
 
 								WeaponShotInfo refitInfo;
-								refitInfo.init(NULL,
+								refitInfo.init(0,
 											   -5,
 											   pointsUsed,
 											   GROUNDVEHICLE_LOCATION_TURRET,
 											   0.0);
 								MPlayer->addWeaponHitChunk((GameObjectPtr)warrior->getVehicle(), &refitInfo);
-								refitInfo.init(NULL,
+								refitInfo.init(0,
 											   -5,
 											   pointsAvailable,
 											   0,
@@ -1573,13 +1573,13 @@ long TacticalOrder::status (MechWarriorPtr warrior) {
 									pointsAvailable = 255.0f;
 
 								WeaponShotInfo refitInfo;
-								refitInfo.init(NULL,
+								refitInfo.init(0,
 											   -5,
 											   pointsUsed,
 											   -1,
 											   0.0);
 								MPlayer->addWeaponHitChunk(target, &refitInfo);
-								refitInfo.init(NULL,
+								refitInfo.init(0,
 											   -5,
 											   pointsAvailable,
 											   0,
@@ -2111,12 +2111,12 @@ void TacticalOrder::debugString (MechWarriorPtr pilot, char* s) {
 			strcpy(s, "eject");
 			break;
 		case TACTICAL_ORDER_ATTACK_OBJECT: {
-			char* tacticCode[] = {"  ", "RT", "LT", "RR", "SF", "TT", "JS"};
+			const char* tacticCode[] = {"  ", "RT", "LT", "RR", "SF", "TT", "JS"};
 			sprintf(s, "attack obj (%d) %s", target ? target->getPartId() : 0, tacticCode[attackParams.tactic]);
 			}
 			break;
 		case TACTICAL_ORDER_ATTACK_POINT: {
-			char* tacticCode[] = {"  ", "RT", "LT", "RR", "SF", "TT", "JS"};
+			const char* tacticCode[] = {"  ", "RT", "LT", "RR", "SF", "TT", "JS"};
 			sprintf(s, "attack pt (%.0f, %.0f) %s",
 				attackParams.targetPoint.x,
 				attackParams.targetPoint.y,

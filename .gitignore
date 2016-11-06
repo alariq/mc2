@@ -10,8 +10,12 @@ CMakeFiles/
 *.swp
 *.dll
 *.exe
+*.cfg
+*.tga
 Editor
 data
+unpacked_data
+data-orig
 1033
 assets
 ARM
@@ -25,6 +29,7 @@ Tools
 *.so
 *.a
 viewer
+mc2
 text_tool
 .ycm_extra_conf.py
 .ycm_extra_conf.pyc

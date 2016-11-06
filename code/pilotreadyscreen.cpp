@@ -9,7 +9,7 @@ PilotReadyScreen.cpp			: Implementation of the PilotReadyScreen component.
 #include"logisticsmech.h"
 #include"logisticsdata.h"
 #include"logisticsmechicon.h"
-#include "..\resource.h"
+#include "../resource.h"
 #include"mechbayscreen.h"
 #include"warrior.h"
 #include"gamesound.h"
@@ -78,7 +78,8 @@ void PilotReadyScreen::init(FitIniFile* file)
 
 	for ( int j = 0; j < ICON_COUNT_Y; j++ )
 	{
-		for ( int i = 0; i < ICON_COUNT_X; i++ )
+        int i = 0;
+		for (; i < ICON_COUNT_X; i++ )
 		{
 			pIcons[count].setHelpID( IDS_HELP_DEPLOYTEAMMW );
 			pIcons[count].setMech( 0 );
@@ -119,13 +120,13 @@ void PilotReadyScreen::init(FitIniFile* file)
 	LogisticsPilotListBoxItem::init( &tmpFile );
 
 	char blockName[32];
-	for ( i = 0; i < 4; i++ )
+	for (int i = 0; i < 4; i++ )
 	{
 		sprintf( blockName, "PilotSpecialtySkillIcon%ld", i );
 		specialtySkillIcons[i].init( file, blockName );
 	}
 
-	for ( i = 0; i < 4; i++ )
+	for (int i = 0; i < 4; i++ )
 	{
 		sprintf( blockName, "PilotSpecialtySkill%ld", i );
 		file->seekBlock( blockName );
@@ -135,19 +136,19 @@ void PilotReadyScreen::init(FitIniFile* file)
 		file->readIdLong( "right", skillLocations[i].right );
 	}
 
-	for ( i = 0; i < 5; i++ )
+	for (int i = 0; i < 5; i++ )
 	{
 		sprintf( blockName, "PilotReadyRankIcon%ld", i );
 		rankIcons[i].init( file, blockName );
 	}
 
-	for ( i = 0; i < 16; i++ )
+	for (int i = 0; i < 16; i++ )
 	{
 		sprintf( blockName, "PilotMedal%ld", i );
 		medalIcons[i].init( file, blockName );
 	}
 
-	for ( i = 0; i < 16; i++ )
+	for (int i = 0; i < 16; i++ )
 	{
 		sprintf( blockName, "PilotMedalPlacement%ld", i );
 		file->seekBlock( blockName );
@@ -212,7 +213,7 @@ void PilotReadyScreen::begin()
 		LogisticsPilot* pilots[256];
 		LogisticsData::instance->getPilots( pilots, count );
 
-		for ( i = 0; i < count; i++ )
+		for (int i = 0; i < count; i++ )
 		{
 			pilots[i]->setUsed(0);
 		}
@@ -236,7 +237,7 @@ void PilotReadyScreen::begin()
 			}
 		}
 
-		for ( i = 0; i < count; i++ )
+		for (int i = 0; i < count; i++ )
 		{
 			if ( !pilots[i]->isUsed() && pilots[i]->isAvailable() )
 			{
@@ -299,15 +300,15 @@ void PilotReadyScreen::render(int xOffset, int yOffset )
 		rankIcons[pCurPilot->getRank()].render(xOffset, yOffset);
 
 
-	for ( i = 0; i < 4; i++ )
+	for (int i = 0; i < 4; i++ )
 		skillIcons[i].render(xOffset, yOffset);
 
-	for ( i = 0; i < MAX_MEDAL; i++ )
+	for (int i = 0; i < MAX_MEDAL; i++ )
 		medalIcons[i].render(xOffset, yOffset);
 
 
 	LogisticsScreen::render( xOffset, yOffset );
-	for ( i = 0; i < ICON_COUNT; i++ )
+	for (int i = 0; i < ICON_COUNT; i++ )
 	{
 		pIcons[i].render( xOffset, yOffset );
 	}
@@ -368,7 +369,7 @@ void PilotReadyScreen::update()
 		int oldSel = -1;
 		bool bHasMech = 0;
 		int newRightSel = -1;
-		for ( i = 0; i < ICON_COUNT; i++ )
+		for (int i = 0; i < ICON_COUNT; i++ )
 		{
 			pIcons[i].update();
 			if ( pIcons[i].justSelected() )
@@ -469,7 +470,7 @@ void PilotReadyScreen::update()
 			buttons[3].disable(0);
 
 
-		for ( i = 0; i < MAX_MEDAL; i++ ) // so we get rollovers
+		for (int i = 0; i < MAX_MEDAL; i++ ) // so we get rollovers
 			medalIcons[i].update();
 
 		
@@ -599,7 +600,7 @@ void PilotReadyScreen::addSelectedPilot()
 			{
 
 				// if we got here, there was nothing selected
-				for ( i = 0; i < ICON_COUNT; i++ )
+				for (int i = 0; i < ICON_COUNT; i++ )
 				{
 					if ( pIcons[i].getMech() && !pIcons[i].getPilot() )
 					{
@@ -790,7 +791,8 @@ void PilotReadyScreen::setPilot( LogisticsPilot* pPilot )
  		pCurPilot->getSpecialtySkills( specialtySkills, count );
 		count = 32;
 		pCurPilot->getSpecialtySkills( skillIDs, count );
-		for ( int i = 0; i < 4; i++ )
+        int i = 0;
+		for (; i < 4; i++ )
 		{
 			if ( i < count )
 			{

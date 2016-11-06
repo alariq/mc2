@@ -68,7 +68,7 @@
 #include"gamelog.h"
 #endif
 
-#include "..\resource.h"
+#include "../resource.h"
 //***************************************************************************
 
 //extern float worldUnitsPerMeter;
@@ -1247,7 +1247,7 @@ void Turret::printFireWeaponDebugInfo (GameObjectPtr target, Stuff::Vector3D* ta
 	if (!CombatLog)
 		return;
 
-	static char* locationStrings [] = {
+	static const char* locationStrings [] = {
 		"head",
 		"center torso",
 		"left torso",
@@ -1308,7 +1308,7 @@ void Turret::printHandleWeaponHitDebugInfo (WeaponShotInfo* shotInfo) {
 	if (!CombatLog)
 		return;
 
-	static char* locationStrings [] = {
+	static const char* locationStrings [] = {
 		"head",
 		"center torso",
 		"left torso",

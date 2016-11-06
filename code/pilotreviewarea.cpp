@@ -11,7 +11,7 @@ SalvageMechArea.cpp			: Implementation of the SalvageMechArea component.
 #include"objmgr.h"
 #include"logisticspilot.h"
 #include"logisticsdata.h"
-#include "..\resource.h"
+#include "../resource.h"
 #include"mech.h"
 #include<malloc.h>
 #include"mechicon.h"
@@ -192,7 +192,7 @@ void PilotReviewScreen::init(FitIniFile* file)
 	bool bLiveTextAdded = 0;
 	bool bJustPromoted = 0;
 
-	for ( i = 0; i < count; i++ )
+	for (int i = 0; i < count; i++ )
 	{
 		if ( !pPilots[i]->isDead() && pPilots[i]->isUsed() )
 		{
@@ -771,7 +771,7 @@ void	ActivePilotListItem::render()
 		attributeMeters[i].render(globalX(), globalY());
 	}
 
-	for ( i = 0; i < 5; i++ )
+	for (int i = 0; i < 5; i++ )
 	{
 		tmp = s_outline[i]->getGUI_RECT();
 		tmp.left += globalX();
@@ -931,7 +931,7 @@ ActivePilotListItem::~ActivePilotListItem()
 
 		s_killIconRect = 0;
 
-			for ( i = 0; i < 5; i++ )
+			for (int i = 0; i < 5; i++ )
 			{
 				if ( s_outline[i] )
 					delete s_outline[i];
@@ -939,7 +939,7 @@ ActivePilotListItem::~ActivePilotListItem()
 				s_outline[i] = 0;
 			}
 
-			for ( i = 0; i < 7; i++ )
+			for (int i = 0; i < 7; i++ )
 			{
 				if ( s_icons[i] )
 					delete s_icons[i];
@@ -949,7 +949,7 @@ ActivePilotListItem::~ActivePilotListItem()
 				
 			}
 
-		for ( i = 0; i < MAX_MEDAL; i++ )
+		for (int i = 0; i < MAX_MEDAL; i++ )
 		{
 			if ( s_medals[i] )
 				delete s_medals[i];
@@ -1038,7 +1038,7 @@ void	ActivePilotListItem::init( FitIniFile* file )
 	char name[64];
 	
 	// last three are missing, remove this
-	for ( i = 0; i < MAX_MEDAL; i++ )
+	for (int i = 0; i < MAX_MEDAL; i++ )
 	{
 		sprintf( name, "MedalIcon%ld", i );
 		s_medals[i]->init( file, name );
@@ -1046,14 +1046,14 @@ void	ActivePilotListItem::init( FitIniFile* file )
 
 
 	char buffer[256];
-	for ( i = 0; i < 5; i++ )
+	for (int i = 0; i < 5; i++ )
 	{
 		s_outline[i] = new aRect;
 		sprintf( buffer, "ActiveDutyBoxRect%ld", i );
 		s_outline[i]->init( file, buffer );
 	}
 
-	for ( i = 0; i < 2; i++ )
+	for (int i = 0; i < 2; i++ )
 	{
 		s_icons[i] = new aObject;
 		sprintf( buffer, "ActiveDutyBoxSkill%ld", i );
@@ -1066,7 +1066,7 @@ void	ActivePilotListItem::init( FitIniFile* file )
 		s_attributeMeters[i]->setAddedColorMin( 0xffffffff );
 	}
 
-	for ( i = 0; i < 5; i++ )
+	for (int i = 0; i < 5; i++ )
 	{
 		s_icons[i+3] = new aObject;
 		sprintf( buffer, "ActiveDutyBoxRankIcon%ld", i );
@@ -1210,7 +1210,7 @@ ActivePilotListItem::ActivePilotListItem( LogisticsPilot* pPilot )
 	sprintf( buffer, "%ld", (long)pPilot->getPiloting() );
 	pilotingText.setText( buffer );
 
-	for ( i = 0; i < 2; i++ )
+	for (int i = 0; i < 2; i++ )
 	{
 		icons[i] = *s_icons[i];
 		addChild( &icons[i] );
@@ -1517,7 +1517,7 @@ void PilotPromotionArea::setPilot( LogisticsPilot* pPilot, PilotIcon* pIcon )
 		soundSystem->playBettySample( BETTY_PROMOREG );
 	}
 
-	for ( i = 0; i < maxSkill; i++ )
+	for (int i = 0; i < maxSkill; i++ )
 	{
 		SpecialtyListItem* pItem = new SpecialtyListItem( i );
 		aTextListItem* tmpItem = NULL;

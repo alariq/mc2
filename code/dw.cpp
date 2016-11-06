@@ -7,9 +7,11 @@
 #include"msodw.h"
 
 #include"utilities.h"
-#include "..\resource.h"
+#include "../resource.h"
 
 #include<gameos.hpp>
+
+#ifndef LINUX_BUILD
 
 long _stdcall ProcessException( EXCEPTION_POINTERS* ep );
 extern HWND			hWindow;
@@ -287,4 +289,7 @@ void InitDW (void)
 }
 
 //----------------------------------------------------------------------------
-
+#else 
+void InitDW (void) {
+}
+#endif // LINUX_BUILD

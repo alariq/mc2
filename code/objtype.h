@@ -220,7 +220,7 @@ class ObjectTypeManager {
 			init();
 		}
 
-		long init (char* objectFileName, long objectTypeCacheSize, long objectCacheSize, long maxObjectTypes = 1024);
+		long init (const char* objectFileName, long objectTypeCacheSize, long objectCacheSize, long maxObjectTypes = 1024);
 			
 		void destroy (void);
 							

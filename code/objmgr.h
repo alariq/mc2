@@ -302,7 +302,7 @@ class GameObjectManager {
 			destroy();
 		}
 		
-		void init (char* objTypeDataFile, long objTypeCacheSize, long objCacheSize);
+		void init (const char* objTypeDataFile, long objTypeCacheSize, long objCacheSize);
 
 		void setNumObjects (long nMechs,
 							long nVehicles,

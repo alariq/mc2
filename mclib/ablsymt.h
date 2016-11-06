@@ -28,7 +28,7 @@
 // DEFINITION structure
 
 typedef union {
-	long		integer;
+	int         integer;
 	char		character;
 	float		real;
 	char*		stringPtr;

@@ -738,14 +738,14 @@ long FitIniFile::open (FilePtr _parent, unsigned long fileSize, long numChild)
 }
 
 //---------------------------------------------------------------------------
-long FitIniFile::create (char* fName)
+long FitIniFile::create (const char* fName)
 {
 	long result = File::create(fName);
 	afterOpen();
 	return(result);
 }
 
-long FitIniFile::createWithCase( char* fName )
+long FitIniFile::createWithCase(const char* fName )
 {
 	long result = File::createWithCase( fName );
 	afterOpen();

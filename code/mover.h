@@ -1235,7 +1235,7 @@ class Mover : public GameObject {
 
 		virtual void setPilotHandle (long _pilotHandle);
 
-		virtual void loadPilot (char* pilotFileName, char* brainFileName, LogisticsPilot *lPilot);
+		virtual void loadPilot (const char* pilotFileName, const char* brainFileName, LogisticsPilot *lPilot);
 
 		virtual void setCommanderId (long _commanderId);
 
@@ -1272,8 +1272,7 @@ class Mover : public GameObject {
 //		}
 
 		void setNetPlayerName(const char *name) {
-			if (netPlayerName)
-				strncpy(netPlayerName,name,255);
+            strncpy(netPlayerName,name,255);
 		}
 
 		const char* getNetPlayerName(void) {
@@ -1405,17 +1404,13 @@ class Mover : public GameObject {
 		}
 
 		long getSensorMax (void) {
-			if (sensor > -1)
-				return(MasterComponent::masterList[inventory[sensor].masterID].getHealth());
-			else
-				return(0);
+            gosASSERT(sensor < MAX_MOVER_INVENTORY_ITEMS);
+		    return(MasterComponent::masterList[inventory[sensor].masterID].getHealth());
 		}
 
 		long getSensorHealth (void) {
-			if (sensor > -1)
-				return(inventory[sensor].health);
-			else
-				return(0);
+            gosASSERT(sensor < MAX_MOVER_INVENTORY_ITEMS);
+            return(inventory[sensor].health);
 		}
 
 		float getVisualRange (void);
@@ -1719,8 +1714,8 @@ class Mover : public GameObject {
 		bool enemyRevealed (void);
 
 		virtual const char* getIfaceName(void) {
-			return ("No Name");
-		}
+            return ("No Name");
+        }
 
 		void drawSensorTextHelp (float screenX, float screenY, long resID, DWORD color, bool drawBOLD);
 
@@ -1790,13 +1785,13 @@ typedef struct _MoverInitData {
 	bool			specialtySkills[NUM_SPECIALTY_SKILLS];
 	char			brainFileName[50];
 	char			csvFileName[50];
-	long			objNumber;
-	long			rosterIndex;
-	unsigned long	controlType;
-	unsigned long	controlDataType;
-	unsigned long	variant;
+	DWORD           objNumber;
+	DWORD           rosterIndex;
+	DWORD           controlType;
+	DWORD           controlDataType;
+	DWORD           variant;
 	Stuff::Vector3D	position;
-	long			rotation;
+	DWORD           rotation;
 	char			teamID;
 	char			commanderID;
 	DWORD			baseColor;
@@ -1807,8 +1802,8 @@ typedef struct _MoverInitData {
 	bool			exists;
 	char			icon;
 	bool			capturable;
-	long			numComponents;
-	long			components[50];
+	long            numComponents;
+	long            components[50];
 } MoverInitData;
 
 //---------------------------------------------------------------------------

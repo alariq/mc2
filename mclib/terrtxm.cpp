@@ -46,7 +46,7 @@ long tileCacheReqs = 0;
 long tileCacheHits = 0;
 long tileCacheMiss = 0;
 
-long TERRAIN_TXM_SIZE = 64;
+int TERRAIN_TXM_SIZE = 64;
 
 #define MAX_MASK_NUM		14
 
@@ -181,7 +181,7 @@ long TerrainTextures::init (const char *fileName, const char *baseName)
 
 	//-----------------------------------
 	// Read in the Base Terrain Textures.
-	for (long i=0;i<numTypes;i++)
+	for (int i=0;i<numTypes;i++)
 	{
 		char blockName[512];
 		sprintf(blockName,"TerrainType%d",i);
@@ -469,7 +469,7 @@ long TerrainTextures::initDetail (long typeNum, long detailNum)
 	// It then copies the raw TGA texture to GOS Texture Memory.
 	// We now control the MIP levels.  Load all MIP levels here!
 	long txmResult = -1;
-	for (long j=0;j<MC_MAX_MIP_LEVELS;j++)
+	for (int j=0;j<MC_MAX_MIP_LEVELS;j++)
 	{
 		//---------------------------------------------
 		// Change Texture Path to reflect texture size
@@ -798,7 +798,7 @@ long TerrainTextures::getOverlayHandle( Overlays id, int Offset )
 
 }
 
-void TerrainTextures::getOverlayInfoFromHandle( long handle, Overlays& id, unsigned long& Offset )
+void TerrainTextures::getOverlayInfoFromHandle( long handle, Overlays& id, DWORD& Offset )
 {
 	id = INVALID_OVERLAY;
 	Offset = -1;

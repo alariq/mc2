@@ -7,7 +7,7 @@ MPStats.cpp			: Implementation of the MPStats component.
 \*************************************************************************************************/
 
 #include"mpstats.h"
-#include "../resource.h"
+#include"../resource.h"
 #include"missionbriefingscreen.h"
 #include"chatwindow.h"
 #include"mechbayscreen.h"
@@ -39,7 +39,7 @@ int MPStats::init()
 	if ( NO_ERR != file.open( path ) )
 	{
 		char buffer2[512];
-		sprintf( buffer2, "couldn't open file %s", (char*)path );
+		sprintf( buffer2, "couldn't open file %s", (const char*)path );
 		Assert( 0, 0, buffer2 );
 		return false;	
 
@@ -57,7 +57,7 @@ int MPStats::init()
 		entries[i+1].move( 0, (i+1) * (entries[0].height()+1) );
 	}
 
-	for ( i = 0; i < buttonCount; i++ )
+	for (int i = 0; i < buttonCount; i++ )
 		buttons[i].setMessageOnRelease();
 
 	bSavingStats = 0;
@@ -314,7 +314,7 @@ void MPStatsEntry::init()
 	if ( NO_ERR != file.open( path ) )
 	{
 		char buffer2[512];
-		sprintf( buffer2, "couldn't open file %s", (char*)path );
+		sprintf( buffer2, "couldn't open file %s", (const char*)path );
 		Assert( 0, 0, buffer2 );
 		return;	
 
@@ -439,7 +439,7 @@ void MPStatsResultsEntry::init()
 	if ( NO_ERR != file.open( path ) )
 	{
 		char buffer2[512];
-		sprintf( buffer2, "couldn't open file %s", (char*)path );
+		sprintf( buffer2, "couldn't open file %s", (const char*)path );
 		Assert( 0, 0, buffer2 );
 		return;	
 
@@ -522,7 +522,7 @@ void MPStatsResultsEntry::setData(const MC2Player* data, unsigned long laurelCol
 		if ( pData )
 		{
 			int size = pData->pixel_depth/8;
-			int ID = mcTextureManager->textureFromMemory( (unsigned long*)(pData+1), gos_Texture_Solid, 0, pData->width, size  );
+			int ID = mcTextureManager->textureFromMemory( (DWORD*)(pData+1), gos_Texture_Solid, 0, pData->width, size  );
 			statics[0].setTexture( ID );
 			statics[0].setUVs( 0, 32, 32, 0 );
 		}

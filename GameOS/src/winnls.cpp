@@ -76,3 +76,8 @@ BOOL GetStringTypeEx(
         return false;
     }
 }
+
+BOOL IsDBCSLeadByte(BYTE TestChar) {
+    // sebi: NB!
+    return FALSE;
+}

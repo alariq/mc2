@@ -300,7 +300,7 @@ MechListBoxItem& MechListBoxItem::operator=( const MechListBoxItem& src )
 			animations[1][i] = src.animations[1][i];
 		}
 
-		for ( i = 0; i < 9; i++ )
+		for (int i = 0; i < 9; i++ )
 		{
 			animationIDs[i] = src.animationIDs[i];
 		}
@@ -597,7 +597,7 @@ void MechListBox::disableItemsThatCostMoreThanRP()
 
 	if ( bDisabledSel )
 	{
-		for ( i = 0; i < itemCount; i++ )
+		for (int i = 0; i < itemCount; i++ )
 		{
 			if ( items[i]->getState() != aListItem::DISABLED )
 			{
@@ -632,7 +632,7 @@ void MechListBox::disableItemsThatCanNotGoInFG()
 
 	if ( bDisabledSel )
 	{
-		for ( i = 0; i < itemCount; i++ )
+		for (int i = 0; i < itemCount; i++ )
 		{
 			if ( items[i]->getState() != aListItem::DISABLED )
 			{

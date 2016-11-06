@@ -132,12 +132,12 @@ class MapData : public HeapManager
 		void calcLight (void);
 		void clearShadows();
 		
-		float terrainElevation (Stuff::Vector3D &position);
+		float terrainElevation (const Stuff::Vector3D &position);
 		float terrainElevation ( long tileR, long tileC );
 
-		float terrainAngle (Stuff::Vector3D &position, Stuff::Vector3D* normal = NULL);
-		Stuff::Vector3D terrainNormal (Stuff::Vector3D& position);
-		float terrainLight (Stuff::Vector3D& position);
+		float terrainAngle (const Stuff::Vector3D &position, Stuff::Vector3D* normal = NULL);
+		Stuff::Vector3D terrainNormal (const Stuff::Vector3D& position);
+		float terrainLight (const Stuff::Vector3D& position);
 		
 		float getTopLeftElevation (void);
 		
@@ -146,8 +146,8 @@ class MapData : public HeapManager
 		long getOverlayTile (long block, long vertex);
 
 		// new overlay stuff
-		void setOverlay( long tileR, long tileC, Overlays type, unsigned long Offset );
-		void getOverlay( long tileR, long tileC, Overlays& type, unsigned long& Offset );
+		void setOverlay( long tileR, long tileC, Overlays type, DWORD Offset );
+		void getOverlay( long tileR, long tileC, Overlays& type, DWORD& Offset );
 		void setTerrain( long tileR, long tileC, int terrainType );
 		long getTerrain( long tileR, long tileC );
 
@@ -168,7 +168,7 @@ class MapData : public HeapManager
 		
 		float waterElevation () { return waterDepth; }
 
-		void markSeen (Stuff::Vector2DOf<float> &topLeftPosition, VertexPtr vertexList, Stuff::Vector3D &looker, Stuff::Vector3D &lookVector, float cone, float dist, byte who);
+		void markSeen (const Stuff::Vector2DOf<float> &topLeftPosition, VertexPtr vertexList, const Stuff::Vector3D &looker, const Stuff::Vector3D &lookVector, float cone, float dist, byte who);
 
 		void unselectAll();
 		void unhighlightAll();

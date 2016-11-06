@@ -255,7 +255,7 @@ class Debugger {
 
 		void displayModuleInstanceRegistry (void);
 
-		void processCommand (long commandId, char* strParam1, long numParam1, ABLModulePtr moduleParam1);
+		void processCommand (long commandId, char* strParam1, int numParam1, ABLModulePtr moduleParam1);
 
 		void debugMode (void);
 

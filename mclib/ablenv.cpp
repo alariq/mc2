@@ -37,13 +37,13 @@
 #endif
 
 //***************************************************************************
-long ABLi_preProcess (char* sourceFileName,
+long ABLi_preProcess (const char* sourceFileName,
 					  long* numErrors = NULL,
 					  long* numLinesProcessed = NULL,
 					  long* numFilesProcessed = NULL,
 					  bool printLines = false);
 
-ABLModulePtr ABLi_loadLibrary (char* sourceFileName,
+ABLModulePtr ABLi_loadLibrary (const char* sourceFileName,
 					   long* numErrors = NULL,
 					   long* numLinesProcessed = NULL,
 					   long* numFilesProcessed = NULL,
@@ -54,7 +54,7 @@ ABLModulePtr ABLi_loadLibrary (char* sourceFileName,
 // EXTERNAL variables
 extern long				lineNumber;
 extern long				errorCount;
-extern long				execStatementCount;
+extern int              execStatementCount;
 
 extern TokenCodeType	curToken;
 extern char				wordString[];
@@ -139,7 +139,7 @@ long				CallStackLevel = 0;
 #define MAX_PROFILE_LINES		256
 
 long NumProfileLogLines = 0;
-long TotalProfileLogLines = 0;
+int TotalProfileLogLines = 0;
 char ProfileLogBuffer[MAX_PROFILE_LINES][MAX_PROFILE_LINELEN];
 ABLFile* ProfileLog = NULL;
 long ProfileLogFunctionTimeLimit = 5;
@@ -200,7 +200,7 @@ void ABL_AddToProfileLog (char* profileString) {
 		DumpProfileLog();
 
 	strncpy(ProfileLogBuffer[NumProfileLogLines], profileString, MAX_PROFILE_LINELEN - 1);
-	ProfileLogBuffer[NumProfileLogLines][MAX_PROFILE_LINELEN] = '\0';
+	ProfileLogBuffer[NumProfileLogLines][MAX_PROFILE_LINELEN - 1] = '\0';
 	NumProfileLogLines++;
 	TotalProfileLogLines++;
 }
@@ -713,10 +713,10 @@ char* ABLModule::getFileName (void) {
 
 //---------------------------------------------------------------------------
 
-void ABLModule::setName (char* _name) {
+void ABLModule::setName (const char* _name) {
 
 	strncpy(name, _name, MAX_ABLMODULE_NAME);
-	name[MAX_ABLMODULE_NAME] = '\0';
+	name[MAX_ABLMODULE_NAME-1] = '\0';
 }
 
 //---------------------------------------------------------------------------
@@ -870,7 +870,7 @@ long ABLModule::execute (ABLParamPtr paramList) {
 
 				//----------------------------------------------------------
 				// Formal parameter is an array or record, so make a copy...
-				if ((formalTypePtr->form == FRM_ARRAY)/* || (formalTypePtr->form == FRM_RECORD)*/) {
+				if (formalTypePtr->form == FRM_ARRAY/* || (formalTypePtr->form == FRM_RECORD)*/) {
 					//------------------------------------------------------------------------------
 					// The following is a little inefficient, but is kept this way to keep it clear.
 					// Once it's verified to work, optimize...
@@ -1012,7 +1012,7 @@ long ABLModule::execute (ABLParamPtr moduleParamList, SymTableNodePtr functionId
 
 				//----------------------------------------------------------
 				// Formal parameter is an array or record, so make a copy...
-				if ((formalTypePtr->form == FRM_ARRAY)/* || (formalTypePtr->form == FRM_RECORD)*/) {
+				if (formalTypePtr->form == FRM_ARRAY/* || (formalTypePtr->form == FRM_RECORD)*/) {
 					//------------------------------------------------------------------------------
 					// The following is a little inefficient, but is kept this way to keep it clear.
 					// Once it's verified to work, optimize...
@@ -1428,7 +1428,7 @@ void ABLi_loadEnvironment (ABLFile* ablFile, bool malloc) {
 	long numModsRegistered = ablFile->readLong();
 	long numMods = ablFile->readLong();
 
-	for (long i = 0; i < numLibs; i++) {
+	for (int i = 0; i < numLibs; i++) {
 		unsigned char fileName[1024];
 		long result = ablFile->readString(fileName);
 		if (!result) {
@@ -1438,7 +1438,7 @@ void ABLi_loadEnvironment (ABLFile* ablFile, bool malloc) {
 		}
 		if (malloc) {
 			long numErrors, numLinesProcessed;
-			ABLModulePtr library = ABLi_loadLibrary((char*)fileName, &numErrors, &numLinesProcessed, NULL, false, false);
+			ABLModulePtr library = ABLi_loadLibrary((const char*)fileName, &numErrors, &numLinesProcessed, NULL, false, false);
 			if (!library) {
 				char err[255];
 				sprintf(err, "ABLi_loadEnvironment: Unable to load library [Module %d]", i);
@@ -1457,7 +1457,7 @@ void ABLi_loadEnvironment (ABLFile* ablFile, bool malloc) {
 		}
 		long numErrors, numLinesProcessed;
 		if (malloc) {
-			long handle = ABLi_preProcess((char*)fileName, &numErrors, &numLinesProcessed);
+			long handle = ABLi_preProcess((const char*)fileName, &numErrors, &numLinesProcessed);
 			if (handle < 0) {
 				char err[255];
 				sprintf(err, "ABLi_loadEnvironment: Unable to preprocess [Module %d]", i);

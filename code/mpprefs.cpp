@@ -65,7 +65,7 @@ int MPPrefs::init( FitIniFile& file )
 	char blockName[256];
 
 	const char* headers[3] = {"PlayerNameComboBox", "UnitNameComboBox", "UnitInsigniaComboBox" };
-	for ( i = 0;  i< count; i++ )
+	for (int i = 0; i< count; i++ )
 	{
 		sprintf( blockName, "ComboBox%ld",  i );
 		file.seekBlock( blockName );
@@ -83,7 +83,7 @@ int MPPrefs::init( FitIniFile& file )
 		if ( NO_ERR != tmpFile.open( path ) )
 		{
 			char error[256];
-			sprintf( error, "couldn't open file %s", path );
+			sprintf( error, "couldn't open file %s", (const char*)path );
 			Assert( 0, 0, error );
 			return -1;
 		}
@@ -140,7 +140,7 @@ void MPPrefs::begin()
 	comboBox[1].ListBox().removeAllItems( true );
 	comboBox[1].SelectItem( -1 );
 
-	for ( i = 0; i < 10; i++ )
+	for (int i = 0; i < 10; i++ )
 	{
 		if ( strlen( prefs.unitName[i] ) )
 		{
@@ -205,7 +205,7 @@ void MPPrefs::begin()
 
 	long playerCount;
 	const MC2Player* players = MPlayer->getPlayers(playerCount);
-	for( i = 0; i < playerCount; i++ )
+	for(int i = 0; i < playerCount; i++ )
 	{
 		if ( players[i].teamSeniority > mySeniority && players[i].team == player->team )
 		{
@@ -276,7 +276,7 @@ void MPPrefs::update()
 
 	int oldSel = comboBox[2].GetSelectedItem();
 	bool bExpanded = 0;
-	for ( i = 0; i < 3; i++ )
+	for (int i = 0; i < 3; i++ )
 	{
 		if ( comboBox[i].ListBox().isShowing() )
 		{

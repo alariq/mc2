@@ -119,7 +119,7 @@ enum  // EDwBehaviorFlags
 	fDwUseHKLM              = 0x00000100,   // DW reg from HKLM instead of HKCU
 };
 
-
+#ifndef LINUX_BUILD
 typedef struct _DWSharedMem
 {
 	DWORD dwSize;               // should be set to size of DWSharedMem
@@ -199,6 +199,7 @@ typedef struct _DWSharedMem
 	int AssertActionCode;              // [out] action code to take
 #endif
 } DWSharedMem;
+#endif // LINUX_BUILD
 
 #pragma pack(pop, msodw_h)
 #endif // MSODW_H

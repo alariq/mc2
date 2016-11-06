@@ -12,7 +12,7 @@ LogisticsData.cpp			: Implementation of the LogisticsData component.
 #include"cmponent.h"
 #include"paths.h"
 #include"warrior.h"
-#include "../resource.h"
+#include"../resource.h"
 #include"malloc.h"
 #include"team.h"
 #include"mech.h"
@@ -79,7 +79,7 @@ LogisticsData::~LogisticsData()
 	missionInfo = NULL;
 
 #ifndef VIEWER
-	ChatWindow::destroy();
+	ChatWindow::static_destroy();
 #endif
 }
 
@@ -1350,7 +1350,7 @@ void	LogisticsData::setMissionCompleted( )
 			{
 				LogisticsMech* pMech = getMech( pMover->getName(), pMover->getPilot()->getName() );
 
-				unsigned long base, highlight1, highlight2;
+				DWORD base, highlight1, highlight2;
 				((Mech3DAppearance*)pMover->getAppearance())->getPaintScheme( base, highlight1, highlight2 );
 				LogisticsPilot* pPilot = getPilot( pMover->getPilot()->getName() );
 				if ( pMech )
@@ -1950,7 +1950,7 @@ int LogisticsData::setMechToModify( LogisticsMech* pMech )
 	return 0;
 }
 
-void encryptFile (char *inputFile, char* outputFile)
+void encryptFile (const char *inputFile, const char* outputFile)
 {
 	//Now we encrypt this by zlib Compressing the file passed in.
 	// Then LZ Compressing the resulting zlib data.
@@ -2130,7 +2130,8 @@ int LogisticsData::acceptMechModifications( const char* name )
 				(*vIter)->save( file, 0 );
 				file.close();
 
-				encryptFile(mechFile,mechFile);
+                const char* filename = (const char*)mechFile;
+				encryptFile(filename, filename);
 			}
 		}
 	}

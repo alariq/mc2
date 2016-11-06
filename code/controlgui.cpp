@@ -33,7 +33,7 @@ controlGui.cpp			: Implementation of the controlGui component.
 
 #include"txmmgr.h"
 
-#include "..\resource.h"
+#include "../resource.h"
 #include"malloc.h"
 
 #include"chatwindow.h"
@@ -155,7 +155,7 @@ ControlGui::ControlGui()
 	helpTextID = 0;
 
 	rectInfos = NULL;
-	rectCount = NULL;	
+	rectCount = 0;	
 	staticInfos = 0;
 	staticCount = 0;
 	buttons = 0;
@@ -328,7 +328,7 @@ void ControlGui::render( bool bPaused )
 		else
 			renderInfoTab();
 
-		for ( i = 0; i < staticCount; i++ )
+		for (int i = 0; i < staticCount; i++ )
 		{
 			staticInfos[i].render();
 		}
@@ -341,11 +341,11 @@ void ControlGui::render( bool bPaused )
 		
 		gos_SetRenderState( gos_State_AlphaMode, gos_Alpha_OneZero );
 		
-		for ( i = 0; i < LAST_COMMAND; ++i )
+		for (int i = 0; i < LAST_COMMAND; ++i )
 			buttons[i].render();
 
 		// want to draw the tab on top last
-		for ( i = TACMAP_TAB; i < TACMAP_TAB + 3; i++ )
+		for (int i = TACMAP_TAB; i < TACMAP_TAB + 3; i++ )
 		{
 			if ( (getButton( i )->state) & ControlButton::PRESSED )
 			{
@@ -708,7 +708,7 @@ void ControlGui::RenderObjectives()
 			guiFont.getSize() );
 
 		// draw secondary objectives
-		for ( iter =  Team::home->objectives.Begin();
+		for (EList< CObjective*, CObjective* >::EIterator iter =  Team::home->objectives.Begin();
 			!iter.IsDone(); iter++ )
 		{
 			if ( ((*iter)->IsActive()) && (!(*iter)->IsHiddenTrigger()) && (!(1 == (*iter)->Priority())) )
@@ -782,7 +782,7 @@ void ControlGui::renderPlayerStatus(float xDelta)
 	GUI_RECT rect = { mpStats[0].left()-5+xDelta, mpStats[0].top()-5, 
 		mpStats[0].right()+5+xDelta, mpStats[0].bottom()+5};
 	
-	for ( i = 1; i < 9; i++ )
+	for (int i = 1; i < 9; i++ )
 	{
 		if ( mpStats[i].isShowing() )
 			rect.bottom += mpStats[0].height() + 4;
@@ -790,7 +790,7 @@ void ControlGui::renderPlayerStatus(float xDelta)
 
 	drawRect( rect, 0x7f000000 );
 
-	for ( i = 0; i < 9; i++ )
+	for (int i = 0; i < 9; i++ )
 	{
 		mpStats[i].render( xDelta, ((i) * (mpStats[0].height() + 4) ));
 	}
@@ -857,7 +857,7 @@ void ControlGui::renderObjective( CObjective* pObjective, long xPos, long yPos, 
 			guiFont.getSize() );
 
 		// draw .............
-		unsigned long tmpULong1, tmpULong2;
+		DWORD tmpULong1, tmpULong2;
 		gos_TextStringLength( &tmpULong1, &tmpULong2, pObjective->LocalizedDescription() );
 		descWidth = (int)tmpULong1;
 		height = (int)tmpULong2;
@@ -876,7 +876,8 @@ void ControlGui::renderObjective( CObjective* pObjective, long xPos, long yPos, 
 		}
 		
 		char* dots = (char*)_alloca( sizeof( char ) * (numberOfDots+1) );
-		for ( int i = 0; i < numberOfDots - 2; i++ )
+        int i;
+		for (i = 0; i < numberOfDots - 2; i++ )
 			dots[i] = '.';
 		
 		dots[i] = 0;
@@ -1003,7 +1004,7 @@ void ControlGui::update( bool bPaused, bool bLOS )
 	bool bJump = 1;
 
 	// if no mover is selected, disable range buttons
-	for ( i = DEFAULT_RANGE; i < STOP_COMMAND; i++ )
+	for (int i = DEFAULT_RANGE; i < STOP_COMMAND; i++ )
 	{
 		buttons[i].disable( false );
 	}
@@ -1017,7 +1018,7 @@ void ControlGui::update( bool bPaused, bool bLOS )
 	Mover* pSelectedMover = 0;
 	int holdPositionCount = 0;
 	
-	for ( i = 0; i < pTeam->getRosterSize(); ++i )
+	for (int i = 0; i < pTeam->getRosterSize(); ++i )
 	{
 		Mover* pMover = (Mover*)pTeam->getMover( i );
 		
@@ -1075,7 +1076,7 @@ void ControlGui::update( bool bPaused, bool bLOS )
 		
 
 	int rangeCount = 0;
-	for ( i = 0; i < 4; i++ )
+	for (int i = 0; i < 4; i++ )
 	{
 		if ( getButton( DEFAULT_RANGE + i )->state & ControlButton::PRESSED )
 		{
@@ -1085,7 +1086,7 @@ void ControlGui::update( bool bPaused, bool bLOS )
 
 	if ( rangeCount > 1 )
 	{
-		for ( i = 0; i < 4; i++ )
+		for (int i = 0; i < 4; i++ )
 		{
 			if ( getButton( DEFAULT_RANGE + i )->state & ControlButton::PRESSED )
 			{
@@ -1098,7 +1099,7 @@ void ControlGui::update( bool bPaused, bool bLOS )
 	// if no mover is selected, disable range buttons
 	if ( !bMover )
 	{
-		for ( i = DEFAULT_RANGE; i < STOP_COMMAND; i++ )
+		for (int i = DEFAULT_RANGE; i < STOP_COMMAND; i++ )
 			buttons[i].disable( true );
 	}
 	else
@@ -1263,13 +1264,13 @@ bool ControlGui::inRegion( int mouseX, int mouseY, bool bPaused )
 			 return true;
 	}
 	
-	for ( i = 0; i < staticCount; i++ )
+	for (int i = 0; i < staticCount; i++ )
 	{
 		if ( staticInfos[i].isInside( mouseX, mouseY ) )
 			return true;
 	}
 
-	for ( i = 0; i < rectCount; i++ )
+	for (int i = 0; i < rectCount; i++ )
 	{
 		if ( (rectInfos[i].rect.left)  <= mouseX && 
 			 rectInfos[i].rect.right >= mouseX && 
@@ -1519,7 +1520,7 @@ ControlButton*		ControlGui::getButton( int ID )
 			return &buttons[i];
 	}
 
-	for ( i = 0; i < LAST_VEHICLE; i++ )
+	for (int i = 0; i < LAST_VEHICLE; i++ )
 	{
 		if ( vehicleButtons[i].ID == ID )
 			return &vehicleButtons[i];
@@ -2006,7 +2007,7 @@ void ControlGui::handleVehicleClick( int ID )
 			break;
 		case STOP_VEHICLE:
 			addingArtillery = addingVehicle = addingSalvage = false;
-			for ( i = 0; i < LAST_VEHICLE - 1; i++ )
+			for (int i = 0; i < LAST_VEHICLE - 1; i++ )
 			{
 				if ( vehicleCosts[i] <= LogisticsData::instance->getResourcePoints() )
 				{
@@ -2136,7 +2137,7 @@ void ControlGui::renderHelpText()
 		char buffer[1024];
 		cLoadString( helpTextID, buffer, 1024 );
 
-		unsigned long width, height;
+		DWORD width, height;
 		width = helpFont.width( buffer );
 		height = helpFont.height( buffer, width );
 
@@ -2459,7 +2460,8 @@ void ControlGui::initStatics( FitIniFile& file )
 	objectiveInfos = new StaticInfo[objectiveInfoCount + 3];
 
 	char blockName[64];
-	for ( i = 0; i < objectiveInfoCount; i++ )
+    int i = 0;
+	for (; i < objectiveInfoCount; i++ )
 	{
 		sprintf( blockName, "ObjStatic%ld", i );
 		objectiveInfos[i].init( file, blockName );
@@ -2832,7 +2834,7 @@ void ControlGui::playMovie( const char* fileName )
 	FullPathFileName movieName;
 	movieName.init(moviePath,realName,".bik");
 	bMovie = new MC2Movie;
-	bMovie->init((char *)movieName,vRect,true);
+	bMovie->init(movieName,vRect,true);
 
 	//Maybe not enough frames to run.  Do not flash the border!
 	// Do ONE update to make sure the damned sound starts at least!!
@@ -2980,7 +2982,8 @@ void ControlGui::eatChatKey()
 
 void ControlGui::setChatText( const char* playerName, const char* message, unsigned long color, unsigned long chatColor )
 {
-	for ( int i = 0; i < MAX_CHAT_COUNT - 1; i++ )
+    int i = 0;
+	for (; i < MAX_CHAT_COUNT - 1; i++ )
 	{
 		memcpy( &chatInfos[i], &chatInfos[i+1], sizeof( ChatInfo ) );
 	}
@@ -3045,7 +3048,8 @@ void ControlGui::renderChatText()
 
 	int lineCount = 0;
 	int curTime = scenarioTime;
-	for ( int i = MAX_CHAT_COUNT - 1; i > -1; i-- )
+    int i;
+	for (i = MAX_CHAT_COUNT - 1; i > -1; i-- )
 	{
 		if ( chatInfos[i].messageLength && curTime - chatInfos[i].time < CHAT_DISPLAY_TIME )
 		{
@@ -3137,8 +3141,8 @@ bool ControlGui::playPilotVideo( MechWarrior* pPilot, char movieCode )
 	strcat( fileName, realPilotName ); // swap in pilot name when videos are done
 	char tmp[3];
 	tmp[0] = movieCode;
-	tmp[1] = NULL;
-	tmp[2] = NULL;
+	tmp[1] = '\0';
+	tmp[2] = '\0';
 	strcat( fileName, tmp );
 
 	return forceGroupBar.setPilotVideo( fileName, pPilot );

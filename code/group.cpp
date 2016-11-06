@@ -387,7 +387,7 @@ void MoverGroup::sortMovers (long numMoversInGroup, MoverPtr* moverList, Stuff::
 		Mover::sortList->setValue(i, dist);
 	}
 	Mover::sortList->sort(false);
-	for (i = 0; i < numMoversInGroup; i++) {
+	for (int i = 0; i < numMoversInGroup; i++) {
 		long moverIndex = Mover::sortList->getId(i);
 		if (moverIndex != -1)
 			moverList[moverIndex]->selectionIndex = i;
@@ -631,7 +631,7 @@ long MoverGroup::calcJumpGoals (Stuff::Vector3D goal, long numMovers, Stuff::Vec
 	//-----------------------------------------------------------------
 	// Now, for each jumper, select a closest cell to the goal, mark it
 	// as theirs and close it...
-	for (i = 0; i < numMovers; i++) {
+	for (int i = 0; i < numMovers; i++) {
 		//long startCellRow = 0;
 		//long startCellCol = 0;
 
@@ -764,7 +764,7 @@ Fatal(0, "Need to support jumpGoalList (and goalList) for MOVETO as well in mc2 
 				//-----------------------------------
 				// Now, calc the order of movement...
 				long curIndex = 1;
-				for (i = 0; i < moverCount; i++) {
+				for (int i = 0; i < moverCount; i++) {
 					MoverPtr mover = getMover(list->getId(i));
 					if (mover->getWatchID() == pointWID)
 						mover->selectionIndex = 0;

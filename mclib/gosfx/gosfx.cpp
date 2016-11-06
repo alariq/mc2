@@ -4,6 +4,9 @@
 
 #include"gosfxheaders.hpp"
 
+//'GFX#'
+static const uint32_t gosFX_fourccGFX = 0x47465823;
+
 HGOSHEAP
 	gosFX::Heap = NULL;
 
@@ -124,7 +127,7 @@ int
 
 	int erf_signature;
 	*erf_stream >> erf_signature;
-	Verify(erf_signature == 'GFX#');
+	Verify(erf_signature == gosFX_fourccGFX);
 	int version;
 	*erf_stream >> version;
 	if (version > CurrentGFXVersion)
@@ -139,7 +142,6 @@ void
 {
 	Check_Object(erf_stream);
     // sebi TODO: int strtoint(char[4]); aka MAKE_FOURCC
-    uint32_t fourcc = 0x47465823;
 	//*erf_stream << 'GFX#' << static_cast<int>(CurrentGFXVersion);
-	*erf_stream << fourcc << static_cast<int>(CurrentGFXVersion);
+	*erf_stream << gosFX_fourccGFX << static_cast<int>(CurrentGFXVersion);
 }

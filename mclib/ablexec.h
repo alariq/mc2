@@ -50,7 +50,7 @@ typedef enum {
 
 typedef struct {
 	char		type;
-	long		integer;
+	int         integer;
 	float		real;
 } ABLParam;
 
@@ -60,7 +60,7 @@ typedef ABLParam* ABLParamPtr;
 // RUN-TIME STACK
 
 typedef union {
-	long			integer;
+	int             integer;
 	float			real;
 	unsigned char	byte;
 	Address			address;
@@ -120,8 +120,8 @@ extern char*			codeSegmentLimit;
 extern char*			statementStartPtr;
 
 extern TokenCodeType	codeToken;
-extern long				execLineNumber;
-extern long				execStatementCount;
+extern int              execLineNumber;
+extern int              execStatementCount;
 
 extern StackItem*		stack;
 extern StackItemPtr		tos;

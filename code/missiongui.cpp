@@ -96,13 +96,13 @@
 #include"keyboardref.h"
 #endif
 
-#include "..\resource.h"
+#include "../resource.h"
 
 #include"windows.h"
 
 #include"gvehicl.h" // remove
 
-	static char* terrainStr[NUM_TERRAIN_TYPES] = {
+	static const char* terrainStr[NUM_TERRAIN_TYPES] = {
 			"Blue Water",	//MC_BLUEWATER_TYPE
 			"Green Water",	//MC_GREEN_WATER_TYPE
 			"Mud",	//MC_MUD_TYPE
@@ -134,7 +134,7 @@ extern bool MLRVertexLimitReached;
 // Globals
 extern float frameLength;
 
-extern void DEBUGWINS_print (char* s, long window = 0);
+extern void DEBUGWINS_print (const char* s, long window = 0);
 extern void DEBUGWINS_setGameObject (long debugObj, GameObjectPtr obj);
 extern void DEBUGWINS_toggle (bool* windowsOpen);
 extern void DEBUGWINS_display (bool* windowsOpen);
@@ -880,7 +880,7 @@ void MissionInterfaceManager::update (void)
 		updateOldStyle(shiftDn, altDn, ctrlDn, bGui, lineOfSight, passable, moverCount, nonMoverCount);
 	}
 
-	for ( i = 0; i < Team::home->getRosterSize(); i++ )
+	for (int i = 0; i < Team::home->getRosterSize(); i++ )
 	{
 		Mover* pMover = (Mover*)Team::home->getMover( i );
 		MechWarrior* pilot = pMover->getPilot();
@@ -3277,7 +3277,7 @@ void MissionInterfaceManager::makeForceGroup( int forceGroup )
 {
 	Team* pTeam = Team::home;
 
-	for (long i=0;i<pTeam->getRosterSize();i++)
+	for (int i=0;i<pTeam->getRosterSize();i++)
 	{
 		Mover* pMover = (Mover*)pTeam->getMover( i );
 		if (pMover && (pMover->getCommander()->getId() == Commander::home->getId()))
@@ -3287,7 +3287,7 @@ void MissionInterfaceManager::makeForceGroup( int forceGroup )
 		}
 	}					
 
-	for (i=0;i<pTeam->getRosterSize();i++)
+	for (int i=0;i<pTeam->getRosterSize();i++)
 	{
 		Mover* pMover = (Mover*)pTeam->getMover( i );
 		if (pMover && (pMover->getCommander()->getId() == Commander::home->getId()))
@@ -3609,13 +3609,13 @@ void MissionInterfaceManager::doDrag(bool bGui)
 
 				if ( !userInput->shift() )
 				{
-					for (i=0;i<ObjectManager->getNumMovers();i++)
+					for (int i=0;i<ObjectManager->getNumMovers();i++)
 					{
 						ObjectManager->getMover(i)->setSelected( 0 );
 					}
 				}
 
-				for ( i = 0; i < count; i ++ )
+				for (int i = 0; i < count; i ++ )
 				{
 					objsInRect[i]->setSelected( true );
 				}
@@ -3651,7 +3651,7 @@ bool MissionInterfaceManager::canAddVehicle( const Stuff::Vector3D& pos )
 		if ( Team::home->teamLineOfSight(pos, 0.0f) )
 		{
 			if ( GameMap->getPassable( pos )
-				&& (!land->getWater((Stuff::Vector3D)pos) ) )
+				&& (!land->getWater(pos) ))
 				return true;
 			else 
 				return false;
@@ -4970,7 +4970,7 @@ int MissionInterfaceManager::teleport() {
 		}
 		MoverGroup::calcMoveGoals(wPos, numMovers, moveGoals);
 		numMovers = 0;
-		for (i = 0; i < pTeam->getRosterSize(); i++) {
+		for (int i = 0; i < pTeam->getRosterSize(); i++) {
 			Mover* mover = (Mover*)pTeam->getMover( i );
 			if (mover->isSelected() && mover->getCommander()->getId() == Commander::home->getId() )
 				((MoverPtr)mover)->setTeleportPosition(moveGoals[numMovers++]);
@@ -5028,7 +5028,7 @@ int MissionInterfaceManager::goalPlan() {
 			if (mover->isSelected() && mover->getCommander()->getId() == Commander::home->getId())
 				numMovers++;
 		}
-		for (i = 0; i < pTeam->getRosterSize(); i++) {
+		for (int i = 0; i < pTeam->getRosterSize(); i++) {
 			Mover* mover = (Mover*)pTeam->getMover( i );
 			if (mover->isSelected() && mover ->getCommander()->getId() == Commander::home->getId()) {
 				((MoverPtr)mover)->getPilot()->setUseGoalPlan(!((MoverPtr)mover)->getPilot()->getUseGoalPlan());
@@ -5084,11 +5084,11 @@ void damageObject (GameObjectPtr victim, float damage) {
 	switch (victim->getObjectClass()) {
 		case BATTLEMECH:
 		case GROUNDVEHICLE:
-			shot.init(NULL, -2, damage, victim->calcHitLocation(NULL,-1,ATTACKSOURCE_WEAPONFIRE,0), 0);
+			shot.init(0, -2, damage, victim->calcHitLocation(NULL,-1,ATTACKSOURCE_WEAPONFIRE,0), 0);
 			victim->handleWeaponHit(&shot, (MPlayer != NULL));
 			break;
 		default:
-			shot.init(NULL, -1, damage, 0, 0);
+			shot.init(0, -1, damage, 0, 0);
 			victim->handleWeaponHit(&shot, (MPlayer != NULL));
 			break;
 	}

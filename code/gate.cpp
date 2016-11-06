@@ -58,7 +58,7 @@
 #include"team.h"
 #endif
 
-#include "..\resource.h"
+#include "../resource.h"
 #include<stdio.h>
 
 extern unsigned long NextIdNumber;
@@ -382,7 +382,7 @@ void Gate::blowAnyOffendingObject (void)
 			//-------------------------------------------------------------
 			// Put about a million points of damage into the closestObject
 			WeaponShotInfo shot;
-			shot.init(NULL, -3, 250.00, 0, 0);
+			shot.init(0, -3, 250.00, 0, 0);
 
 			for (long i=0;i<10;i++)
 			{
@@ -392,7 +392,7 @@ void Gate::blowAnyOffendingObject (void)
 
 			//--------------------
 			// Gate must die too.
-			shot.init(NULL, -3, ((GateTypePtr)(ObjectManager->getObjectType(typeHandle)))->getDamageLvl()+5, 0, 0);
+			shot.init(0, -3, ((GateTypePtr)(ObjectManager->getObjectType(typeHandle)))->getDamageLvl()+5, 0, 0);
 
 			handleWeaponHit(&shot, (MPlayer != NULL));
 		}

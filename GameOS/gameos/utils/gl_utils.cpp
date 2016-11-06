@@ -204,6 +204,7 @@ updateTexture(const Texture& t , char* pdata) {
 
     glEnable(GL_TEXTURE_2D);
 	glBindTexture(GL_TEXTURE_2D, t.id);
+    assert(t.fmt_ != TF_NONE && "t.format is deprecated");
     if(t.fmt_ != TF_NONE) {
         // TODO: keep this all in platform dependent data of texture
         GLint int_fmt = textureInternalFormats[t.fmt_];
@@ -213,7 +214,7 @@ updateTexture(const Texture& t , char* pdata) {
 	    //glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, t.w, t.h, 0, GL_RGBA, GL_UNSIGNED_BYTE, pdata);
         //glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, t.w, t.h, GL_RGBA, GL_UNSIGNED_BYTE, pdata);
     } else {
-#pragma message("Deprecated!!!")
+        // deprecated
 	    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, t.w, t.h, 0, t.format, GL_UNSIGNED_BYTE, pdata);
     }
 	glBindTexture(GL_TEXTURE_2D, 0);

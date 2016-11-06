@@ -10,7 +10,9 @@
 #include"mclib.h"
 #endif
 
+#ifndef LINUX_BUILD
 #include"crtdbg.h"
+#endif
 
 #ifndef MULTPLYR_H
 #include"multplyr.h"
@@ -98,15 +100,18 @@
 #include"gamelog.h"
 #endif
 
+#ifndef LINUX_BUILD
 #include"dplay8.h"
+#endif
 
 #include"mpparameterscreen.h"
 
+//sebi: commented include
 //#ifndef VERSION_H
-#include"version.h"
+//#include"version.h"
 //#endif
 
-#include "..\resource.h"
+#include "../resource.h"
 
 #ifdef USE_MISSION_RESULTS_SCREEN
 extern bool EventsToMissionResultsScreen;
@@ -193,7 +198,7 @@ MultiPlayer* MPlayer = NULL;
 ///extern Scenario* scenario;
 ///extern Logistics* globalLogPtr;
 
-void DEBUGWINS_print (char* s, long window = 0);
+void DEBUGWINS_print (const char* s, long window = 0);
 
 //***************************************************************************
 // MISC functions
@@ -417,7 +422,7 @@ void MultiPlayer::setCancelled (bool set) {
 
 //---------------------------------------------------------------------------
 
-void MultiPlayer::addTeamScore (long teamID, long score) {
+void MultiPlayer::addTeamScore (int teamID, int score) {
 
 }
 
@@ -821,7 +826,7 @@ void MultiPlayer::sendEndMission (long result) {
 //---------------------------------------------------------------------------
 extern MoverPtr BringInReinforcement (long vehicleID, long rosterIndex, long commanderID, Stuff::Vector3D pos, bool exists);
 
-void MultiPlayer::sendReinforcement (long vehicleID, long rosterIndex, char pilotName[16], long commanderID, Stuff::Vector3D pos, unsigned char stage) {
+void MultiPlayer::sendReinforcement (long vehicleID, long rosterIndex, const char pilotName[16], long commanderID, Stuff::Vector3D pos, unsigned char stage) {
 
 }
 

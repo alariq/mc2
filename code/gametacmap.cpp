@@ -14,7 +14,7 @@ gameTacMap.cpp			: Implementation of the gameTacMap component.
 #include"objective.h"
 #include"mission.h"
 #include<windows.h>
-#include "..\resource.h"
+#include "../resource.h"
 extern unsigned char godMode;
 extern bool useLeftRightMouseProfile;
 
@@ -282,7 +282,7 @@ void GameTacMap::render()
 	//------------------------------------------------------------
 	// draw non-movers, must do separate check for vehicles, I'm not sure they
 	// have sensors
-	for ( i = 0; i < MAX_TEAMS; ++i )
+	for (int i = 0; i < MAX_TEAMS; ++i )
 	{
 		TeamSensorSystem* pSys = SensorManager->getTeamSensor( i );
 		
@@ -355,7 +355,7 @@ void GameTacMap::render()
 
 	//-----------------------------------------------------	
 	// draw the movers
-	for (i=0;i<(ObjectManager->numMovers);i++)
+	for (int i=0;i<(ObjectManager->numMovers);i++)
 	{
 		MoverPtr mover = ObjectManager->getMover(i);
 		if (mover && mover->getExists() && !(mover->isDestroyed() || mover->isDisabled()))
@@ -410,7 +410,7 @@ void GameTacMap::render()
 		}
 	}
 
-	for ( i = 0; i < count; i++ )
+	for (int i = 0; i < count; i++ )
 	{
 		drawSensor( positions[i], ranges[i], ringColors[i] );
 	}

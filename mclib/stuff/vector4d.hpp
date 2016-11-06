@@ -24,6 +24,10 @@ namespace Stuff {
 
 	class AffineMatrix4D;
 	class Matrix4D;
+	class Vector4D;
+
+    bool Small_Enough(const Vector4D &v,Scalar e = SMALL);
+    bool Close_Enough(const Vector4D &v1, const Vector4D &v2, Scalar e = SMALL);
 
 	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Vector4D ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -98,7 +102,7 @@ namespace Stuff {
 				}
 
 		friend bool
-			Small_Enough(const Vector4D &v,Scalar e=SMALL);
+			Small_Enough(const Vector4D &v,Scalar e/*=SMALL*/);
 		bool
 			operator!() const
 				{return Small_Enough(*this);}
@@ -110,7 +114,7 @@ namespace Stuff {
 			Close_Enough(
 				const Vector4D &v1,
 				const Vector4D &v2,
-				Scalar e=SMALL
+				Scalar e/*=SMALL*/
 			);
 		bool
 			operator==(const Vector4D& v) const

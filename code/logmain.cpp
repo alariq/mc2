@@ -91,7 +91,7 @@ char* ExceptionGameMsg = NULL;
 char buildNumber[80];
 
 extern long TERRAIN_TXM_SIZE;
-long ObjectTextureSize = 128;
+int ObjectTextureSize = 128;
 
 extern unsigned long MultiPlayCommanderId;
 extern bool	useRealLOS;

@@ -11,7 +11,7 @@ LogisticsDialog.cpp			: Implementation of the LogisticsDialog component.
 #include"inifile.h"
 #include"mclib.h"
 #include"windows.h"
-#include "..\resource.h"
+#include "../resource.h"
 #include"aedit.h"
 #include"logisticsdata.h"
 #include<malloc.h>
@@ -395,7 +395,7 @@ int LogisticsSaveDialog::init( FitIniFile& file )
 		s_instance->templateItem.init( &file, "AnimText" );
 		s_instance->templateItem.resize( s_instance->gameListBox.width() - 30, s_instance->templateItem.height() );
 
-		for ( i = 0; i < s_instance->editCount; i++ )
+		for (int i = 0; i < s_instance->editCount; i++ )
 		{
 			s_instance->edits[i].allowWierdChars( 0 );
 		}
@@ -534,7 +534,7 @@ void LogisticsSaveDialog::initDialog( const char* path, bool bCampaign )
 					pExt = (strstr( findResult.cFileName, ".FIT" ) );
 				}
 				if ( pExt )
-					*pExt = NULL;
+					*pExt = '\0';
 			
 				if (!bCampaign && isCorrectVersionSaveGame(findResult.cFileName))
 					pEntry->setText( findResult.cFileName );
@@ -609,7 +609,7 @@ bool LogisticsSaveDialog::isCorrectVersionSaveGame( char* fileName )
 	if ( NO_ERR != file.open( (char*)(const char*)path ) )
 	{
 		char errorStr[256];
-		sprintf( errorStr, "couldn't open file %s", path );
+		sprintf( errorStr, "couldn't open file %s", (const char*)path );
 		STOP((errorStr));
 	}
 
@@ -626,7 +626,7 @@ bool LogisticsSaveDialog::isCorrectVersionSaveGame( char* fileName )
 	return false;
 }
 
-void LogisticsSaveDialog::readCampaignNameFromFile( char* fileName, char* resultName, long len )
+void LogisticsSaveDialog::readCampaignNameFromFile( const char* fileName, char* resultName, long len )
 {
 	FullPathFileName path;
 	path.init( campaignPath, fileName, ".fit" );
@@ -636,7 +636,7 @@ void LogisticsSaveDialog::readCampaignNameFromFile( char* fileName, char* result
 	if ( NO_ERR != file.open( (char*)(const char*)path ) )
 	{
 		char errorStr[256];
-		sprintf( errorStr, "couldn't open file %s", path );
+		sprintf( errorStr, "couldn't open file %s", (const char*)path );
 		Assert( 0, 0, errorStr );
 	}
 
@@ -1187,7 +1187,7 @@ int LogisticsVariantDialog::init( FitIniFile& file )
 
 	templateItem.init( file, "AnimText" );
 
-	for ( i = 0; i < editCount; i++ )
+	for (int i = 0; i < editCount; i++ )
 	{
 		edits[i].allowWierdChars( 0 );
 	}
@@ -1408,7 +1408,7 @@ void LogisticsVariantDialog::update()
 
 	EString text;
 	edits[0].getEntry( text );
-	if ( ( !bTranscript && !LogisticsData.instance->canReplaceVariant( text ) ) || !text.Length() )
+	if ( ( !bTranscript && !LogisticsData::instance->canReplaceVariant( text ) ) || !text.Length() )
 	{
 		buttons[2].disable( 1 );	
 	}
@@ -1659,7 +1659,7 @@ void LogisticsAcceptVariantDialog::update()
 
 	EString text;
 	edits[0].getEntry( text );
-	if ( !LogisticsData.instance->canReplaceVariant( text ) )
+	if ( !LogisticsData::instance->canReplaceVariant( text ) )
 	{
 		buttons[1].disable( 1 );	
 	}
@@ -1741,7 +1741,7 @@ int LogisticsAcceptVariantDialog::init( FitIniFile& file )
 
 	edits[0].limitEntry( 14 );
 
-	for ( i = 0; i < editCount; i++ )
+	for (int i = 0; i < editCount; i++ )
 	{
 		edits[i].allowWierdChars( 0 );
 	}
@@ -1859,7 +1859,7 @@ int LogisticsMapInfoDialog::init()
 	if ( NO_ERR != file.open( path ) )
 	{
 		char buffer2[512];
-		sprintf( buffer2, "couldn't open file %s", (char*)path );
+		sprintf( buffer2, "couldn't open file %s", (const char*)path );
 		Assert( 0, 0, buffer2 );
 		return false;	
 

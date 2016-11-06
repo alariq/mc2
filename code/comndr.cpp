@@ -156,7 +156,7 @@ void Commander::eject (void) {
 				}
 			else {
 				WeaponShotInfo shot;
-				shot.init(NULL, -3, 254.0, 0, 0);
+				shot.init(0, -3, 254.0, 0, 0);
 				mover->handleWeaponHit(&shot, (MPlayer != NULL));
 			}
 		}

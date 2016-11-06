@@ -405,9 +405,9 @@ float FireArc[3];
 
 //bool LongRangeMovementEnabled[MAX_TEAMS];
 
-extern char ProfessionalismOffsetTable[NUM_OFFSET_RANGES][2];
-extern char DecorumOffsetTable[NUM_OFFSET_RANGES][2];
-extern char AmmoConservationModifiers[2][2];
+extern const char ProfessionalismOffsetTable[NUM_OFFSET_RANGES][2];
+extern const char DecorumOffsetTable[NUM_OFFSET_RANGES][2];
+extern const char AmmoConservationModifiers[2][2];
 //extern long OverlayWeightTable[NUM_OVERLAY_WEIGHT_CLASSES * NUM_OVERLAY_TYPES * MAPCELL_DIM * MAPCELL_DIM];
 //extern long OverlayWeightIndex[NUM_OVERLAY_TYPES];
 //extern float MoveMarginOfError[2];
@@ -480,7 +480,7 @@ inline MoverPtr getMoverFromHandle (long handle) {
 
 void DebugMoveChunk (MoverPtr mover, MoveChunkPtr chunk1, MoveChunkPtr chunk2) {
 
-	ChunkDebugMsg[0] = NULL;
+	ChunkDebugMsg[0] = '\0';
 	char outString[512];
 
 	if (mover) {
@@ -952,7 +952,7 @@ bool MoveChunk::equalTo (MoverPtr mover, MoveChunkPtr chunk) {
 			return(false);
 		}
 
-	for (i = 0; i < numSteps - 1; i++) {
+	for (int i = 0; i < numSteps - 1; i++) {
 		if (stepRelPos[i] != chunk->stepRelPos[i]) {
 			DebugMoveChunk(mover, this, chunk);
 			return(false);
@@ -988,7 +988,7 @@ void Mover::setMoveChunk (MovePathPtr path, MoveChunkPtr chunk) {
 
 void DebugStatusChunk (MoverPtr mover, StatusChunkPtr chunk1, StatusChunkPtr chunk2) {
 
-	ChunkDebugMsg[0] = NULL;
+	ChunkDebugMsg[0] = '\0';
 
 	char outString[512];
 
@@ -1967,6 +1967,8 @@ long Mover::loadGameSystem (FitIniFilePtr mechFile, float visualRange) {
 	if (result != NO_ERR)
 		return(result);
 
+    // sebi: show me where are they used
+    /*
 	char profData[NUM_OFFSET_RANGES * 2];
 	result = mechFile->readIdCharArray("ProfessionalismTable", profData, NUM_OFFSET_RANGES * 2);
 	if (result != NO_ERR)
@@ -1977,15 +1979,17 @@ long Mover::loadGameSystem (FitIniFilePtr mechFile, float visualRange) {
 	result = mechFile->readIdCharArray("DecorumTable", profData, NUM_OFFSET_RANGES * 2);
 	if (result != NO_ERR)
 		return(result);
-	for (i = 0; i < NUM_OFFSET_RANGES; i++)
+	for (int i = 0; i < NUM_OFFSET_RANGES; i++)
 		memcpy(&DecorumOffsetTable[i], &profData[i * 2], 2);
 
 	result = mechFile->readIdCharArray("AmmoTable", profData, 2 * 2);
 	if (result != NO_ERR)
 		return(result);
-	for (i = 0; i < 2; i++)
+	for (int i = 0; i < 2; i++)
 
 		memcpy(&AmmoConservationModifiers[i], &profData[i * 2], 2);
+    */
+
 #ifdef USEHEAT
 	result = mechFile->readIdFloat("WeaponHeatCheckDelay", WeaponHeatCheckDelay);
 	if (result != NO_ERR)
@@ -2009,7 +2013,7 @@ long Mover::loadGameSystem (FitIniFilePtr mechFile, float visualRange) {
 	if (result != NO_ERR)
 		return(result);
 
-	for (i = 0; i < NUM_ATTITUDES; i++)
+	for (int i = 0; i < NUM_ATTITUDES; i++)
 		memcpy(&AttitudeEffect[i], &charData[i * 6], 6);
 
 	result = mechFile->readIdFloat("MovementUpdateFrequency", MovementUpdateFrequency);
@@ -2086,7 +2090,7 @@ long Mover::loadGameSystem (FitIniFilePtr mechFile, float visualRange) {
 	result = mechFile->readIdFloatArray("SensorRangeModifier", rangeTable, 8);
 	if (result != NO_ERR)
 		return(result);
-	for (i = 0; i < 4; i++) {
+	for (int i = 0; i < 4; i++) {
 		SensorRangeModifier[i][0] = rangeTable[i * 2];
 		SensorRangeModifier[i][1] = rangeTable[i * 2 + 1];
 	}
@@ -2095,7 +2099,7 @@ long Mover::loadGameSystem (FitIniFilePtr mechFile, float visualRange) {
 	result = mechFile->readIdFloatArray("SizeModifier", sizeTable, 6);
 	if (result != NO_ERR)
 		return(result);
-	for (i = 0; i < 3; i++) {
+	for (int i = 0; i < 3; i++) {
 		SensorSizeModifier[i][0] = sizeTable[i * 2];
 		SensorSizeModifier[i][1] = sizeTable[i * 2 + 1];
 	}
@@ -2168,7 +2172,7 @@ void Mover::set (Mover copy) {
 	fieldedCV = copy.fieldedCV;
 		
 	numArmorLocations = copy.numArmorLocations;
-	for (i = 0; i < numArmorLocations; i++)	
+	for (int i = 0; i < numArmorLocations; i++)	
 		armor[i] = copy.armor[i];
 }
 
@@ -2204,7 +2208,7 @@ void Mover::init (bool create) {
 
 	positionNormal.Zero();
 	velocity.Zero();
-	name[0] = NULL;
+	name[0] = '\0';
 	chassis = 0;
 	startDisabled = false;
 
@@ -2281,7 +2285,7 @@ void Mover::init (bool create) {
 #endif
 		}
 	else
-		netPlayerName[0] = NULL;
+		netPlayerName[0] = '\0';
 	localMoverId = -1;
 	netRosterIndex = -1;
 	statusChunk.init();
@@ -2387,7 +2391,7 @@ void Mover::updateDebugWindow (GameDebugWindow* debugWindow) {
 	if (sensorSystem)
 	sensorRange = (long)sensorSystem->getEffectiveRange();
 	long contStat = contactInfo->getContactStatus(0, true);
-	static char* contactStr[NUM_CONTACT_STATUSES] = {
+	static const char* contactStr[NUM_CONTACT_STATUSES] = {
 		"        ",
 		"SENSOR_1",
 		"SENSOR_2",
@@ -2527,7 +2531,7 @@ void Mover::updateDebugWindow (GameDebugWindow* debugWindow) {
 				strcat(s, " +");
 			debugWindow->print(s);
 		}
-		static char* moveStateStr[NUM_MOVESTATES] = {
+		static const char* moveStateStr[NUM_MOVESTATES] = {
 			"SS",
 			"FF",
 			"RR",
@@ -2567,7 +2571,7 @@ void Mover::updateDebugWindow (GameDebugWindow* debugWindow) {
 		debugWindow->print(s);
 		}
 	else if (debugPage == 2) {
-		static char* locationStrings [] = {
+		static const char* locationStrings [] = {
 			"head:     ",
 			"c torso:  ",
 			"l torso:  ",
@@ -2585,7 +2589,7 @@ void Mover::updateDebugWindow (GameDebugWindow* debugWindow) {
 			"rear:     ",
 			"turret:   "
 		};
-		static char* bodyState[] = {
+		static const char* bodyState[] = {
 			"normal",
 			"DAM",
 			"DEST"
@@ -2606,7 +2610,7 @@ void Mover::updateDebugWindow (GameDebugWindow* debugWindow) {
 					bodyState[body[i].damageState]);
 				debugWindow->print(s);
 			}
-			for (i = numArmorLocations; i < numArmorLocations; i++) {
+			for (int i = numArmorLocations; i < numArmorLocations; i++) {
 				sprintf(s, "%s AR:%02d(%02d) %s",
 					locationStrings[i],
 					armor[i].curArmor,
@@ -3340,7 +3344,7 @@ void Mover::setPilotHandle (long _pilotHandle) {
 
 //---------------------------------------------------------------------------
 
-void Mover::loadPilot (char* pilotFileName, char* brainFileName, LogisticsPilot *lPilot) {
+void Mover::loadPilot (const char* pilotFileName, const char* brainFileName, LogisticsPilot *lPilot) {
 
 	if (pilot) {
 		MechWarrior::freeWarrior(pilot);
@@ -3506,7 +3510,7 @@ void Mover::printFireWeaponDebugInfo (GameObjectPtr target, Stuff::Vector3D* tar
 	if (!CombatLog)
 		return;
 
-	static char* locationStrings [] = {
+	static const char* locationStrings [] = {
 		"head",
 		"center torso",
 		"left torso",
@@ -3587,7 +3591,7 @@ void Mover::printHandleWeaponHitDebugInfo (WeaponShotInfo* shotInfo) {
 	if (!CombatLog)
 		return;
 
-	static char* locationStrings [] = {
+	static const char* locationStrings [] = {
 		"head",
 		"center torso",
 		"left torso",
@@ -4093,7 +4097,8 @@ inline void insertMoveGoal (long goalList[MAX_MOVE_GOALS][3], long r, long c, lo
 	//------------------------------------------------------------
 	// This routine assumes wt > goaList[MAX_MOVE_GOALS - 1][2]...
 	// AND that MAX_MOVE_GOALS >= 2...
-	for (long i = MAX_MOVE_GOALS - 2; i > -1; i--)
+    int i;
+	for (i = MAX_MOVE_GOALS - 2; i > -1; i--)
 		if (wt < goalList[i][2])
 			break;
 
@@ -4643,7 +4648,7 @@ long Mover::calcMoveGoal (GameObjectPtr target,
 			}
 		}
 	}
-	for (i = 0; i < numValidAreas; i++)
+	for (int i = 0; i < numValidAreas; i++)
 		validAreaTable[validAreas[i]] = 1;
 
 	startTime = GetCycles();
@@ -4651,7 +4656,7 @@ long Mover::calcMoveGoal (GameObjectPtr target,
 
 	//-----------------------------------------
 	// Finally, lay down the terrain weights...
-	for (r = 0; r < GOALMAP_CELL_DIM; r++)
+	for (int r = 0; r < GOALMAP_CELL_DIM; r++)
 		for (long c = 0; c < GOALMAP_CELL_DIM; c++) {
 			long curCellRow = mapCellUL[0] + r;
 			long curCellCol = mapCellUL[1] + c;
@@ -4720,15 +4725,16 @@ long Mover::calcMoveGoal (GameObjectPtr target,
 	long goalList[MAX_MOVE_GOALS][2];
 	//------------------
 	// Setup the list...
-	for (i = 0; i < MAX_MOVE_GOALS; i++) {
+	for (int i = 0; i < MAX_MOVE_GOALS; i++) {
 		goalList[i][0] = -1;
 		goalList[i][1] = -99999;
 	}
-	for (i = 0; i < MAX_MOVE_GOALS; i++) {
+	for (int i = 0; i < MAX_MOVE_GOALS; i++) {
 		//-----------------------------------------
 		// This assumes that MAX_MOVE_GOALS >= 2...
 		long weight = goalMap[i];
-		for (long j = MAX_MOVE_GOALS - 2; j > -1; j--)
+        int j;
+		for (j = MAX_MOVE_GOALS - 2; j > -1; j--)
 			if (weight < goalList[j][1])
 				break;
 
@@ -4737,13 +4743,14 @@ long Mover::calcMoveGoal (GameObjectPtr target,
 		goalList[j + 1][0] = i;
 		goalList[j + 1][1] = weight;
 	}
-	for (i = MAX_MOVE_GOALS; i < (GOALMAP_CELL_DIM * GOALMAP_CELL_DIM); i++) {
+	for (int i = MAX_MOVE_GOALS; i < (GOALMAP_CELL_DIM * GOALMAP_CELL_DIM); i++) {
 		//------------------------------------------------------------
 		// This routine assumes wt > goaList[MAX_MOVE_GOALS - 1][2]...
 		// AND that MAX_MOVE_GOALS >= 2...
 		long weight = goalMap[i];
 		if (weight > goalList[MAX_MOVE_GOALS - 1][1]) {
-			for (long j = MAX_MOVE_GOALS - 2; j > -1; j--)
+            int j;
+			for (j = MAX_MOVE_GOALS - 2; j > -1; j--)
 				if (weight < goalList[j][1])
 					break;
 			if (j < (MAX_MOVE_GOALS - 2))
@@ -5772,7 +5779,7 @@ void Mover::calcAmmoTotals (void)
 		
 		//--------------------------------------------------
 		// Now, go through all ammo we have and tally 'em...
-		for (i = numOther + numWeapons; i < (numOther + numWeapons + numAmmos); i++) 
+		for (int i = numOther + numWeapons; i < (numOther + numWeapons + numAmmos); i++) 
 		{
 			long ammoMasterId = inventory[i].masterID;
 			bool foundAmmoWeapon = false;
@@ -5833,7 +5840,7 @@ long Mover::calcFireRanges (void) {
 	//---------------------------
 	// Now, calc optimal range...
 	float rangeTotals[NUM_WEAPON_RANGE_TYPES] = {0, 0, 0, 0, 0};
-	for (curWeapon = numOther; curWeapon < (numOther + numWeapons); curWeapon++) {
+	for (int curWeapon = numOther; curWeapon < (numOther + numWeapons); curWeapon++) {
 		MasterComponent* weapon = &MasterComponent::masterList[inventory[curWeapon].masterID];
 		if (!inventory[curWeapon].disabled && (getWeaponShots(curWeapon) > 0)) {
 			float damageTimeRating = weapon->getWeaponDamage() / weapon->getWeaponRecycleTime();
@@ -6141,7 +6148,7 @@ long Mover::sortWeapons (long* weaponList, long* valueList, long listSize, long 
 			}
 		}
 		sortList->sort();
-		for (item = 0; item < numWeapons; item++) {
+		for (int item = 0; item < numWeapons; item++) {
 			weaponList[item] = sortList->getId(item);
 			valueList[item] = sortList->getValue(item);
 		}
@@ -6165,7 +6172,7 @@ long Mover::sortWeapons (long* weaponList, long* valueList, long listSize, long 
 			sortList->setValue(item, sortValue);
 		}
 		sortList->sort();
-		for (item = 0; item < listSize; item++) {
+		for (int item = 0; item < listSize; item++) {
 			weaponList[item] = sortList->getId(item);
 			valueList[item] = sortList->getValue(item);
 		}
@@ -6461,7 +6468,7 @@ void Mover::ammoExplosion (long ammoIndex) {
 	if (damage > 255.0f)
 		damage = 255.0f;
 
-	shotInfo.init(NULL, inventory[ammoIndex].masterID, damage, bodyLocation, 0.0);
+	shotInfo.init(0, inventory[ammoIndex].masterID, damage, bodyLocation, 0.0);
 
 	if (MPlayer) {
 		if (MPlayer->isServer())
@@ -6615,7 +6622,7 @@ bool Mover::refit (float pointsAvailable, float& pointsUsed, bool ammoOnly) {
 			pilot->getRadio()->resetAmmoMessage();
 
 		// repair each armor & IS
-		for (i = 0; i < numArmorLocations; i++) {
+		for (int i = 0; i < numArmorLocations; i++) {
 			if ((repairCount == 0) || (refitPoints <= 0.0))
 				continue;
 			if (((i == MECH_BODY_LOCATION_LARM) || (i == MECH_BODY_LOCATION_RARM)) && (body[i].damageState == IS_DAMAGE_DESTROYED))
@@ -6663,7 +6670,7 @@ bool Mover::refit (float pointsAvailable, float& pointsUsed, bool ammoOnly) {
 		}
 
 		// refit each ammo that needs it
-		for (i=0; i < numAmmoTypes; i++) {
+		for (int i=0; i < numAmmoTypes; i++) {
 			if ((rearmCount > 0) && (refitPoints > 0.0) && (ammoTypeTotal[i].curAmount < ammoTypeTotal[i].maxAmount)) {
 				bool recalc = (ammoTypeTotal[i].curAmount == 0);
 				float pointsToUse = areaMax / rearmCount;
@@ -6687,7 +6694,7 @@ bool Mover::refit (float pointsAvailable, float& pointsUsed, bool ammoOnly) {
 		rearmCount = 0;
 		repairCount = 0;
 		if (!ammoOnly) {
-			for (i = 0; i < numArmorLocations; i++) {
+			for (int i = 0; i < numArmorLocations; i++) {
 				// don't repair destroyed arms
 				if (((i == MECH_BODY_LOCATION_LARM) || (i == MECH_BODY_LOCATION_RARM)) && (body[i].damageState == IS_DAMAGE_DESTROYED))
 					continue;
@@ -6701,7 +6708,7 @@ bool Mover::refit (float pointsAvailable, float& pointsUsed, bool ammoOnly) {
 
 		// if there's no more repairing, do any ammo types need refilling?
 		if (repairCount == 0)
-			for (i = 0; i < numAmmoTypes; i++)
+			for (int i = 0; i < numAmmoTypes; i++)
 				if (ammoTypeTotal[i].curAmount < ammoTypeTotal[i].maxAmount) {
 					rearmCount++;
 					break;
@@ -6783,7 +6790,7 @@ bool Mover::recover (void) {
 		}
 
 		// repair each IS
-		for (i = 0; i < numBodyLocations; i++) 
+		for (int i = 0; i < numBodyLocations; i++) 
 		{
 			if ((repairCount == 0) || (recoverPoints <= 0.0))
 				continue;
@@ -6825,7 +6832,7 @@ bool Mover::recover (void) {
 		
 		// do any locations still need repair?
 		repairCount = 0;
-		for (i = 0; i < numBodyLocations; i++) 
+		for (int i = 0; i < numBodyLocations; i++) 
 		{
 			// don't repair destroyed arms
 			if (((i == MECH_BODY_LOCATION_LARM) || (i == MECH_BODY_LOCATION_RARM)) && (body[i].damageState == IS_DAMAGE_DESTROYED))
@@ -6859,7 +6866,7 @@ bool Mover::recover (void) {
 				}
 			}
 
-			for (i = 0; i < numBodyLocations; i++)
+			for (int i = 0; i < numBodyLocations; i++)
 				for (long j = 0; j < NumLocationCriticalSpaces[i]; j++)
 					if (body[i].criticalSpaces[j].inventoryID < 255)
 						body[i].criticalSpaces[j].hit = inventory[body[i].criticalSpaces[j].inventoryID].disabled;
@@ -6948,7 +6955,7 @@ void Mover::initOptimalCells (long numIncrements) {
 	// may select an "optimal" cell from which it's out of range. As long
 	// as these optimal ranges fall well within their weapon fire ranges,
 	// this should be no problem.
-	for (r = 0; r < MAX_ATTACK_CELLRANGE; r++)
+	for (int r = 0; r < MAX_ATTACK_CELLRANGE; r++)
 		for (long i = 0; i < numIncrements; i++) {
 			if (doptimalCells[r][i][0] < 0.00)
 				optimalCells[r][i][0] = (char)(doptimalCells[r][i][0] - 0.50);
@@ -6963,7 +6970,7 @@ void Mover::initOptimalCells (long numIncrements) {
 	//-----------------------------------------------
 	// Now, initialize the tables for Ranged Areas...
 	char rangedMap[MAX_ATTACK_CELLRANGE * 2 + 1][MAX_ATTACK_CELLRANGE * 2 + 1];
-	for (r = 0; r < (MAX_ATTACK_CELLRANGE * 2 + 1); r++)
+	for (int r = 0; r < (MAX_ATTACK_CELLRANGE * 2 + 1); r++)
 		for (long c = 0; c < (MAX_ATTACK_CELLRANGE * 2 + 1); c++) {
 			Stuff::Vector3D start, goal;
 			start.x = c;

@@ -8,6 +8,9 @@
 #include <SDL2/SDL.h>
 #include <GL/gl.h>
 
+// FIXME: think how to make it better when different parts need window
+SDL_Window* g_sdl_window = NULL;
+
 namespace graphics {
 
 static bool VERBOSE_VIDEO = true;
@@ -26,6 +29,7 @@ struct RenderContext {
 };
 
 static void PrintRenderer(SDL_RendererInfo * info);
+
 
 //==============================================================================
 void set_verbose(bool is_verbose)
@@ -202,6 +206,8 @@ RenderWindow* create_window(const char* pwinname, int width, int height)
     rw->width_ = width;
     rw->height_ = height;
 
+    g_sdl_window = window;
+
     return rw;
 }
 //==============================================================================
@@ -347,6 +353,8 @@ void destroy_window(RenderWindowHandle rw_handle)
     RenderWindow* rw = (RenderWindow*)rw_handle;
     SDL_DestroyWindow(rw->window_);
     delete rw;
+
+    g_sdl_window = NULL;
 }
 
 static void PrintRendererFlag(Uint32 flag)

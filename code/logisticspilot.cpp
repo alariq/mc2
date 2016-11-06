@@ -12,7 +12,7 @@
 #include"logisticsdata.h"
 
 #include"warrior.h"
-#include "../resource.h"
+#include"../resource.h"
 #include"mechicon.h"
 #include"objmgr.h"
 
@@ -468,7 +468,7 @@ long LogisticsPilot::update( MechWarrior* pWarrior )
 		medals[DAVION_MEDAL] = true;
 	}
 
-	for ( i = 0; i < NUM_SPECIALTY_SKILLS; i++ )
+	for (int i = 0; i < NUM_SPECIALTY_SKILLS; i++ )
 	{
 		if ( pWarrior->specialtySkills[i] )
 		{

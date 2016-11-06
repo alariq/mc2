@@ -231,7 +231,7 @@ void WeaponFireChunk::operator delete (void* us) {
 
 void DebugWeaponFireChunk (WeaponFireChunkPtr chunk1, WeaponFireChunkPtr chunk2, GameObjectPtr attacker) {
 
-	ChunkDebugMsg[0] = NULL;
+	ChunkDebugMsg[0] = '\0';
 
 	char outString[512];
 
@@ -961,7 +961,7 @@ bool WeaponFireChunk::equalTo (WeaponFireChunkPtr chunk) {
 
 void DebugWeaponHitChunk (WeaponHitChunkPtr chunk1, WeaponHitChunkPtr chunk2) {
 
-	ChunkDebugMsg[0] = NULL;
+	ChunkDebugMsg[0] = '\0';
 
 	char outString[512];
 

@@ -9,8 +9,8 @@ OptionsArea.cpp			: Implementation of the OptionsArea component.
 #include"optionsarea.h"
 #include"prefs.h"
 #include"inifile.h"
-#include "../MCLib/UserInput.h"
-#include "..\resource.h"
+#include"userinput.h"
+#include "../resource.h"
 #include"prefs.h"
 #include"missiongui.h"
 #include"logisticsdialog.h"
@@ -139,7 +139,7 @@ void OptionsXScreen::init(FitIniFile* file)
 		if ( NO_ERR != tmpFile.open( path ) )
 		{
 			char error[256];
-			sprintf( error, "couldn't open file %s", path );
+			sprintf( error, "couldn't open file %s", (const char*)path );
 			Assert( 0, 0, error );
 			return;	
 		}
@@ -198,7 +198,7 @@ void OptionsXScreen::init(FitIniFile* file)
 	prefs.load();
 
 
-	for ( i = 0; i < 4; i++ )
+	for (int i = 0; i < 4; i++ )
 		tabAreas[i]->begin();
 
 	if ( mission && strlen( mission->getMissionFileName() ) )
@@ -206,7 +206,7 @@ void OptionsXScreen::init(FitIniFile* file)
 		getButton( MSB_TAB2 )->disable( true );
 	}
 
-	for ( i = 0; i < buttonCount; i++ )
+	for (int i = 0; i < buttonCount; i++ )
 	{
 		if ( MSB_TAB0 > buttons[i].getID() || MSB_TAB3 < buttons[i].getID() )
 			buttons[i].setMessageOnRelease( );
@@ -369,7 +369,7 @@ void OptionsGraphics::init(long xOffset, long yOffset)
 	if ( NO_ERR !=file.open( path ) )
 	{
 		char error[256];
-		sprintf( error, "couldn't open file %s", path );
+		sprintf( error, "couldn't open file %s", (const char*)path );
 		Assert( 0, 0, error );
 		return;	
 	}
@@ -405,7 +405,7 @@ void OptionsGraphics::init(long xOffset, long yOffset)
 	if ( NO_ERR !=file.open( path ) )
 	{
 		char error[256];
-		sprintf( error, "couldn't open file %s", path );
+		sprintf( error, "couldn't open file %s", (const char*)path );
 		Assert( 0, 0, error );
 		return;	
 	}
@@ -425,7 +425,7 @@ void OptionsGraphics::init(long xOffset, long yOffset)
 		STOP(("GameOS said there were no video cards in the system!"));
 
 	long usableCardCount = 0;
-	for (i=0;i<numDevices;i++)
+	for (int i=0;i<numDevices;i++)
 	{
 		DWORD minTextureRam = 6291456;
 
@@ -439,7 +439,9 @@ void OptionsGraphics::init(long xOffset, long yOffset)
 
 		if (gos_GetMachineInformation(gos_Info_GetDeviceLocalMemory, i) >= minTextureRam)
 		{
-			char *deviceName = (char*)gos_GetMachineInformation( gos_Info_GetDeviceName, i);
+            //sebi:
+			//char *deviceName = (char*)gos_GetMachineInformation( gos_Info_GetDeviceName, i);
+            const char* deviceName = "fix me: gos_GetMachineInformation";
 		
 			//Save name to other string here.
 			cardList.AddItem( deviceName, 0xffffffff );
@@ -465,7 +467,7 @@ void OptionsGraphics::init(long xOffset, long yOffset)
 //If you set the values to any of the above, you will switch to that device.
 
 
-	for ( i = 0; i < buttonCount; i++ )
+	for (int i = 0; i < buttonCount; i++ )
 	{
 		buttons[i].setPressFX( LOG_VIDEOBUTTONS );
 		buttons[i].setHighlightFX( LOG_DIGITALHIGHLIGHT );
@@ -655,7 +657,7 @@ void OptionsAudio::init(long xOffset, long yOffset)
 	}
 	move( xOffset, yOffset );
 
-	for ( i = 0; i < buttonCount; i++ )
+	for (int i = 0; i < buttonCount; i++ )
 	{
 		buttons[i].setPressFX( LOG_VIDEOBUTTONS );
 		buttons[i].setHighlightFX( LOG_DIGITALHIGHLIGHT );
@@ -663,7 +665,7 @@ void OptionsAudio::init(long xOffset, long yOffset)
 
 	}
 
-	for ( i = 0; i < 5; i++ )
+	for (int i = 0; i < 5; i++ )
 	{
 		scrollBars[i].init( &buttons[i * 2], &buttons[i * 2 + 1], &buttons[i + 11] );
 		addChild( &scrollBars[i] );
@@ -1112,7 +1114,7 @@ void OptionsHotKeys::makeKeyString( long newKey, char* keysString )
 	cLoadString( IDS_ALT, alt, 31 );
 
 	long key = newKey;
-	char* pKey = gos_DescribeKey( (key & 0x000fffff) << 8 );
+	const char* pKey = gos_DescribeKey( (key & 0x000fffff) << 8 );
 
 	if ( ((key & SHIFT)) )
 	{
@@ -1459,7 +1461,7 @@ void HotKeyListItem::init()
 	if ( NO_ERR != file.open( path ) )
 	{
 		char error[256];
-		sprintf( error, "couldn't open file %s", path );
+		sprintf( error, "couldn't open file %s", (const char*)path );
 		Assert( 0, 0, error );
 		return;	
 	}

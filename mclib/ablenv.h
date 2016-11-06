@@ -60,7 +60,7 @@ class UserFile {
 		char					fileName[MAXLEN_FILENAME];
 		ABLFile*				filePtr;
 		long					numLines;
-		long					totalLines;
+		int                     totalLines;
 		char					lines[MAX_USER_FILE_LINES][MAX_USER_FILE_LINELEN];
 
 		static UserFilePtr		files[MAX_USER_FILES];
@@ -116,7 +116,7 @@ class UserFile {
 
 typedef struct {
 	char					name[128];
-	long					size;
+	int                     size;
 } VariableInfo;
 
 typedef struct {
@@ -127,8 +127,8 @@ typedef struct {
 typedef struct {
 	char					name[128];
 	char					fileName[128];
-	long					numStaticVars;
-	long					totalSizeStaticVars;
+	int                     numStaticVars;
+	int                     totalSizeStaticVars;
 	VariableInfo			largestStaticVar;
 	long					totalCodeSegmentSize;
 	long					numRoutines;
@@ -142,7 +142,7 @@ typedef struct {
 	char**					sourceFiles;
 	long					numLibrariesUsed;
 	ABLModulePtr*			librariesUsed;
-	long					numStaticVars;
+	int                     numStaticVars;
 	long					numOrderCalls;
 	long					numStateHandles;
 	StateHandleInfoPtr		stateHandles;
@@ -157,7 +157,7 @@ class ABLModule {
 
 	private:
 
-		long					id;
+		int                     id;
 		char					name[MAX_ABLMODULE_NAME];
 		long					handle;
 		StackItemPtr			staticData;
@@ -208,7 +208,7 @@ class ABLModule {
 		
 		void read (ABLFile* moduleFile);
 
-		long getId (void) {
+		int getId (void) {
 			return(id);
 		}
 
@@ -236,7 +236,7 @@ class ABLModule {
 			return(name);
 		}
 
-		void setName (char* _name);
+		void setName (const char* _name);
 
 		unsigned long* getOrderCallFlags (void) {
 			return(orderCallFlags);

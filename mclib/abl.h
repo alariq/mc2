@@ -58,7 +58,7 @@ void ABLi_init (unsigned long runtimeStackSize, // = 20480,
 				long (*fileWriteByteCB) (void* file, unsigned char byte),
 				long (*fileWriteLongCB) (void* file, long value),
 				long (*fileWriteStringCB) (void* file, const char* buffer),
-				void (*debuggerPrintCallback) (char* s),
+				void (*debuggerPrintCallback) (const char* s),
 				void (*ablFatalCallback) (long code, const char* s),
 				bool debugInfo = false,
 				bool debug = false,
@@ -72,13 +72,13 @@ void ABLi_setRealParam (ABLParamPtr paramList, long index, float value);
 
 void ABLi_deleteParamList (ABLParamPtr paramList);
 
-long ABLi_preProcess (char* sourceFileName,
+long ABLi_preProcess (const char* sourceFileName,
 					  long* numErrors = NULL,
 					  long* numLinesProcessed = NULL,
 					  long* numFilesProcessed = NULL,
 					  bool printLines = false);
 
-ABLModulePtr ABLi_loadLibrary (char* sourceFileName,
+ABLModulePtr ABLi_loadLibrary (const char* sourceFileName,
 					   long* numErrors = NULL,
 					   long* numLinesProcessed = NULL,
 					   long* numFilesProcessed = NULL,
@@ -104,21 +104,21 @@ void ABLi_close (void);
 
 bool ABLi_enabled (void);
 
-void ABLi_addFunction (char* name,
+void ABLi_addFunction (const char* name,
 					   bool isOrder,
-					   char* paramList,
-					   char* returnType,
+					   const char* paramList,
+					   const char* returnType,
 					   void (*codeCallback)(void));
 
 void ABLi_setRandomCallbacks (void (*seedRandomCallback) (unsigned long seed),
 							  long (*randomCallback) (long range));
-void ABLi_setDebugPrintCallback (void (*ABLDebugPrintCallback) (char* s));
+void ABLi_setDebugPrintCallback (void (*ABLDebugPrintCallback) (const char* s));
 void ABLi_setGetTimeCallback (unsigned long (*ABLGetTimeCallback) (void));
 
 void ABLi_setEndlessStateCallback (void (*endlessStateCallback) (UserFile* log));
 
 char ABLi_popChar (void);
-long ABLi_popInteger (void);
+int ABLi_popInteger (void);
 float ABLi_popReal (void);
 bool ABLi_popBoolean (void);
 float ABLi_popIntegerReal (void);

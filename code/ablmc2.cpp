@@ -132,7 +132,7 @@ extern bool 			enemyDestroyed;
 extern bool 			invulnerableON;		//Used for tutorials so mechs can take damage, but look like they are taking damage!  Otherwise, I'd just use NOPAIN!!
 
 void DEBUGWINS_setGameObject (long debugObj, GameObjectPtr obj);
-void DEBUGWINS_print (char* s, long window);
+void DEBUGWINS_print (const char* s, long window);
 
 //*****************************************************************************
 // MISC AI
@@ -245,7 +245,7 @@ void calcAttackPlan (long numAttackers, GameObjectPtr* attackers, long numDefend
 
 	//---------------------------------------------
 	// For now, let's let 'em know their targets...
-	for (i = 0; i < numAttackers; i++)
+	for (int i = 0; i < numAttackers; i++)
 		attackers[i]->getPilot()->triggerAlarm(PILOT_ALARM_ATTACK_ORDER, target[i]->getWatchID());
 }
 
@@ -263,7 +263,8 @@ GameObjectPtr calcBestTarget (MoverPtr attacker, long numAttackers, MoverPtr* at
 	float attackRatio[MAX_MOVERS];
 	long attackTotal[MAX_MOVERS];
 	GameObjectPtr target[MAX_MOVERS];
-	for (long i = 0; i < numDefenders; i++) {
+    int i=0;
+	for (; i < numDefenders; i++) {
 		attackTotal[i] = 0;
 		attackRatio[i] = 0.0;
 		target[i] = NULL;
@@ -273,20 +274,20 @@ GameObjectPtr calcBestTarget (MoverPtr attacker, long numAttackers, MoverPtr* at
 	// First, find out who everyone else in our group is attacking...
 	for (long a = 0; a < numAttackers; a++) {
 		GameObjectPtr target = attackers[a]->getPilot()->getCurrentTarget();
-		for (long d = 0; d < numDefenders; d++)
+		for (int d = 0; d < numDefenders; d++)
 			if (defenders[d] == target) {
 				attackTotal[i] += attackers[a]->getThreatRating();
 				break;
 			}
 	}
-	for (long d = 0; d < numDefenders; d++)
+	for (int d = 0; d < numDefenders; d++)
 		attackRatio[d] = attackTotal[d] / defenders[d]->getThreatRating();
 
 	//----------------------------------------------
 	// Now, find out who this pilot should attack...
 	long bestTarget = numDefenders - 1;
 	if (numDefenders > 1)
-		for (d = (numDefenders - 2); d > -1; d--) {
+		for (int d = (numDefenders - 2); d > -1; d--) {
 			if (attackRatio[d] < attackRatio[bestTarget])
 				bestTarget = d;
 			else if (attackRatio[d] == attackRatio[bestTarget]) {
@@ -1532,7 +1533,7 @@ void execGetObjects (void) {
 				}
 			}
 			listSize = ObjectManager->getNumBuildings();
-			for (i = 0; i < listSize; i++) {
+			for (int i = 0; i < listSize; i++) {
 				BuildingPtr building = ObjectManager->getBuilding(i);
 				if (building) {
 					//long row, col;
@@ -1544,7 +1545,7 @@ void execGetObjects (void) {
 				}
 			}
 			listSize = ObjectManager->getNumTurrets();
-			for (i = 0; i < listSize; i++) {
+			for (int i = 0; i < listSize; i++) {
 				TurretPtr turret = ObjectManager->getTurret(i);
 				if (turret) {
 					//long row, col;
@@ -1555,7 +1556,7 @@ void execGetObjects (void) {
 				}
 			}
 			listSize = ObjectManager->getNumGates();
-			for (i = 0; i < listSize; i++) {
+			for (int i = 0; i < listSize; i++) {
 				GatePtr gate = ObjectManager->getGate(i);
 				if (gate) {
 					//long row, col;
@@ -2126,10 +2127,10 @@ void execDistanceToPosition (void) {
 	Stuff::Vector3D position2;
 	position2.Zero();
 
-	if (!_isnan(coordList[0]))
+	if (!isnan(coordList[0]))
 		position2.x = coordList[0];
 
-	if (!_isnan(coordList[1]))
+	if (!isnan(coordList[1]))
 		position2.y = coordList[1];
 	
 	if ((objectId >= MIN_UNIT_PART_ID) && (objectId <= MAX_UNIT_PART_ID)) {
@@ -3380,7 +3381,7 @@ void execSetObjectDamage (void) {
 		if (dmgPoints > 0.0) 
 		{
 			WeaponShotInfo shot;
-			shot.init(NULL, -1, dmgPoints, 0, 0);
+			shot.init(0, -1, dmgPoints, 0, 0);
 			if (MPlayer) 
 			{
 				if (MPlayer->isServer()) 
@@ -4454,7 +4455,7 @@ void execRepair (void) {
 				}
 			}
 		}
-		for (i = 0; i < mech->numArmorLocations; i++) {
+		for (int i = 0; i < mech->numArmorLocations; i++) {
 			float diff = (float) mech->armor[i].maxArmor - mech->armor[i].curArmor;
 			if (i < mech->numBodyLocations)	{
 				if (mech->body[i].damageState == IS_DAMAGE_DESTROYED)	// can't repair it if it ain't there!
@@ -4602,7 +4603,7 @@ void execGetRepairState (void) {
 			max += mover->body[i].maxInternalStructure;
 			cur += mover->body[i].curInternalStructure;
 		}
-		for (i = 0; i < mover->numArmorLocations; i++) {
+		for (int i = 0; i < mover->numArmorLocations; i++) {
 			if (i < mover->numBodyLocations) {
 				if (mover->body[i].damageState == IS_DAMAGE_DESTROYED)	// can't repair it if it ain't there!
 					continue;
@@ -4902,7 +4903,7 @@ void execCoreMoveTo (void) {
 		return;
 	}
 
-	if (_isnan(location[0]) || _isnan(location[1]))
+	if (isnan(location[0]) || isnan(location[1]))
 	{
 		STOP(("Move to order location is Not a Number in Brain %s.  Check patrol path array indices!",CurWarrior->getBrainString()));
 	}
@@ -6433,7 +6434,7 @@ void ablSymbolFreeCallback (void* memBlock) {
 
 //*****************************************************************************
 
-long ablFileCreateCB (void** file, char* fName) {
+long ablFileCreateCB (void** file, const char* fName) {
 
 	*file = new File;
 	if (*file == NULL)
@@ -6448,16 +6449,18 @@ long ablFileCreateCB (void** file, char* fName) {
 
 //-----------------------------------------------------------------------------
 
-long ablFileOpenCB (void** file, char* fName) {
+long ablFileOpenCB (void** file, const char* fName) {
 
 	*file = new File;
 	if (*file == NULL)
 		Fatal(0, " unable to create ABL file");
 
 	//Filenames MUST be all lowercase or Hash won't find 'em!
-	CharLower(fName);
-	if (((FilePtr)*file)->open(fName) != NO_ERR)
+    char* tmpstr = strdup(fName);
+	CharLower(tmpstr);
+	if (((FilePtr)*file)->open(tmpstr) != NO_ERR)
 		STOP((" unable to open ABL File %s",fName));
+    free(tmpstr);
 	return(NO_ERR);
 }
 
@@ -6533,14 +6536,14 @@ long ablFileWriteLongCB (void* file, long value) {
 
 //-----------------------------------------------------------------------------
 
-long ablFileWriteStringCB (void* file, char* buffer) {
+long ablFileWriteStringCB (void* file, const char* buffer) {
 
 	return(((FilePtr)file)->writeString(buffer));
 }
 
 //*****************************************************************************
 
-void ablDebuggerPrintCallback (char* s) {
+void ablDebuggerPrintCallback (const char* s) {
 
 	//ABLDebuggerOut->print(s);
 	char msg[1024];
@@ -6550,7 +6553,7 @@ void ablDebuggerPrintCallback (char* s) {
 
 //*****************************************************************************
 
-void ablDebugPrintCallback (char* s) {
+void ablDebugPrintCallback (const char* s) {
 
 	DEBUGWINS_print(s, 0);
 }
@@ -6564,7 +6567,7 @@ void ablSeedRandom (unsigned long seed) {
 
 //*****************************************************************************
 
-void ablFatalCallback (long code, char* s) {
+void ablFatalCallback (long code, const char* s) {
 
 	STOP((s));
 }

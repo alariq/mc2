@@ -187,8 +187,11 @@ char* __stdcall gos_FindFilesNext()
 
 void __stdcall gos_GetCurrentPath(char* Buffer, int buf_len)
 {
-    STOP(("gos function not implemented"));
-
+    gosASSERT(Buffer);
+    if(getcwd(Buffer, buf_len) == NULL) {
+        int last_error = errno;
+        STOP(("Current path is longer than buffer provided for it, getwd: %s\n", strerror(last_error)));
+    }
 }
 
 void __stdcall gos_GetFile(char const* FileName, BYTE** MemoryImage, DWORD* Size)

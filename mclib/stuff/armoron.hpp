@@ -47,13 +47,15 @@ template <class T> T
 
 #define Cast_Pointer(type, ptr) Stuff::Cast_Pointer_Function(reinterpret_cast<type>(ptr))
 
+#define abs_ptr(x) ((x<0) ? -(x) : (x))
+
 #define Mem_Copy(destination, source, length, available)\
 	do {\
 		Check_Pointer(destination);\
 		Check_Pointer(source);\
 		Verify((length) <= (available));\
 		Verify(\
-			abs(\
+			abs_ptr(\
 				reinterpret_cast<char*>(destination)\
 				 - reinterpret_cast<const char*>(source)\
 			) >= length\

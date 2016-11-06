@@ -257,7 +257,7 @@ class Mission
 
 		bool calcComplexDropZones (char* missionName, char dropZoneList[MAX_MC_PLAYERS]);
 
-		void init (char *missionName, long loadType, long dropZoneID, Stuff::Vector3D* dropZoneList, char commandersToLoad[8][3], long numMoversPerCommander);
+		void init (const char *missionName, long loadType, long dropZoneID, Stuff::Vector3D* dropZoneList, char commandersToLoad[8][3], long numMoversPerCommander);
 
 		static void initBareMinimum();
 		
@@ -310,7 +310,7 @@ class Mission
 		
 		long removeMover (MoverPtr mover);
 
-		void tradeMover (MoverPtr mover, long newTeamID, long newCommanderID, char* pilotFileName, char* brainFileName);
+		void tradeMover (MoverPtr mover, long newTeamID, long newCommanderID, char* pilotFileName, const char* brainFileName);
 
 		void createPartObject (long objectId, MoverPtr mover);
 		

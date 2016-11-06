@@ -86,7 +86,7 @@ extern bool MLRVertexLimitReached;
 #define MAX_WEAPON_NODES			4
 //-----------------------------------------------------------------------------
 // class BldgAppearanceType
-void BldgAppearanceType::init (char * fileName)
+void BldgAppearanceType::init (const char * fileName)
 {
 	AppearanceType::init(fileName);
 
@@ -1033,7 +1033,7 @@ void BldgAppearance::setMoverParameters (float turretRot, float lArmRot, float r
 }
 
 //-----------------------------------------------------------------------------
-void BldgAppearance::setObjectParameters (Stuff::Vector3D &pos, float Rot, long sel, long team, long homeRelations)
+void BldgAppearance::setObjectParameters (const Stuff::Vector3D &pos, float Rot, long sel, long team, long homeRelations)
 {
 	rotation = Rot;
 
@@ -2994,7 +2994,7 @@ void BldgAppearance::calcAdjCell (long& row, long& col)
 
 //-----------------------------------------------------------------------------
 // class TreeAppearanceType
-void TreeAppearanceType::init (char * fileName)
+void TreeAppearanceType::init (const char * fileName)
 {
 	AppearanceType::init(fileName);
 
@@ -3505,7 +3505,7 @@ void TreeAppearance::setObjStatus (long oStatus)
 }
 
 //-----------------------------------------------------------------------------
-void TreeAppearance::setObjectParameters (Stuff::Vector3D &pos, float Rot, long sel, long team, long homeRelations)
+void TreeAppearance::setObjectParameters (const Stuff::Vector3D &pos, float Rot, long sel, long team, long homeRelations)
 {
 	rotation = Rot;
 

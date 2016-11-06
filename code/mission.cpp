@@ -114,7 +114,7 @@
 #include"prefs.h"
 #endif
 
-#include "..\resource.h"
+#include "../resource.h"
 
 #include<gameos.hpp>
 
@@ -769,7 +769,7 @@ long Mission::render (void)
 		DWORD fogColor = eye->fogColor;
 		if (useFog)
 		{
-			gos_SetRenderState( gos_State_Fog, (int)&fogColor);
+			gos_SetRenderState( gos_State_Fog, fogColor);
 		}
 		else
 		{
@@ -1445,7 +1445,7 @@ long Mission::removeMover (MoverPtr mover) {
 
 //---------------------------------------------------------------------------
 
-void Mission::tradeMover (MoverPtr mover, long newTeamID, long newCommanderID, char* pilotFileName, char* brainFileName) {
+void Mission::tradeMover (MoverPtr mover, long newTeamID, long newCommanderID, char* pilotFileName, const char* brainFileName) {
 
 	missionInterface->removeMover(mover);
 	if (MPlayer) {
@@ -1556,7 +1556,7 @@ bool Mission::calcComplexDropZones (char* missionName, char dropZoneCID[MAX_MC_P
 */
 	//---------------------------------------------------------
 	// We know everything's good, so hand out the drop zones...
-	for (i = 0; i < MAX_MC_PLAYERS; i++) {
+	for (int i = 0; i < MAX_MC_PLAYERS; i++) {
 		long index = RandomNumber(teamSize[MPlayer->playerInfo[i].team][0]--);
 		for (long j = 0; j < MAX_MC_PLAYERS; j++)
 			if (dropZoneSetup[j] == MPlayer->playerInfo[i].team) {
@@ -1614,7 +1614,7 @@ bool IsGateOpen (long objectWID) {
 }
 
 //----------------------------------------------------------------------------
-void Mission::init (char *missionName, long loadType, long dropZoneID, Stuff::Vector3D* dropZoneList, char commandersToLoad[8][3], long numMoversPerCommander)
+void Mission::init (const char *missionName, long loadType, long dropZoneID, Stuff::Vector3D* dropZoneList, char commandersToLoad[8][3], long numMoversPerCommander)
 {
 	neverEndingStory = false;
 	invulnerableON = false;
@@ -1781,7 +1781,7 @@ void Mission::init (char *missionName, long loadType, long dropZoneID, Stuff::Ve
 #ifdef _DEBUG
 		long loadErr = 
 #endif
-			MasterComponent::loadMasterList(compFileName, 255, baseSensorRange);
+		    MasterComponent::loadMasterList(compFileName, 255, baseSensorRange);
 		gosASSERT(loadErr == NO_ERR);
 	}
 
@@ -1968,13 +1968,13 @@ void Mission::init (char *missionName, long loadType, long dropZoneID, Stuff::Ve
 
 	result = missionFile->seekBlock("Teams");
 	Assert(result == NO_ERR, result, " Could not find Teams Block ");
-	for (i = 0; i < Team::numTeams; i++)
+	for (int i = 0; i < Team::numTeams; i++)
 		if (Team::teams[i]) {
 			delete Team::teams[i];
 			Team::teams[i] = NULL;
 		}
 	Team::numTeams = 0;
-	for (i = 0; i < Commander::numCommanders; i++)
+	for (int i = 0; i < Commander::numCommanders; i++)
 		if (Commander::commanders[i]) {
 			delete Commander::commanders[i];
 			Commander::commanders[i] = NULL;
@@ -1999,7 +1999,7 @@ void Mission::init (char *missionName, long loadType, long dropZoneID, Stuff::Ve
 		result = missionFile->readIdULong("NumParts",numParts);
 		gosASSERT(result == NO_ERR);
 		if (numParts)
-			for (i = 1; i < long(numParts + 1); i++) {
+			for (int i = 1; i < long(numParts + 1); i++) {
 				char partName[12];
 				sprintf(partName,"Part%d",i);
 				
@@ -2039,11 +2039,11 @@ void Mission::init (char *missionName, long loadType, long dropZoneID, Stuff::Ve
 
 	//----------------------------------------------
 	// Now, init the teams and commanders we need...
-	for (i = 0; i <= maxTeamID; i++) {
+	for (int i = 0; i <= maxTeamID; i++) {
 		Team::teams[i] = new Team;
 		Team::teams[i]->init(i);
 	}
-	for (i = 0; i <= maxCommanderID; i++) {
+	for (int i = 0; i <= maxCommanderID; i++) {
 		Commander::commanders[i] = new Commander;
 		Commander::commanders[i]->setId(i);
 	}
@@ -2431,7 +2431,7 @@ void Mission::init (char *missionName, long loadType, long dropZoneID, Stuff::Ve
 
 		long bigAlternatives = 0;
 
-		for (i = 1; i < long(numParts + 1); i++) {
+		for (int i = 1; i < long(numParts + 1); i++) {
 			char partName[12];
 			sprintf(partName,"Part%d",i);
 
@@ -2465,7 +2465,7 @@ void Mission::init (char *missionName, long loadType, long dropZoneID, Stuff::Ve
 		}
 
 		long alternateChoice = RandomNumber(bigAlternatives + 1);
-		for (s = 0; s < numSquads; s++)
+		for (int s = 0; s < numSquads; s++)
 		{
 			randomAlternative[s] = alternateChoice;
 			if (GameDifficulty >= 2)
@@ -2492,7 +2492,7 @@ void Mission::init (char *missionName, long loadType, long dropZoneID, Stuff::Ve
 		long i;
 #endif
 
-		for (i = 1; i < long(numParts + 1); i++)
+		for (int i = 1; i < long(numParts + 1); i++)
 		{
 			char partName[12];
 			sprintf(partName,"Part%d",i);
@@ -2531,7 +2531,7 @@ void Mission::init (char *missionName, long loadType, long dropZoneID, Stuff::Ve
 				//MUST save off ORIGINAL Pilot.  WE don't load the alternate pilots!!!!!
 				usingAlternate = true;
 				result = missionFile->readIdULong("Pilot", realPilot);
-				gosASSERT(result == NO_ERR,);
+				gosASSERT(result == NO_ERR);
 
 				sprintf(partName, "Part%d", partId);
 				result = missionFile->seekBlock(partName);
@@ -2568,7 +2568,7 @@ void Mission::init (char *missionName, long loadType, long dropZoneID, Stuff::Ve
 			else
 			{
 				result = missionFile->readIdULong("Pilot", parts[i].pilot);
-				gosASSERT(result == NO_ERR,);
+				gosASSERT(result == NO_ERR);
 			}
 			
 			//------------------------------------------------------------------
@@ -2672,7 +2672,7 @@ void Mission::init (char *missionName, long loadType, long dropZoneID, Stuff::Ve
 	// the real things. First, count the number of objects we need...
 	long numMechs = 0;
 	long numVehicles = 0;
-	for (i = 1; i < (numParts + 1); i++) 
+	for (int i = 1; i < (numParts + 1); i++) 
 	{
 		ObjectTypePtr objType = ObjectManager->loadObjectType(parts[i].objNumber);
 		if (!objType)
@@ -2801,7 +2801,7 @@ void Mission::init (char *missionName, long loadType, long dropZoneID, Stuff::Ve
 
 	//----------------------------------------------
 	// Read in the Objectives.  Safe to have none.
-	for (i = 0; i <= maxTeamID; i++)
+	for (int i = 0; i <= maxTeamID; i++)
 		Team::teams[i]->loadObjectives(missionFile);
 
 /*	numObjectives = 0; // this refers to the number of *old* objectives
@@ -2867,7 +2867,7 @@ void Mission::init (char *missionName, long loadType, long dropZoneID, Stuff::Ve
 
 	//-----------------------------------------------------------------------
 	// Now that the parts are loaded, let's build the roster for each team...
-	for (i = 0; i < Team::numTeams; i++)
+	for (int i = 0; i < Team::numTeams; i++)
 		Team::teams[i]->buildRoster();
 
 	//---------------------------------------------------------------------------------
@@ -3232,7 +3232,7 @@ void Mission::destroy (bool initLogistics)
 	Team::numTeams = 0;
 
 	long numC = Commander::numCommanders;
-	for (i = 0; i < numC; i++)
+	for (int i = 0; i < numC; i++)
 		if (Commander::commanders[i]) {
 			delete Commander::commanders[i];
 			Commander::commanders[i] = NULL;

@@ -31,8 +31,8 @@
 //----------
 // EXTERNALS
 extern char*		tokenp;
-extern long			execLineNumber;
-extern long			lineNumber;
+extern int          execLineNumber;
+extern int          lineNumber;
 extern long			FileNumber;
 extern char			SourceFiles[MAX_SOURCE_FILES][MAXLEN_FILENAME];
 extern ABLModulePtr	CurModule;
@@ -160,7 +160,7 @@ void ABL_Assert (bool test, long errCode, const char* s) {
 
 //***************************************************************************
 
-void syntaxError (long errCode) {
+void syntaxError (int errCode) {
 
 	char errMessage[MAXLEN_ERROR_MESSAGE];
 	sprintf(errMessage, "SYNTAX ERROR %s [line %d] - (type %d) %s \"%s\"\n", SourceFiles[FileNumber], lineNumber, errCode, syntaxErrorMessages[errCode], wordString);
@@ -177,7 +177,7 @@ void syntaxError (long errCode) {
 
 //---------------------------------------------------------------------------
 
-void runtimeError (long errCode) {
+void runtimeError (int errCode) {
 
 	char message[512];
 
@@ -189,7 +189,7 @@ void runtimeError (long errCode) {
 		if (FileNumber > -1)
 			sprintf(message, "FILE %s", CurModule->getSourceFile(FileNumber));
 		else
-			sprintf(message, "FILE %s: unavailable");
+			sprintf(message, "FILE : unavailable");
 		debugger->print(message);
 		sprintf(message, "LINE %d", execLineNumber);
 		debugger->print(message);

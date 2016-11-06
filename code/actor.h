@@ -213,7 +213,7 @@ class VFXAppearance : public Appearance
 			fadeTable = fTable;
 		}
 		
-		void setObjectParameters (Stuff::Vector3D &pos, float rot, long selected);
+		void setObjectParameters (const Stuff::Vector3D &pos, float rot, long selected);
 		
 		long stateExists (ActorState typeId);
 		

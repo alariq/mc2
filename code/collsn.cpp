@@ -91,7 +91,8 @@ CollisionAlertRecordPtr GlobalCollisionAlert::findAlert (GameObjectPtr object, C
 	unsigned long startIndex = 0;
 	if (startRecord)
 	{
-		for (long i=startIndex;i<(long)nextRecord;i++)
+        int i = startIndex;
+		for (;i<(long)nextRecord;i++)
 		{
 			if (&(collisionAlerts[i]) == startRecord)
 			{
@@ -104,7 +105,7 @@ CollisionAlertRecordPtr GlobalCollisionAlert::findAlert (GameObjectPtr object, C
 	
 	if (startIndex < nextRecord)
 	{
-		for (long i=startIndex;i<(long)nextRecord;i++)
+		for (unsigned long i=startIndex;i<nextRecord;i++)
 		{
 			if (( (collisionAlerts[i].object1) == object) ||
 				( (collisionAlerts[i].object2) == object))

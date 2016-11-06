@@ -552,7 +552,7 @@ void Terrain::resetVisibleVertices (long maxVisibleVertices)
 }
 
 //---------------------------------------------------------------------------
-bool Terrain::IsValidTerrainPosition (Stuff::Vector3D pos)
+bool Terrain::IsValidTerrainPosition (const Stuff::Vector3D pos)
 {
 	float metersCheck = (Terrain::worldUnitsMapSide / 2.0f);
 
@@ -568,7 +568,7 @@ bool Terrain::IsValidTerrainPosition (Stuff::Vector3D pos)
 }
 
 //---------------------------------------------------------------------------
-bool Terrain::IsEditorSelectTerrainPosition (Stuff::Vector3D pos)
+bool Terrain::IsEditorSelectTerrainPosition (const Stuff::Vector3D pos)
 {
 	float metersCheck = (Terrain::worldUnitsMapSide / 2.0f) - Terrain::worldUnitsPerVertex;
 
@@ -584,7 +584,7 @@ bool Terrain::IsEditorSelectTerrainPosition (Stuff::Vector3D pos)
 }
 
 //---------------------------------------------------------------------------
-bool Terrain::IsGameSelectTerrainPosition (Stuff::Vector3D pos)
+bool Terrain::IsGameSelectTerrainPosition (const Stuff::Vector3D pos)
 {
 	float metersCheck = (Terrain::worldUnitsMapSide / 2.0f) - (Terrain::worldUnitsPerVertex * 2.0f);
 
@@ -788,7 +788,7 @@ void Terrain::setOverlayTile (long block, long vertex, long offset)
 }	
 
 //---------------------------------------------------------------------------
-void Terrain::setOverlay( long tileR, long tileC, Overlays type, unsigned long offset )
+void Terrain::setOverlay( long tileR, long tileC, Overlays type, DWORD offset )
 {
 	mapData->setOverlay( tileR, tileC, type, offset );
 }
@@ -818,7 +818,7 @@ long Terrain::getOverlayTile (long block, long vertex)
 }	
 
 //---------------------------------------------------------------------------
-void Terrain::getOverlay( long tileR, long tileC, enum Overlays& type, unsigned long& Offset )
+void Terrain::getOverlay( long tileR, long tileC, enum Overlays& type, DWORD& Offset )
 {
 	mapData->getOverlay( tileR, tileC, type, Offset );
 }
@@ -1127,7 +1127,7 @@ void Terrain::geometry (void)
 }
 
 //---------------------------------------------------------------------------
-float Terrain::getTerrainElevation (Stuff::Vector3D &position)
+float Terrain::getTerrainElevation (const Stuff::Vector3D &position)
 {
 	float result = mapData->terrainElevation(position);
 	return(result);
@@ -1146,21 +1146,21 @@ unsigned long Terrain::getTexture( long tileR, long tileC )
 }
 
 //---------------------------------------------------------------------------
-float Terrain::getTerrainAngle (Stuff::Vector3D &position, Stuff::Vector3D* normal)
+float Terrain::getTerrainAngle (const Stuff::Vector3D &position, Stuff::Vector3D* normal)
 {
 	float result = mapData->terrainAngle(position, normal);
 	return(result);
 }
 
 //---------------------------------------------------------------------------
-float Terrain::getTerrainLight (Stuff::Vector3D &position)
+float Terrain::getTerrainLight (const Stuff::Vector3D &position)
 {
 	float result = mapData->terrainLight(position);
 	return(result);
 }
 
 //---------------------------------------------------------------------------
-Stuff::Vector3D Terrain::getTerrainNormal (Stuff::Vector3D &position)
+Stuff::Vector3D Terrain::getTerrainNormal (const Stuff::Vector3D &position)
 {
 	Stuff::Vector3D result = Terrain::mapData->terrainNormal(position);
 	return(result);
@@ -1169,7 +1169,7 @@ Stuff::Vector3D Terrain::getTerrainNormal (Stuff::Vector3D &position)
 //---------------------------------------------------------------------------
 // Uses a simple value to mark radius.  It never changes now!!
 // First value in range table!!
-void Terrain::markSeen (Stuff::Vector3D &looker, byte who, float specialUnitExpand)
+void Terrain::markSeen (const Stuff::Vector3D &looker, byte who, float specialUnitExpand)
 {
 	return;
 
@@ -1225,7 +1225,7 @@ void Terrain::markSeen (Stuff::Vector3D &looker, byte who, float specialUnitExpa
 
 //---------------------------------------------------------------------------
 // Uses dist passed in as radius.
-void Terrain::markRadiusSeen (Stuff::Vector3D &looker, float dist, byte who)
+void Terrain::markRadiusSeen (const Stuff::Vector3D &looker, float dist, byte who)
 {
 	return;
 
@@ -1541,7 +1541,7 @@ void Terrain::clearShadows()
 
 //---------------------------------------------------------------------------
 
-long Terrain::getWater (Stuff::Vector3D& worldPos) {
+long Terrain::getWater (const Stuff::Vector3D& worldPos) {
 	//-------------------------------------------------
 	// Get elevation at this point and compare to deep
 	// water altitude for this map.

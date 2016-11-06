@@ -395,7 +395,7 @@ void MissionBegin::begin()
 
 
 
-	for (i = 0; i < 5/*dim screen X*/; i+=1)
+	for (int i = 0; i < 5/*dim screen X*/; i+=1)
 	{
 		int j;
 		for (j = 0; j < 3/*dim screen Y*/; j += 1)

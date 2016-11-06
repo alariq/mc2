@@ -347,8 +347,8 @@ class Building : public TerrainObject
 //				(bldgType->getObjTypeNum() == GENERIC_INDESTRUCTIBLE_RESOURCE_BUILDING_OBJNUM))
 //				return(true);
 
-			if ((bldgType->perimeterAlarmRange > 0.0f) &&
-				(bldgType->perimeterAlarmTimer > 0.0f) ||
+			if (((bldgType->perimeterAlarmRange > 0.0f) &&
+				(bldgType->perimeterAlarmTimer > 0.0f)) ||
 				(bldgType->lookoutTowerRange > 0.0f) ||
 				(bldgType->sensorRange > 0.0f))
 			{

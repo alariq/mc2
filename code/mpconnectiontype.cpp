@@ -9,8 +9,11 @@ MPConnectionType.cpp			: Implementation of the MPConnectionType component.
 #include"mpconnectiontype.h"
 #include"prefs.h"
 #include"inifile.h"
-#include "../MCLib/UserInput.h"
-#include "..\resource.h"
+// sebi
+//#include"../userinput.h"
+#include"userinput.h"
+
+#include "../resource.h"
 #include"multplyr.h"
 #include"mechbayscreen.h"
 
@@ -580,7 +583,7 @@ void aTcpipPanel::init(FitIniFile* pFile)
 	if ( NO_ERR != tmpFile.open( path ) )
 	{
 		char errorStr[256];
-		sprintf( errorStr, "couldn't open file %s", path );
+		sprintf( errorStr, "couldn't open file %s", (const char*)path );
 		Assert( 0, 0, errorStr );
 	}
 	
@@ -768,7 +771,8 @@ void aTcpipPanel::update()
 			}
 			else
 			{
-				for ( i = 0; i < 3; i++ )
+                int i = 0;
+				for (; i < 3; i++ )
 				{
 					if ( dotIndex[i+1] == -1 )
 					{

@@ -297,7 +297,7 @@ void Team::eject (void) {
 				mover->getPilot()->orderEject(false, true, ORDER_ORIGIN_COMMANDER);
 			else {
 				WeaponShotInfo shot;
-				shot.init(NULL, -3, 254.0, 0, 0);
+				shot.init(0, -3, 254.0, 0, 0);
 				mover->handleWeaponHit(&shot, (MPlayer != NULL));
 			}
 		}
@@ -319,7 +319,7 @@ void Team::destroyTargets (void) {
 				//-----------------------------------------
 				//-- Need to pound these guys to death.
 				WeaponShotInfo shot;
-				shot.init(NULL, -3, 5, 0, 0);
+				shot.init(0, -3, 5, 0, 0);
 
 				for (long i=0;i<100;i++)
 				{
@@ -687,7 +687,7 @@ Stuff::Vector3D Team::calcEscapeVector (MoverPtr mover, float threatRange) {
 
 	//-----------------------------------------------------------------
 	// Now, find the furthest enemy and scale the deltas accordingly...
-	for (i = 0; i < rosterSize; i++)
+	for (int i = 0; i < rosterSize; i++)
 		if (distance[i] >= 0.0) {
 			float scale = distance[longest] / distance[i];
 			delta[i] *= scale;

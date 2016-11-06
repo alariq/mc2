@@ -8,7 +8,7 @@ PauseWindow.cpp			: Implementation of the PauseWindow component.
 
 #include"pausewindow.h"
 #include"controlgui.h"
-#include "..\resource.h"
+#include "../resource.h"
 #include"userinput.h"
 #include"missiongui.h"
 #include"logisticsdialog.h"
@@ -144,13 +144,13 @@ void PauseWindow::update()
 				buttons[i].move( delta, 0 );
 			}
 
-			for ( i = 0; i < staticCount; i++ )
+			for (int i = 0; i < staticCount; i++ )
 			{
 				statics[i].move( delta, 0 );				
 			}
 
 
-			for ( i = 0; i < 2; i++ )
+			for (int i = 0; i < 2; i++ )
 			{
 				float dif = backgrounds[i].right - backgrounds[i].left;
 				backgrounds[i].left = .5 + currentPos;
@@ -215,7 +215,7 @@ void PauseWindow::update()
 			}
 		}
 
-		for ( i = 0; i < staticCount; i++ )
+		for (int i = 0; i < staticCount; i++ )
 		{
 			for ( int j = 0; j < 4; j++ )
 			{
@@ -224,7 +224,7 @@ void PauseWindow::update()
 		}
 
 	
-		for ( i = 0; i < 2; i++ )
+		for (int i = 0; i < 2; i++ )
 		{
 			float dif = backgrounds[i].right - backgrounds[i].left;
 			backgrounds[i].left = .5 + currentPos;
@@ -265,7 +265,7 @@ void PauseWindow::render()
 		buttons[i].render();
 	}
 
-	for ( i = 0; i < staticCount; i++ )
+	for (int i = 0; i < staticCount; i++ )
 	{
 		statics[i].render();
 	}	

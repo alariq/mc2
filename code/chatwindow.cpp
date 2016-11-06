@@ -8,7 +8,7 @@
 #include"chatwindow.h"
 #include"mclib.h"
 #include"multplyr.h"
-#include "..\resource.h"
+#include "../resource.h"
 
 ChatWindow* ChatWindow::s_instance = NULL;
 
@@ -30,7 +30,7 @@ ChatWindow::~ChatWindow()
 }
 
 //-------------------------------------------------------------------------------------------------
-void ChatWindow::destroy()
+void ChatWindow::static_destroy()
 {
 	if (s_instance)
 	{
@@ -57,7 +57,7 @@ int ChatWindow::initInstance()
 	if ( NO_ERR != file.open( path ) )
 	{
 		char buffer2[512];
-		sprintf( buffer2, "couldn't open file %s", (char*)path );
+		sprintf( buffer2, "couldn't open file %s", (const char*)path );
 		Assert( 0, 0, buffer2 );
 		return false;	
 
@@ -267,7 +267,7 @@ void ChatWindow::refillListBox( aListBox& listBox, char** chatTexts, long* playe
 	}
 
 	int curLinesInListBox = 0;
-	for ( i = 0; i < listBox.GetItemCount(); i++ )
+	for (int i = 0; i < listBox.GetItemCount(); i++ )
 	{
 		ChatMessageItem* pItem = (ChatMessageItem*)listBox.GetItem( i );
 		curLinesInListBox += pItem->getLineCount();
@@ -288,7 +288,7 @@ void ChatWindow::refillListBox( aListBox& listBox, char** chatTexts, long* playe
 		}
 	}
 
-	for ( i = 0; i < itemCount && i < maxCount; i++ )
+	for (int i = 0; i < itemCount && i < maxCount; i++ )
 	{
 		int item = (curItem)%maxCount;
 		listBox.AddItem( &pItems[item] );
@@ -318,7 +318,7 @@ void ChatWidget::init( )
 	if ( NO_ERR != file.open( path ) )
 	{
 		char buffer2[512];
-		sprintf( buffer2, "couldn't open file %s", (char*)path );
+		sprintf( buffer2, "couldn't open file %s", (const char*)path );
 		Assert( 0, 0, buffer2 );
 		return;
 

@@ -449,7 +449,7 @@ class GroundVehicle : public Mover {
 		
 		virtual void handleStaticCollision (void);
 
-		virtual char* getIfaceName(void) {
+		virtual const char* getIfaceName(void) {
 			return(longName);
 		}
 		

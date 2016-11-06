@@ -55,10 +55,10 @@ class TG_AnimateShape;
 // TG_TypeMultiShape
 class TG_TypeMultiShape
 {
-	friend TG_MultiShape;
-	friend TG_TypeShape;
-	friend TG_Shape;
-	friend TG_AnimateShape;
+	friend class TG_MultiShape;
+	friend class TG_TypeShape;
+	friend class TG_Shape;
+	friend class TG_AnimateShape;
 	
 	//---------------------------------------------------------
 	// This class runs a multi-shape appearance.  Anything
@@ -239,10 +239,10 @@ class TG_MultiShape
 	// Shape is transformed, rendered etc. in TG_Shape.
 	// This will store animation information and use it, too!
 
-	friend TG_TypeMultiShape;
-	friend TG_Shape;
-	friend TG_TypeShape;
-	friend TG_AnimateShape;
+	friend class TG_TypeMultiShape;
+	friend class TG_Shape;
+	friend class TG_TypeShape;
+	friend class TG_AnimateShape;
 	
 	//-------------
 	//Data Members
@@ -569,8 +569,8 @@ typedef TG_MultiShape* TG_MultiShapePtr;
 // TG_AnimShape
 class TG_AnimateShape
 {
-	friend TG_TypeMultiShape;
-	friend TG_MultiShape;
+	friend class TG_TypeMultiShape;
+	friend class TG_MultiShape;
 	//--------------------------------------------------------------------
 	//This class stores a single gesture worth of animation data.
 	//Works by loading the animation data for each NODE in the multiShape

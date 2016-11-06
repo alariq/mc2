@@ -8,7 +8,7 @@ InfoWindow.cpp			: Implementation of the InfoWindow component.
 
 #include"infowindow.h"
 #include"mclib.h"
-#include "..\resource.h"
+#include "../resource.h"
 #include"mover.h"
 #include"mechicon.h"
 #include"team.h"
@@ -118,7 +118,7 @@ void InfoWindow::init( FitIniFile& file )
 	memset( buttonData, 0, sizeof( buttonData ) );
 
 
-	for ( i = 0; i < 2; i++ )
+	for (int i = 0; i < 2; i++ )
 	{
 		if ( buttonData[i].textureHandle )
 		{
@@ -274,7 +274,7 @@ void InfoWindow::init( FitIniFile& file )
 	ControlButton::initButtons( file, 2, buttons, buttonData, "InfoButton" );
 
 	char SkillText[32];
-	for ( i = 0; i < 7; i++ )
+	for (int i = 0; i < 7; i++ )
 	{
 		sprintf( SkillText, "Skill%ld", i );
 		skillInfos[i].init( file, SkillText ,ControlGui::hiResOffsetX, ControlGui::hiResOffsetY);
@@ -366,7 +366,7 @@ void InfoWindow::render()
 	long scrollBarLength = buttons[1].location[0].y - buttons[0].location[2].y - 4 - SCROLLBUTTONHEIGHT;
 
 	gos_VERTEX v[4];
-	for ( i = 0; i < 4; i++ )
+	for (int i = 0; i < 4; i++ )
 	{
 		v[i].argb = 0xff5c96c2;
 		v[i].frgb = 0;
@@ -452,7 +452,7 @@ void InfoWindow::render()
 
 		v[2].x = v[3].x = HEALTHLEFT + (HEALTHRIGHT - HEALTHLEFT)* barStatus;
 
-		for ( i = 0; i < 4; i++ )
+		for (int i = 0; i < 4; i++ )
 			v[i].argb = color | 0xff000000;
 
 		gos_DrawQuads( v, 4 );
@@ -765,7 +765,7 @@ void InfoWindow::drawScrollingStuff()
 	
 	
 
-	for ( curWeapon = 0; curWeapon < 4; curWeapon++ )
+	for (int curWeapon = 0; curWeapon < 4; curWeapon++ )
 	{
 		if ( count[curWeapon] != 255)
 		{
@@ -840,7 +840,7 @@ void InfoWindow::drawScrollingStuff()
 		}
 
 		int currentSkill = rank;
-		for ( j = 0; j < 3; j ++ )
+		for (int j = 0; j < 3; j ++ )
 		{
 			gos_VERTEX v[4];
 

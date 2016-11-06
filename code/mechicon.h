@@ -100,7 +100,7 @@ public:
 
 protected:
 
-		static long		damageColors[4][3];
+		static DWORD            damageColors[4][3];
 
 		static unsigned long	s_textureHandle[5];
 		static bool				s_slotUsed[240];
@@ -125,7 +125,7 @@ protected:
 		static float	pilotLocation[17][4];
 		Mover*		unit;
 
-		static long		ForceGroupColors[11];
+		static DWORD ForceGroupColors[11];
 
 		void drawBar( float barStatus );
 		static void setIconVariables();

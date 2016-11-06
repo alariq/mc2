@@ -64,8 +64,8 @@ long scaleDraw (MemoryPtr shapeTable, unsigned long frameNum, long sx, long sy, 
 	}
 	
 	result = VFX_shape_bounds(shapeTable,frameNum);
-	long xMax = result>>16;
-	long yMax = result & 0x0000ffff;
+	int xMax = result>>16;
+	int yMax = result & 0x0000ffff;
 
 	if ((xMax == 0) || (yMax == 0))
 		return -1;

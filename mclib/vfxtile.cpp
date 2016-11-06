@@ -19,6 +19,8 @@
 #include"vfx.h"
 #endif
 
+#include<cassert>
+
 static unsigned long pwXMax,count;		// Must be static for assembly optimizations
 static unsigned char *FadeTable;		// Must be static for assembly optimizations
 
@@ -541,11 +543,12 @@ long VFX_shape_minxy(void *shape_table, LONG shape_number)
 //;
 //;----------------------------------------------------------------------------
 
-long VFX_shape_bounds (void *shape_table, long shape_number)
+int VFX_shape_bounds (void *shape_table, long shape_number)
 {
-	long boundsResult = -1;
+	int boundsResult = -1;
 
 #ifdef LINUX_BUILD
+    assert(0);
 #else
 	__asm
 	{

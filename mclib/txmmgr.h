@@ -67,7 +67,7 @@ class MC_TextureManager;
 //---------------------------------------------------------------------------
 typedef struct _MC_VertexArrayNode
 {
-	friend MC_TextureManager;
+	friend class MC_TextureManager;
 
 	public:
 		DWORD				textureIndex;
@@ -90,9 +90,9 @@ typedef struct _MC_VertexArrayNode
 } MC_VertexArrayNode;
 
 //----------------------------------------------------------------------
-typedef struct _MC_TextureNode
+struct MC_TextureNode
 {
-	friend MC_TextureManager;
+	friend class MC_TextureManager;
 
 	protected:
 		DWORD				gosTextureHandle;			//Handle returned by GOS
@@ -151,7 +151,7 @@ typedef struct _MC_TextureNode
 	
 	DWORD get_gosTextureHandle (void);				//If texture is not in VidRAM, cache a texture out and cache this one in.
 
-} MC_TextureNode;
+};
 
 //---------------------------------------------------------------------------
 class gos_VERTEXManager : public HeapManager
@@ -219,7 +219,7 @@ class gos_VERTEXManager : public HeapManager
 //----------------------------------------------------------------------
 class MC_TextureManager
 {
-	friend MC_TextureNode;
+	friend struct MC_TextureNode;
 	
 	//Data Members
 	//------------

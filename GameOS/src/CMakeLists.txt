@@ -11,6 +11,7 @@ set(SOURCES ${SOURCES}
     mbstring.cpp
     eh.cpp
     io.cpp
+    mmsystem.cpp
     )
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O0 -ggdb -Wno-unused-local-typedefs")

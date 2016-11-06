@@ -64,7 +64,7 @@ void GoalObject::init (void) {
 	used = false;
 	type = GOAL_OBJECT;
 	id = -1;
-	name[0] = NULL;
+	name[0] = '\0';
 	links = NULL;
 	controller = NULL;
 	info.object.WID = 0;

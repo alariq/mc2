@@ -126,7 +126,7 @@
 #include"logisticsdata.h"
 #endif
 
-#include "..\resource.h"
+#include "../resource.h"
 
 //--------
 // DEFINES
@@ -1176,7 +1176,7 @@ void BattleMech::init (bool create) {
 
 	sentCrippledMsg = false;
 
-	for (i = 0; i < NUM_ACTUATORS; i++)
+	for (int i = 0; i < NUM_ACTUATORS; i++)
 		actuator[i] = 255;
 	gyro = 255;
 
@@ -1206,7 +1206,7 @@ void BattleMech::init (bool create) {
 #endif
 
 	maxWeaponDamage = 0.0;
-	longName[0] = NULL;
+	longName[0] = '\0';
 	pilotNum = 0;
 
 	captureable = false;
@@ -1395,7 +1395,7 @@ long BattleMech::init (DWORD variantNum)
 	char thisMechName[128];
 	mechFile->readString(3,2,thisMechName,127);
 	strncpy(name, thisMechName, MAXLEN_MOVER_NAME - 1);
-	name[MAXLEN_MOVER_NAME] = NULL;
+	name[MAXLEN_MOVER_NAME] = '\0';
 
 	mechFile->readLong(10,5,chassisBR);
 
@@ -1419,7 +1419,7 @@ long BattleMech::init (DWORD variantNum)
 	result = mechFile->readString( 23 + ( 97 * variantNum ), 2, variantName, 63 );
 	if (result == 1)
 	{
-		PAUSE(("Variant Number %d does not exist for mech %s.  Please set variant in editor!",variantNum,csvName));
+		PAUSE(("Variant Number %d does not exist for mech %s.  Please set variant in editor!",variantNum,(const char*)csvName));
 		variantNum = 0;
 		variantID = 0;
 		result = mechFile->readString( 23 + ( 97 * variantNum ), 2, variantName, 63 );
@@ -1555,7 +1555,7 @@ long BattleMech::init (DWORD variantNum)
 	}
 
 	//NOW read in the weapons.
-	for (curItem = 0;curItem < MAX_MOVER_INVENTORY_ITEMS;curItem++)
+	for (int curItem = 0;curItem < MAX_MOVER_INVENTORY_ITEMS;curItem++)
 	{
 		mechFile->readUChar((26 + (97 * variantNum)) + curItem, 5, inventory[realItemNum].masterID);
 		
@@ -1623,7 +1623,7 @@ long BattleMech::init (DWORD variantNum)
 	}
 
 	//NOW read in the AMMO
-	for (curItem = 0;curItem < MAX_MOVER_INVENTORY_ITEMS;curItem++)
+	for (int curItem = 0;curItem < MAX_MOVER_INVENTORY_ITEMS;curItem++)
 	{
 		mechFile->readUChar((26 + (97 * variantNum)) + curItem, 5, inventory[realItemNum].masterID);
 		
@@ -1845,7 +1845,7 @@ long BattleMech::init (DWORD variantNum)
 		}
 	}
 
-	for (item = numOther+numWeapons;item<(numOther+numWeapons+numAmmos);item++) 
+	for (int item = numOther+numWeapons;item<(numOther+numWeapons+numAmmos);item++) 
 	{
 		//----------------------------------------------------------
 		// Each weapon should point to its appropriate ammo total in
@@ -1860,7 +1860,7 @@ long BattleMech::init (DWORD variantNum)
 		}
 	}
 
-	for (item = 0; item < numOther; item++) 
+	for (int item = 0; item < numOther; item++) 
 	{
 		if ((inventory[item].masterID == MasterComponent::clanAntiMissileSystemID) || (inventory[item].masterID == MasterComponent::innerSphereAntiMissileSystemID)) 
 		{
@@ -2271,7 +2271,7 @@ void BattleMech::resetComponents (long totalComponents, long *componentList)
 	}
 
 	//NOW read in the weapons.
-	for (curItem = 0;curItem < MAX_MOVER_INVENTORY_ITEMS;curItem++)
+	for (int curItem = 0;curItem < MAX_MOVER_INVENTORY_ITEMS;curItem++)
 	{
 		inventory[realItemNum].masterID = localMasterComponentList[curItem];
 		
@@ -2340,7 +2340,7 @@ void BattleMech::resetComponents (long totalComponents, long *componentList)
 	}
 
 	//NOW read in the AMMO
-	for (curItem = 0;curItem < MAX_MOVER_INVENTORY_ITEMS;curItem++)
+	for (int curItem = 0;curItem < MAX_MOVER_INVENTORY_ITEMS;curItem++)
 	{
 		inventory[realItemNum].masterID = localMasterComponentList[curItem];
 		
@@ -2606,7 +2606,7 @@ void BattleMech::resetComponents (long totalComponents, long *componentList)
 
 	calcAmmoTotals();
 
-	for (item = numOther; item < (numOther + numWeapons); item++) 
+	for (int item = numOther; item < (numOther + numWeapons); item++) 
 	{
 		//----------------------------------------------------------
 		// Each weapon should point to its appropriate ammo total in
@@ -2621,7 +2621,7 @@ void BattleMech::resetComponents (long totalComponents, long *componentList)
 		}
 	}
 
-	for (item = numOther+numWeapons;item<(numOther+numWeapons+numAmmos);item++) 
+	for (int item = numOther+numWeapons;item<(numOther+numWeapons+numAmmos);item++) 
 	{
 		//----------------------------------------------------------
 		// Each weapon should point to its appropriate ammo total in
@@ -2636,7 +2636,7 @@ void BattleMech::resetComponents (long totalComponents, long *componentList)
 		}
 	}
 
-	for (item = 0; item < numOther; item++) 
+	for (int item = 0; item < numOther; item++) 
 	{
 		if ((inventory[item].masterID == MasterComponent::clanAntiMissileSystemID) || (inventory[item].masterID == MasterComponent::innerSphereAntiMissileSystemID)) 
 		{
@@ -2667,7 +2667,7 @@ void BattleMech::resetComponents (long totalComponents, long *componentList)
 
 long BattleMech::init (FitIniFile* mechFile) {
 
-	char* BodyLocationBlockString[NUM_BODY_LOCATIONS] = {
+	const char* BodyLocationBlockString[NUM_BODY_LOCATIONS] = {
 		"Head",
 		"CenterTorso",
 		"LeftTorso",
@@ -2698,7 +2698,7 @@ long BattleMech::init (FitIniFile* mechFile) {
 	char thisMechName[128];
 	result = mechFile->readIdString ("Name", thisMechName, 127);
 	strncpy(name, thisMechName, MAXLEN_MOVER_NAME - 1);
-	name[MAXLEN_MOVER_NAME] = NULL;
+	name[MAXLEN_MOVER_NAME] = '\0'; 
 
 	result = mechFile->readIdLong("ChassisBR", chassisBR);
 	if (result != NO_ERR)
@@ -2712,7 +2712,7 @@ long BattleMech::init (FitIniFile* mechFile) {
 	if (result != NO_ERR)
 		descID = -1;
 
-	longName[0] = NULL;
+	longName[0] = '\0';
 
 //	result = mechFile->readIdLong("NameIndex", nameIndex);
 //	if (result != NO_ERR)
@@ -3234,7 +3234,7 @@ long BattleMech::init (FitIniFile* mechFile) {
 		}
 	}
 
-	for (item = numOther+numWeapons;item<(numOther+numWeapons+numAmmos);item++) {
+	for (int item = numOther+numWeapons;item<(numOther+numWeapons+numAmmos);item++) {
 		//----------------------------------------------------------
 		// Each weapon should point to its appropriate ammo total in
 		// the ammo type total list...
@@ -3246,7 +3246,7 @@ long BattleMech::init (FitIniFile* mechFile) {
 		}
 	}
 
-	for (item = 0; item < numOther; item++) {
+	for (int item = 0; item < numOther; item++) {
 		if ((inventory[item].masterID == MasterComponent::clanAntiMissileSystemID) || (inventory[item].masterID == MasterComponent::innerSphereAntiMissileSystemID)) {
 			for (long ammoIndex = 0; ammoIndex < numAmmoTypes; ammoIndex++) {
 				if ((long)MasterComponent::masterList[inventory[item].masterID].getWeaponAmmoMasterId() == ammoTypeTotal[ammoIndex].masterId) {
@@ -3771,7 +3771,7 @@ void BattleMech::mineCheck (void)
 			ObjectManager->createExplosion(MINE_EXPLOSION_ID, NULL, explosionPosition, MineSplashDamage, MineSplashRange * worldUnitsPerMeter);
 			
 			WeaponShotInfo shot;
-			shot.init(NULL, -2, MineDamage, calcHitLocation(NULL,-1,ATTACKSOURCE_MINE,0), 0);
+			shot.init(0, -2, MineDamage, calcHitLocation(NULL,-1,ATTACKSOURCE_MINE,0), 0);
 			handleWeaponHit(&shot, (MPlayer != NULL));
 		}
 	}

@@ -34,7 +34,8 @@ void TriggerAreaManager::destroy (void) {
 
 long TriggerAreaManager::add (long ULrow, long ULcol, long LRrow, long LRcol, long type, long param) {
 
-	for (long i = 1; i < MAX_TRIGGER_AREAS; i++)
+    int i;
+	for (i = 1; i < MAX_TRIGGER_AREAS; i++)
 		if (triggerAreas[i].type == TRIGGER_AREA_NONE)
 			break;
 	if (i < MAX_TRIGGER_AREAS) {

@@ -341,7 +341,7 @@ bool VFXAppearance::recalcBounds (void)
 }
 
 //-----------------------------------------------------------------------------
-void VFXAppearance::setObjectParameters (Stuff::Vector3D &pos, float rot, long sel)
+void VFXAppearance::setObjectParameters (const Stuff::Vector3D &pos, float rot, long sel)
 {
 	position = pos;
 	rotation = rot;

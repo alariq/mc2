@@ -111,7 +111,7 @@ class GVAppearanceType : public AppearanceType
 			destroy();
 		}
 
-		virtual void init (char *fileName);
+		virtual void init (const char *fileName);
 		
 		virtual void destroy (void);
 		
@@ -295,7 +295,7 @@ class GVAppearance : public ObjectAppearance
 
 		virtual bool isMouseOver (float px, float py);
 		
-		virtual void setObjectParameters (Stuff::Vector3D &pos, float rot, long selected, long team, long homeRelations);
+		virtual void setObjectParameters (const Stuff::Vector3D &pos, float rot, long selected, long team, long homeRelations);
 
 		virtual void setMoverParameters (float turretRot, float lArmRot = 0.0f, float rArmRot = 0.0f, bool isAirborne = false);
 

@@ -179,7 +179,7 @@ class Mech3DAppearanceType: public AppearanceType
 			destroy();
 		}
 		
-		virtual void init (char *fileName);
+		virtual void init (const char *fileName);
 		
 		long getTotalNodes (void)
 		{
@@ -648,7 +648,7 @@ class Mech3DAppearance: public ObjectAppearance
 			inCombatMode = combatMode;
 		}
 
-		virtual void setObjectParameters (Stuff::Vector3D &pos, float legRot, long selected, long alignment, long homeRelations);
+		virtual void setObjectParameters (const Stuff::Vector3D &pos, float legRot, long selected, long alignment, long homeRelations);
 
 		virtual void setMoverParameters (float turretRot, float lArmRot = 0.0f, float rArmRot = 0.0f, bool isAirborne = false);
 

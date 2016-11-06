@@ -58,9 +58,25 @@ void __stdcall gos_GetMouseInfo( float* pXPosition, float* pYPosition, int* pXDe
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+extern SDL_Window* g_sdl_window;
+void __stdcall gos_SetMousePosition( float XPosition, float YPosition )
+{
+    if(g_sdl_window) {
+        SDL_WarpMouseInWindow(g_sdl_window, (int)XPosition, (int)YPosition);
+    }
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
 DWORD __stdcall gos_GetKey()
 {
     return 0;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+const char* __stdcall gos_DescribeKey( DWORD Key )
+{
+    return "implement me";
 }
 
 ////////////////////////////////////////////////////////////////////////////////

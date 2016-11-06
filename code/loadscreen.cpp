@@ -6,8 +6,14 @@ LoadScreen.cpp			: Implementation of the LoadScreen component.
 //===========================================================================//
 \*************************************************************************************************/
 
+#ifdef LINUX_BUILD
+#include"windows.h"
+struct DDSURFACEDESC2 {
+};
+#else
 #include<windows.h>
 #include<ddraw.h>
+#endif
 #include"loadscreen.h"
 #include"aanimobject.h"
 #include"tgainfo.h"
@@ -39,6 +45,7 @@ extern volatile bool mc2IsInDisplayBackBuffer;
 extern void (*AsynFunc)(RECT& WinRect,DDSURFACEDESC2& mouseSurfaceDesc );
 extern CPrefs prefs;
 
+void ProgressTimer(	RECT& WinRect,DDSURFACEDESC2& mouseSurfaceDesc );
 //
 // Returns the number of bits in a given mask.  Used to determine if we are in 555 mode vs 565 mode.
 WORD GetNumberOfBits( DWORD dwMask );
@@ -127,7 +134,7 @@ void LoadScreenWrapper::changeRes()
 	if ( NO_ERR != outFile.open( path ) )
 	{
 		char error[256];
-		sprintf( error, "couldn't open file %s", path );
+		sprintf( error, "couldn't open file %s", (const char*)path );
 		Assert( 0, 0, error );
 		return;
 	}
@@ -177,7 +184,7 @@ void LoadScreen::changeRes( FitIniFile& outFile )
 		if ( NO_ERR != tgaFile.open( path ) )
 		{
 			char error[256];
-			sprintf( error, "couldn't open file %s", path );
+			sprintf( error, "couldn't open file %s", (const char*)path );
 			Assert( 0, 0, error );
 			return;
 		}
@@ -193,7 +200,7 @@ void LoadScreen::changeRes( FitIniFile& outFile )
 		if ( NO_ERR != tgaFile.open( path ) )
 		{
 			char error[256];
-			sprintf( error, "couldn't open file %s", path );
+			sprintf( error, "couldn't open file %s", (const char*)path );
 			Assert( 0, 0, error );
 			return;
 		}
@@ -218,7 +225,7 @@ void LoadScreen::changeRes( FitIniFile& outFile )
 		if ( NO_ERR != tgaFile.open( path ) )
 		{
 			char error[256];
-			sprintf( error, "couldn't open file %s", path );
+			sprintf( error, "couldn't open file %s", (const char*)path );
 			Assert( 0, 0, error );
 			return;
 		}
@@ -563,85 +570,89 @@ void ProgressTimer(	RECT& WinRect,DDSURFACEDESC2& mouseSurfaceDesc )
 
 	}
 	else
+    {
 		return;
+    }
 
-		// now put it on the screen...
+#ifndef LINUX_BUILD
+    // now put it on the screen...
 
-		long destWidth = destRight - destX;
-		long destHeight = destBottom - destY;
-
-
-		for ( int y = 0; y < destHeight; y++ )
-		{
-			BYTE* pSrc = pMem + y * srcWidth * srcDepth;
-			BYTE* pDest = (MemoryPtr)mouseSurfaceDesc.lpSurface + destX * mouseSurfaceDesc.ddpfPixelFormat.dwRGBBitCount/8 + 										
-										((destY + y) * mouseSurfaceDesc.lPitch);
-
-			for ( long x = 0; x < destWidth; x++ )
-			{
-
-					DWORD mColor = *(long*)pSrc;
-					BYTE baseAlpha 		= 0;
-					BYTE baseColorRed	= (mColor & 0x00ff0000)>>16;
-					BYTE baseColorGreen	= (mColor & 0x0000ff00)>>8;
-					BYTE baseColorBlue 	= (mColor & 0x000000ff);
-					pSrc += 4;
-
-					if ( mouseSurfaceDesc.ddpfPixelFormat.dwRGBBitCount == 32 )
-					{
-						(*(long*)pDest) = mColor;
-						pDest += 4;
-					}
-					else if ( mouseSurfaceDesc.ddpfPixelFormat.dwRGBBitCount == 24 )
-					{
-						
-						if ( !baseAlpha )
-						{
-							pDest++;
-							pDest++;
-							pDest++; 
-						}
-
-						*pDest++ = baseColorRed;
-						*pDest++ = baseColorGreen;
-						*pDest++ = baseColorBlue;
-
-					}
-					else if ( mouseSurfaceDesc.ddpfPixelFormat.dwRGBBitCount == 16 )
-					{
-						bool in555Mode = false;
-						if (GetNumberOfBits(mouseSurfaceDesc.ddpfPixelFormat.dwGBitMask) == 5)
-							in555Mode = true;
-
-						if ( !baseAlpha )
-						{
-							long clr;
-							if (in555Mode)
-							{
-								clr = (baseColorRed >> 3) << 10;
-								clr += (baseColorGreen >> 3) << 5;
-								clr += (baseColorBlue >> 3);
-							}
-							else
-							{
-								clr = (baseColorRed >> 3) << 11;
-								clr += (baseColorGreen >> 2) << 5;
-								clr += (baseColorBlue >> 3);
-							}
-							
-							*pDest++ = clr & 0xff;
-							*pDest++ = clr >> 8;
-						}
-						else
-						{
-							pDest++;
-							pDest++;
-						}
-					}
+    long destWidth = destRight - destX;
+    long destHeight = destBottom - destY;
 
 
-				}
-			}
+    for ( int y = 0; y < destHeight; y++ )
+    {
+        BYTE* pSrc = pMem + y * srcWidth * srcDepth;
+        BYTE* pDest = (MemoryPtr)mouseSurfaceDesc.lpSurface + destX * mouseSurfaceDesc.ddpfPixelFormat.dwRGBBitCount/8 + 										
+            ((destY + y) * mouseSurfaceDesc.lPitch);
+
+        for ( long x = 0; x < destWidth; x++ )
+        {
+
+            DWORD mColor = *(long*)pSrc;
+            BYTE baseAlpha 		= 0;
+            BYTE baseColorRed	= (mColor & 0x00ff0000)>>16;
+            BYTE baseColorGreen	= (mColor & 0x0000ff00)>>8;
+            BYTE baseColorBlue 	= (mColor & 0x000000ff);
+            pSrc += 4;
+
+            if ( mouseSurfaceDesc.ddpfPixelFormat.dwRGBBitCount == 32 )
+            {
+                (*(long*)pDest) = mColor;
+                pDest += 4;
+            }
+            else if ( mouseSurfaceDesc.ddpfPixelFormat.dwRGBBitCount == 24 )
+            {
+
+                if ( !baseAlpha )
+                {
+                    pDest++;
+                    pDest++;
+                    pDest++; 
+                }
+
+                *pDest++ = baseColorRed;
+                *pDest++ = baseColorGreen;
+                *pDest++ = baseColorBlue;
+
+            }
+            else if ( mouseSurfaceDesc.ddpfPixelFormat.dwRGBBitCount == 16 )
+            {
+                bool in555Mode = false;
+                if (GetNumberOfBits(mouseSurfaceDesc.ddpfPixelFormat.dwGBitMask) == 5)
+                    in555Mode = true;
+
+                if ( !baseAlpha )
+                {
+                    long clr;
+                    if (in555Mode)
+                    {
+                        clr = (baseColorRed >> 3) << 10;
+                        clr += (baseColorGreen >> 3) << 5;
+                        clr += (baseColorBlue >> 3);
+                    }
+                    else
+                    {
+                        clr = (baseColorRed >> 3) << 11;
+                        clr += (baseColorGreen >> 2) << 5;
+                        clr += (baseColorBlue >> 3);
+                    }
+
+                    *pDest++ = clr & 0xff;
+                    *pDest++ = clr >> 8;
+                }
+                else
+                {
+                    pDest++;
+                    pDest++;
+                }
+            }
+
+
+        }
+    }
+#endif
 }
 
 

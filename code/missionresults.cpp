@@ -16,7 +16,7 @@ MissionResults.cpp			: Implementation of the MissionResults component.
 #include"salvagemecharea.h"
 #include"pilotreviewarea.h"
 #include"gamesound.h"
-#include "..\resource.h"
+#include "../resource.h"
 
 bool MissionResults::FirstTimeResults = true;
 MissionResults::MissionResults()

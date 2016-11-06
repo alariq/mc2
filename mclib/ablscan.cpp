@@ -1256,7 +1256,7 @@ bool getSourceLine (void) {
 
 //---------------------------------------------------------------------------
 
-long openSourceFile (char* sourceFileName) {
+long openSourceFile (const char* sourceFileName) {
 
 	//---------------------------------------
 	// Now, let's open the ABL source file...

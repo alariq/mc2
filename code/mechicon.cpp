@@ -31,7 +31,7 @@ TGAFileHeader* ForceGroupIcon::s_textureMemory = 0;
 StaticInfo*		ForceGroupIcon::jumpJetIcon = NULL;
 
 MC2MoviePtr	ForceGroupIcon::bMovie = NULL;
-unsigned long	ForceGroupIcon::pilotVideoTexture = 0;
+DWORD ForceGroupIcon::pilotVideoTexture = 0;
 MechWarrior*	ForceGroupIcon::pilotVideoPilot = NULL;
 
 
@@ -40,8 +40,8 @@ MechWarrior*	ForceGroupIcon::pilotVideoPilot = NULL;
 #define HEALTH_BARHEIGHT	2.0f * Environment.screenHeight/600.f
 #define TEXT_HEIGHT				8.0f * Environment.screenHeight/480.f
 
-float			MechIcon::unitIconX = 32;
-float			MechIcon::unitIconY = 38;
+float			ForceGroupIcon::unitIconX = 32;
+float			ForceGroupIcon::unitIconY = 38;
 float			PilotIcon::pilotIconX = 25;
 float			PilotIcon::pilotIconY = 36;
 const long		PilotIcon::DEAD_PILOT_INDEX = 27;
@@ -51,14 +51,14 @@ unsigned long	PilotIcon::s_pilotTextureWidth = 0;
 long			ForceGroupIcon::pilotTextTop[17] = {0};
 
 
-long		MechIcon::damageColors[4][3] = 
+DWORD ForceGroupIcon::damageColors[4][3] = 
 		{ 194 << 16 | 229 << 8 | 255 | 0xff << 24,	92 << 16 | 150 << 8 | 194 | 0xff << 24, 0 << 16 | 83 << 8 | 146 | 0xff << 24,
 		  248 << 16 | 241 << 8 | 193 | 0xff << 24,	248 << 16 | 206 << 8 | 31 | 0xff << 24, 139 << 16 | 114 << 8 | 0 | 0xff << 24,
 		  248 << 16 | 193 << 8 | 193 | 0xff << 24,	248 << 16 | 31 << 8 | 31 | 0xff << 24, 139 << 16 | 0 << 8 | 0 | 0xff << 24,
 		  94 << 16 | 101 << 8 | 101 | 0xff << 24,	56 << 16 | 64 << 8 | 64 | 0xff << 24, 26 << 16 | 33 << 8 | 33 | 0xff << 24
 		};
 
-long		MechIcon::ForceGroupColors[11] = {
+DWORD ForceGroupIcon::ForceGroupColors[11] = {
 		0xff005392,
 		0xffC66600,
 		0xff6E7C00,
@@ -341,9 +341,9 @@ void MechIcon::setDrawBack( bool bSet)
 	gos_LockTexture( s_textureHandle[textureIndex], 0, 0, &textureData );
 
 
-	unsigned long* pDestData, *pDestRow = textureData.pTexture + offsetY * textureData.Width + offsetX;
+	DWORD* pDestData, *pDestRow = textureData.pTexture + offsetY * textureData.Width + offsetX;
 	char* pTmp = (char*)s_MechTextures + sizeof ( TGAFileHeader );
-	unsigned long* pSrcRow = (unsigned long*)pTmp;
+	DWORD* pSrcRow = (DWORD*)pTmp;
 
 	long whichMech = unit->getIconPictureIndex();
 
@@ -354,7 +354,7 @@ void MechIcon::setDrawBack( bool bSet)
 
 	pSrcRow += tmpOffset;
 
-	unsigned long* pSrcData = pSrcRow;
+	DWORD* pSrcData = pSrcRow;
 
 	for( int j = 0; j < unitIconY; ++j )
 	{
@@ -519,9 +519,9 @@ bool MechIcon::init( long whichIndex )
 	TEXTUREPTR textureData;
 	gos_LockTexture( s_textureHandle[textureIndex], 0, 0, &textureData );
 
-	unsigned long* pDestData, *pDestRow = textureData.pTexture + offsetY * textureData.Width + offsetX;
+	DWORD* pDestData, *pDestRow = textureData.pTexture + offsetY * textureData.Width + offsetX;
 	char* pTmp = (char*)s_MechTextures + sizeof ( TGAFileHeader );
-	unsigned long* pSrcRow = (unsigned long*)pTmp;
+	DWORD* pSrcRow = (DWORD*)pTmp;
 
 
 	offsetY = 0;
@@ -531,7 +531,7 @@ bool MechIcon::init( long whichIndex )
 
 	pSrcRow += tmpOffset;
 
-	unsigned long* pSrcData = pSrcRow;
+	DWORD* pSrcData = pSrcRow;
 
 	for( int j = 0; j < unitIconY; ++j )
 	{
@@ -809,18 +809,18 @@ void MechIcon::doDraw( char* newDamage, char* oldDamage, unsigned long handle, u
 			TEXTUREPTR textureData;
 			gos_LockTexture( s_textureHandle[texIndex], 0, 0, &textureData );
 
-			unsigned long* pData = textureData.pTexture;
+			DWORD* pData = textureData.pTexture;
 
 			// go to write spot in texture
 			int jLine = yIndex * unitIconY;
 
 			int iLine = xIndex * unitIconX;
 
-			unsigned long* pLine = (unsigned long*)(pData + (jLine * textureData.Width) + iLine);
-			unsigned long* pChange = pLine;
+			DWORD* pLine = (DWORD*)(pData + (jLine * textureData.Width) + iLine);
+			DWORD* pChange = pLine;
 
-			unsigned long oldColors[3];
-			unsigned long newColors[3];
+			DWORD oldColors[3];
+			DWORD newColors[3];
 
 			// find the colors we're looking for
 			for ( int p = 0; p < 3; p++ )
@@ -846,7 +846,7 @@ void MechIcon::doDraw( char* newDamage, char* oldDamage, unsigned long handle, u
 
 					if ( (*pChange)&0xff000000 ) // not transparent
 					{
-						for ( p = 0; p < 3; p++ )
+						for (int p = 0; p < 3; p++ )
 						{
 							if ( oldColors[p] == *pChange )		
 							{
@@ -909,7 +909,7 @@ void ForceGroupIcon::render()
 
 	char buffer[256];
 	strcpy( buffer, unit->getPilot()->getName() );
-	for ( i = 0; i < strlen( buffer ); i++ )
+	for (int i = 0; i < strlen( buffer ); i++ )
 		CharUpper( buffer );
 
 	gosFontHandle->render( buffer, textArea[locationIndex].left + 1, pilotTextTop[locationIndex], 0, 0, 0xffffffff, 0, 0 );
@@ -940,7 +940,7 @@ void ForceGroupIcon::render()
 	if ( pilotVideoPilot == unit->getPilot()  )
 	{
 		gos_VERTEX v[4];
-		for ( i = 0; i < 4; i++ )
+		for (int i = 0; i < 4; i++ )
 		{
 			v[i] = bmpLocation[locationIndex][i];
 			v[i].u = 0.f;
@@ -1181,9 +1181,9 @@ bool VehicleIcon::init( Mover* pMover )
 	gos_LockTexture( s_textureHandle[texIndex], 0, 0, &textureData );
 
 	
-	unsigned long* pDestData, *pDestRow = textureData.pTexture + offsetY * textureData.Width + offsetX;
+	DWORD* pDestData, *pDestRow = textureData.pTexture + offsetY * textureData.Width + offsetX;
 	char* pTmp = (char*)s_VehicleTextures + sizeof ( TGAFileHeader );
-	unsigned long* pSrcRow = (unsigned long*)pTmp;
+	DWORD* pSrcRow = (DWORD*)pTmp;
 
 	long whichMech = pMover->getIconPictureIndex();
 
@@ -1194,7 +1194,7 @@ bool VehicleIcon::init( Mover* pMover )
 
 	pSrcRow += tmpOffset;
 
-	unsigned long* pSrcData = pSrcRow;
+	DWORD* pSrcData = pSrcRow;
 
 	for( int j = 0; j < unitIconY; ++j )
 	{
@@ -1303,18 +1303,18 @@ void VehicleIcon::update()
 			TEXTUREPTR textureData;
 			gos_LockTexture( s_textureHandle[texIndex], 0, 0, &textureData );
 
-			unsigned long* pData = textureData.pTexture;
+			DWORD* pData = textureData.pTexture;
 
 			// go to write spot in texture
 			int jLine = yIndex * unitIconY;
 
 			int iLine = xIndex * unitIconX;
 
-			unsigned long* pLine = (unsigned long*)(pData + (jLine * textureData.Width) + iLine);
-			unsigned long* pChange = pLine;
+			DWORD* pLine = (DWORD*)(pData + (jLine * textureData.Width) + iLine);
+			DWORD* pChange = pLine;
 
-			unsigned long oldColors[3];
-			unsigned long newColors[3];
+			DWORD oldColors[3];
+			DWORD newColors[3];
 
 			for ( int p = 0; p < 3; p++ )
 			{
@@ -1440,7 +1440,8 @@ void ForceGroupIcon::drawDeathEffect()
 	unit->setSelected( 0 );
 	bool bFinished = true;
 	deathAnimationTime += frameLength;
-	for ( int i = 0; i < NUM_DEATH_INFOS - 1; i++ )
+    int i = 0;
+	for (; i < NUM_DEATH_INFOS - 1; i++ )
 	{
 		if ( animationInfos[i].time < deathAnimationTime &&
 			 animationInfos[i+1].time > deathAnimationTime )

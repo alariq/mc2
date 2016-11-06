@@ -9,7 +9,7 @@
 #include"missiongui.h"
 
 #include"soundsys.h"
-#include "../resource.h"
+#include"../resource.h"
 
 extern SoundSystem *sndSystem;
 

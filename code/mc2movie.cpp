@@ -22,8 +22,8 @@
 #include"prefs.h"
 #endif
 
-#include "..\resource.h"
-#include<gameos.hpp>
+#include "../resource.h"
+#include"gameos.hpp"
 
 //-----------------------------------------------------------------------
 const DWORD MAX_TEXTURE_WIDTH 	= 256;
@@ -51,7 +51,7 @@ void __stdcall ExitGameOS();
 
 //-----------------------------------------------------------------------
 // Class MC2Movie
-void MC2Movie::init (char *MC2Name, RECT mRect, bool useWaveFile)
+void MC2Movie::init (const char *MC2Name, RECT mRect, bool useWaveFile)
 {
 		char MOVIEName[1024];
 		_splitpath(MC2Name,NULL,NULL,MOVIEName,NULL);

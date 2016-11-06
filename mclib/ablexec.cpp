@@ -42,8 +42,8 @@ char*					codeSegmentLimit = NULL;
 char*					statementStartPtr = NULL;
 
 TokenCodeType			codeToken;
-long					execLineNumber;
-long					execStatementCount = 0;
+int                     execLineNumber;
+int                     execStatementCount = 0;
 
 StackItem*				stack = NULL;
 StackItemPtr			tos = NULL;

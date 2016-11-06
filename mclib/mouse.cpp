@@ -49,6 +49,9 @@
 #ifndef LINUX_BUILD
 #include<mmsystem.h>
 #include<ddraw.h>
+#else
+struct DDSURFACEDESC2 {
+};
 #endif
 
 #include<gameos.hpp>
@@ -77,10 +80,9 @@ volatile MemoryPtr mc2MouseData = NULL;
 //Timing in Hz to update mouse
 long MOUSE_REFRESH_RATE = 30;
 
+void (*AsynFunc)(RECT& WinRect,DDSURFACEDESC2& mouseSurfaceDesc ) = 0;
 #ifndef LINUX_BUILD
 void CALLBACK MouseTimer(UINT wTimerID, UINT msg, DWORD dwUser, DWORD dw1, DWORD dw2);
-void (*AsynFunc)(RECT& WinRect,DDSURFACEDESC2& mouseSurfaceDesc ) = 0;
-
 
 //External GameOS stuff
 extern IDirectDrawSurface7*	FrontBufferSurface;

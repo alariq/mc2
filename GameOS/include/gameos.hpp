@@ -31,6 +31,7 @@
 #include<stdlib.h> // size_t 
 #include<errno.h> // size_t 
 #include<signal.h> // size_t 
+#include<string.h> // memcmp
 #include "windows.h"
 
 static __inline__ unsigned long long rdtsc(void)
@@ -133,6 +134,14 @@ typedef struct _GUID
     unsigned short Data2;
     unsigned short Data3;
     unsigned char Data4[8];
+
+    bool operator==(const _GUID& other) {
+        return Data1 == other.Data1 && Data2 == other.Data2 && Data3 == other.Data3 && (memcmp(Data4, other.Data4, sizeof(Data4))==0);
+    }
+
+    bool operator!=(const _GUID& other) {
+        return !(*this == other);
+    }
 } GUID;
 #endif /* GUID_DEFINED */
 
@@ -1317,7 +1326,7 @@ DWORD __stdcall gos_GetKey();
 //
 // Returns the displayable name of a key press returned from gos_GetKey() eg: "A", "Cursor Left" or "Enter"
 //
-char* __stdcall gos_DescribeKey( DWORD Key );
+const char* __stdcall gos_DescribeKey( DWORD Key );
 
 //////////////////////////////////////////////////////////////////////////////////
 // Clear the client keyboard buffer
@@ -1607,21 +1616,21 @@ double __stdcall gos_GetElapsedTime( int RealTime=0 );
 //
 // When 'bool HKLM' on the read function is true it will read from LOCAL_MACHINE, otherwise CURRENT_USER. The write functions ONLY work to CURRENT_USER
 //
-void __stdcall gos_LoadDataFromRegistry( char* keyName, void* pData, DWORD* szData, bool HKLM=false );
+void __stdcall gos_LoadDataFromRegistry( const char* keyName, void* pData, DWORD* szData, bool HKLM=false );
 
 //
 // Saves szData bytes starting at pData into the registry key specified.
 //
 // If szData is 4 the data will be saved as a DWORD, otherwise just binary data
 //
-void __stdcall gos_SaveDataToRegistry( char* keyName,  void* pData,  DWORD szData );
+void __stdcall gos_SaveDataToRegistry( const char* keyName,  void* pData,  DWORD szData );
 
 //
 // Saves a string starting at pData, length szData into the registry key specified.
 //
 // This is the same as the gos_SaveDataToRegistry API, except it's saved as a readable string
 //
-void __stdcall gos_SaveStringToRegistry( char* keyName,  char* pData,  DWORD szData );
+void __stdcall gos_SaveStringToRegistry( const char* keyName,  char* pData,  DWORD szData );
 
 
 

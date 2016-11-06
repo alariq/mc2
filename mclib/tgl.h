@@ -495,9 +495,9 @@ class TG_TypeShape : public TG_TypeNode
 	// User use (i.e. Texture Names).  Transforms, lights, clips
 	// and renders the shape.
 
-	friend TG_TypeMultiShape;
-	friend TG_MultiShape;
-	friend TG_Shape;
+	friend class TG_TypeMultiShape;
+	friend class TG_MultiShape;
+	friend class TG_Shape;
 	
 	//-------------
 	//Data Members
@@ -641,10 +641,10 @@ class TG_Shape
 	// This class runs the shape instance.
 	// Transforms, lights, clips and renders the shape.
 
-	friend TG_MultiShape;
-	friend TG_TypeShape;
-	friend TG_TypeNode;
-	friend TG_TypeMultiShape;
+	friend class TG_MultiShape;
+	friend class TG_TypeShape;
+	friend class TG_TypeNode;
+	friend class TG_TypeMultiShape;
 	
 	//-------------
 	//Data Members

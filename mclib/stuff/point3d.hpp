@@ -14,6 +14,9 @@ namespace Stuff {
 
 	class Origin3D;
 	class Vector4D;
+    class Point3D;
+
+    bool Close_Enough( const Point3D &P1, const Point3D &P2, Scalar e = SMALL);
 
 	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Point3D ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

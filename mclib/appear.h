@@ -365,9 +365,7 @@ class Appearance
 		{
 		}
 
-		virtual void setObjectParameters (Stuff::Vector3D &pos, float rot, long selected, long team, long homeRelations)
-		{
-		}
+		virtual void setObjectParameters (const Stuff::Vector3D &pos, float rot, long selected, long team, long homeRelations) = 0;
 
 		virtual void setMoverParameters (float turretRot, float lArmRot = 0.0f, float rArmRot = 0.0f, bool isAirborne = false)
 		{

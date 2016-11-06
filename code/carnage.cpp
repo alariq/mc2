@@ -359,7 +359,7 @@ bool ExplosionType::handleCollision (GameObjectPtr collidee, GameObjectPtr colli
 			damageAmount = damageLeft;
 
 		if (collider->isMover()) {
-			shot.init(NULL, -1, damageAmount, 0, 0);		 
+			shot.init(0, -1, damageAmount, 0, 0);		 
 			while (damageLeft > 0.0) {
 				shot.hitLocation = collider->calcHitLocation(collidee,-1,ATTACKSOURCE_ARTILLERY,0);
 				collider->handleWeaponHit(&shot, (MPlayer != NULL));
@@ -386,7 +386,7 @@ bool ExplosionType::handleCollision (GameObjectPtr collidee, GameObjectPtr colli
 							return(false);
 					}
 					
-					shot.init(NULL, -1, damageAmount, 0, 0);		 
+					shot.init(0, -1, damageAmount, 0, 0);		 
 					while (damageLeft > 0.0) 
 					{
 						shot.hitLocation = 0;
@@ -415,7 +415,7 @@ bool ExplosionType::handleCollision (GameObjectPtr collidee, GameObjectPtr colli
 					
 					float damageLeft = collidee->getExplDmg();
 					WeaponShotInfo shot;
-					shot.init(NULL, -1, damageAmount, 0, 0);		 
+					shot.init(0, -1, damageAmount, 0, 0);		 
 					while (damageLeft > 0.0) 
 					{
 						shot.hitLocation = 0;
@@ -430,7 +430,7 @@ bool ExplosionType::handleCollision (GameObjectPtr collidee, GameObjectPtr colli
 				default: 
 				{
 					WeaponShotInfo shot;
-					shot.init(NULL, -1, collidee->getExplDmg(), 0, 0);
+					shot.init(0, -1, collidee->getExplDmg(), 0, 0);
 					collider->handleWeaponHit(&shot, (MPlayer != NULL));
 				}
 			}
@@ -555,7 +555,7 @@ void Carnage::handleStaticCollision (void)
 			long startCellRow = CellRow - 4;
 			long startCellCol = CellCol - 4;
 				
-			for (i = startCellRow; i < startCellRow + 9; i++) 
+			for (int i = startCellRow; i < startCellRow + 9; i++) 
 			{
 				for (long j = startCellCol; j < startCellCol + 9; j++) 
 				{

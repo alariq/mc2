@@ -9,7 +9,7 @@ MissionSelectionScreen.cpp			: Implementation of the MissionSelectionScreen comp
 #include"missionselectionscreen.h"
 #include"mechbayscreen.h"
 #include"logisticsdata.h"
-#include "..\resource.h"
+#include "../resource.h"
 #include"missionbriefingscreen.h"
 #include"sounds.h"
 #include"mc2movie.h"
@@ -215,7 +215,7 @@ void MissionSelectionScreen::begin()
 	if ( NO_ERR != file.open( fileName ) )
 	{
 		char errorStr[256];
-		sprintf( errorStr, "couldn't open file %s", fileName );
+		sprintf( errorStr, "couldn't open file %s", (const char*)fileName );
 		Assert( 0, 0, errorStr );
 	}
 	
@@ -274,7 +274,8 @@ void MissionSelectionScreen::begin()
 	gosASSERT( result == NO_ERR );
 
 	bool bPressed = 0;
-	for ( int i = 0; i < missionCount; i++ )
+    int i = 0;
+	for (; i < missionCount; i++ )
 	{
 		if ( i > operationScreen.buttonCount )
 		{

@@ -100,7 +100,7 @@ extern bool useNonWeaponEffects;
 extern bool useHighObjectDetail;
 //-----------------------------------------------------------------------------
 // class GVAppearanceType
-void GVAppearanceType::init (char * fileName)
+void GVAppearanceType::init (const char * fileName)
 {
 	AppearanceType::init(fileName);
 
@@ -1400,7 +1400,7 @@ Stuff::Vector3D GVAppearance::getHitNode (void)
 }
 
 //-----------------------------------------------------------------------------
-void GVAppearance::setObjectParameters (Stuff::Vector3D &pos, float Rot, long sel, long team, long homeRelations)
+void GVAppearance::setObjectParameters (const Stuff::Vector3D &pos, float Rot, long sel, long team, long homeRelations)
 {
 	movedThisFrame = false;
 	if ((rotation != Rot) || (pos != position))

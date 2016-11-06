@@ -1,0 +1,2 @@
+1) GameDebugWindow is duplicated on code and mclib - Fix it
+2) ablmc2.cpp is found in ABLT and code folders - Fix it

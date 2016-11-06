@@ -122,9 +122,9 @@ private:
 	LogisticsVariant*	pVariant;
 	aAnimButton*		checkButton;
 
-	unsigned long				psRed;
-	unsigned long				psGreen;
-	unsigned long				psBlue;
+	DWORD               psRed;
+	DWORD               psGreen;
+	DWORD               psBlue;
 
 	friend class SalvageMechScreen;
 

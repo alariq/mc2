@@ -764,8 +764,9 @@ void
 								{
 									theNewOr |= srcPolygon.clipPerVertex[k];
 								}
-
-								theOr == theNewOr;
+                                // sebi: pretty sure assignment was meant (thank you clang!)
+								//theOr == theNewOr;
+								theOr = theNewOr;
 								loop++;
 							} while (theNewOr != 0 && loop--);
 
@@ -1340,7 +1341,9 @@ void
 									theNewOr |= srcPolygon.clipPerVertex[k];
 								}
 
-								theOr == theNewOr;
+                                // sebi: pretty sure assignment was meant (thank you clang!)
+								//theOr == theNewOr;
+								theOr = theNewOr;
 								loop++;
 							} while (theNewOr != 0 && loop--);
 

@@ -76,7 +76,7 @@ namespace Stuff {
 			Close_Enough(
 				const RGBColor &c1,
 				const RGBColor &c2,
-				Scalar e = SMALL
+				Scalar e/* = SMALL*/
 			);
 		bool
 			operator==(const RGBColor &color) const
@@ -181,7 +181,7 @@ namespace Stuff {
 			Close_Enough(
 				const RGBAColor &c1,
 				const RGBAColor &c2,
-				Scalar e = SMALL
+				Scalar e/* = SMALL*/
 			);
 		bool
 			operator==(const RGBAColor &color) const
@@ -281,7 +281,7 @@ namespace Stuff {
 			Close_Enough(
 				const HSVColor &c1,
 				const HSVColor &c2,
-				Scalar e = SMALL
+				Scalar e/* = SMALL*/
 			);
 		bool
 			operator==(const HSVColor &color) const
@@ -384,7 +384,7 @@ namespace Stuff {
 			Close_Enough(
 				const HSVAColor &c1,
 				const HSVAColor &c2,
-				Scalar e = SMALL
+				Scalar e/* = SMALL*/
 			);
 		bool
 			operator==(const HSVAColor &color) const

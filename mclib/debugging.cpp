@@ -42,7 +42,7 @@ void GameDebugWindow::operator delete (void* us) {
 
 //---------------------------------------------------------------------------
 
-void GameDebugWindow::setFont (char* fontFile) {
+void GameDebugWindow::setFont (const char* fontFile) {
 
 	if (font) {
 		gos_DeleteFont(font);
@@ -59,7 +59,7 @@ void GameDebugWindow::setFont (char* fontFile) {
 
 //---------------------------------------------------------------------------
 
-void GameDebugWindow::print (char* s) {
+void GameDebugWindow::print (const char* s) {
 	
 	if (numLines < MAX_DEBUG_WINDOW_LINES)
 		strcpy(textBuffer[numLines++], s);

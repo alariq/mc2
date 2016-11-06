@@ -628,7 +628,7 @@ typedef struct _RoleOrders {
 
 typedef union _MemoryCell {
 	float						real;
-	long						integer;
+	int                         integer;
 } MemoryCell;
 
 //------------------------------------------------------------------------------------------
@@ -1406,7 +1406,7 @@ class MechWarrior {
 
 		long setBrain (long brainHandle);
 
-		void setBrainName (char *brainName);
+		void setBrainName (const char *brainName);
 		
 		ABLModulePtr getBrain (void) {
 			return(brain);
@@ -2079,15 +2079,17 @@ class MechWarrior {
 
 		bool isCloseToFirstTacOrder( Stuff::Vector3D& pos );
 
-		BldgAppearance* getWayPointMarker( const Stuff::Vector3D& pos, char* name );
+		BldgAppearance* getWayPointMarker( const Stuff::Vector3D& pos, const char* name );
 
 
 		void setDebugString (long stringNum, char* s) {
-			if ((stringNum > -1) && (stringNum < NUM_PILOT_DEBUG_STRINGS))
-				if (s == NULL)
+			if ((stringNum > -1) && (stringNum < NUM_PILOT_DEBUG_STRINGS)) {
+				if (s == NULL) {
 					debugStrings[stringNum][0] = '\0';
-				else
+                } else {
 					strncpy(debugStrings[stringNum], s, MAXLEN_PILOT_DEBUG_STRING - 1);
+                }
+            }
 		}
 
 		char* getDebugString (long stringNum) 

@@ -8,7 +8,7 @@ KeyboardRef.cpp			: Implementation of the KeyboardRef component.
 
 #include"keyboardref.h"
 #include"mclib.h"
-#include "..\resource.h"
+#include "../resource.h"
 #include"missiongui.h"
 #include"utilities.h"
 
@@ -128,13 +128,13 @@ void KeyboardRef::reseed( MissionInterfaceManager::Command* commands )
 
 	long curCount = 0;
 
-	for ( i = 0; i < MAX_COMMAND; i++ )
+	for (int i = 0; i < MAX_COMMAND; i++ )
 	{
 		if ( commands[i].hotKeyDescriptionText != -1 )
 		{
 			cLoadString( commands[i].hotKeyDescriptionText, descText, 127 );
 			long key = commands[i].key;
-			char* pKey = gos_DescribeKey( (key & 0x000fffff) << 8 );
+			const char* pKey = gos_DescribeKey( (key & 0x000fffff) << 8 );
 			strcpy( keysString, pKey );
 
 			if ( ((key & SHIFT)) )

@@ -43,6 +43,13 @@ namespace Stuff {
 	class UnitVector3D;
 	class LinearMatrix4D;
 
+    // sebi
+    bool Small_Enough( const EulerAngles &a, Scalar e = SMALL);
+    bool Small_Enough( const YawPitchRoll &a, Scalar e = SMALL);
+
+    bool Close_Enough( const YawPitchRoll &a1, const YawPitchRoll &a2, Scalar e = SMALL);
+
+
 	//##########################################################################
 	//#########################    EulerAngles     #############################
 	//##########################################################################
@@ -105,7 +112,7 @@ namespace Stuff {
 		friend bool
 			Small_Enough(
 				const EulerAngles &a,
-				Scalar e=SMALL
+				Scalar e/*=SMALL*/
 			);
 		bool
 			operator!() const
@@ -115,7 +122,7 @@ namespace Stuff {
 			Close_Enough(
 				const EulerAngles &a1,
 				const EulerAngles &a2,
-				Scalar e=SMALL
+				Scalar e/*=SMALL*/
 			);
 		bool
 			operator==(const EulerAngles& a) const
@@ -265,7 +272,7 @@ namespace Stuff {
 		friend bool
 			Small_Enough(
 				const YawPitchRoll &a,
-				Scalar e=SMALL
+				Scalar e/*=SMALL*/
 			);
 		bool
 			operator!() const
@@ -275,7 +282,7 @@ namespace Stuff {
 			Close_Enough(
 				const YawPitchRoll &a1,
 				const YawPitchRoll &a2,
-				Scalar e=SMALL
+				Scalar e/*=SMALL*/
 			);
 		bool
 			operator==(const YawPitchRoll& a) const
@@ -397,7 +404,7 @@ namespace Stuff {
 			Close_Enough(
 				const UnitQuaternion &a1,
 				const UnitQuaternion &a2,
-				Scalar e=SMALL
+				Scalar e/*=SMALL*/
 			);
 		bool
 			operator==(const UnitQuaternion& a) const

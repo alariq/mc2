@@ -36,8 +36,9 @@ public:
 	void			SetScrollPos(float newPos);
 	float			GetScrollMax(void){return scrollMax;};
 	float			GetScrollPos(void){return scrollPos;};
-	long			SetSrollInc( long newInc ){ scrollInc = newInc; } // amount you move for one arrow click
-	long			SetScrollPage(long newInc){ pageInc = newInc;} // amount you move if you click on the bar itself
+    // sebi: not used and type in name!
+	//long			SetSrollInc( long newInc ){ scrollInc = newInc; } // amount you move for one arrow click
+	//long			SetScrollPage(long newInc){ pageInc = newInc;} // amount you move if you click on the bar itself
 	void			ScrollUp(void);
 	void			ScrollPageUp(void);
 	void			ScrollDown(void);

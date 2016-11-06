@@ -9,7 +9,7 @@
 #include"mechicon.h"
 #include"logisticsmech.h"
 #include"logisticspilot.h"
-#include "..\resource.h"
+#include "../resource.h"
 #include"alistbox.h"
 #include"logisticspilotlistbox.h"
 #include"gamesound.h"

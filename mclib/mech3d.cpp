@@ -184,7 +184,7 @@ bool Mech3DAppearanceType::animationLoadingEnabled = true;
 
 //-------------------------------------------------------------------------------
 // class Mech3DAppearanceType
-void Mech3DAppearanceType::init (char * fileName)
+void Mech3DAppearanceType::init (const char * fileName)
 {
 	AppearanceType::init(fileName);
 
@@ -1843,7 +1843,7 @@ void Mech3DAppearance::resetPaintScheme (DWORD red, DWORD green, DWORD blue)
 }	
 
 //-----------------------------------------------------------------------------
-void Mech3DAppearance::setObjectParameters (Stuff::Vector3D &pos, float Rot, long sel, long team, long homeRelations)
+void Mech3DAppearance::setObjectParameters (const Stuff::Vector3D &pos, float Rot, long sel, long team, long homeRelations)
 {
 	movedThisFrame = false;
 	if ((rotation != Rot) || (pos != position))

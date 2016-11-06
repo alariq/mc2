@@ -346,7 +346,7 @@ void MC_TextureManager::removeTexture (DWORD gosHandle)
     long i = 0;
 	for (;i<MC_MAXTEXTURES;i++)
 	{
-		if ((masterTextureNodes[i].gosTextureHandle == gosHandle))
+		if (masterTextureNodes[i].gosTextureHandle == gosHandle)
 		{
 			masterTextureNodes[i].numUsers--;
 			break;			

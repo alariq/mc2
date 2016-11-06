@@ -40,7 +40,7 @@
 // EXTERNALS
 
 extern long				level;
-extern long				execLineNumber;
+extern int              execLineNumber;
 	//extern long				execStatementCount;
 extern TokenCodeType	codeToken;
 
@@ -176,6 +176,7 @@ WatchPtr WatchManager::add (SymTableNodePtr idPtr) {
 				return(&watches[numWatches++]);
 			}
 			break;
+        default: ;
 	}
 
 	return(NULL);
@@ -521,6 +522,7 @@ long Debugger::setWatch (long states) {
 			watchManager->print();
 			break;
 		case TKN_IDENTIFIER:
+            {
 			SymTableNodePtr idPtr = NULL;
 			searchAndFindAllSymTables(idPtr);
 			getToken();
@@ -537,7 +539,9 @@ long Debugger::setWatch (long states) {
 				watchManager->setFetch(idPtr, false, breakToDebug);
 			else if (states & WATCH_FETCH_ON)
 				watchManager->setFetch(idPtr, true, breakToDebug);
+            }
 			break;
+        default:;
 	}
 
 	return(ABL_NO_ERR);
@@ -559,6 +563,7 @@ long Debugger::addBreakPoint (void) {
 				breakPointManager->add(curLiteral.value.integer);
 			getToken();
 			break;
+        default:;
 	}
 
 	return(ABL_NO_ERR);
@@ -579,6 +584,7 @@ long Debugger::removeBreakPoint (void) {
 				breakPointManager->remove(curLiteral.value.integer);
 			getToken();
 			break;
+        default:;
 	}
 
 	return(ABL_NO_ERR);
@@ -717,6 +723,7 @@ long Debugger::sprintSimpleValue (char* dest, SymTableNodePtr symbol) {
 			case VAR_TYPE_STATIC:
 				dataPtr = (StackItemPtr)StaticDataPtr + symbol->defn.info.data.offset;
 				break;
+            default:;
 		}
 
 		//---------------------------------------------------------------
@@ -728,7 +735,7 @@ long Debugger::sprintSimpleValue (char* dest, SymTableNodePtr symbol) {
 		if ((typePtr->form != FRM_ARRAY) /*&& (typePtr->form != FRM_RECORD)*/) {
 			ABL_Assert(dataPtr != NULL, 0, " Debugger.sprintSimpleValue(): dataPtr is NULL ");
 			if ((typePtr == IntegerTypePtr) || (typePtr->form == FRM_ENUM))
-				sprintf(dest, "%d", *((long*)dataPtr));
+				sprintf(dest, "%d", *((int*)dataPtr));
 			else if (typePtr == CharTypePtr)
 				sprintf(dest, "\"%c\"", *((char*)dataPtr));
 			else
@@ -772,6 +779,7 @@ long Debugger::sprintArrayValue (char* dest, SymTableNodePtr symbol, char* subsc
 			case VAR_TYPE_STATIC:
 				dataPtr = (StackItemPtr)StaticDataPtr + symbol->defn.info.data.offset;
 				break;
+            default:;
 		}
 
 		TypePtr	typePtr = (TypePtr)(symbol->typePtr);
@@ -805,7 +813,7 @@ long Debugger::sprintArrayValue (char* dest, SymTableNodePtr symbol, char* subsc
 
 		if ((typePtr->form != FRM_ARRAY)) {
 			if ((typePtr == IntegerTypePtr) || (typePtr->form == FRM_ENUM))
-				sprintf(dest, "%d", *((long*)elementAddress));
+				sprintf(dest, "%d", *((int*)elementAddress));
 			else if (typePtr == CharTypePtr)
 				sprintf(dest, "\"%c\"", *((char*)elementAddress));
 			else
@@ -1068,7 +1076,7 @@ void Debugger::displayModuleInstanceRegistry (void) {
 
 //---------------------------------------------------------------------------
 
-void Debugger::processCommand (long commandId, char* strParam1, long numParam1, ABLModulePtr moduleParam1) {
+void Debugger::processCommand (long commandId, char* strParam1, int numParam1, ABLModulePtr moduleParam1) {
 
 	switch (commandId) {
 		case DEBUG_COMMAND_SET_MODULE:
@@ -1214,7 +1222,7 @@ void Debugger::processCommand (long commandId, char* strParam1, long numParam1, 
 			sprintf(message, "%d static vars, %d bytes, %d largest",
 					moduleInfo.numStaticVars,
 					moduleInfo.totalSizeStaticVars,
-					moduleInfo.largestStaticVar);
+					moduleInfo.largestStaticVar.size);
 			print(message);
 			}
 			break;

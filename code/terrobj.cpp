@@ -369,7 +369,7 @@ void TerrainObject::updateDebugWindow (GameDebugWindow* debugWindow) {
 			strcat(s, tempStr);
 		}
 		strcat(s, " *");
-		for (i = 0; i < numSubAreas1; i++) {
+		for (int i = 0; i < numSubAreas1; i++) {
 			char tempStr[15];
 			sprintf(tempStr, " %d", subAreas1[i]);
 			strcat(s, tempStr);
@@ -1054,7 +1054,7 @@ void TerrainObject::calcSubAreas (long numCells, short cells[MAX_GAME_OBJECT_CEL
 
 		numSubAreas1 = 0;
 		curCoord = cellsCovered;
-		for (i = 0; i < numCellsCovered; i++) 
+		for (int i = 0; i < numCellsCovered; i++) 
 		{
 			long r = *curCoord++;
 			long c = *curCoord++;
@@ -1079,10 +1079,10 @@ void TerrainObject::calcSubAreas (long numCells, short cells[MAX_GAME_OBJECT_CEL
 			}
 		}
 
-		for (i = 0; i < numSubAreas0; i++)
+		for (int i = 0; i < numSubAreas0; i++)
 			GlobalMoveMap[0]->setAreaOwnerWID(subAreas0[i], getWatchID());
 
-		for (i = 0; i < numSubAreas1; i++)
+		for (int i = 0; i < numSubAreas1; i++)
 			GlobalMoveMap[1]->setAreaOwnerWID(subAreas1[i], getWatchID());
 	}
 }
@@ -1106,9 +1106,9 @@ void TerrainObject::markMoveMap (bool passable) {
 void TerrainObject::openSubAreas (void) {
 
 	markMoveMap(true);
-	for (long i = 0; i < numSubAreas0; i++)
+	for (int i = 0; i < numSubAreas0; i++)
 		GlobalMoveMap[0]->openArea(subAreas0[i]);
-	for (i = 0; i < numSubAreas1; i++)
+	for (int i = 0; i < numSubAreas1; i++)
 		GlobalMoveMap[1]->openArea(subAreas1[i]);
 }
 
@@ -1117,9 +1117,9 @@ void TerrainObject::openSubAreas (void) {
 void TerrainObject::closeSubAreas (void) {
 
 	markMoveMap(false);
-	for (long i = 0; i < numSubAreas0; i++)
+	for (int i = 0; i < numSubAreas0; i++)
 		GlobalMoveMap[0]->closeArea(subAreas0[i]);
-	for (i = 0; i < numSubAreas1; i++)
+	for (int i = 0; i < numSubAreas1; i++)
 		GlobalMoveMap[1]->closeArea(subAreas1[i]);
 }
 
@@ -1127,9 +1127,9 @@ void TerrainObject::closeSubAreas (void) {
 
 void TerrainObject::setSubAreasTeamId (long id) {
 
-	for (long i = 0; i < numSubAreas0; i++)
+	for (int i = 0; i < numSubAreas0; i++)
 		GlobalMoveMap[0]->setAreaTeamID(subAreas0[i], id);
-	for (i = 0; i < numSubAreas1; i++)
+	for (int i = 0; i < numSubAreas1; i++)
 		GlobalMoveMap[1]->setAreaTeamID(subAreas1[i], id);
 }
 
@@ -1139,7 +1139,7 @@ bool TerrainObject::calcAdjacentAreaCell (long moveLevel, long areaID, long& adj
 
 	if (areaID == -1) {
 		short* curCoord = cellsCovered;
-		for (long i = 0; i < numCellsCovered; i++) {
+		for (int i = 0; i < numCellsCovered; i++) {
 			long cellRow = *curCoord++;
 			long cellCol = *curCoord++;
 			long adjArea = GlobalMoveMap[moveLevel]->calcArea(cellRow - 1, cellCol);

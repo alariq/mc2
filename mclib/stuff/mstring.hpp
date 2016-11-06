@@ -126,7 +126,7 @@ namespace Stuff {
 			: public Stuff::Signature
 		#endif
 	{
-		friend MString;
+		friend class MString;
 
 		friend MString
 			operator + (
@@ -581,7 +581,7 @@ namespace Stuff {
 			Close_Enough(
 				const char *str1,
 				const char *str2,
-				Scalar e = SMALL
+				Scalar e/* = SMALL*/
 			);
 
 		void

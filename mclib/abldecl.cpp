@@ -683,6 +683,7 @@ void varOrFieldDeclarations (SymTableNodePtr routineIdPtr, long offset) {
 						NumStaticVariables++;
 						}
 						break;
+                    default:;
 				}
 				analyzeVarDecl(idPtr);
 				}

@@ -177,7 +177,7 @@ class LogisticsSaveDialog : public LogisticsDialog
 		void	initDialog(const char* path, bool bCampaign);
 		void	updateCampaignMissionInfo();
 		void	setMission( const char* path );
-		void	readCampaignNameFromFile( char* fileName, char* resultName, long len );
+		void	readCampaignNameFromFile(const char* fileName, char* resultName, long len );
 		bool	isCorrectVersionSaveGame( char *fileName );
 
 

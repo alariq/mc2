@@ -9,7 +9,7 @@ MechBayScreen.cpp			: Implementation of the MechBayScreen component.
 #include"logisticsmech.h"
 #include"logisticsdata.h"
 #include"logisticsmechicon.h"
-#include "..\resource.h"
+#include "../resource.h"
 #include"simplecamera.h"
 #include"windows.h"
 #include"gamesound.h"
@@ -85,7 +85,8 @@ void MechBayScreen::init(FitIniFile* file)
 
 	for ( int j = 0; j < ICON_COUNT_Y; j++ )
 	{
-		for ( int i = 0; i < ICON_COUNT_X; i++ )
+        int i = 0;
+		for (; i < ICON_COUNT_X; i++ )
 		{
 			pIcons[count].setMech( 0 );
 			pIcons[count].move( x, y );
@@ -139,7 +140,7 @@ void MechBayScreen::init(FitIniFile* file)
 	textObjects[11].setText( "" );
 	textObjects[12].setText( "" );
 	textObjects[14].setText( "" );
-	for ( i = 0; i < 3; i++ )
+	for (int i = 0; i < 3; i++ )
 	{
 		attributeMeters[i].setValue(0);
 	}
@@ -263,7 +264,7 @@ void MechBayScreen::render(int xOffset, int yOffset)
 
 	LogisticsScreen::render(xOffset, yOffset);
 
-	for ( i = 0; i < ICON_COUNT; i++ )
+	for (int i = 0; i < ICON_COUNT; i++ )
 	{
 		pIcons[i].render( xOffset, yOffset );
 	}
@@ -333,7 +334,7 @@ void MechBayScreen::drawWeightMeter(long xOffset, long yOffset)
 	float curArc = 180.f;
 	float curX = 50.f * cos( DEGREES_TO_RADS * curArc );
 	float curY = 50.f * sin( DEGREES_TO_RADS * curArc );
-	for ( i= 0; i < numberOfBars + numRemoveBars; i++ )
+	for (int i= 0; i < numberOfBars + numRemoveBars; i++ )
 	{
 
 		v[1].x = curX + weightCenterX + xOffset;
@@ -703,7 +704,8 @@ void MechBayScreen::addSelectedMech()
 
 void MechBayScreen::removeSelectedMech()
 {
-	for ( int i = 0; i < ICON_COUNT; i++ )
+    int i = 0;
+	for (i = 0; i < ICON_COUNT; i++ )
 	{
 		if ( pIcons[i].isSelected() )
 		{

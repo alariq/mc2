@@ -9,8 +9,8 @@ MPSetupArea.cpp			: Implementation of the MPSetupArea component.
 #include"mpsetuparea.h"
 #include"prefs.h"
 #include"inifile.h"
-#include "../MCLib/UserInput.h"
-#include "..\resource.h"
+#include"userinput.h"
+#include "../resource.h"
 
 #ifndef GAMESOUND_H
 #include"gamesound.h"
