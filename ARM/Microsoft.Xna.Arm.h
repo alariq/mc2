@@ -10,30 +10,33 @@
 
 #ifdef LINUX_BUILD
 
-
+// sebi
 namespace Microsoft
 {
 	namespace Xna
 	{
 		namespace Arm
 		{
-			struct IProviderEngine;
-			typedef IProviderEngine *IProviderEnginePtr;
+            struct IProviderEngine
+            {
+                // TODO: implement
+            };
+            struct IProviderAsset
+            {
+                // TODO: implement
+                void AddRelationship(const char* texture, const char* filename) {};
+                void Close(void) {};
+            };
 
-			struct IProviderAsset {
-				void AddRelationship(const char* , const char*) {}
-				void Close() {};
-			};
-			typedef IProviderAsset *IProviderAssetPtr;
-
-			inline IProviderEnginePtr CreateProviderEngine(const char *toolName, const char *toolVersion)
-			{
-				return NULL;
-			}
-		}
-	}
+            typedef IProviderAsset *IProviderAssetPtr;
+            typedef IProviderEngine *IProviderEnginePtr;
+        }
+    }
 }
+
+
 #else
+
 #include <comdef.h>
 
 namespace Microsoft
@@ -66,6 +69,8 @@ namespace Microsoft
 		}
 	}
 }
+
+
 #endif // LINUX_BUILD
 
-#endif
+#endif // __MICROSOFT_XNA_ARM_H__
