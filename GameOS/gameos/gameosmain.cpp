@@ -1,6 +1,7 @@
 #include "gameos.hpp"
 #include "gos_render.h"
 #include <stdio.h>
+#include <time.h>
 
 #include <SDL2/SDL.h>
 #include "gos_input.h"
@@ -177,6 +178,10 @@ int main(int argc, char** argv)
 
     while( !g_exit ) {
 
+        timespec ts;
+        ts.tv_sec = 0;
+        ts.tv_nsec = 10*1000000; // 10msec
+        nanosleep(&ts, NULL);
         Environment.DoGameLogic();
 
         process_events();
