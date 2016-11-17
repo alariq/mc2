@@ -240,8 +240,9 @@ void MPStats::update()
 
 			FullPathFileName oldPath;
 			FullPathFileName newPath;
-			newPath.init( "data\\multiplayer\\transcripts\\", str, ".txt");
-			oldPath.init( "data\\multiplayer\\transcripts\\", "transcript", ".txt" );
+            const char* path = "data" PATH_SEPARATOR "multiplayer" PATH_SEPARATOR "transcripts" PATH_SEPARATOR;
+			newPath.init(path, str, ".txt");
+			oldPath.init(path, "transcript", ".txt" );
 
 			LogisticsVariantDialog::instance()->end();
 			
@@ -497,7 +498,7 @@ void MPStatsResultsEntry::setData(const MC2Player* data, unsigned long laurelCol
 	textObjects[5].setText( text );
 
 	char path[256];
-	strcpy( path, "data\\multiplayer\\insignia\\" );
+	strcpy( path, "data" PATH_SEPARATOR "multiplayer" PATH_SEPARATOR "insignia" PATH_SEPARATOR );
 	strcat( path, data->insigniaFile );
 
 	if ( data->winner )

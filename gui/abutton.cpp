@@ -352,8 +352,9 @@ void aButton::init( FitIniFile& buttonFile, const char* str, HGOSFONT3D font )
 		location[j].z = 0.f;
 	}
 		
-	
-	if ( 0 == textureHandle && data.fileName && strlen( data.fileName ) )
+	// sebi: WTF??? data.fileName is useless as will always be true
+	//if ( 0 == textureHandle && data.fileName && strlen( data.fileName ) )
+	if ( 0 == textureHandle && strlen( data.fileName ) )
 	{
 		char file[256];
 		strcpy( file, artPath );

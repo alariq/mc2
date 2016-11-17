@@ -1964,7 +1964,8 @@ bool CObjective::StatusChangedSuccess (void)
 	if (m_changedStatus)
 	{
 		m_changedStatus = false;
-		m_resolvedStatus;
+        //sebi:
+		//m_resolvedStatus;
 		if (m_resolvedStatus == OS_SUCCESSFUL)
 			return true;
 	}

@@ -838,7 +838,8 @@ void InitializeGameEngine()
 	// In order to do that, we must force Win2K/XP to enlarge
 	// its swapfile at the get go to insure goodness and that
 	// the message does not come up during game run.
-	void *testMem = VirtualAlloc(NULL,123000000,MEM_COMMIT,PAGE_READWRITE);
+	DWORD testMemLength = 123000000;
+	void *testMem = VirtualAlloc(NULL,testMemLength,MEM_COMMIT,PAGE_READWRITE);
 
 #ifndef LINUX_BUILD
    	MEMORYSTATUS ms;
@@ -862,7 +863,7 @@ void InitializeGameEngine()
 #endif
 
 	if (testMem)
-		VirtualFree(testMem,0,MEM_RELEASE);
+		VirtualFree(testMem,testMemLength,MEM_RELEASE);
 
 	cLoadString(IDS_MC2_FILEMISSING,FileMissingString,511);
 	cLoadString(IDS_MC2_CDMISSING,CDMissingString,1023);
@@ -1528,7 +1529,7 @@ void InitializeGameEngine()
 		
 		gos_PushCurrentHeap(MidLevelRenderer::Heap);
 	
-		MidLevelRenderer::TGAFilePool *pool = new MidLevelRenderer::TGAFilePool("data\\tgl\\128\\");
+		MidLevelRenderer::TGAFilePool *pool = new MidLevelRenderer::TGAFilePool("data" PATH_SEPARATOR "tgl" PATH_SEPARATOR "128" PATH_SEPARATOR);
 		MidLevelRenderer::MLRTexturePool::Instance = new MidLevelRenderer::MLRTexturePool(pool);
 	
 		MidLevelRenderer::MLRSortByOrder *cameraSorter = new MidLevelRenderer::MLRSortByOrder(MidLevelRenderer::MLRTexturePool::Instance);
@@ -2210,7 +2211,7 @@ void DoGameLogic()
 
 		if (loadInMissionSave)
 		{
-			mission->load("data\\savegame\\testgame.ims");
+			mission->load("data" PATH_SEPARATOR "savegame" PATH_SEPARATOR "testgame.ims");
 			loadInMissionSave = false;
 		}
 	}

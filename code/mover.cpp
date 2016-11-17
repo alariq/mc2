@@ -495,14 +495,14 @@ void DebugMoveChunk (MoverPtr mover, MoveChunkPtr chunk1, MoveChunkPtr chunk2) {
 			mover->getPosition().z);
 		strcat(ChunkDebugMsg, outString);
 
-		long cellPos[2];
+		int cellPos[2];
 		mover->getCellPosition(cellPos[0], cellPos[1]);
 		sprintf(outString, "Mover Obj Cell Pos = [%d, %d]\n", cellPos[0], cellPos[1]);
 		strcat(ChunkDebugMsg, outString);
 		if (mover->getPilot() == NULL)
 			strcat(ChunkDebugMsg, "NULL pilot!\n");
 		if ((mover->getObjectClass() == BATTLEMECH) && ((BattleMechPtr)mover)->inJump) {
-			long jumpDest[2];
+			int jumpDest[2];
 			land->worldToCell(((BattleMechPtr)mover)->jumpGoal, jumpDest[0], jumpDest[1]);
 			sprintf(outString, "Jumping to [%d, %d]\n", jumpDest[0], jumpDest[1]);
 			strcat(ChunkDebugMsg, outString);
@@ -513,7 +513,7 @@ void DebugMoveChunk (MoverPtr mover, MoveChunkPtr chunk1, MoveChunkPtr chunk2) {
 	if (chunk1) {
 		strcat(ChunkDebugMsg, "CHUNK1\n");
 
-		for (long i = 0; i < 4; i++) {
+		for (int i = 0; i < 4; i++) {
 			sprintf(outString, "stepPos[%d] = (%d, %d)\n",
 				i,
 				chunk1->stepPos[i][0],
@@ -540,7 +540,7 @@ void DebugMoveChunk (MoverPtr mover, MoveChunkPtr chunk1, MoveChunkPtr chunk2) {
 	if (chunk2) {
 		strcat(ChunkDebugMsg, "\nCHUNK2\n");
 
-		for (long i = 0; i < 4; i++) {
+		for (int i = 0; i < 4; i++) {
 			sprintf(outString, "stepPos[%d] = (%d, %d)\n",
 				i,
 				chunk2->stepPos[i][0],
@@ -633,7 +633,7 @@ inline long cellDirToCell (long fromCellRow,
 
 void MoveChunk::build (MoverPtr mover, MovePathPtr path1, MovePathPtr path2) {
 
-	long cellPos[2];
+	int cellPos[2];
 	mover->getCellPosition(cellPos[0], cellPos[1]);
 	stepPos[0][0] = cellPos[0];
 	stepPos[0][1] = cellPos[1];
@@ -798,7 +798,7 @@ void MoveChunk::build (MoverPtr mover, MovePathPtr path1, MovePathPtr path2) {
 
 void MoveChunk::build (MoverPtr mover, Stuff::Vector3D jumpGoal) {
 
-	long jumpCoords[2];
+	int jumpCoords[2];
 	land->worldToCell(jumpGoal, jumpCoords[0], jumpCoords[1]);
 
 	stepPos[0][0] = jumpCoords[0];
@@ -3077,7 +3077,7 @@ Stuff::Vector3D Mover::relativePosition (float angle, float distance, unsigned l
 	curRay.Zero();
 	float rayLength = 0.0;
 
-	long cellR, cellC;
+	int cellR, cellC;
 	land->worldToCell(curPoint, cellR, cellC);
 	bool cellClear = GameMap->getPassable(cellR, cellC);
 
@@ -3196,7 +3196,7 @@ if (queuePlayerOrder)
 			if (getJumpRange() < distanceFrom(tacOrder.getWayPoint(0)))
 				canJump = false;
 			if (getObjectClass() == BATTLEMECH) {
-				long cellR, cellC;
+				int cellR, cellC;
 				land->worldToCell(tacOrder.getWayPoint(0), cellR, cellC);
 			if (!GameMap->getPassable(cellR, cellC))
 					canJump = false;
@@ -4069,7 +4069,7 @@ Stuff::Vector3D Mover::calcOffsetMoveGoal (Stuff::Vector3D target) {
 	curRay.y = 0.0;
 	float rayLength = 0.0;
 
-	long cellR, cellC;
+	int cellR, cellC;
 	Stuff::Vector3D curPoint3d(curPoint.x, curPoint.y, 0.0);
 	land->worldToCell(curPoint3d, cellR, cellC);
 	if (!GameMap->getPassable(cellR, cellC))
@@ -4118,7 +4118,7 @@ inline bool inMapBounds (long r, long c, long mapHeight, long mapWidth) {
 
 //---------------------------------------------------------------------------
 
-long calcBestGoalFromTarget (long targetPos[2], long maxPos[2], float minRange, float bestRange, long* bestCell) {
+long calcBestGoalFromTarget (int targetPos[2], int maxPos[2], float minRange, float bestRange, int* bestCell) {
 float startLocal = 40.0f;
 
 	//------------------------------------------------------------------------------------------
@@ -4280,7 +4280,7 @@ long Mover::calcGlobalPath (GlobalPathStep* globalPath, GameObjectPtr obj, Stuff
 #if 1
 	long startArea = GlobalMoveMap[moveLevel]->calcArea(cellPositionRow, cellPositionCol);
 	long goalArea = -1;
-	long goalCell[2] = {-1, -1};
+	int goalCell[2] = {-1, -1};
 	if (obj) {
 		goalArea = GlobalMoveMap[moveLevel]->calcArea(obj->cellPositionRow, obj->cellPositionCol);
 		if (goalArea == -1) {
@@ -4433,12 +4433,12 @@ long Mover::calcMoveGoal (GameObjectPtr target,
 	// The Goal Map is in CELLS...
 	memset(goalMap, 0, sizeof(long) * GOALMAP_CELL_DIM * GOALMAP_CELL_DIM);
 
-	long centerCell[2];
+	int centerCell[2];
 	land->worldToCell(moveCenter, centerCell[0], centerCell[1]);
-	long goalCell[2];
+	int goalCell[2];
 	land->worldToCell(moveGoal, goalCell[0], goalCell[1]);
 
-	long mapCellUL[2];
+	int mapCellUL[2];
 	mapCellUL[0] = centerCell[0] - GOALMAP_CELL_DIM / 2;
 	mapCellUL[1] = centerCell[1] - GOALMAP_CELL_DIM / 2;
 	
@@ -4561,7 +4561,7 @@ long Mover::calcMoveGoal (GameObjectPtr target,
 
 	//--------------------------------------
 	// Calc the closest map cell to start...
-	long startCell[2];
+	int startCell[2];
 	land->worldToCell(position, startCell[0], startCell[1]);
 	startCell[0] -= mapCellUL[0];
 	startCell[1] -= mapCellUL[1];
@@ -4580,10 +4580,10 @@ long Mover::calcMoveGoal (GameObjectPtr target,
 	//--------------------------------------------------------------
 	// The closer we are to the goal, the better (within reason:)...
 	if (!playerMove)
-		for (long cellR = -1; cellR < 2; cellR++)
-			for (long cellC = -1; cellC < 2; cellC++) {
-				long r = goalCell[0] - mapCellUL[0] + cellR;
-				long c = goalCell[1] - mapCellUL[1] + cellC;
+		for (int cellR = -1; cellR < 2; cellR++)
+			for (int cellC = -1; cellC < 2; cellC++) {
+				int r = goalCell[0] - mapCellUL[0] + cellR;
+				int c = goalCell[1] - mapCellUL[1] + cellC;
 				if (inMapBounds(r, c, GOALMAP_CELL_DIM, GOALMAP_CELL_DIM))
 					goalMap[goalMapRowStart[r] + c] += 100;
 			}
@@ -4596,9 +4596,9 @@ long Mover::calcMoveGoal (GameObjectPtr target,
 	//-------------------------------------
 	// Cells closer to the start cell get a
 	// slight bonus...
-	for (long r = 0; r < GOALMAP_CELL_DIM; r++)
-		for (long c = 0; c < GOALMAP_CELL_DIM; c++) {
-			long dist = 0;
+	for (int r = 0; r < GOALMAP_CELL_DIM; r++)
+		for (int c = 0; c < GOALMAP_CELL_DIM; c++) {
+			int dist = 0;
 			if (r > startCell[0])
 				dist += (r - startCell[0]);
 			else
@@ -4615,15 +4615,15 @@ long Mover::calcMoveGoal (GameObjectPtr target,
 	// the number of people in my unit attacking this target...
 	if (getGroup()) {
 		MoverPtr mates[MAX_MOVERGROUP_COUNT];
-		long numMates = getGroup()->getMovers(mates);
-		for (long i = 0; i < numMates; i++) {
+		int numMates = getGroup()->getMovers(mates);
+		for (int i = 0; i < numMates; i++) {
 			if (mates[i] == this)
 				continue;
 			MechWarriorPtr pilot = mates[i]->getPilot();
 			Stuff::Vector3D goal;
 			goal.x = goal.y = goal.z = 0.0f;
 			if (pilot && pilot->getMoveGlobalGoal(goal)) {
-				long worldCell[2];
+			    int worldCell[2];
 				land->worldToCell(goal, worldCell[0], worldCell[1]);
 				worldCell[0] -= mapCellUL[0];
 				worldCell[1] -= mapCellUL[1];
@@ -4851,12 +4851,12 @@ long Mover::calcMoveGoal (GameObjectPtr target,
 
 	startTime = GetCycles();
 	if (noLOF && hasWeaponNode()) {
-		long targetPos[2], maxPos[2], bestCell[4][2];
+		int targetPos[2], maxPos[2], bestCell[4][2];
 		float castRange;
-		long result[4];
-		long resultCost[4] = {0, 0, 0, 0};
-		long confidence[4];
-		long bestBest = 0;
+		int result[4];
+		int resultCost[4] = {0, 0, 0, 0};
+		int confidence[4];
+		int bestBest = 0;
 		if (moveRadius > 0.0) {
 			targetPos[0] = centerCell[0];
 			targetPos[1] = centerCell[1];
@@ -4963,14 +4963,14 @@ long Mover::calcMovePath (MovePathPtr path,
 	if (!PathFindMap[SECTOR_PATHMAP] || !PathFindMap[SIMPLE_PATHMAP])
 		Fatal(0, " No PathFindMap in Mover::calcMovePath ");
 
-	long posCellR, posCellC;
+	int posCellR, posCellC;
 	land->worldToCell(start, posCellR, posCellC);
 
-	long goalCellR, goalCellC;
+	int goalCellR, goalCellC;
 	land->worldToCell(goal, goalCellR, goalCellC);
 
 	path->clear();
-	long result = 0;
+	int result = 0;
 
 	if (pathType == MOVEPATH_SIMPLE) {
 		long mapULr = posCellR - SimpleMovePathRange;
@@ -5145,10 +5145,10 @@ long Mover::calcEscapePath (MovePathPtr path,
 	if (!PathFindMap[SECTOR_PATHMAP] || !PathFindMap[SIMPLE_PATHMAP])
 		Fatal(0, " No PathFindMap in Mover::calcMovePath ");
 
-	long posCellR, posCellC;
+	int posCellR, posCellC;
 	land->worldToCell(start, posCellR, posCellC);
 
-	long goalCellR, goalCellC;
+	int goalCellR, goalCellC;
 	land->worldToCell(goal, goalCellR, goalCellC);
 
 	path->clear();
@@ -5429,7 +5429,7 @@ long Mover::calcMovePath (MovePathPtr path,
 		if (!pilot->onHomeTeam() && !MPlayer)
 			getJumpRange(&numOffsets, &jumpCost);
 
-		long posCellR, posCellC;
+		int posCellR, posCellC;
 		land->worldToCell(start, posCellR, posCellC);
 
 		#ifdef USE_ELEMENTALS
@@ -5496,7 +5496,7 @@ long Mover::calcMovePath (MovePathPtr path,
 
 //---------------------------------------------------------------------------
 
-long Mover::getContacts (long* contactList, long contactCriteria, long sortType) {
+long Mover::getContacts (int* contactList, int contactCriteria, int sortType) {
 
 	if (sensorSystem)
 		return(sensorSystem->getTeamContacts(contactList, contactCriteria, sortType));
@@ -5537,7 +5537,7 @@ bool Mover::weaponInRange (long weaponIndex, float metersToTarget, float buffer)
 
 //------------------------------------------------------------------------------------------
 
-long Mover::getWeaponsReady (long* list, long listSize) {
+long Mover::getWeaponsReady (int* list, int listSize) {
 
 	//-----------------------------------------
 	// Make sure list is >= the number of ready
@@ -5568,7 +5568,7 @@ long Mover::getWeaponsReady (long* list, long listSize) {
 
 //------------------------------------------------------------------------------------------
 
-long Mover::getWeaponsLocked (long* list, long listSize) {
+long Mover::getWeaponsLocked (int* list, int listSize) {
 
 	//------------------------------------------
 	// Make sure list is >= the number of locked
@@ -5599,7 +5599,7 @@ long Mover::getWeaponsLocked (long* list, long listSize) {
 
 //------------------------------------------------------------------------------------------
 
-long Mover::getWeaponsInRange (long* list, long listSize, float fireRangeOrder) {
+long Mover::getWeaponsInRange (int* list, int listSize, float fireRangeOrder) {
 
 	//------------------------------------------
 	// Make sure list is >= the number of locked
@@ -6035,7 +6035,7 @@ long Mover::reduceAmmo (long ammoMasterId, long amount) {
 	// Deduct it from the first available ammo critical space...
 	long firstAmmo = numOther + numWeapons;
 	for (long item = firstAmmo; item < firstAmmo + numAmmos; item++) {
-		if (inventory[item].masterID == ammoMasterId)
+		if (inventory[item].masterID == ammoMasterId) {
 			if (inventory[item].amount > amount) {
 				inventory[item].amount -= amount;
 				break;
@@ -6044,12 +6044,13 @@ long Mover::reduceAmmo (long ammoMasterId, long amount) {
 				amount -= inventory[item].amount;
 				inventory[item].amount = 0;
 			}
+        }
 	}
 
 	//-------------------------------------------------------------------
 	// Make sure the ammoTypeTotal list, in which we track total ammo for
 	// all of the ammo types this mover uses, is adjusted...
-	for (long ammo = 0; ammo < numAmmoTypes; ammo++)
+	for (long ammo = 0; ammo < numAmmoTypes; ammo++) {
 		if (ammoTypeTotal[ammo].masterId == ammoMasterId) {
 			ammoTypeTotal[ammo].curAmount -= amountUsed;
 			if (ammoTypeTotal[ammo].curAmount <= 0) {
@@ -6063,6 +6064,7 @@ long Mover::reduceAmmo (long ammoMasterId, long amount) {
 			}
 			break;
 		}
+    }
 
 	return(amountUsed);
 }
@@ -6119,7 +6121,7 @@ void Mover::deductWeaponShot (long weaponIndex, long ammoAmount) {
 
 //---------------------------------------------------------------------------
 
-long Mover::sortWeapons (long* weaponList, long* valueList, long listSize, long sortType, bool skillCheck) {
+long Mover::sortWeapons (int* weaponList, long* valueList, long listSize, long sortType, bool skillCheck) {
 
 	//------------------------------------------
 	// Make sure list is >= the number of locked
@@ -7000,11 +7002,13 @@ void Mover::initOptimalCells (long numIncrements) {
 // MOVE ROUTINES CALLBACKS
 //***************************************************************************
 
-void GetBlockedDoorCells (long moveLevel, long door, char* openCells) {
+void GetBlockedDoorCells (int moveLevel, int door, char* openCells) {
 
 	Assert((door > -1) && (door < GlobalMoveMap[moveLevel]->numDoors), 0, " FUDGE 1");
 	Assert((GlobalMoveMap[moveLevel]->doors[door].direction[0] == 1) || (GlobalMoveMap[moveLevel]->doors[door].direction[0] == 2), 0, " FUDGE 2");
-	Assert((GlobalMoveMap[moveLevel]->doors[door].length > 0) && (GlobalMoveMap[moveLevel]->doors[door].length < 1024), 0, " FUDGE 3");
+    //sebi length is char it is always < 1024
+	//Assert((GlobalMoveMap[moveLevel]->doors[door].length > 0) && (GlobalMoveMap[moveLevel]->doors[door].length < 1024), 0, " FUDGE 3");
+	Assert((GlobalMoveMap[moveLevel]->doors[door].length > 0), 0, " FUDGE 3");
 	long doorWorldCellRec[4] = {-1, -1, -1, -1};
 	if (GlobalMoveMap[moveLevel]->doors[door].direction[0] == 1) {
 		doorWorldCellRec[0] = GlobalMoveMap[moveLevel]->doors[door].row;
@@ -7017,10 +7021,10 @@ void GetBlockedDoorCells (long moveLevel, long door, char* openCells) {
 		for (long i = 0; i < numMovers; i++) {
 			MoverPtr mover = ObjectManager->getMover(i);
 			if ((mover->getWatchID() != PathFindMap[SECTOR_PATHMAP]->moverWID) && (mover->getWatchID() != RamObjectWID) && !mover->isDisabled()) {
-				long cellPos[2];
+				int cellPos[2];
 				mover->getCellPosition (cellPos[0], cellPos[1]);
-				long worldCellRow = cellPos[0];
-				long worldCellCol = cellPos[1];
+				int worldCellRow = cellPos[0];
+				int worldCellCol = cellPos[1];
 				if ((worldCellRow >= doorWorldCellRec[0]) && (worldCellRow < doorWorldCellRec[2]))
 					if ((worldCellCol >= doorWorldCellRec[1]) && (worldCellCol < doorWorldCellRec[3])) {
 						long cellIndex = worldCellRow - doorWorldCellRec[0];
@@ -7041,9 +7045,9 @@ void GetBlockedDoorCells (long moveLevel, long door, char* openCells) {
 		for (long i = 0; i < numMovers; i++) {
 			MoverPtr mover = ObjectManager->getMover(i);
 			if ((mover->getObjectClass() != ELEMENTAL) && (mover->getWatchID() != PathFindMap[SECTOR_PATHMAP]->moverWID) && (mover->getWatchID() != RamObjectWID) && !mover->isDisabled()) {
-				long cellPos[2];
+				int cellPos[2];
 				mover->getCellPosition (cellPos[0], cellPos[1]);
-				long worldCellRow = cellPos[0];
+				int worldCellRow = cellPos[0];
 				long worldCellCol = cellPos[1];
 				if ((worldCellRow >= doorWorldCellRec[0]) && (worldCellRow < doorWorldCellRec[2]))
 					if ((worldCellCol >= doorWorldCellRec[1]) && (worldCellCol < doorWorldCellRec[3])) {
@@ -7064,7 +7068,7 @@ void PlaceMovers (void) {
 	for (long i = 0; i < numMovers; i++) {
 		MoverPtr mover = (MoverPtr)ObjectManager->getMover(i);
 		if (mover->getUseMe()) {
-			long cellRow, cellCol;
+			int cellRow, cellCol;
 			mover->getCellPosition(cellRow, cellCol);
 			if (!GameMap->getPreserved(cellRow, cellCol))
 				GameMap->setPreserved(cellRow, cellCol, true);
@@ -7084,7 +7088,7 @@ void PlaceStationaryMovers (MoveMap* map) {
 	for (long i = 0; i < numMovers; i++) {
 		MoverPtr mover = ObjectManager->getMover(i);
 		if ((mover->getObjectClass() != ELEMENTAL) && (mover->getWatchID() != map->moverWID) && (mover->getWatchID() != RamObjectWID) && !mover->isDisabled()) {
-			long cellRow, cellCol;
+			int cellRow, cellCol;
 			mover->getCellPosition(cellRow, cellCol);
 			if ((cellRow >= 0) && (cellRow < map->height) && (cellCol >= 0) && (cellCol < map->width)) {
 	

@@ -238,8 +238,14 @@ long i, roll, callsign, fragmentNum, dropOut = 0;
 			return(NO_PLAY);
 		}
 		
-		messagesFile[radioID]->readPacket(msgData->msgId,msgData->data[fragmentNum]);
-		msgData->dataSize[fragmentNum] = messageSize;
+        // sebi: added failure handling
+        if(messagesFile[radioID]->readPacket(msgData->msgId,msgData->data[fragmentNum])) {
+    		msgData->dataSize[fragmentNum] = messageSize;
+        } else {
+            radioHeap->Free(msgData->data[fragmentNum]);
+            msgData->data[fragmentNum] = NULL;
+        }
+        
 		
 		if (noiseFile->seekPacket(msgData->noiseId) == NO_ERR)
 		{
@@ -254,8 +260,13 @@ long i, roll, callsign, fragmentNum, dropOut = 0;
 				return(NO_PLAY);
 			}
 		
-			noiseFile->readPacket(msgData->noiseId,msgData->noise[0]);
-			msgData->noiseSize[fragmentNum] = messageSize;
+            // sebi added failure handling
+			if(noiseFile->readPacket(msgData->noiseId,msgData->noise[0])) {
+				msgData->noiseSize[fragmentNum] = messageSize;
+			} else {
+				radioHeap->Free(msgData->noise[0]);
+				msgData->noise[0] = NULL;
+			}
 		}
 	}
 	

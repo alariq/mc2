@@ -522,7 +522,7 @@ void GoalManager::setControlMap (long row, long col, GoalObjectPtr controller) {
 */
 //---------------------------------------------------------------------------
 
-GoalObjectPtr GoalManager::calcGoal (long startCell[2], long goalCell[2]) {
+GoalObjectPtr GoalManager::calcGoal (int startCell[2], int goalCell[2]) {
 
 	//No Warnings!
 	//ObstaclePtr startObstacle = &obstaclePool[controlMap[startCell[0]][startCell[1]]];
@@ -551,7 +551,7 @@ GoalObjectPtr GoalManager::calcGoal (GameObjectPtr attacker, Stuff::Vector3D loc
 
 GoalObjectPtr GoalManager::calcGoal (Stuff::Vector3D start, Stuff::Vector3D location) {
 
-	long startCell[2], locationCell[2];
+	int startCell[2], locationCell[2];
 	land->worldToCell(start, startCell[0], startCell[1]);
 	land->worldToCell(location, locationCell[0], locationCell[1]);
 	return(calcGoal(startCell, locationCell));

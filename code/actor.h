@@ -73,7 +73,7 @@ class VFXAppearanceType : public AppearanceType
 	
 		ActorData			*actorStateData;
 		TGATexturePtr		*textureList;				//These go NULL when a texture is cached out.
-		long				numPackets;
+		int                 numPackets;
 		DWORD				textureMemoryHandle;
 		unsigned char		numStates;
 

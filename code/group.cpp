@@ -245,7 +245,7 @@ MechWarriorPtr MoverGroup::getPointPilot (void) {
 
 //---------------------------------------------------------------------------
 
-void MoverGroup::statusCount (long* statusTally) {
+void MoverGroup::statusCount (int* statusTally) {
 
 	for (long i = 0; i < numMovers; i++) {
 		MoverPtr mover = getMover(i);
@@ -409,15 +409,15 @@ long MoverGroup::calcMoveGoals (Stuff::Vector3D goal, long numMovers, Stuff::Vec
 			Fatal(0, " MoverGroup.calcMoveGoals: unable to malloc goalMap ");
 	}
 
-	long goalRow, goalCol;
+	int goalRow, goalCol;
 	land->worldToCell(goal, goalRow, goalCol);
-	long topLeftRow = goalRow - GOALMAP_DIM / 2;
-	long topLeftCol = goalCol - GOALMAP_DIM / 2;
-	for (long r = 0; r < GOALMAP_DIM; r++)
-		for (long c = 0; c < GOALMAP_DIM; c++) {
+	int topLeftRow = goalRow - GOALMAP_DIM / 2;
+	int topLeftCol = goalCol - GOALMAP_DIM / 2;
+	for (int r = 0; r < GOALMAP_DIM; r++)
+		for (int c = 0; c < GOALMAP_DIM; c++) {
 			if (!inMapBounds(topLeftRow + r, topLeftCol + c, GameMap->height, GameMap->width))
 				continue;
-			long index = r * GOALMAP_DIM + c;
+			int index = r * GOALMAP_DIM + c;
 			goalMap[index].cost = GameMap->getPassable(topLeftRow + r, topLeftCol + c) ? 100 : COST_BLOCKED;
 			goalMap[index].flags = GOALFLAG_AVAILABLE + GOALFLAG_NO_NEIGHBORS;
 			goalMap[index].g = 0;
@@ -431,8 +431,8 @@ long MoverGroup::calcMoveGoals (Stuff::Vector3D goal, long numMovers, Stuff::Vec
 		openList->init(5000);
 	}
 
-	long curRow = GOALMAP_DIM / 2;
-	long curCol = GOALMAP_DIM / 2;
+	int curRow = GOALMAP_DIM / 2;
+	int curCol = GOALMAP_DIM / 2;
 	
 	GoalMapNode* curMapNode = &goalMap[curRow * GOALMAP_DIM + curCol];
 
@@ -539,10 +539,10 @@ long MoverGroup::calcJumpGoals (Stuff::Vector3D goal, long numMovers, Stuff::Vec
 
 	//------------------------------------------------------------
 	// The initial goal tile is placed at the center of the map...
-	long goalCell[2] = {0, 0};
+	int goalCell[2] = {0, 0};
 	land->worldToCell(goal, goalCell[0], goalCell[1]);
 
-	long mapCellUL[2] = {0, 0};
+	int mapCellUL[2] = {0, 0};
 	mapCellUL[0] = goalCell[0] - JUMPMAP_CELL_DIM / 2;
 	mapCellUL[1] = goalCell[1] - JUMPMAP_CELL_DIM / 2;
 
@@ -608,11 +608,11 @@ long MoverGroup::calcJumpGoals (Stuff::Vector3D goal, long numMovers, Stuff::Vec
 				jumpMap[r][c] = -2;
 		}
 
-	long moverCount = ObjectManager->getNumMovers();
-	for (long i = 0; i < moverCount; i++) {
+	int moverCount = ObjectManager->getNumMovers();
+	for (int i = 0; i < moverCount; i++) {
 		MoverPtr mover = ObjectManager->getMover(i);
 		if ((mover->getObjectClass() != ELEMENTAL) && (mover != DFATarget) && !mover->isDisabled()) {
-			long mapCellRow, mapCellCol;
+			int mapCellRow, mapCellCol;
 			mover->getCellPosition(mapCellRow, mapCellCol);
 			mapCellRow -= mapCellUL[0];
 			mapCellCol -= mapCellUL[1];
@@ -632,13 +632,13 @@ long MoverGroup::calcJumpGoals (Stuff::Vector3D goal, long numMovers, Stuff::Vec
 	// Now, for each jumper, select a closest cell to the goal, mark it
 	// as theirs and close it...
 	for (int i = 0; i < numMovers; i++) {
-		//long startCellRow = 0;
-		//long startCellCol = 0;
+		//int startCellRow = 0;
+		//int startCellCol = 0;
 
-		long curCellRow = goalCell[0] - mapCellUL[0];
-		long curCellCol = goalCell[1] - mapCellUL[1];
+		int curCellRow = goalCell[0] - mapCellUL[0];
+		int curCellCol = goalCell[1] - mapCellUL[1];
 		bool notFound = true;
-		long spiralIndex = 0;
+		int spiralIndex = 0;
 		while (notFound) {
 			if (jumpMap[curCellRow][curCellCol] == -1) {
 				// Should check to see if the cell is within range...

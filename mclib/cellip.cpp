@@ -123,7 +123,7 @@ void EllipseElement::init()
 {
 	if ( !s_textureHandle )
 	{
-		s_textureHandle = mcTextureManager->loadTexture("data\\art\\ring.tga", gos_Texture_Alpha, 0 );
+		s_textureHandle = mcTextureManager->loadTexture("data/art/ring.tga", gos_Texture_Alpha, 0 );
 	}
 }
 

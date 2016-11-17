@@ -3248,7 +3248,7 @@ void Mech3DAppearance::updateGeometry (void)
 		
 		if (rightFootDone0 &&
 			(currentFrame < (mechType->gestures[currentGestureId].rightFootDownFrame0-FOOTPRINT_SLOP)) ||
-			(currentFrame > (mechType->gestures[currentGestureId].rightFootDownFrame0+FOOTPRINT_SLOP)))
+		INT32	(currentFrame > (mechType->gestures[currentGestureId].rightFootDownFrame0+FOOTPRINT_SLOP)))
 		{
 			rightFootDone0 = false;
 		}

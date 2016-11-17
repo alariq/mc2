@@ -221,7 +221,7 @@ class Turret : public TerrainObject {
 			return (true);
 		}
 		
-		virtual void getBlockAndVertexNumber (long &blockNum, long &vertexNum) {
+		virtual void getBlockAndVertexNumber (int &blockNum, int &vertexNum) {
 			blockNum = blockNumber;
 			vertexNum = vertexNumber;
 		}

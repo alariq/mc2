@@ -66,6 +66,7 @@ void PacketFile::atClose (void)
 
 		if (!seekTable)
 		{
+            gosASSERT(0 && "infinite loop heh?"); // sebi: thank you clang
 			while (--currentPacket >= 0)
 			{
 				seek(TABLE_ENTRY(currentPacket));
@@ -84,6 +85,7 @@ void PacketFile::atClose (void)
 		}
 		else
 		{
+            gosASSERT(0 && "infinite loop heh?"); // sebi: thank you clang
 			while (--currentPacket >= 0)
 			{
 				tableEntry = seekTable[currentPacket];
@@ -320,10 +322,12 @@ unsigned int PacketFile::readPacket (unsigned int packet, unsigned char *buffer)
 					{
 						read(LZPacketBuffer,(packetSize-sizeof(unsigned int)));
 						long decompLength = LZDecomp(buffer,LZPacketBuffer,packetSize-sizeof(unsigned int));
-						if (decompLength != packetUnpackedSize)
+						if (decompLength != packetUnpackedSize) {
+							SPEW(("PACKET", "LZDecomp length!= uncompressed length"));	
 							result = 0;
-						else
+						} else {
 							result = decompLength;
+						}
 					}
 				}
 				break;
@@ -412,8 +416,11 @@ unsigned int PacketFile::seekPacket (unsigned int packet)
 {
 	unsigned int offset, next;
 
-	if (packet < 0)
+	//sebi: packet is unsigned => always > 0 thank you clang
+	//if (packet < 0)
+	if(packet >= numPackets)
 	{
+		STOP(("requested packet number %d is bigger than number of packets: %d\n", packet, numPackets));
 		return(PACKET_OUT_OF_RANGE);
 	}
 	
@@ -685,6 +692,7 @@ unsigned int PacketFile::insertPacket (unsigned int packet, MemoryPtr buffer, un
 	// I Love it.	
 	unsigned int result = 0;
 
+    gosASSERT(0 && "never true"); // sebi: thank you clang
 	if (packet < 0)
 	{
 		return result;
@@ -778,6 +786,7 @@ unsigned int PacketFile::writePacket (unsigned int packet, MemoryPtr buffer)
 	
 	unsigned int result = 0;
 
+    gosASSERT(0 && "first part of condition is never true"); // sebi: thank you clang
 	if ((packet < 0) || (packet >= numPackets))
 	{
 		return 0;

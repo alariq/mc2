@@ -197,98 +197,99 @@ void
 
 //------------------------------------------------------------------------------
 //
-bool 
-	gosFX::Tube__Specification::IsDataValid(bool fix_data)
+bool gosFX::Tube__Specification::IsDataValid(bool fix_data)
 {
 
-	Check_Object(this);
-	if(m_maxProfileCount<2) 
-		if(fix_data)
-		{
-			m_maxProfileCount=2;
-				PAUSE(("Warning: Value \"maxProfileCount\" in Effect \"%s\" Is Out of Range and has been Reset",(char *)m_name));
+    Check_Object(this);
+    if(m_maxProfileCount<2) {
+        if(fix_data)
+        {
+            m_maxProfileCount=2;
+            PAUSE(("Warning: Value \"maxProfileCount\" in Effect \"%s\" Is Out of Range and has been Reset",(char *)m_name));
 
-		}
-			else
-			return false;
-	
-	Stuff::Scalar min,max;
-	m_pScale.ExpensiveComputeRange(&min,&max);
-	if(min<0.0f)
-		if(fix_data)
-		{
-		m_pScale.m_ageCurve.SetCurve(1.0f);
-		m_pScale.m_seeded = false;
-		m_pScale.m_seedCurve.SetCurve(1.0f);
-		PAUSE(("Warning: Curve \"pScale\" in Effect \"%s\" Is Out of Range and has been Reset",(char *)m_name));
+        }
+        else
+            return false;
+    }
 
-		}
-			else
-		return false;
+    Stuff::Scalar min,max;
+    m_pScale.ExpensiveComputeRange(&min,&max);
+    if(min<0.0f) {
+        if(fix_data)
+        {
+            m_pScale.m_ageCurve.SetCurve(1.0f);
+            m_pScale.m_seeded = false;
+            m_pScale.m_seedCurve.SetCurve(1.0f);
+            PAUSE(("Warning: Curve \"pScale\" in Effect \"%s\" Is Out of Range and has been Reset",(char *)m_name));
 
-	Stuff::Scalar max_offset, min_offset;
-	Stuff::Scalar max_scale, min_scale;
-	m_pUSize.ExpensiveComputeRange(&min_scale, &max_scale);
-	Stuff::Scalar lower = min_scale;
-	if (lower > 0.0f)
-		lower = 0.0f;
-	Stuff::Scalar upper = max_scale;
+        }
+        else
+            return false;
+    }
 
-	//
-	//------------------------------------
-	// Calculate the worst case UV offsets
-	//------------------------------------
-	//
-	m_pVOffset.ExpensiveComputeRange(&min_offset, &max_offset);
-	lower += min_offset;
-	upper += max_offset;
+    Stuff::Scalar max_offset, min_offset;
+    Stuff::Scalar max_scale, min_scale;
+    m_pUSize.ExpensiveComputeRange(&min_scale, &max_scale);
+    Stuff::Scalar lower = min_scale;
+    if (lower > 0.0f)
+        lower = 0.0f;
+    Stuff::Scalar upper = max_scale;
 
-	if (upper > 99.0f || lower < -99.0f)
-	{
-	if(fix_data)
-		{
-		m_pVOffset.m_ageCurve.SetCurve(0.0f);
-		m_pVOffset.m_seeded = false;
-		m_pVOffset.m_seedCurve.SetCurve(1.0f);
-		PAUSE(("Warning: Curve \"VOffset\" in Effect \"%s\" Is Out of Range and has been Reset",(char *)m_name));
+    //
+    //------------------------------------
+    // Calculate the worst case UV offsets
+    //------------------------------------
+    //
+    m_pVOffset.ExpensiveComputeRange(&min_offset, &max_offset);
+    lower += min_offset;
+    upper += max_offset;
 
-		}
-		else
-			return false;
-	}
-	
-	m_pVSize.ExpensiveComputeRange(&min_scale, &max_scale);
-	lower = min_scale;
-	if (lower > 0.0f)
-		lower = 0.0f;
-	upper = max_scale;
+    if (upper > 99.0f || lower < -99.0f)
+    {
+        if(fix_data)
+        {
+            m_pVOffset.m_ageCurve.SetCurve(0.0f);
+            m_pVOffset.m_seeded = false;
+            m_pVOffset.m_seedCurve.SetCurve(1.0f);
+            PAUSE(("Warning: Curve \"VOffset\" in Effect \"%s\" Is Out of Range and has been Reset",(char *)m_name));
 
-	//
-	//------------------------------------
-	// Calculate the worst case UV offsets
-	//------------------------------------
-	//
-	max_offset, min_offset;
-	m_pUOffset.ExpensiveComputeRange(&min_offset, &max_offset);
-	lower += min_offset;
-	upper += max_offset;
+        }
+        else
+            return false;
+    }
 
-	if (upper > 99.0f || lower < -99.0f)
-	{
-	if(fix_data)
-		{
-		m_pUOffset.m_ageCurve.SetCurve(0.0f);
-		m_pUOffset.m_seeded = false;
-		m_pUOffset.m_seedCurve.SetCurve(1.0f);
-		PAUSE(("Warning: Curve \"UOffset\" in Effect \"%s\" Is Out of Range and has been Reset",(char *)m_name));
-		
-		}
-		else
-			return false;
-	}
+    m_pVSize.ExpensiveComputeRange(&min_scale, &max_scale);
+    lower = min_scale;
+    if (lower > 0.0f)
+        lower = 0.0f;
+    upper = max_scale;
+
+    //
+    //------------------------------------
+    // Calculate the worst case UV offsets
+    //------------------------------------
+    //
+    //max_offset, min_offset;
+    m_pUOffset.ExpensiveComputeRange(&min_offset, &max_offset);
+    lower += min_offset;
+    upper += max_offset;
+
+    if (upper > 99.0f || lower < -99.0f)
+    {
+        if(fix_data)
+        {
+            m_pUOffset.m_ageCurve.SetCurve(0.0f);
+            m_pUOffset.m_seeded = false;
+            m_pUOffset.m_seedCurve.SetCurve(1.0f);
+            PAUSE(("Warning: Curve \"UOffset\" in Effect \"%s\" Is Out of Range and has been Reset",(char *)m_name));
+
+        }
+        else
+            return false;
+    }
 
 
-	return Effect__Specification::IsDataValid(fix_data);
+    return Effect__Specification::IsDataValid(fix_data);
 }
 
 //------------------------------------------------------------------------------

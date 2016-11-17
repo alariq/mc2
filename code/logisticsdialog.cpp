@@ -1245,7 +1245,7 @@ void LogisticsVariantDialog::beginTranscript()
 void LogisticsVariantDialog::initTranscript()
 {
 	char findString[512];
-	sprintf(findString,"%s*.txt","data\\multiplayer\\transcripts\\");
+	sprintf(findString,"%s*.txt","data" PATH_SEPARATOR "multiplayer" PATH_SEPARATOR "transcripts" PATH_SEPARATOR);
 
 	gameListBox.removeAllItems( true );
 
@@ -1349,7 +1349,7 @@ void LogisticsVariantDialog::update()
 			if ( bTranscript )
 			{
 				FullPathFileName path;
-				path.init( "data\\multiplayer\\transcripts\\", selectedName, ".txt" );
+				path.init( "data" PATH_SEPARATOR "multiplayer" PATH_SEPARATOR "transcripts" PATH_SEPARATOR, selectedName, ".txt" );
 
 				DeleteFile( path );
 				initTranscript();
@@ -1426,7 +1426,7 @@ void LogisticsVariantDialog::update()
 			else
 			{
 				FullPathFileName path;
-				path.init( "data\\multiplayer\\transcripts\\", text, ".txt" );
+				path.init( "data" PATH_SEPARATOR "multiplayer" PATH_SEPARATOR "transcripts" PATH_SEPARATOR, text, ".txt" );
 				if ( fileExists( path ) )
 				{
 					buttons[0].disable( 0 );

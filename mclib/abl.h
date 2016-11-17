@@ -125,7 +125,7 @@ float ABLi_popIntegerReal (void);
 long ABLi_popAnything (ABLStackItem* value);
 
 char* ABLi_popCharPtr (void);
-long* ABLi_popIntegerPtr (void);
+int* ABLi_popIntegerPtr (void);
 float* ABLi_popRealPtr (void);
 char* ABLi_popBooleanPtr (void);
 

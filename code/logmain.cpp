@@ -450,7 +450,7 @@ void InitializeGameEngine()
 
 	gosResourceHandle = gos_OpenResourceDLL("mc2res.dll");
 
-	gosFontHandle = gos_LoadFont("assets\\graphics\\arial8.tga");
+	gosFontHandle = gos_LoadFont("assets" PATH_SEPARATOR "graphics" PATH_SEPARATOR "arial8.tga");
 
 	globalFloatHelp = new FloatHelp [MAX_FLOAT_HELPS];
 

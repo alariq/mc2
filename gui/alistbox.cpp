@@ -96,8 +96,8 @@ void aListBox::destroy()
 
 void aListBox::removeAllItems( bool bDelete )
 {
-
-	if (items)
+    // sebi: WTF??? always true
+	//if (items)
 	{
 		for ( int i = 0; i < itemCount; i++ )
 		{
@@ -367,7 +367,11 @@ long aListBox::AddItem(aListItem* add)
 	if ( scrollBar )
 	{
 		int itemsTotalHeight = 0;
-		if ( items )
+
+        // sebi: WTF??? always true
+        // putting assert here, because otherwise items[itemCount-1] does bad stuff
+        gosASSERT(itemCount>0);
+		if ( itemCount>0 )
 			itemsTotalHeight = items[itemCount-1]->bottom() - items[0]->top() + skipAmount;
 
 			if ( itemsTotalHeight > scrollBar->height() )
@@ -424,7 +428,10 @@ long	aListBox::InsertItem(aListItem* itemString, long where)
 	if ( scrollBar )
 	{
 		int itemsTotalHeight = 0;
-		if ( items )
+        // sebi: WTF??? always true
+        // putting assert here, because otherwise items[itemCount-1] does bad stuff
+        gosASSERT(itemCount>0);
+		if ( itemCount>0 )
 			itemsTotalHeight = items[itemCount-1]->bottom() - items[0]->top();
 
 			if ( itemsTotalHeight > scrollBar->height() )
@@ -544,7 +551,9 @@ aListItem* aListBox::GetItem(long itemNumber)
 
 void aListBox::scroll( int amount )
 {
-	if ( !items || !itemCount )
+    // sebi: !items has no sense as will always return false
+	//if ( !items || !itemCount )
+	if ( !itemCount )
 		return;
 
 	if ( amount < 0 && items[0]->globalY() > globalY() ) // no need to scroll
@@ -562,7 +571,8 @@ void aListBox::scroll( int amount )
 long aListBox::GetCheckedItem() const
 {
 	int ret = -1;
-	if ( items )
+    // sebi: always coca cola...
+	//if ( items )
 	{
 		for ( int i = 0; i < itemCount; i++ )
 		{

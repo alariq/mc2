@@ -186,8 +186,8 @@ ByteFlag *SeenBits = NULL;			//What HAS been seen
 
 UserHeapPtr missionHeap = NULL;
 
-unsigned long MultiPlayTeamId = 0xFFFFFFFF;
-unsigned long MultiPlayCommanderId = 0xFFFFFFFF;
+unsigned int MultiPlayTeamId = 0xFFFFFFFF;
+unsigned int MultiPlayCommanderId = 0xFFFFFFFF;
 
 bool useSensors = true;
 bool useCollisions = true;
@@ -203,7 +203,7 @@ float CheatHitDamage = 0.0f;
 
 bool neverEndingStory = false;
 
-void GetBlockedDoorCells (long moveLevel, long door, char* openCells);
+void GetBlockedDoorCells (int moveLevel, int door, char* openCells);
 void PlaceStationaryMovers (MoveMap* map);
 void PlaceMovers (void);
 //---------------------------------------------------------------------------
@@ -400,7 +400,7 @@ long Mission::update (void)
 		//Save the game in-Mission if requested
 		if (saveInMissionSave)
 		{
-			save("data\\savegame\\testgame.ims");
+			save("data" PATH_SEPARATOR "savegame" PATH_SEPARATOR "testgame.ims");
 			saveInMissionSave = false;
 		}
 
@@ -1580,7 +1580,7 @@ bool Mission::calcComplexDropZones (char* missionName, char dropZoneCID[MAX_MC_P
 
 //----------------------------------------------------------------------------
 
-bool IsGateDisabled (long objectWID) {
+bool IsGateDisabled (int objectWID) {
 
 	//--------------------------------------------------------------
 	// Actually looks at the object and its parent, if it has one...
@@ -1599,7 +1599,7 @@ bool IsGateDisabled (long objectWID) {
 
 //----------------------------------------------------------------------------
 
-bool IsGateOpen (long objectWID) {
+bool IsGateOpen (int objectWID) {
 
 	//--------------------------------------------------------------
 	// Actually looks at the object and its parent, if it has one...

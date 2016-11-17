@@ -604,7 +604,7 @@ void BldgAppearance::init (AppearanceTypePtr tree, GameObjectPtr obj)
 			bldgShape->GetTextureName(i,txmName,256);
 
 			char texturePath[1024];
-			sprintf(texturePath,"%s%d\\",tglPath,ObjectTextureSize);
+			sprintf(texturePath,"%s%d"PATH_SEPARATOR,tglPath,ObjectTextureSize);
 	
 			FullPathFileName textureName;
 			textureName.init(texturePath,txmName,"");
@@ -645,7 +645,7 @@ void BldgAppearance::init (AppearanceTypePtr tree, GameObjectPtr obj)
 				bldgShadowShape->GetTextureName(i,txmName,256);
 		
 				char texturePath[1024];
-				sprintf(texturePath,"%s%d\\",tglPath,ObjectTextureSize);
+				sprintf(texturePath,"%s%d"PATH_SEPARATOR,tglPath,ObjectTextureSize);
 		
 				FullPathFileName textureName;
 				textureName.init(texturePath,txmName,"");
@@ -800,7 +800,7 @@ void BldgAppearance::setObjStatus (long oStatus)
 		
 		if (oStatus == OBJECT_STATUS_NORMAL)
 		{
-			if (appearType->bldgShape)
+			if (appearType->bldgShape[0])
 			{
 				if (bldgShape)
 				{
@@ -845,7 +845,7 @@ void BldgAppearance::setObjStatus (long oStatus)
 				bldgShape->GetTextureName(i,txmName,256);
 	
 				char texturePath[1024];
-				sprintf(texturePath,"%s%d\\",tglPath,ObjectTextureSize);
+				sprintf(texturePath,"%s%d"PATH_SEPARATOR,tglPath,ObjectTextureSize);
 		
 				FullPathFileName textureName;
 				textureName.init(texturePath,txmName,"");
@@ -885,7 +885,7 @@ void BldgAppearance::setObjStatus (long oStatus)
 				bldgShadowShape->GetTextureName(i,txmName,256);
 	
 				char texturePath[1024];
-				sprintf(texturePath,"%s%d\\",tglPath,ObjectTextureSize);
+				sprintf(texturePath,"%s%d"PATH_SEPARATOR,tglPath,ObjectTextureSize);
 		
 				FullPathFileName textureName;
 				textureName.init(texturePath,txmName,"");
@@ -1344,7 +1344,7 @@ bool BldgAppearance::recalcBounds (void)
 								bldgShape->GetTextureName(j,txmName,256);
 
 								char texturePath[1024];
-								sprintf(texturePath,"%s%d\\",tglPath,ObjectTextureSize);
+								sprintf(texturePath,"%s%d"PATH_SEPARATOR,tglPath,ObjectTextureSize);
 
 								FullPathFileName textureName;
 								textureName.init(texturePath,txmName,"");
@@ -1396,7 +1396,7 @@ bool BldgAppearance::recalcBounds (void)
 								bldgShape->GetTextureName(i,txmName,256);
 										
 								char texturePath[1024];
-								sprintf(texturePath,"%s%d\\",tglPath,ObjectTextureSize);
+								sprintf(texturePath,"%s%d"PATH_SEPARATOR,tglPath,ObjectTextureSize);
 						
 								FullPathFileName textureName;
 								textureName.init(texturePath,txmName,"");
@@ -2440,12 +2440,12 @@ long BldgAppearance::calcCellsCovered (Stuff::Vector3D& pos, short* cellList) {
 
 	//-------------------------------------------------------------
 	// New way.  For each vertex in each shape, translate to world
-	for (long i=0;i<bldgShape->GetNumShapes();i++)
+	for (int i=0;i<bldgShape->GetNumShapes();i++)
 	{
 		//Check if the artists meant for this piece to NOT block passability!!
 		if (strnicmp(bldgShape->GetNodeId(i),"_PAB",4) != 0)
 		{
-			for (long j=0;j<bldgShape->GetNumVerticesInShape(i);j++) 
+			for (int j=0;j<bldgShape->GetNumVerticesInShape(i);j++) 
 			{
 				Stuff::Vector3D vertexPos, worldPos;
 				vertexPos = bldgShape->GetShapeVertexInEditor(i,j,-rotation);
@@ -2458,7 +2458,7 @@ long BldgAppearance::calcCellsCovered (Stuff::Vector3D& pos, short* cellList) {
 					recordCell = (vertexPos.z >= 1.0f);
 				if (recordCell) 
 				{
-					long cellR, cellC;
+					int cellR, cellC;
 					land->worldToCell(worldPos,cellR,cellC);
 					if ((0 > cellR) || (Terrain::realVerticesMapSide * MAPCELL_DIM <= cellR)
 						|| (0 > cellC) || (Terrain::realVerticesMapSide * MAPCELL_DIM <= cellC))
@@ -2505,24 +2505,24 @@ void BldgAppearance::markTerrain (_ScenarioMapCellInfo* pInfo, int type, int cou
 			appearType->setAnimation(bldgShape,bdAnimationState);
 	}
 
-	long cellR, cellC;
+	int cellR, cellC;
 	land->worldToCell(position, cellR, cellC);
 	if (appearType->isForestClump)
 	{
 		//-------------------------------------------------------------
 		// New way.  For each vertex in each shape, translate to world
-		for (long i=0;i<bldgShape->GetNumShapes();i++)
+		for (int i=0;i<bldgShape->GetNumShapes();i++)
 		{
 			//Check if the artists meant for this piece to NOT block passability!!
 			if (strnicmp(bldgShape->GetNodeId(i),"_PAB",4) != 0)
 			{
-				for (long j=0;j<bldgShape->GetNumVerticesInShape(i);j++)
+				for (int j=0;j<bldgShape->GetNumVerticesInShape(i);j++)
 				{
 					Stuff::Vector3D vertexPos, worldPos;
 					vertexPos = bldgShape->GetShapeVertexInEditor(i,j,-rotation);
 					worldPos.Add(position,vertexPos);
 		
-					long cellR, cellC;
+					int cellR, cellC;
 					land->worldToCell(worldPos,cellR,cellC);
 					if ((0 > cellR) || (Terrain::realVerticesMapSide * MAPCELL_DIM <= cellR) || 
 						(0 > cellC) || (Terrain::realVerticesMapSide * MAPCELL_DIM <= cellC))
@@ -2584,18 +2584,18 @@ void BldgAppearance::markTerrain (_ScenarioMapCellInfo* pInfo, int type, int cou
 
 		//-------------------------------------------------------------
 		// New way.  For each vertex in each shape, translate to world
-		for (long i=0;i<bldgShape->GetNumShapes();i++)
+		for (int i=0;i<bldgShape->GetNumShapes();i++)
 		{
 			//Check if the artists meant for this piece to NOT block passability!!
 			if (strnicmp(bldgShape->GetNodeId(i),"_PAB",4) != 0)
 			{
-				for (long j=0;j<bldgShape->GetNumVerticesInShape(i);j++)
+				for (int j=0;j<bldgShape->GetNumVerticesInShape(i);j++)
 				{
 					Stuff::Vector3D vertexPos, worldPos;
 					vertexPos = bldgShape->GetShapeVertexInEditor(i,j,-rotation);
 					worldPos.Add(position,vertexPos);
 		
-					long cellR, cellC;
+					int cellR, cellC;
 					land->worldToCell(worldPos,cellR,cellC);
 					if ((0 > cellR) || (Terrain::realVerticesMapSide * MAPCELL_DIM <= cellR) || 
 						(0 > cellC) || (Terrain::realVerticesMapSide * MAPCELL_DIM <= cellC))
@@ -2687,13 +2687,13 @@ void BldgAppearance::markTerrain (_ScenarioMapCellInfo* pInfo, int type, int cou
 			//Check if the artists meant for this piece to NOT block passability!!
 			if (strnicmp(bldgShape->GetNodeId(i),"_PAB",4) != 0)
 			{
-				for (long j=0;j<bldgShape->GetNumVerticesInShape(i);j++)
+				for (int j=0;j<bldgShape->GetNumVerticesInShape(i);j++)
 				{
 					Stuff::Vector3D vertexPos, worldPos;
 					vertexPos = bldgShape->GetShapeVertexInEditor(i,j,-rotation);
 					worldPos.Add(position,vertexPos);
 		
-					long cellR, cellC;
+					int cellR, cellC;
 					land->worldToCell(worldPos,cellR,cellC);
 					if ((0 > cellR) || (Terrain::realVerticesMapSide * MAPCELL_DIM <= cellR) || 
 						(0 > cellC) || (Terrain::realVerticesMapSide * MAPCELL_DIM <= cellC))
@@ -2749,10 +2749,10 @@ void BldgAppearance::markTerrain (_ScenarioMapCellInfo* pInfo, int type, int cou
 
 long BldgAppearance::markMoveMap (bool passable, long* lineOfSightRect, bool useHeight, short* cellList)
 {
-	long minRow = 9999;
-	long maxRow = 0;
-	long minCol = 9999;
-	long maxCol = 0;
+	int minRow = 9999;
+	int maxRow = 0;
+	int minCol = 9999;
+	int maxCol = 0;
 
 	//MUST force building to HIGHEST LOD!!!  IMpassability data is only valid at this LOD!!
 	// Building will reset its LOD on next draw!!
@@ -2765,26 +2765,26 @@ long BldgAppearance::markMoveMap (bool passable, long* lineOfSightRect, bool use
 			appearType->setAnimation(tempBldgShape,bdAnimationState);
 	}
 
-	long numCoords = 0;
+	int numCoords = 0;
 	if (cellList) {
 		gosASSERT(!useHeight);
 		//----------------------------------------------------------------------------------
 		// Store the max number of coords allowed in the first cell. Can overwrite it now...
-		long maxCoords = cellList[0];
+		int maxCoords = cellList[0];
 		//-------------------------------------------------------------
 		// New way.  For each vertex in each shape, translate to world
-		for (long i = 0; i < tempBldgShape->GetNumShapes(); i++) 
+		for (int i = 0; i < tempBldgShape->GetNumShapes(); i++) 
 		{
 			//Check if the artists meant for this piece to NOT block passability!!
 			if (strnicmp(tempBldgShape->GetNodeId(i),"_PAB",4) != 0)
 			{
-				for (long j=0;j<tempBldgShape->GetNumVerticesInShape(i);j++) 
+				for (int j=0;j<tempBldgShape->GetNumVerticesInShape(i);j++) 
 				{
 					Stuff::Vector3D vertexPos, worldPos;
 					vertexPos = tempBldgShape->GetShapeVertexInWorld(i,j,-rotation);
 					worldPos.Add(position,vertexPos);
 	
-					long cellR, cellC;
+					int cellR, cellC;
 					land->worldToCell(worldPos,cellR,cellC);
 					if ((0 > cellR) || (Terrain::realVerticesMapSide * MAPCELL_DIM <= cellR) || 
 						(0 > cellC) || (Terrain::realVerticesMapSide * MAPCELL_DIM <= cellC))
@@ -2817,18 +2817,18 @@ long BldgAppearance::markMoveMap (bool passable, long* lineOfSightRect, bool use
 	{
 		//-------------------------------------------------------------
 		// New way.  For each vertex in each shape, translate to world
-		for (long i=0;i<tempBldgShape->GetNumShapes();i++)
+		for (int i=0;i<tempBldgShape->GetNumShapes();i++)
 		{
 			//Check if the artists meant for this piece to NOT block passability!!
 			if (strnicmp(tempBldgShape->GetNodeId(i),"_PAB",4) != 0)
 			{
-				for (long j=0;j<tempBldgShape->GetNumVerticesInShape(i);j++)
+				for (int j=0;j<tempBldgShape->GetNumVerticesInShape(i);j++)
 				{
 					Stuff::Vector3D vertexPos, worldPos;
 					vertexPos = tempBldgShape->GetShapeVertexInWorld(i,j,-rotation);
 					worldPos.Add(position,vertexPos);
 	
-					long cellR, cellC;
+					int cellR, cellC;
 					land->worldToCell(worldPos,cellR,cellC);
 					if ((0 > cellR) || (Terrain::realVerticesMapSide * MAPCELL_DIM <= cellR) || 
 						(0 > cellC) || (Terrain::realVerticesMapSide * MAPCELL_DIM <= cellC))
@@ -2896,7 +2896,7 @@ void BldgAppearance::markLOS (bool clearIt)
 
 	//-------------------------------------------------------------
 	// New way.  For each vertex in each shape, translate to world
-	for (long i=0;i<tempBldgShape->GetNumShapes();i++)
+	for (int i=0;i<tempBldgShape->GetNumShapes();i++)
 	{
 		//Check if the artists meant for this piece to NOT block LOS!!
 		// Probably should check for light cones,too!
@@ -2904,14 +2904,14 @@ void BldgAppearance::markLOS (bool clearIt)
 		if ((strnicmp(tempBldgShape->GetNodeId(i),"LOS_",4) != 0) &&
 			(strnicmp(tempBldgShape->GetNodeId(i),"SpotLight_",10) != 0))
 		{
-			for (long j=0;j<tempBldgShape->GetNumVerticesInShape(i);j++)
+			for (int j=0;j<tempBldgShape->GetNumVerticesInShape(i);j++)
 			{
 				Stuff::Vector3D vertexPos, worldPos;
 				vertexPos = tempBldgShape->GetShapeVertexInEditor(i,j,-rotation);
 //				vertexPos = tempBldgShape->GetShapeVertexInWorld(i,j,-rotation);
 				worldPos.Add(position,vertexPos);
 	
-				long cellR, cellC;
+				int cellR, cellC;
 				land->worldToCell(worldPos,cellR,cellC);
 				if ((0 > cellR) || (Terrain::realVerticesMapSide * MAPCELL_DIM <= cellR) || 
 					(0 > cellC) || (Terrain::realVerticesMapSide * MAPCELL_DIM <= cellC))
@@ -2971,10 +2971,10 @@ void BldgAppearance::calcAdjCell (long& row, long& col)
 
 	//-------------------------------------------------------------
 	// New way.  For each vertex in each shape, translate to world
-	long numVert = 0;
-	for (long i=0;i<bldgShape->GetNumShapes();i++)
+	int numVert = 0;
+	for (int i=0;i<bldgShape->GetNumShapes();i++)
 	{
-		for (long j=0;j<bldgShape->GetNumVerticesInShape(i);j++)
+		for (int j=0;j<bldgShape->GetNumVerticesInShape(i);j++)
 		{
 			Stuff::Vector3D vertexPos, worldPos;
 			vertexPos = bldgShape->GetShapeVertexInWorld(i,j,-rotation);
@@ -2982,7 +2982,7 @@ void BldgAppearance::calcAdjCell (long& row, long& col)
 
 			{
 				numVert++;
-				long cellR, cellC;
+				int cellR, cellC;
 				land->worldToCell(worldPos,cellR,cellC);
 				
 				//MapCellPtr curCell = GameMap->getCell(cellR, cellC);
@@ -3220,7 +3220,7 @@ void TreeAppearance::init (AppearanceTypePtr tree, GameObjectPtr obj)
 			treeShape->GetTextureName(i,txmName,256);
 	
 			char texturePath[1024];
-			sprintf(texturePath,"%s%d\\",tglPath,ObjectTextureSize);
+			sprintf(texturePath,"%s%d"PATH_SEPARATOR,tglPath,ObjectTextureSize);
 	
 			FullPathFileName textureName;
 			textureName.init(texturePath,txmName,"");
@@ -3261,7 +3261,7 @@ void TreeAppearance::init (AppearanceTypePtr tree, GameObjectPtr obj)
 				treeShadowShape->GetTextureName(i,txmName,256);
 		
 				char texturePath[1024];
-				sprintf(texturePath,"%s%d\\",tglPath,ObjectTextureSize);
+				sprintf(texturePath,"%s%d"PATH_SEPARATOR,tglPath,ObjectTextureSize);
 		
 				FullPathFileName textureName;
 				textureName.init(texturePath,txmName,"");
@@ -3392,7 +3392,7 @@ void TreeAppearance::setObjStatus (long oStatus)
 		
 		if (oStatus == OBJECT_STATUS_NORMAL)
 		{
-			if (appearType->treeShape)
+			if (appearType->treeShape[0])
 			{
 				if (treeShape)
 				{
@@ -3430,7 +3430,7 @@ void TreeAppearance::setObjStatus (long oStatus)
 				treeShape->GetTextureName(i,txmName,256);
 		
 				char texturePath[1024];
-				sprintf(texturePath,"%s%d\\",tglPath,ObjectTextureSize);
+				sprintf(texturePath,"%s%d"PATH_SEPARATOR,tglPath,ObjectTextureSize);
 		
 				FullPathFileName textureName;
 				textureName.init(texturePath,txmName,"");
@@ -3470,7 +3470,7 @@ void TreeAppearance::setObjStatus (long oStatus)
 				treeShadowShape->GetTextureName(i,txmName,256);
 		
 				char texturePath[1024];
-				sprintf(texturePath,"%s%d\\",tglPath,ObjectTextureSize);
+				sprintf(texturePath,"%s%d"PATH_SEPARATOR,tglPath,ObjectTextureSize);
 		
 				FullPathFileName textureName;
 				textureName.init(texturePath,txmName,"");
@@ -3765,7 +3765,7 @@ bool TreeAppearance::recalcBounds (void)
 							treeShape->GetTextureName(j,txmName,256);
 
 							char texturePath[1024];
-							sprintf(texturePath,"%s%d\\",tglPath,ObjectTextureSize);
+							sprintf(texturePath,"%s%d"PATH_SEPARATOR,tglPath,ObjectTextureSize);
 
 							FullPathFileName textureName;
 							textureName.init(texturePath,txmName,"");
@@ -3815,7 +3815,7 @@ bool TreeAppearance::recalcBounds (void)
 							treeShape->GetTextureName(i,txmName,256);
 									
 							char texturePath[1024];
-							sprintf(texturePath,"%s%d\\",tglPath,ObjectTextureSize);
+							sprintf(texturePath,"%s%d"PATH_SEPARATOR,tglPath,ObjectTextureSize);
 					
 							FullPathFileName textureName;
 							textureName.init(texturePath,txmName,"");
@@ -4157,18 +4157,18 @@ void TreeAppearance::markTerrain (_ScenarioMapCellInfo* pInfo, int type, int cou
 
 	//-------------------------------------------------------------
 	// New way.  For each vertex in each shape, translate to world
-	for (long i=0;i<treeShape->GetNumShapes();i++)
+	for (int i=0;i<treeShape->GetNumShapes();i++)
 	{
 		//Check if the artists meant for this piece to NOT block passability!!
 		if (strnicmp(treeShape->GetNodeId(i),"_PAB",4) != 0)
 		{
-			for (long j=0;j<treeShape->GetNumVerticesInShape(i);j++)
+			for (int j=0;j<treeShape->GetNumVerticesInShape(i);j++)
 			{
 				Stuff::Vector3D vertexPos, worldPos;
 				vertexPos = treeShape->GetShapeVertexInEditor(i,j,-rotation);
 				worldPos.Add(position,vertexPos);
 	
-				long cellR, cellC;
+				int cellR, cellC;
 				land->worldToCell(worldPos,cellR,cellC);
 				if ((0 > cellR) || (Terrain::realVerticesMapSide * MAPCELL_DIM <= cellR) || 
 					(0 > cellC) || (Terrain::realVerticesMapSide * MAPCELL_DIM <= cellC))
@@ -4211,7 +4211,7 @@ void TreeAppearance::markLOS (bool clearIt)
 
 	//-------------------------------------------------------------
 	// New way.  For each vertex in each shape, translate to world
-	for (long i=0;i<treeShape->GetNumShapes();i++)
+	for (int i=0;i<treeShape->GetNumShapes();i++)
 	{
 		//Check if the artists meant for this piece to NOT block LOS!!
 		// Probably should check for light cones,too!
@@ -4219,14 +4219,14 @@ void TreeAppearance::markLOS (bool clearIt)
 		if ((strnicmp(treeShape->GetNodeId(i),"LOS_",4) != 0) &&
 			(strnicmp(treeShape->GetNodeId(i),"SpotLight_",10) != 0))
 		{
-			for (long j=0;j<treeShape->GetNumVerticesInShape(i);j++)
+			for (int j=0;j<treeShape->GetNumVerticesInShape(i);j++)
 			{
 				Stuff::Vector3D vertexPos, worldPos;
 				vertexPos = treeShape->GetShapeVertexInEditor(i,j,-rotation);
 //				vertexPos = treeShape->GetShapeVertexInWorld(i,j,-rotation);
 				worldPos.Add(position,vertexPos);
 	
-				long cellR, cellC;
+				int cellR, cellC;
 				land->worldToCell(worldPos,cellR,cellC);
 				if ((0 > cellR) || (Terrain::realVerticesMapSide * MAPCELL_DIM <= cellR) || 
 					(0 > cellC) || (Terrain::realVerticesMapSide * MAPCELL_DIM <= cellC))

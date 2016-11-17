@@ -104,33 +104,33 @@ struct ObjData {
 	unsigned short		vertexNumber;	//Vertex Number in Block.
 	unsigned short		blockNumber;	//Which terrain Block.
 	unsigned char		damage;			//Damage
-	long				teamId;
-	unsigned long		parentId;		//hOW AM i LINKED.
+	int				    teamId;
+	unsigned int		parentId;		//hOW AM i LINKED.
 };
 
 struct MiscObjectData {
-	long				blockNumber;	//Terrain Block I occupy
-	long				vertexNumber;	//Terrain Vertex I occupy
-	long				objectTypeNum;	//ObjectTypeNumber for this overlay tile
-	long				damaged;		//Is this overlay tile damaged or not
+	int				blockNumber;	//Terrain Block I occupy
+	int				vertexNumber;	//Terrain Vertex I occupy
+	int				objectTypeNum;	//ObjectTypeNumber for this overlay tile
+	int				damaged;		//Is this overlay tile damaged or not
 };
 
 struct ObjDataLoader {
-		long objTypeNum;
+		int objTypeNum;
 		Stuff::Vector3D vector;
 
 		float rotation;		
-		long damage;
+		int damage;
 		
-		long teamId;
-		long parentId;
+		int teamId;
+		int parentId;
 
 		// convert to block and vertex
-		long tileCol;
-		long tileRow;
+		int tileCol;
+		int tileRow;
 		
-		long blockNumber;
-		long vertexNumber;
+		int blockNumber;
+		int vertexNumber;
 };
 
 #pragma pack()
@@ -164,27 +164,27 @@ typedef struct _TeamObjectInfo {
 #define	MAX_CAPTURES_PER_TEAM	30
 
 typedef struct _RemovedMoverRec {
-	unsigned long	turn;
-	long			partID;
+	unsigned int	turn;
+	int			partID;
 } RemovedMoverRec;
 
 typedef struct _ObjectManagerData
 {
-	long					maxObjects;
-	long					numElementals;
-	long					numTerrainObjects;
-	long					numBuildings;
-	long					numTurrets;
-	long					numWeapons;
-	long					numCarnage;
-	long					numLights;
-	long					numArtillery;
-	long					numGates;
-	long					maxMechs;
-	long					maxVehicles;
-	long					numMechs;
-	long					numVehicles;
-	long					nextWatchId;
+	int					maxObjects;
+	int					numElementals;
+	int					numTerrainObjects;
+	int					numBuildings;
+	int					numTurrets;
+	int					numWeapons;
+	int					numCarnage;
+	int					numLights;
+	int					numArtillery;
+	int					numGates;
+	int					maxMechs;
+	int					maxVehicles;
+	int					numMechs;
+	int					numVehicles;
+	int					nextWatchId;
 } ObjectManagerData;
 
 class GameObjectManager {

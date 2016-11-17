@@ -203,10 +203,10 @@ void Logistics::start (long startMode)
 			if ( bTestScript )
 			{
 				FitIniFile loadFile;
-				loadFile.open( "data\\missions\\save.fit" );
+				loadFile.open( "data" PATH_SEPARATOR "missions" PATH_SEPARATOR "save.fit" );
 				LogisticsData::instance->load( loadFile );
 				FitIniFile saveFile;
-				saveFile.open("data\\missions\\save.fit", CREATE);
+				saveFile.open("data" PATH_SEPARATOR "missions" PATH_SEPARATOR "save.fit", CREATE);
 				LogisticsData::instance->save( saveFile );
 		
 			}
@@ -532,10 +532,12 @@ int _stdcall Logistics::beginMission(void*, int, void*[])
 		}
 		if (MPlayer->missionSettings.quickStart) {
 			MultiPlayTeamId = MPlayer->playerInfo[MPlayer->commanderID].team;
-			if (MultiPlayTeamId < 0)
+			//if (MultiPlayTeamId < 0)
+			if (MultiPlayTeamId == 0xffffffff)
 				STOP(("Bad commanderID"));
 			MultiPlayCommanderId = MPlayer->commanderID;
-			if (MultiPlayCommanderId < 0)
+			//if (MultiPlayCommanderId < 0)
+			if (MultiPlayCommanderId == 0xffffffff)
 				STOP(("Bad commanderID"));
 			missionLoadType = MISSION_LOAD_MP_QUICKSTART;
 			}

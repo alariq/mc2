@@ -673,28 +673,28 @@ void Artillery::handleStaticCollision (void)
 	{
 		//-----------------------------------------------------
 		// What is our block and vertex number?
-		long blockNumber = 0;
-		long vertexNumber = 0;
+		int blockNumber = 0;
+		int vertexNumber = 0;
 		
 		getBlockAndVertexNumber(blockNumber,vertexNumber);
 
-		long CellRow, CellCol;
+		int CellRow, CellCol;
 		land->worldToCell(getPosition(), CellRow, CellCol);
 		
 		//-------------------------------------------------------
 		// MUST figure out radius to set off mines in CELLS now.
 		// -fs
-		long startCellRow = CellRow - 4;
-		long startCellCol = CellCol - 4;
+		int startCellRow = CellRow - 4;
+		int startCellCol = CellCol - 4;
 			
-		long i=0;
+		int i=0;
 		for (i = startCellRow; i < startCellRow + 9; i++) 
 		{
-			for (long j = startCellCol; j < startCellCol + 9; j++) 
+			for (int j = startCellCol; j < startCellCol + 9; j++) 
 			{
 				if (GameMap->inBounds(i,j)) 
 				{
-					long mineResult = 0;
+					int mineResult = 0;
 					mineResult = GameMap->getMine(i,j);
 					
 					if (mineResult == 1)
@@ -728,18 +728,18 @@ void Artillery::handleStaticCollision (void)
 		// We must now move out into other tiles for the artillery strike to work.
 		// Remember, Its pretty big!
 		// Just grab the nine vertices around this one.  Problems arise when on Block border.  Handle it.
-		long topLeftBlockNumber = blockNumber - Terrain::blocksMapSide - 1;
-		long currentBlockNumber = topLeftBlockNumber;
-		long totalBlocks = Terrain::blocksMapSide * Terrain::blocksMapSide;
+		int topLeftBlockNumber = blockNumber - Terrain::blocksMapSide - 1;
+		int currentBlockNumber = topLeftBlockNumber;
+		int totalBlocks = Terrain::blocksMapSide * Terrain::blocksMapSide;
 
 		for (i = 0; i < 3; i++) 
 		{
-			for (long j = 0; j < 3; j++) 
+			for (int j = 0; j < 3; j++) 
 			{
 				if ((currentBlockNumber >= 0) && (currentBlockNumber < totalBlocks))
 				{
-					long numObjectsInBlock = ObjectManager->getObjBlockNumObjects(currentBlockNumber);
-					for (long objIndex = 0; objIndex < numObjectsInBlock; objIndex++) 
+					int numObjectsInBlock = ObjectManager->getObjBlockNumObjects(currentBlockNumber);
+					for (int objIndex = 0; objIndex < numObjectsInBlock; objIndex++) 
 					{
 						GameObjectPtr obj = ObjectManager->getObjBlockObject(currentBlockNumber, objIndex);
 						if (!obj)
@@ -774,7 +774,7 @@ void Artillery::setJustCreated (void)
 
 		if (info.strike.sensorRange)
 		{
-			long cellR, cellC;
+			int cellR, cellC;
 			land->worldToCell(position,cellR, cellC);
 			if (GameMap->getDeepWater(cellR, cellC) || GameMap->getShallowWater(cellR, cellC))
 				effectId--;
@@ -1219,12 +1219,12 @@ bool Artillery::recalcBounds (CameraPtr myEye)
 			Stuff::Vector4D iFaceScreen;
 			eye->projectZ(iFacePosition, iFaceScreen );
 	
-			if ((screenPos.x >= 0) && (screenPos.y >= 0) &&
+			if (((screenPos.x >= 0) && (screenPos.y >= 0) &&
 				(screenPos.x <= eye->getScreenResX()) &&
-				(screenPos.y <= eye->getScreenResY()) 
-				|| ((iFaceScreen.x >= 0) && (iFaceScreen.y >= 0) &&
+				(screenPos.y <= eye->getScreenResY())) 
+				|| (((iFaceScreen.x >= 0) && (iFaceScreen.y >= 0) &&
 				(iFaceScreen.x <= eye->getScreenResX()) &&
-				(iFaceScreen.y <= eye->getScreenResY())))
+				(iFaceScreen.y <= eye->getScreenResY()))))
 			{
 				inView = true;
 			}
@@ -1546,7 +1546,7 @@ void Artillery::init (bool create, ObjectTypePtr _type)
 			long appearanceType = (BLDG_TYPE << 24);
 		
 			AppearanceTypePtr buildingAppearanceType = NULL;
-			if (!appearName)
+			if (!appearName[0])
 			{
 				//------------------------------------------------------
 				// LOAD a dummy appearance until real ones are available
@@ -1614,7 +1614,7 @@ void Artillery::init (bool create, ObjectTypePtr _type)
 			long appearanceType = (BLDG_TYPE << 24);
 		
 			AppearanceTypePtr buildingAppearanceType = NULL;
-			if (!appearName)
+			if (!appearName[0])
 			{
 				//------------------------------------------------------
 				// LOAD a dummy appearance until real ones are available
@@ -1682,7 +1682,7 @@ void Artillery::init (bool create, ObjectTypePtr _type)
 			long appearanceType = (BLDG_TYPE << 24);
 		
 			AppearanceTypePtr buildingAppearanceType = NULL;
-			if (!appearName)
+			if (!appearName[0])
 			{
 				//------------------------------------------------------
 				// LOAD a dummy appearance until real ones are available
@@ -1760,7 +1760,7 @@ void Artillery::Load (ArtilleryData *data)
 	// If not, create the impact effect and move on.
 	if ((data->info.strike.sensorRange != 0.0f) && (data->info.strike.timeToImpact <= 0.0) && !getFlag(OBJECT_FLAG_SENSORS_GOING))	
 	{
-		long cellR, cellC;
+		int cellR, cellC;
 		land->worldToCell(position,cellR, cellC);
 		if (GameMap->getDeepWater(cellR, cellC) || GameMap->getShallowWater(cellR, cellC))
 			effectId--;

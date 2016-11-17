@@ -123,7 +123,7 @@ void HeapManager::destroy (void)
 
 	if (totalSize && memReserved && heap)
 	{
-		result = VirtualFree(heap,0,MEM_RELEASE);
+		result = VirtualFree(heap, totalSize, MEM_RELEASE);
 		if (result == FALSE)
 			result = GetLastError();
 	}
@@ -584,8 +584,8 @@ DoneTC:
 		mov		result,eax
 	}
 
-	return(result);
 #endif // USE_GOS_HEAP
+	return(result);
 }
 
 //---------------------------------------------------------------------------
@@ -693,11 +693,11 @@ DoneCL:
 		mov		result, eax
 	}
 	
-	return(result);
 	
 #endif
 
 #endif // USE_GOS_HEAP
+	return(result);
 }			
 
 //---------------------------------------------------------------------------
@@ -1166,8 +1166,8 @@ NoAllocation:
 	}
 	#endif
 	
-	return(result);
 #endif // USE_GOS_HEAP
+	return(result);
 }
 
 //---------------------------------------------------------------------------
@@ -1181,9 +1181,10 @@ long UserHeap::Free (void *memBlock)
 
 		return 0;
 	}
+
+	long result = 0;
 #ifndef USE_GOS_HEAP
 	HeapBlockPtr blockOffs = (HeapBlockPtr)memBlock;
-	long result = 0;
 	HeapBlockPtr sortBlock = NULL;
 
 	//------------------------------------------
@@ -1469,9 +1470,9 @@ Dealloc_Done:
 	}
 #endif
 	
-	return(result);
-
 #endif // USE_GOS_HEAP
+
+	return(result);
 }
 
 //---------------------------------------------------------------------------

@@ -50,7 +50,7 @@ enum craterTypes
 // struct CraterData
 typedef struct _CraterData
 {
-	long			craterShapeId;
+	int 			craterShapeId;
 	Stuff::Vector3D position[4];
 	Stuff::Vector4D screenPos[4];
 } CraterData;

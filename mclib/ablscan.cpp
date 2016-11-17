@@ -656,7 +656,12 @@ void languageDirective (void) {
 			// What's the current module's directory?
 			char fullPath[255];
 			long curChar = strlen(SourceFiles[0]);
-			while ((curChar > -1) && (SourceFiles[0][curChar] != '\\'))
+#ifdef LINUX_BUILD
+            const char path_separator = '/';
+#else
+            const char path_separator = '\\';
+#endif
+			while ((curChar > -1) && (SourceFiles[0][curChar] != path_separator))
 				curChar--;
 			if (curChar == -1)
 				strcpy(fullPath, fileName);

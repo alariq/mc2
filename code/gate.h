@@ -234,7 +234,7 @@ class Gate : public TerrainObject
 			return (TRUE);
 		}
 
-		virtual void getBlockAndVertexNumber (long &blockNum, long &vertexNum)
+		virtual void getBlockAndVertexNumber (int &blockNum, int &vertexNum)
 		{
 			blockNum = blockNumber;
 			vertexNum = vertexNumber;

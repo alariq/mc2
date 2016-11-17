@@ -1307,7 +1307,9 @@ char* ABLModule::getSourceDirectory (long fileNumber, char* directory) {
 
 	char* fileName = ModuleRegistry[handle].sourceFiles[fileNumber];
 	long curChar = strlen(fileName);
-	while ((curChar > -1) && (fileName[curChar] != '\\'))
+    //sebi
+	//while ((curChar > -1) && (fileName[curChar] != '\\'))
+	while ((curChar > -1) && (fileName[curChar] != '\\') && (fileName[curChar] != '/'))
 		curChar--;
 	if (curChar == -1)
 		return(NULL);

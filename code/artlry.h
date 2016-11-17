@@ -53,10 +53,10 @@ class ArtilleryChunk {
 
 		char				commanderId;
 		char				strikeType;
-		long				cellRC[2];
+		int                 cellRC[2];
 		char				secondsToImpact;
 
-		unsigned long		data;
+		unsigned int        data;
 
 	public:
 

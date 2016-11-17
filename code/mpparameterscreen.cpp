@@ -756,7 +756,9 @@ void MPParameterScreen::update()
 	
 	// game not front and center at the top of the screen
 	textObjects[0].setText( MPlayer->sessionName );
-	if ( !MPlayer->sessionName || !strlen( MPlayer->sessionName ) )
+    // sebi: !MPlayer->sessionName - always false
+	//if ( !MPlayer->sessionName || !strlen( MPlayer->sessionName ) )
+	if ( !strlen( MPlayer->sessionName ) )
 	{
 		if ( MPlayer->isHost() )
 			textObjects[0].setText( IDS_STRING26150 );
@@ -2129,7 +2131,7 @@ void	aPlayerParams::setData( const _MC2Player* data)
 	if ( pFileName != insigniaName )
 	{
 		FullPathFileName path;
-		path.init( "data\\multiplayer\\insignia\\", data->insigniaFile, ".tga" );
+		path.init( "data" PATH_SEPARATOR "multiplayer" PATH_SEPARATOR "insignia" PATH_SEPARATOR, data->insigniaFile, ".tga" );
 
 		if ( fileExists( path ) )
 		{

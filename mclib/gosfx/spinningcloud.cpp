@@ -102,25 +102,25 @@ void
 
 //------------------------------------------------------------------------------
 //
-bool 
-	gosFX::SpinningCloud__Specification::IsDataValid(bool fix_data)
+bool gosFX::SpinningCloud__Specification::IsDataValid(bool fix_data)
 {
 
-	Check_Object(this);
-	Stuff::Scalar min,max;
-	m_pScale.ExpensiveComputeRange(&min,&max);
-	if(min<0.0f) 
-	if(fix_data)
-	{
-	m_pScale.m_ageCurve.SetCurve(1.0f);
-	m_pScale.m_seeded = false;
-	m_pScale.m_seedCurve.SetCurve(1.0f);
-	PAUSE(("Warning: Curve \"pScale\" in Effect \"%s\" Is Out of Range and has been Reset",(char *)m_name));
+    Check_Object(this);
+    Stuff::Scalar min,max;
+    m_pScale.ExpensiveComputeRange(&min,&max);
+    if(min<0.0f) {
+        if(fix_data)
+        {
+            m_pScale.m_ageCurve.SetCurve(1.0f);
+            m_pScale.m_seeded = false;
+            m_pScale.m_seedCurve.SetCurve(1.0f);
+            PAUSE(("Warning: Curve \"pScale\" in Effect \"%s\" Is Out of Range and has been Reset",(char *)m_name));
 
-	}
-	else
-		return false;
-	return ParticleCloud__Specification::IsDataValid(fix_data);
+        }
+        else
+            return false;
+    }
+    return ParticleCloud__Specification::IsDataValid(fix_data);
 }
 
 //------------------------------------------------------------------------------

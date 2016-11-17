@@ -146,12 +146,12 @@ char* ABLi_popCharPtr (void) {
 
 //---------------------------------------------------------------------------
 
-long* ABLi_popIntegerPtr (void) {
+int* ABLi_popIntegerPtr (void) {
 
 	getCodeToken();
 	SymTableNodePtr idPtr = getCodeSymTableNodePtr();
 	execVariable(idPtr, USE_REFPARAM);
-	long* integerPtr = (long*)(&((StackItemPtr)tos->address)->integer);
+	int* integerPtr = (int*)(&((StackItemPtr)tos->address)->integer);
 	pop();
 
 	return(integerPtr);

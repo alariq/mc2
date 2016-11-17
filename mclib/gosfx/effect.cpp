@@ -190,23 +190,24 @@ void
 //------------------------------------------------------------------------------
 //
 
-bool 
-	gosFX::Effect__Specification::IsDataValid(bool fix_data)
+bool gosFX::Effect__Specification::IsDataValid(bool fix_data)
 {
-	Check_Object(this);
-	Stuff::Scalar minv,maxv;
-m_lifeSpan.ExpensiveComputeRange(&minv,&maxv);
-if(minv<0.0f) 
-	if(fix_data)
-	{
-		m_lifeSpan.SetCurve(1.0f);
-	PAUSE(("Warning: Curve \"lifespan\" in Effect \"%s\" Is Out of Range and has been Reset",(char *)m_name));
+    Check_Object(this);
+    Stuff::Scalar minv,maxv;
+    m_lifeSpan.ExpensiveComputeRange(&minv,&maxv);
+    if(minv<0.0f)
+    {
+        if(fix_data)
+        {
+            m_lifeSpan.SetCurve(1.0f);
+            PAUSE(("Warning: Curve \"lifespan\" in Effect \"%s\" Is Out of Range and has been Reset",(char *)m_name));
 
-	}
-	else
-		return false;
+        }
+        else 
+            return false;
+    }
 
-return true;
+    return true;
 }
 
 //------------------------------------------------------------------------------

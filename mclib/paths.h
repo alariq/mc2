@@ -48,8 +48,10 @@ extern char transcriptsPath[];
 
 #ifdef LINUX_BUILD
     #define PATH_SEPARATOR  "/"
+    #define PATH_SEPARATOR_AS_CHAR  '/'
 #else
     #define PATH_SEPARATOR  "\\"
+    #define PATH_SEPARATOR_AS_CHAR  '\\'
 #endif
 
 #endif

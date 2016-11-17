@@ -661,7 +661,7 @@ long WeaponBolt::update (void)
 				else
 				{
 					Stuff::Vector3D hotSpot = *targetPosition;
-					long cellR, cellC;
+					int cellR, cellC;
 					land->worldToCell(hotSpot,cellR, cellC);
 					if (GameMap->getDeepWater(cellR, cellC) || GameMap->getShallowWater(cellR, cellC))
 					{
@@ -820,7 +820,7 @@ long WeaponBolt::update (void)
 					// energy weapons don't set off mines
 					// Yes, they should DT, 5/30/98
 					{
-						long cellRow, cellCol;
+						int cellRow, cellCol;
 		
 						land->worldToCell(*targetPosition, cellRow, cellCol);
 						if (GameMap->getMine(cellRow, cellCol) == 1)
@@ -917,7 +917,7 @@ long WeaponBolt::update (void)
 				else
 				{
 					Stuff::Vector3D hotSpot = *targetPosition;
-					long cellR, cellC;
+					int cellR, cellC;
 					land->worldToCell(hotSpot,cellR, cellC);
 					if (GameMap->getDeepWater(cellR, cellC) || GameMap->getShallowWater(cellR, cellC))
 					{
@@ -1072,7 +1072,7 @@ long WeaponBolt::update (void)
 					// energy weapons don't set off mines
 					// Yes, they should DT, 5/30/98
 					{
-						long cellRow, cellCol;
+						int cellRow, cellCol;
 		
 						land->worldToCell(*targetPosition, cellRow, cellCol);
 						if (GameMap->getMine(cellRow, cellCol) == 1)
@@ -2471,7 +2471,7 @@ void WeaponBolt::init (bool create, ObjectTypePtr _type)
 	if (((WeaponBoltTypePtr)_type)->textureName && stricmp(((WeaponBoltTypePtr)_type)->textureName,"NONE") != 0)
 	{
 		char tPath[1024];
-		sprintf(tPath,"%s128\\",tglPath);
+		sprintf(tPath,"%s128" PATH_SEPARATOR, tglPath);
 
 		FullPathFileName textureName;
 		textureName.init(tPath,((WeaponBoltTypePtr)_type)->textureName,".tga");

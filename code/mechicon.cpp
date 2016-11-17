@@ -1479,7 +1479,7 @@ void ForceGroupIcon::drawDeathEffect()
 				long color = 0xff000000;
 				if ( deathAnimationTime < .4 
 					|| (deathAnimationTime > .8 && deathAnimationTime < 1.2)
-					|| deathAnimationTime > 1.6 && deathAnimationTime < 2.0)
+					|| (deathAnimationTime > 1.6 && deathAnimationTime < 2.0))
 				{
 					color = 0xffff0000;
 				}
@@ -1537,7 +1537,7 @@ PilotIcon::PilotIcon()
 	{
 		// find proper file based on resolution
 		char path[256];
-		strcpy( path, "data\\art\\");
+		strcpy( path, "data" PATH_SEPARATOR "art" PATH_SEPARATOR);
 		if ( Environment.screenWidth == 640 )
 		{
 			strcat( path, "mcui_low2.tga" );
@@ -1619,7 +1619,7 @@ void PilotIcon::swapResolutions( bool bForce)
 	{
 		// find proper file based on resolution
 		char path[256];
-		strcpy( path, "data\\art\\");
+		strcpy( path, "data" PATH_SEPARATOR "art" PATH_SEPARATOR);
 		if ( Environment.screenWidth == 640 )
 		{
 			strcat( path, "mcui_low2.tga" );

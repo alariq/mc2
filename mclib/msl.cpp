@@ -600,7 +600,7 @@ long TG_TypeMultiShape::LoadTGMultiShapeFromASE (const char *fileName, bool forc
 				{				
 					// The filenames refer to art files on some share (\\aas1), just get the base filename
 					// and assume it's in the "Data\TGL\128\" directory
-					char * baseFilename = strrchr(listOfTextures[i].textureName, '\\');
+					char * baseFilename = strrchr(listOfTextures[i].textureName, PATH_SEPARATOR_AS_CHAR);
 					
 					if (baseFilename)
 					{

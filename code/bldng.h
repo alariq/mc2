@@ -288,7 +288,7 @@ class Building : public TerrainObject
 
 		virtual float getDamageLevel (void);
 
-		virtual void getBlockAndVertexNumber (long& blockNum, long& vertexNum) {
+		virtual void getBlockAndVertexNumber (int& blockNum, int& vertexNum) {
 			blockNum = blockNumber;
 			vertexNum = vertexNumber;
 		}

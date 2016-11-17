@@ -48,10 +48,10 @@ extern float metersPerWorldUnit;
 extern char* ExceptionGameMsg;
 extern char ChunkDebugMsg[5120];
 
-long GlobalMap::minRow = 0;
-long GlobalMap::maxRow = 0;
-long GlobalMap::minCol = 0;
-long GlobalMap::maxCol = 0;
+int GlobalMap::minRow = 0;
+int GlobalMap::maxRow = 0;
+int GlobalMap::minCol = 0;
+int GlobalMap::maxCol = 0;
 GameLogPtr GlobalMap::log = NULL;
 bool GlobalMap::logEnabled = false;
 //------------
@@ -320,8 +320,8 @@ bool PreserveMapTiles = false;
 MoveMapPtr PathFindMap[2] = {NULL, NULL};
 
 float MoveMap::distanceFloat[DISTANCE_TABLE_DIM][DISTANCE_TABLE_DIM];
-long MoveMap::distanceLong[DISTANCE_TABLE_DIM][DISTANCE_TABLE_DIM];
-long MoveMap::forestCost = 50;
+int MoveMap::distanceInt[DISTANCE_TABLE_DIM][DISTANCE_TABLE_DIM];
+int MoveMap::forestCost = 50;
 
 #ifdef LAB_ONLY
 __int64 MCTimeCalcPath1Update = 0;
@@ -418,10 +418,10 @@ Stuff::Vector3D relativePositionToPoint (Stuff::Vector3D point, float angle, flo
 	curRay.Zero();
 	float rayLength = 0.0;
 
-	long cellR, cellC;
+	int cellR, cellC;
 	Stuff::Vector3D curPoint3d(curPoint.x, curPoint.y, 0.0);
 	land->worldToCell(curPoint3d, cellR, cellC);
-	unsigned long cellClear = GameMap->getPassable(cellR, cellC);
+	unsigned int cellClear = GameMap->getPassable(cellR, cellC);
 
 	Stuff::Vector3D lastGoodPoint = curPoint;
 	if (flags & RELPOS_FLAG_PASSABLE_START)
@@ -900,7 +900,7 @@ long MissionMap::write (PacketFile* packetFile, long whichPacket) {
 
 bool MissionMap::getPassable (Stuff::Vector3D cellPosition) {
 
-	long row, col;
+	int row, col;
 	land->worldToCell(cellPosition, row, col);
 	return(getPassable(row, col));
 }
@@ -1039,7 +1039,7 @@ void MissionMap::spreadState (long cellRow, long cellCol, long radius) {
 
 long MissionMap::placeObject (Stuff::Vector3D position, float radius) {
 
-	long cellRow, cellCol;
+	int cellRow, cellCol;
 	land->worldToCell(position, cellRow, cellCol);
 
 	//---------------------------------------------------------
@@ -1507,7 +1507,7 @@ long GlobalMap::init (PacketFilePtr packetFile, long whichPacket) {
 	result = packetFile->readPacket(whichPacket++, (unsigned char*)&width);
 	if (result == 0)
 		Fatal(result, " GlobalMap.init: unable to read width packet ");
-	long sectorDim; // this is no longer used...
+	int sectorDim; // this is no longer used...
 	result = packetFile->readPacket(whichPacket++, (unsigned char*)&sectorDim);
 	if (result == 0)
 		Fatal(result, " GlobalMap.init: unable to read sectorDim packet ");
@@ -1549,7 +1549,11 @@ long GlobalMap::init (PacketFilePtr packetFile, long whichPacket) {
 		Fatal(result, " GlobalMap.init: unable to read areaMap packet ");
 
 	areas = (GlobalMapAreaPtr)systemHeap->Malloc(sizeof(GlobalMapArea) * numAreas);
+	areas_cellsCovered = (short**)systemHeap->Malloc(sizeof(short*) * numAreas);
+	areas_doors = (DoorInfoPtr*)systemHeap->Malloc(sizeof(DoorInfoPtr) * numAreas);
 	gosASSERT(areas != NULL);
+	gosASSERT(areas_cellsCovered != NULL);
+	gosASSERT(areas_doors != NULL);
 	result = packetFile->readPacket(whichPacket++, (unsigned char*)areas);
 	if (result == 0)
 		Fatal(result, " GlobalMap.init: unable to read areas packet ");
@@ -1570,11 +1574,13 @@ long GlobalMap::init (PacketFilePtr packetFile, long whichPacket) {
 	// Set up the areas so they point to the correct door infos...
 	curDoorInfo = 0;
 	for (long curArea = 0; curArea < numAreas; curArea++) {
-		areas[curArea].doors = &doorInfos[curDoorInfo];
+		//areas[curArea].doors = &doorInfos[curDoorInfo];
+		areas_doors[curArea] = &doorInfos[curDoorInfo];
 		curDoorInfo += areas[curArea].numDoors;
 	}
 
 	doors = (GlobalMapDoorPtr)systemHeap->Malloc(sizeof(GlobalMapDoor) * (numDoors + NUM_DOOR_OFFSETS));
+	doors_links = (DoorInfoLinksPtr*)systemHeap->Malloc(sizeof(DoorInfoLinksPtr) * (numDoors + NUM_DOOR_OFFSETS));
 	gosASSERT(doors != NULL);
 	result = packetFile->readPacket(whichPacket++, (unsigned char*)doors);
 	if (result == 0)
@@ -1591,7 +1597,7 @@ long GlobalMap::init (PacketFilePtr packetFile, long whichPacket) {
 		result = packetFile->readPacket(whichPacket++, (unsigned char*)&doorLinks[numLinksRead]);
 		if (result <= 0)
 			Fatal(result, " GlobalMap.init: Unable to write doorLinks packet ");
-		doors[i].links[0] = &doorLinks[numLinksRead];
+		doors_links[i][0] = &doorLinks[numLinksRead];
 		numLinksRead += numLinks;
 
 		numLinks = doors[i].numLinks[1] + NUM_EXTRA_DOOR_LINKS;
@@ -1599,7 +1605,7 @@ long GlobalMap::init (PacketFilePtr packetFile, long whichPacket) {
 		result = packetFile->readPacket(whichPacket++, (unsigned char*)&doorLinks[numLinksRead]);
 		if (result <= 0)
 			Fatal(result, " GlobalMap.init: Unable to write doorLinks packet ");
-		doors[i].links[1] = &doorLinks[numLinksRead];
+		doors_links[i][1] = &doorLinks[numLinksRead];
 		numLinksRead += numLinks;
 	}
 	Assert(numLinksRead == numDoorLinks, 0, " GlobalMap.init: Incorrect Links count ");
@@ -1631,8 +1637,8 @@ long GlobalMap::init (PacketFilePtr packetFile, long whichPacket) {
 				for (long j = 0; j < doors[i].numLinks[side]; j++) {
 					sprintf(s, "          link %03d, to door %05d, cost %d",
 						j,
-						doors[i].links[side][j].doorIndex,
-						doors[i].links[side][j].cost);
+						doors_links[i][side][j].doorIndex,
+						doors_links[i][side][j].cost);
 					log->write(s); 
 				}
 			}
@@ -1649,9 +1655,10 @@ long GlobalMap::init (PacketFilePtr packetFile, long whichPacket) {
 			sprintf(s, "     %s", typeString[areas[i].type]);
 			log->write(s);
 			for (long d = 0; d < areas[i].numDoors; d++) {
+                const DoorInfo& door = areas_doors[i][d];
 				sprintf(s, "     door %03d is %d (%d:%d & %d) ",
-					d, areas[i].doors[d].doorIndex, areas[i].doors[d].doorSide,
-					doors[areas[i].doors[d].doorIndex].area[0], doors[areas[i].doors[d].doorIndex].area[1]);
+					d, door.doorIndex, door.doorSide,
+					doors[door.doorIndex].area[0], doors[door.doorIndex].area[1]);
 				log->write(s);
 			}
 			
@@ -1725,8 +1732,11 @@ long GlobalMap::write (PacketFilePtr packetFile, long whichPacket) {
 	for (int i = 0; i < numAreas; i++) {
 		//-------------------------
 		// clear it for the save...
-		doorInfoSave[i] = areas[i].doors;
-		areas[i].doors = NULL;
+		//doorInfoSave[i] = areas[i].doors;
+		//areas[i].doors = NULL;
+		doorInfoSave[i] = areas_doors[i];
+		areas_doors[i] = NULL;
+
 		areas[i].ownerWID = 0;
 		areas[i].teamID = -1;
 		//areas[i].offMap = false;
@@ -1736,7 +1746,7 @@ long GlobalMap::write (PacketFilePtr packetFile, long whichPacket) {
 	for (int i = 0; i < numAreas; i++) {
 		//---------------------
 		// restore the doors...
-		areas[i].doors = doorInfoSave[i];
+		areas_doors[i] = doorInfoSave[i];
 	}
 	if (result <= 0)
 		Fatal(result, " GlobalMap.write: Unable to write areas packet ");
@@ -1760,7 +1770,8 @@ long GlobalMap::write (PacketFilePtr packetFile, long whichPacket) {
 	for (int i = 0; i < numAreas; i++)
 		if (areas[i].numDoors) {
 			long packetSize = sizeof(DoorInfo) * areas[i].numDoors;
-			result = packetFile->writePacket(whichPacket++, (unsigned char*)areas[i].doors, packetSize);
+			//result = packetFile->writePacket(whichPacket++, (unsigned char*)areas[i].doors, packetSize);
+			result = packetFile->writePacket(whichPacket++, (unsigned char*)areas_doors[i], packetSize);
 			if (result <= 0)
 				Fatal(result, " GlobalMap.write: Unable to write doorInfos packet ");
 			numDoorInfosWritten += areas[i].numDoors;
@@ -1771,11 +1782,11 @@ long GlobalMap::write (PacketFilePtr packetFile, long whichPacket) {
 	for (int i = 0; i < numDoors + NUM_DOOR_OFFSETS; i++) {
 		//-------------------------
 		// clear it for the save...
-		doorLinkSave[i][0] = doors[i].links[0];
-		doorLinkSave[i][1] = doors[i].links[1];
+		doorLinkSave[i][0] = doors_links[i][0];
+		doorLinkSave[i][1] = doors_links[i][1];
 		//doors[i].cost = 0;
-		doors[i].links[0] = NULL;
-		doors[i].links[1] = NULL;
+		doors_links[i][0] = NULL;
+		doors_links[i][1] = NULL;
 		doors[i].parent = 0;
 		doors[i].fromAreaIndex = 0;
 		doors[i].flags = 0;
@@ -1787,8 +1798,8 @@ long GlobalMap::write (PacketFilePtr packetFile, long whichPacket) {
 	for (int i = 0; i < (numDoors + NUM_DOOR_OFFSETS); i++) {
 		//---------------------
 		// restore the links...
-		doors[i].links[0] = doorLinkSave[i][0];
-		doors[i].links[1] = doorLinkSave[i][1];
+		doors_links[i][0] = doorLinkSave[i][0];
+		doors_links[i][1] = doorLinkSave[i][1];
 	}
 	if (result <= 0)
 		Fatal(result, " GlobalMap.write: Unable to write doors packet ");
@@ -1800,14 +1811,14 @@ long GlobalMap::write (PacketFilePtr packetFile, long whichPacket) {
 	for (int i = 0; i < (numDoors + NUM_DOOR_OFFSETS); i++) {
 		long numLinks = doors[i].numLinks[0] + NUM_EXTRA_DOOR_LINKS;
 		gosASSERT(numLinks >= 2);
-		result = packetFile->writePacket(whichPacket++, (unsigned char*)doors[i].links[0], sizeof(DoorLink) * numLinks);
+		result = packetFile->writePacket(whichPacket++, (unsigned char*)doors_links[i][0], sizeof(DoorLink) * numLinks);
 		if (result <= 0)
 			Fatal(result, " GlobalMap.write: Unable to write doorLinks packet ");
 		numberL += numLinks;
 
 		numLinks = doors[i].numLinks[1] + NUM_EXTRA_DOOR_LINKS;
 		gosASSERT(numLinks >= 2);
-		result = packetFile->writePacket(whichPacket++, (unsigned char*)doors[i].links[1], sizeof(DoorLink) * numLinks);
+		result = packetFile->writePacket(whichPacket++, (unsigned char*)doors_links[i][1], sizeof(DoorLink) * numLinks);
 		if (result <= 0)
 			Fatal(result, " GlobalMap.write: Unable to write doorLinks packet ");
 		numberL += numLinks;
@@ -2076,12 +2087,14 @@ void GlobalMap::calcAreas (void) {
 		areas[i].sectorC = 0;
 		areas[i].type = AREA_TYPE_NORMAL;
 		areas[i].numDoors = 0;
-		areas[i].doors = NULL;
+		areas[i].doors_Legacy32bitPtr = 0;
+		areas_doors[i] = NULL;
 		areas[i].ownerWID = 0;
 		areas[i].teamID = -1;
 		areas[i].offMap = false;
 		areas[i].open = true;
-		areas[i].cellsCovered = NULL;
+		areas[i].cellsCovered_Legacy32bitPtr = 0;
+		areas_cellsCovered[i] = NULL;
 	}
 
 	//-----------------------------------------
@@ -2386,11 +2399,11 @@ void GlobalMap::calcAreaDoors (void) {
 		areas[area].numDoors = numAreaDoors(area);
 		numDoorInfos += areas[area].numDoors;
 		if (areas[area].numDoors) {
-			areas[area].doors = (DoorInfoPtr)systemHeap->Malloc(sizeof(DoorInfo) * areas[area].numDoors);
-			getAreaDoors(area, areas[area].doors);
+			areas_doors[area] = (DoorInfoPtr)systemHeap->Malloc(sizeof(DoorInfo) * areas[area].numDoors);
+			getAreaDoors(area, areas_doors[area]);
 			}
 		else
-			areas[area].doors = NULL;
+			areas_doors[area] = NULL;
 	}
 }
 
@@ -2553,12 +2566,16 @@ long GlobalMap::calcLinkCost (long startDoor, long thruArea, long goalDoor) {
 void GlobalMap::changeAreaLinkCost (long area, long cost) {
 
 	GlobalMapAreaPtr thruArea = &areas[area];
+    DoorInfoPtr thruDoorInfo = areas_doors[area];
 	long numDoors = thruArea->numDoors;
 	for (long i = 0; i < numDoors; i++) {
-		GlobalMapDoorPtr curDoor = &doors[thruArea->doors[i].doorIndex];
-		long doorSide = thruArea->doors[i].doorSide;
+		//GlobalMapDoorPtr curDoor = &doors[thruArea->doors[i].doorIndex];
+		//long doorSide = thruArea->doors[i].doorSide;
+		GlobalMapDoorPtr curDoor = &doors[thruDoorInfo[i].doorIndex];
+		DoorInfoLinksPtr& curDoor_links = doors_links[thruDoorInfo[i].doorIndex];
+		long doorSide = thruDoorInfo[i].doorSide;
 		for (long j = 0; j < curDoor->numLinks[doorSide]; j++)
-			curDoor->links[doorSide][j].cost = cost;
+			curDoor_links[doorSide][j].cost = cost;
 	}
 }
 
@@ -2571,9 +2588,10 @@ void GlobalMap::calcDoorLinks (void) {
 	long maxDoors = 0;
 	for (long d = 0; d < numDoors; d++) {
 		GlobalMapDoorPtr thisDoor = &doors[d];
+		DoorInfoLinksPtr& thisDoor_links = doors_links[d];
 		for (long s = 0; s < 2; s++) {
 			thisDoor->numLinks[s] = 0;
-			thisDoor->links[s] = NULL;
+			thisDoor_links[s] = NULL;
 
 			long area = thisDoor->area[s];
 			long areaNumDoors = areas[area].numDoors;
@@ -2582,18 +2600,19 @@ void GlobalMap::calcDoorLinks (void) {
 				//----------------------------------------------------------------
 				// Allocate enough links for all links to this door plus a scratch
 				// link used during path calc...
-				thisDoor->links[s] = (DoorLinkPtr)systemHeap->Malloc(sizeof(DoorLink) * (thisDoor->numLinks[s] + NUM_EXTRA_DOOR_LINKS));
+				thisDoor_links[s] = (DoorLinkPtr)systemHeap->Malloc(sizeof(DoorLink) * (thisDoor->numLinks[s] + NUM_EXTRA_DOOR_LINKS));
 				numDoorLinks += (thisDoor->numLinks[s] + NUM_EXTRA_DOOR_LINKS);
-				gosASSERT(thisDoor->links[s] != NULL);
+				gosASSERT(thisDoor_links[s] != NULL);
 				long linkIndex = 0;
 				for (long areaDoor = 0; areaDoor < areaNumDoors; areaDoor++) {
-					long doorIndex = areas[area].doors[areaDoor].doorIndex;
+					//long doorIndex = areas[area].doors[areaDoor].doorIndex;
+					long doorIndex = areas_doors[area][areaDoor].doorIndex;
 					GlobalMapDoorPtr curDoor = &doors[doorIndex];
 					if (curDoor != thisDoor) {
-						thisDoor->links[s][linkIndex].doorIndex = doorIndex;
-						thisDoor->links[s][linkIndex].doorSide = (curDoor->area[1] == area);
-						thisDoor->links[s][linkIndex].cost = calcLinkCost(d, area, doorIndex);
-						thisDoor->links[s][linkIndex].openCost = thisDoor->links[s][linkIndex].cost;
+						thisDoor_links[s][linkIndex].doorIndex = doorIndex;
+						thisDoor_links[s][linkIndex].doorSide = (curDoor->area[1] == area);
+						thisDoor_links[s][linkIndex].cost = calcLinkCost(d, area, doorIndex);
+						thisDoor_links[s][linkIndex].openCost = thisDoor_links[s][linkIndex].cost;
 						linkIndex++;
 					}
 				}
@@ -2607,17 +2626,17 @@ void GlobalMap::calcDoorLinks (void) {
 	// Now, set up the start and goal doors...
 	doors[numDoors + DOOR_OFFSET_START].numLinks[0] = maxDoors;
 	numDoorLinks += (doors[numDoors + DOOR_OFFSET_START].numLinks[0] + NUM_EXTRA_DOOR_LINKS);
-	doors[numDoors + DOOR_OFFSET_START].links[0] = (DoorLinkPtr)systemHeap->Malloc(sizeof(DoorLink) * (doors[numDoors + DOOR_OFFSET_START].numLinks[0] + NUM_EXTRA_DOOR_LINKS));
+	doors_links[numDoors + DOOR_OFFSET_START][0] = (DoorLinkPtr)systemHeap->Malloc(sizeof(DoorLink) * (doors[numDoors + DOOR_OFFSET_START].numLinks[0] + NUM_EXTRA_DOOR_LINKS));
 	doors[numDoors + DOOR_OFFSET_START].numLinks[1] = 0;
 	numDoorLinks += (doors[numDoors + DOOR_OFFSET_START].numLinks[1] + NUM_EXTRA_DOOR_LINKS);
-	doors[numDoors + DOOR_OFFSET_START].links[1] = (DoorLinkPtr)systemHeap->Malloc(sizeof(DoorLink) * (doors[numDoors + DOOR_OFFSET_START].numLinks[1] + NUM_EXTRA_DOOR_LINKS));
+	doors_links[numDoors + DOOR_OFFSET_START][1] = (DoorLinkPtr)systemHeap->Malloc(sizeof(DoorLink) * (doors[numDoors + DOOR_OFFSET_START].numLinks[1] + NUM_EXTRA_DOOR_LINKS));
 
 	doors[numDoors + DOOR_OFFSET_GOAL].numLinks[0] = maxDoors;
 	numDoorLinks += (doors[numDoors + DOOR_OFFSET_GOAL].numLinks[0] + NUM_EXTRA_DOOR_LINKS);
-	doors[numDoors + DOOR_OFFSET_GOAL].links[0] = (DoorLinkPtr)systemHeap->Malloc(sizeof(DoorLink) * (doors[numDoors + DOOR_OFFSET_GOAL].numLinks[0] + NUM_EXTRA_DOOR_LINKS));
+	doors_links[numDoors + DOOR_OFFSET_GOAL][0] = (DoorLinkPtr)systemHeap->Malloc(sizeof(DoorLink) * (doors[numDoors + DOOR_OFFSET_GOAL].numLinks[0] + NUM_EXTRA_DOOR_LINKS));
 	doors[numDoors + DOOR_OFFSET_GOAL].numLinks[1] = 0;
 	numDoorLinks += (doors[numDoors + DOOR_OFFSET_GOAL].numLinks[1] + NUM_EXTRA_DOOR_LINKS);
-	doors[numDoors + DOOR_OFFSET_GOAL].links[1] = (DoorLinkPtr)systemHeap->Malloc(sizeof(DoorLink) * (doors[numDoors + DOOR_OFFSET_GOAL].numLinks[1] + NUM_EXTRA_DOOR_LINKS));
+	doors_links[numDoors + DOOR_OFFSET_GOAL][1] = (DoorLinkPtr)systemHeap->Malloc(sizeof(DoorLink) * (doors[numDoors + DOOR_OFFSET_GOAL].numLinks[1] + NUM_EXTRA_DOOR_LINKS));
 
 	long numberL = 0;
 	for (long i = 0; i < (numDoors + NUM_DOOR_OFFSETS); i++) {
@@ -2640,7 +2659,7 @@ void GlobalMap::calcDoorLinks (void) {
 
 //------------------------------------------------------------------------------------------
 
-long GlobalMap::getPathCost (long startArea, long goalArea, bool withSpecialAreas, long& confidence, bool calcIt) {
+long GlobalMap::getPathCost (int startArea, int goalArea, bool withSpecialAreas, int& confidence, bool calcIt) {
 
 	//------------------------------------------------------------------------
 	// This could be cleaned up if we re-save this data, 0 being no path and 1
@@ -2940,7 +2959,7 @@ long GlobalMap::exitDirection (long doorIndex, long fromArea) {
 void GlobalMap::getDoorTiles (long area, long door, GlobalMapDoorPtr areaDoor) {
 
 	
-	*areaDoor = doors[areas[area].doors[door].doorIndex];
+	*areaDoor = doors[areas_doors[area][door].doorIndex];
 }
 
 //------------------------------------------------------------------------------------------
@@ -2948,8 +2967,8 @@ void GlobalMap::getDoorTiles (long area, long door, GlobalMapDoorPtr areaDoor) {
 bool GlobalMap::getAdjacentAreaCell (long area, long adjacentArea, long& cellRow, long& cellCol) {
 
 	for (long i = 0; i < areas[area].numDoors; i++) {
-		long doorIndex = areas[area].doors[i].doorIndex;
-		long doorSide = areas[area].doors[i].doorSide;
+		long doorIndex = areas_doors[area][i].doorIndex;
+		long doorSide = areas_doors[area][i].doorSide;
 		if (doors[doorIndex].area[doorSide % 1] == adjacentArea) {
 			if ((doors[doorIndex].area[0] != area) && (doors[doorIndex].area[1] != area))
 				STOP(("bad adjacent area door", 0));
@@ -3100,6 +3119,7 @@ long GlobalMap::build (MissionMapCellInfo* mapData) {
 void GlobalMap::setStartDoor (long startArea) {
 
 	GlobalMapDoorPtr startDoor = &doors[numDoors + DOOR_OFFSET_START];
+	const DoorInfoLinksPtr& startDoor_links = doors_links[numDoors + DOOR_OFFSET_START];
 	startDoor->row = 0;
 	startDoor->col = 0;
 	startDoor->length = 0;
@@ -3118,9 +3138,10 @@ void GlobalMap::setStartDoor (long startArea) {
 	for (long curLink = 0; curLink < startDoor->numLinks[0]; curLink++) {
 		//---------------------------------------------
 		// Point the goal "door" to its area's doors...
-		long doorIndex = areas[startArea].doors[curLink].doorIndex;
-		long doorSide = areas[startArea].doors[curLink].doorSide;
-		GlobalMapDoorPtr curDoor = &doors[areas[startArea].doors[curLink].doorIndex];
+		const long doorIndex = areas_doors[startArea][curLink].doorIndex;
+		const long doorSide = areas_doors[startArea][curLink].doorSide;
+		GlobalMapDoorPtr curDoor = &doors[doorIndex];
+		const DoorInfoLinksPtr& curDoor_links = doors_links[doorIndex];
 		long costSum = 1;
 		if (startCell[0] > -1) {
 			if (startCell[0] > curDoor->row)
@@ -3133,17 +3154,29 @@ void GlobalMap::setStartDoor (long startArea) {
 			else
 				costSum += (curDoor->col - startCell[1]);
 		}
-		startDoor->links[0][curLink].doorIndex = doorIndex;
-		startDoor->links[0][curLink].doorSide = doorSide;
-		startDoor->links[0][curLink].cost = costSum;
-		startDoor->links[0][curLink].openCost = costSum;
+
+		//startDoor->links[0][curLink].doorIndex = doorIndex;
+		//startDoor->links[0][curLink].doorSide = doorSide;
+		//startDoor->links[0][curLink].cost = costSum;
+		//startDoor->links[0][curLink].openCost = costSum;
+        
+		startDoor_links[0][curLink].doorIndex = doorIndex;
+		startDoor_links[0][curLink].doorSide = doorSide;
+		startDoor_links[0][curLink].cost = costSum;
+		startDoor_links[0][curLink].openCost = costSum;
 		
 		//----------------------------------------------------
 		// Make sure this area door points to the goal door...
-		curDoor->links[doorSide][curDoor->numLinks[doorSide]].doorIndex = numDoors + DOOR_OFFSET_START;
-		curDoor->links[doorSide][curDoor->numLinks[doorSide]].doorSide = 0;
-		curDoor->links[doorSide][curDoor->numLinks[doorSide]].cost = costSum;
-		curDoor->links[doorSide][curDoor->numLinks[doorSide]].openCost = costSum;
+		//curDoor->links[doorSide][curDoor->numLinks[doorSide]].doorIndex = numDoors + DOOR_OFFSET_START;
+		//curDoor->links[doorSide][curDoor->numLinks[doorSide]].doorSide = 0;
+		//curDoor->links[doorSide][curDoor->numLinks[doorSide]].cost = costSum;
+		//curDoor->links[doorSide][curDoor->numLinks[doorSide]].openCost = costSum;
+
+		curDoor_links[doorSide][curDoor->numLinks[doorSide]].doorIndex = numDoors + DOOR_OFFSET_START;
+		curDoor_links[doorSide][curDoor->numLinks[doorSide]].doorSide = 0;
+		curDoor_links[doorSide][curDoor->numLinks[doorSide]].cost = costSum;
+		curDoor_links[doorSide][curDoor->numLinks[doorSide]].openCost = costSum;
+
 		curDoor->numLinks[doorSide]++;
 	}
 
@@ -3156,8 +3189,8 @@ void GlobalMap::resetStartDoor (long startArea) {
 	GlobalMapDoorPtr startDoor = &doors[numDoors + DOOR_OFFSET_START];
 	
 	for (long curLink = 0; curLink < startDoor->numLinks[0]; curLink++) {
-		long doorSide = areas[startArea].doors[curLink].doorSide;
-		doors[areas[startArea].doors[curLink].doorIndex].numLinks[doorSide]--;
+		long doorSide = areas_doors[startArea][curLink].doorSide;
+		doors[areas_doors[startArea][curLink].doorIndex].numLinks[doorSide]--;
 	}
 }
 
@@ -3173,9 +3206,10 @@ void GlobalMap::setAreaTeamID (long area, char teamID) {
 		return;
 
 	GlobalMapAreaPtr curArea = &areas[area];
+	const DoorInfoPtr curArea_doors = areas_doors[area];
 	curArea->teamID = teamID;
 	for (long d = 0; d < curArea->numDoors; d++) {
-		doors[curArea->doors[d].doorIndex].teamID = teamID;
+		doors[curArea_doors[d].doorIndex].teamID = teamID;
 	}
 	//opens = true;
 }
@@ -3201,6 +3235,7 @@ void GlobalMap::setGoalDoor (long goalArea) {
 	}
 
 	GlobalMapDoorPtr goalDoor = &doors[numDoors + DOOR_OFFSET_GOAL];
+	DoorInfoLinksPtr& goalDoor_links = doors_links[numDoors + DOOR_OFFSET_GOAL];
 
 	goalSector[0] = areas[goalArea].sectorR;
 	goalSector[1] = areas[goalArea].sectorC;
@@ -3222,10 +3257,11 @@ void GlobalMap::setGoalDoor (long goalArea) {
 	for (long curLink = 0; curLink < goalDoor->numLinks[0]; curLink++) {
 		//---------------------------------------------
 		// Point the goal "door" to its area's doors...
-		long doorIndex = areas[goalArea].doors[curLink].doorIndex;
-		long doorSide = areas[goalArea].doors[curLink].doorSide;
+		long doorIndex = areas_doors[goalArea][curLink].doorIndex;
+		long doorSide = areas_doors[goalArea][curLink].doorSide;
 		gosASSERT((doorIndex >= 0) && (doorIndex < (numDoors + NUM_DOOR_OFFSETS)));
 		GlobalMapDoorPtr curDoor = &doors[doorIndex];
+	    DoorInfoLinksPtr& curDoor_links = doors_links[doorIndex];
 		long costSum = 1;
 		if (goalCell[0] > -1) {
 			if (goalCell[0] > curDoor->row)
@@ -3238,17 +3274,17 @@ void GlobalMap::setGoalDoor (long goalArea) {
 			else
 				costSum += (curDoor->col - goalCell[1]);
 		}
-		goalDoor->links[0][curLink].doorIndex = doorIndex;
-		goalDoor->links[0][curLink].doorSide = doorSide;
-		goalDoor->links[0][curLink].cost = costSum;
-		goalDoor->links[0][curLink].openCost = costSum;
+		goalDoor_links[0][curLink].doorIndex = doorIndex;
+		goalDoor_links[0][curLink].doorSide = doorSide;
+		goalDoor_links[0][curLink].cost = costSum;
+		goalDoor_links[0][curLink].openCost = costSum;
 		
 		//----------------------------------------------------
 		// Make sure this area door points to the goal door...
-		curDoor->links[doorSide][curDoor->numLinks[doorSide]].doorIndex = numDoors + DOOR_OFFSET_GOAL;
-		curDoor->links[doorSide][curDoor->numLinks[doorSide]].doorSide = 0;
-		curDoor->links[doorSide][curDoor->numLinks[doorSide]].cost = costSum;
-		curDoor->links[doorSide][curDoor->numLinks[doorSide]].openCost = costSum;
+		curDoor_links[doorSide][curDoor->numLinks[doorSide]].doorIndex = numDoors + DOOR_OFFSET_GOAL;
+		curDoor_links[doorSide][curDoor->numLinks[doorSide]].doorSide = 0;
+		curDoor_links[doorSide][curDoor->numLinks[doorSide]].cost = costSum;
+		curDoor_links[doorSide][curDoor->numLinks[doorSide]].openCost = costSum;
 		curDoor->numLinks[doorSide]++;
 	}
 }
@@ -3260,8 +3296,8 @@ void GlobalMap::resetGoalDoor (long goalArea) {
 	GlobalMapDoorPtr goalDoor = &doors[numDoors + DOOR_OFFSET_GOAL];
 	
 	for (long curLink = 0; curLink < goalDoor->numLinks[0]; curLink++) {
-		long doorSide = areas[goalArea].doors[curLink].doorSide;
-		doors[areas[goalArea].doors[curLink].doorIndex].numLinks[doorSide]--;
+		long doorSide = areas_doors[goalArea][curLink].doorSide;
+		doors[areas_doors[goalArea][curLink].doorIndex].numLinks[doorSide]--;
 	}
 }
 
@@ -3296,6 +3332,7 @@ inline void GlobalMap::propogateCost (long door, long cost, long fromAreaIndex, 
 	gosASSERT((door >= 0) && (door < (numDoors + NUM_DOOR_OFFSETS)) && ((fromAreaIndex == 0) || (fromAreaIndex == 1)));
 
 	GlobalMapDoorPtr curMapDoor = &doors[door];
+	const DoorInfoLinksPtr& curMapDoor_links = doors_links[door];
 	if (curMapDoor->g > (g + cost)) {
 		curMapDoor->g = g + cost;
 		curMapDoor->fPrime = curMapDoor->g + curMapDoor->hPrime;
@@ -3312,10 +3349,10 @@ inline void GlobalMap::propogateCost (long door, long cost, long fromAreaIndex, 
 			long toAreaIndex = 1 - fromAreaIndex;
 			long numLinks = curMapDoor->numLinks[toAreaIndex];
 			for (long curLink = 0; curLink < numLinks; curLink++) {
-				long succDoor = curMapDoor->links[toAreaIndex][curLink].doorIndex;
+				long succDoor = curMapDoor_links[toAreaIndex][curLink].doorIndex;
 				gosASSERT((succDoor >= 0) && (succDoor < numDoors + NUM_DOOR_OFFSETS));
 				GlobalMapDoorPtr succMapDoor = &doors[succDoor];
-				long succDoorCost = curMapDoor->links[toAreaIndex][curLink].cost;
+				long succDoorCost = curMapDoor_links[toAreaIndex][curLink].cost;
 				if (useClosedAreas) {
 					if ((succMapDoor->teamID > -1) && (succMapDoor->teamID != moverTeamID))
 						succDoorCost = 1000;
@@ -3474,6 +3511,7 @@ long GlobalMap::calcPath (long startArea,
 		openList->remove(bestPQNode);
 		long bestDoor = bestPQNode.id;
 		GlobalMapDoorPtr bestMapDoor = &doors[bestDoor];
+		const DoorInfoLinksPtr& bestMapDoor_links = doors_links[bestDoor];
 		bestMapDoor->flags &= (MOVEFLAG_OPEN ^ 0xFFFFFFFF);
 
 		long bestDoorG = bestMapDoor->g;
@@ -3510,7 +3548,7 @@ long GlobalMap::calcPath (long startArea,
 			
 			//--------------------------
 			// Now, process this door...
-			long succDoor = bestMapDoor->links[toAreaIndex][curLink].doorIndex;
+			long succDoor = bestMapDoor_links[toAreaIndex][curLink].doorIndex;
 			gosASSERT((succDoor >= 0) && (succDoor < numDoors + NUM_DOOR_OFFSETS));
 			GlobalMapDoorPtr succMapDoor = &doors[succDoor];
 
@@ -3520,7 +3558,7 @@ long GlobalMap::calcPath (long startArea,
 				log->write(s);
 			}
 
-			long succDoorCost = bestMapDoor->links[toAreaIndex][curLink].cost;
+			long succDoorCost = bestMapDoor_links[toAreaIndex][curLink].cost;
 			//----------------------------------------------------------------------------
 			// If this is an aligned door, make it more expensive for unfriendly movers...
 			if (useClosedAreas) {
@@ -3708,10 +3746,10 @@ long GlobalMap::calcPath (long startArea,
 
 long GlobalMap::calcPath (Stuff::Vector3D start, Stuff::Vector3D goal, GlobalPathStepPtr path) {
 
-	long startR, startC;
+	int startR, startC;
 	land->worldToCell(start, startR, startC);
 
-	long goalR, goalC;
+	int goalR, goalC;
 	land->worldToCell(goal, goalR, goalC);
 
 	long numSteps = calcPath(calcArea(startR, startC), calcArea(goalR, goalC), path, startR, startC, goalR, goalC);
@@ -3741,15 +3779,17 @@ void GlobalMap::closeArea (long area) {
 		return;
 
 	GlobalMapAreaPtr closedArea = &areas[area];
+    const DoorInfoPtr& closedArea_doors = areas_doors[area];
 	closedArea->open = false;
 	for (long d = 0; d < closedArea->numDoors; d++)
-		closeDoor(closedArea->doors[d].doorIndex);
+		closeDoor(closedArea_doors[d].doorIndex);
 
 	for (long i = 0; i < closedArea->numDoors; i++) {
-		GlobalMapDoorPtr curDoor = &doors[closedArea->doors[i].doorIndex];
-		long doorSide = closedArea->doors[i].doorSide;
+		GlobalMapDoorPtr curDoor = &doors[closedArea_doors[i].doorIndex];
+		DoorInfoLinksPtr& curDoor_links = doors_links[closedArea_doors[i].doorIndex];
+		long doorSide = closedArea_doors[i].doorSide;
 		for (long j = 0; j < curDoor->numLinks[doorSide]; j++)
-			curDoor->links[doorSide][j].cost = 1000;
+			curDoor_links[doorSide][j].cost = 1000;
 	}
 
 	closes = true;
@@ -3763,19 +3803,22 @@ void GlobalMap::openArea (long area) {
 		return;
 
 	GlobalMapAreaPtr openedArea = &areas[area];
+    const DoorInfoPtr& openedArea_doors = areas_doors[area];
+
 	openedArea->open = true;
 	for (long d = 0; d < openedArea->numDoors; d++) {
-		long areaSide1 = doors[openedArea->doors[d].doorIndex].area[0];
-		long areaSide2 = doors[openedArea->doors[d].doorIndex].area[1];
+		long areaSide1 = doors[openedArea_doors[d].doorIndex].area[0];
+		long areaSide2 = doors[openedArea_doors[d].doorIndex].area[1];
 		if (!isClosedArea(areaSide1) && !isClosedArea(areaSide2))
-			openDoor(openedArea->doors[d].doorIndex);
+			openDoor(openedArea_doors[d].doorIndex);
 	}
 
 	for (long i = 0; i < openedArea->numDoors; i++) {
-		GlobalMapDoorPtr curDoor = &doors[openedArea->doors[i].doorIndex];
-		long doorSide = openedArea->doors[i].doorSide;
+		GlobalMapDoorPtr curDoor = &doors[openedArea_doors[i].doorIndex];
+		DoorInfoLinksPtr& curDoor_links = doors_links[openedArea_doors[i].doorIndex];
+		long doorSide = openedArea_doors[i].doorSide;
 		for (long j = 0; j < curDoor->numLinks[doorSide]; j++)
-			curDoor->links[doorSide][j].cost = curDoor->links[doorSide][j].openCost;
+			curDoor_links[doorSide][j].cost = curDoor_links[doorSide][j].openCost;
 	}
 
 	opens = true;
@@ -3831,32 +3874,34 @@ void GlobalMap::destroy (void) {
 	if (areas) {
 		if (!doorInfos) {
 			for (long i = 0; i < (numAreas + 1); i++) {
-				if (areas[i].cellsCovered) {
-					systemHeap->Free(areas[i].cellsCovered);
-					areas[i].cellsCovered = NULL;
+				if (areas_cellsCovered[i]) {
+					systemHeap->Free(areas_cellsCovered[i]);
+				    areas_cellsCovered[i] = NULL;
 				}
-				if (areas[i].doors) {
-					systemHeap->Free(areas[i].doors);
-					areas[i].doors = NULL;
+				if (areas_doors[i]) {
+					systemHeap->Free(areas_doors[i]);
+					areas_doors[i] = NULL;
 				}
 			}
 		}
 		systemHeap->Free(areas);
 		areas = NULL;
+        areas_doors = NULL;
 	}
 
 	if (doors) {
 		if (!doorLinks) {
 			for (long i = 0; i < (numDoors + NUM_DOOR_OFFSETS); i++)
 				for (long s = 0; s < 2; s++) {
-					if (doors[i].links[s]) {
-						systemHeap->Free(doors[i].links[s]);
-						doors[i].links[s] = NULL;
+					if (doors_links[i][s]) {
+						systemHeap->Free(doors_links[i][s]);
+						doors_links[i][s] = NULL;
 					}
 				}
 		}
 		systemHeap->Free(doors);
 		doors = NULL;
+        doors_links = NULL;
 	}
 
 	if (doorInfos) {
@@ -3907,8 +3952,8 @@ bool GlobalMap::toggleLog (void) {
 					for (long j = 0; j < map->doors[i].numLinks[side]; j++) {
 						sprintf(s, "          link %03d, to door %05d, cost %d",
 							j,
-							map->doors[i].links[side][j].doorIndex,
-							map->doors[i].links[side][j].cost);
+							map->doors_links[i][side][j].doorIndex,
+							map->doors_links[i][side][j].cost);
 						log->write(s); 
 					}
 				}
@@ -3925,9 +3970,10 @@ bool GlobalMap::toggleLog (void) {
 				sprintf(s, "     %s", typeString[map->areas[i].type]);
 				log->write(s);
 				for (long d = 0; d < map->areas[i].numDoors; d++) {
+                    const DoorInfo& di = map->areas_doors[i][d];
 					sprintf(s, "     door %03d is %d (%d:%d & %d) ",
-						d, map->areas[i].doors[d].doorIndex, map->areas[i].doors[d].doorSide,
-						map->doors[map->areas[i].doors[d].doorIndex].area[0], map->doors[map->areas[i].doors[d].doorIndex].area[1]);
+						d, di.doorIndex, di.doorSide,
+						map->doors[di.doorIndex].area[0], map->doors[di.doorIndex].area[1]);
 					log->write(s);
 				}
 				
@@ -3975,29 +4021,29 @@ void MoveMap::init (long maxW, long maxH) {
 	map = (MoveMapNodePtr)systemHeap->Malloc(mapByteSize);
 	gosASSERT(map != NULL);
 
-	mapRowStartTable = (long*)systemHeap->Malloc(maxHeight * sizeof(long));
+	mapRowStartTable = (int*)systemHeap->Malloc(maxHeight * sizeof(int));
 	gosASSERT(mapRowStartTable != NULL);
 	for (long r = 0; r < maxHeight; r++)
 		mapRowStartTable[r] = r * maxWidth;
 
-	mapRowTable = (long*)systemHeap->Malloc(maxHeight * maxWidth * sizeof(long));
+	mapRowTable = (int*)systemHeap->Malloc(maxHeight * maxWidth * sizeof(int));
 	gosASSERT(mapRowTable != NULL);
-	mapColTable = (long*)systemHeap->Malloc(maxHeight * maxWidth * sizeof(long));
+	mapColTable = (int*)systemHeap->Malloc(maxHeight * maxWidth * sizeof(int));
 	gosASSERT(mapColTable != NULL);
 	for (int r = 0; r < maxHeight; r++)
-		for (long c = 0; c < maxWidth; c++) {
-			long index = mapRowStartTable[r] + c;
+		for (int c = 0; c < maxWidth; c++) {
+			int index = mapRowStartTable[r] + c;
 			mapRowTable[index] = r;
 			mapColTable[index] = c;
 		}
 
 	for (int r = 0; r < maxHeight; r++)
-		for (long c = 0; c < maxWidth; c++) {
-			long mapCellIndex = r * maxWidth + c;
-			for (long d = 0; d < NUM_ADJ_CELLS; d++) {
-				long indexStart = d * 2;
-				long adjRow = r + cellShift[indexStart];
-				long adjCol = c + cellShift[indexStart + 1];
+		for (int c = 0; c < maxWidth; c++) {
+			int mapCellIndex = r * maxWidth + c;
+			for (int d = 0; d < NUM_ADJ_CELLS; d++) {
+				int indexStart = d * 2;
+				int adjRow = r + cellShift[indexStart];
+				int adjCol = c + cellShift[indexStart + 1];
 				if (inMapBounds(adjRow, adjCol, height, width))
 					map[mapCellIndex].adjCells[d] = adjRow * maxWidth + adjCol;
 				else
@@ -4010,7 +4056,7 @@ void MoveMap::init (long maxW, long maxH) {
 	for (long i = 0; i < DISTANCE_TABLE_DIM; i++)
 		for (long j = 0; j < DISTANCE_TABLE_DIM; j++) {
 			distanceFloat[i][j] = agsqrt(i, j) * cellLength;
-			distanceLong[i][j] = (long)distanceFloat[i][j];
+			distanceInt[i][j] = (int)distanceFloat[i][j];
 		}
 
 	clear();
@@ -4020,9 +4066,9 @@ void MoveMap::init (long maxW, long maxH) {
 
 void MoveMap::clear (void) {
 
-	long numMapCells = maxWidth * height;
-	long initHPrime = ZeroHPrime ? 0 : HPRIME_NOT_CALCED;
-	for (long i = 0; i < numMapCells; i++) {
+	int numMapCells = maxWidth * height;
+	int initHPrime = ZeroHPrime ? 0 : HPRIME_NOT_CALCED;
+	for (int i = 0; i < numMapCells; i++) {
 		MoveMapNodePtr node = &map[i];
 		//------------------------------------------------
 		// DON'T NEED TO SET THIS SINCE IS SET IN SETUP...
@@ -4147,7 +4193,7 @@ inline long MoveMap::markGoals (Stuff::Vector3D finalGoal) {
 	//--------------------------------------
 	// First, mark the blocked goal cells...
 	static char doorCellState[1024];
-	for (long j = 0; j < GlobalMoveMap[moveLevel]->doors[door].length; j++)
+	for (int j = 0; j < GlobalMoveMap[moveLevel]->doors[door].length; j++)
 		doorCellState[j] = 1;
 
 	if (blockedDoorCallback)
@@ -4156,21 +4202,21 @@ inline long MoveMap::markGoals (Stuff::Vector3D finalGoal) {
 	//-------------------------------------------------------------------------
 	// Ultimately, we should do this conversion once for the finalGoal and then
 	// store it in the moveOrders data...
-	long finalGoalR, finalGoalC;
+	int finalGoalR, finalGoalC;
 	land->worldToCell(finalGoal, finalGoalR, finalGoalC);
 	//-----------------------------------------
 	// Localize the coords for this move map...
 	finalGoalR -= ULr;
 	finalGoalC -= ULc;
 
-	long doorLength = GlobalMoveMap[moveLevel]->doors[door].length;
+	int doorLength = GlobalMoveMap[moveLevel]->doors[door].length;
 
-	long numGoalCells = 0;
+	int numGoalCells = 0;
 	if ((doorDirection == 0) || (doorDirection == 2)) {
 		//--------------------------------
 		// Mark the door cells as goals...
-		long cellR = goalR;
-		long cellC = goalC - (doorLength / 2);
+		int cellR = goalR;
+		int cellC = goalC - (doorLength / 2);
 		bool nextToGoal = false;
 		if (doorSide == 0) {
 			if (finalGoalR == (cellR + 1))
@@ -4277,21 +4323,21 @@ inline long MoveMap::markEscapeGoals (Stuff::Vector3D finalGoal) {
 	//-------------------------------------------------------------------------
 	// Ultimately, we should do this conversion once for the finalGoal and then
 	// store it in the moveOrders data...
-	long finalGoalR, finalGoalC;
+	int finalGoalR, finalGoalC;
 	land->worldToCell(finalGoal, finalGoalR, finalGoalC);
-	long finalGoalArea = GlobalMoveMap[moveLevel]->calcArea(finalGoalR, finalGoalC);
+	int finalGoalArea = GlobalMoveMap[moveLevel]->calcArea(finalGoalR, finalGoalC);
 
 	//------------------------------------------------------------------------
 	// For each tile, mark its cells as valid goals if:
 	//		1) the tile's areaId == the areaId of the finalGoal
 	//		2) OR, if a LR path exists between the tile and the finalGoal tile
-	long cellIndex = 0;
-	for (long row = 0; row < height; row++)
-		for (long col = 0; col < width; col++) {
+	int cellIndex = 0;
+	for (int row = 0; row < height; row++)
+		for (int col = 0; col < width; col++) {
 			if (GameMap->inBounds(ULr + row, ULc + col)) {
-				long curArea = GlobalMoveMap[moveLevel]->calcArea(ULr + row, ULc + col);
-				long confidence;
-				long numLRSteps = GlobalMoveMap[moveLevel]->getPathCost(curArea, finalGoalArea, false, confidence, true);
+				int curArea = GlobalMoveMap[moveLevel]->calcArea(ULr + row, ULc + col);
+				int confidence;
+				int numLRSteps = GlobalMoveMap[moveLevel]->getPathCost(curArea, finalGoalArea, false, confidence, true);
 				bool validGoal = (numLRSteps > 0);
 				if (validGoal)
 					map[cellIndex].setFlag(MOVEFLAG_GOAL);

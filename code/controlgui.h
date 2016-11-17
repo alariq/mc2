@@ -163,7 +163,7 @@ class ControlGui
 		bool isChatting() { return bChatting; }
 		
 		//TUTORIAL
-		bool animateTacMap (long buttonId,float timeToScroll,long numFlashes);
+		bool animateTacMap (int buttonId,float timeToScroll,long numFlashes);
 		bool pushButton (long buttonId);
 		bool flashRPTotal (long numFlashes);
 

@@ -197,7 +197,7 @@ bool
 	// Calculate the worst case UV offsets
 	//------------------------------------
 	//
-	max_offset, min_offset;
+	//max_offset, min_offset;
 	m_UOffset.ExpensiveComputeRange(&min_offset, &max_offset);
 	lower += min_offset;
 	upper += max_offset;

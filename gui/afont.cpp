@@ -29,7 +29,7 @@ long aFont::init( const char* newFontName )
 	}
 
 
-	strcpy( path, "assets\\graphics\\" );
+	strcpy( path, "assets" PATH_SEPARATOR "graphics" PATH_SEPARATOR );
 	strcat( path, fontName );
 	_strlwr( path );
 	gosFont = gos_LoadFont( path );

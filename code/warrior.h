@@ -702,10 +702,10 @@ typedef struct _MechWarriorData
 	long					teamId;
 	GameObjectWatchID		vehicleWID;						// Must point to a Mover
 
-	long					numSkillUses[NUM_SKILLS][NUM_COMBAT_STATS];
-	long					numSkillSuccesses[NUM_SKILLS][NUM_COMBAT_STATS];
-	long					numMechKills[NUM_VEHICLE_CLASSES][NUM_COMBAT_STATS];
-	long					numPhysicalAttacks[NUM_PHYSICAL_ATTACKS][NUM_COMBAT_STATS];
+	int					    numSkillUses[NUM_SKILLS][NUM_COMBAT_STATS];
+	int					    numSkillSuccesses[NUM_SKILLS][NUM_COMBAT_STATS];
+	int					    numMechKills[NUM_VEHICLE_CLASSES][NUM_COMBAT_STATS];
+	int					    numPhysicalAttacks[NUM_PHYSICAL_ATTACKS][NUM_COMBAT_STATS];
 	float					skillRank[NUM_SKILLS];
 	float					skillPoints[NUM_SKILLS];
 	char					originalSkills[NUM_SKILLS];
@@ -728,7 +728,7 @@ typedef struct _MechWarriorData
 	float					brainUpdate;
 	float					combatUpdate;
 	float					movementUpdate;
-	long					weaponsStatus[MAX_WEAPONS_PER_MOVER];
+	int                     weaponsStatus[MAX_WEAPONS_PER_MOVER];
 	long					weaponsStatusResult;
 
 	bool					useGoalPlan;
@@ -834,10 +834,10 @@ class MechWarrior {
 
 	public:
 		// Combat Stats and History
-		long					numSkillUses[NUM_SKILLS][NUM_COMBAT_STATS];
-		long					numSkillSuccesses[NUM_SKILLS][NUM_COMBAT_STATS];
-		long					numMechKills[NUM_VEHICLE_CLASSES][NUM_COMBAT_STATS];
-		long					numPhysicalAttacks[NUM_PHYSICAL_ATTACKS][NUM_COMBAT_STATS];
+		int					numSkillUses[NUM_SKILLS][NUM_COMBAT_STATS];
+		int					numSkillSuccesses[NUM_SKILLS][NUM_COMBAT_STATS];
+		int					numMechKills[NUM_VEHICLE_CLASSES][NUM_COMBAT_STATS];
+		int					numPhysicalAttacks[NUM_PHYSICAL_ATTACKS][NUM_COMBAT_STATS];
 		char					skills[NUM_SKILLS];				//Current
 		float					skillRank[NUM_SKILLS];
 		float					skillPoints[NUM_SKILLS];
@@ -870,8 +870,8 @@ class MechWarrior {
 		float					brainUpdate;
 		float					combatUpdate;
 		float					movementUpdate;
-		long					weaponsStatus[MAX_WEAPONS_PER_MOVER];
-		long					weaponsStatusResult;
+		int					weaponsStatus[MAX_WEAPONS_PER_MOVER];
+		int					weaponsStatusResult;
 
 		bool					useGoalPlan;
 		long					mainGoalAction;
@@ -1389,8 +1389,8 @@ class MechWarrior {
 
 		long getVehicleStatus (void);
 
-		long getWeaponsStatus (long* list) {
-			memcpy(list, weaponsStatus, MAX_WEAPONS_PER_MOVER * sizeof(long));
+		long getWeaponsStatus (int* list) {
+			memcpy(list, weaponsStatus, MAX_WEAPONS_PER_MOVER * sizeof(int));
 			return(weaponsStatusResult);
 		}
 
@@ -1452,7 +1452,7 @@ class MechWarrior {
 
 		AttackerRecPtr getAttackerInfo (unsigned long attackerWID);
 
-		long getAttackers (unsigned long* attackerList, float seconds);
+		long getAttackers (unsigned int* attackerList, float seconds);
 
 		long scanOwnVehicle (void);
 
@@ -1868,7 +1868,7 @@ class MechWarrior {
 		// Command/Observation
 		long executeTacticalOrder (TacticalOrderPtr order = NULL);
 
-		long calcWeaponsStatus (GameObjectPtr target, long* weaponList, Stuff::Vector3D* targetPoint = NULL);
+		long calcWeaponsStatus (GameObjectPtr target, int* weaponList, Stuff::Vector3D* targetPoint = NULL);
 
 		void printWeaponsStatus (char* s);
 
@@ -1938,9 +1938,9 @@ class MechWarrior {
 
 		long getBrainState (void);
 
-		long getEventHistory (long alarmCode, long* paramList);
+		long getEventHistory (long alarmCode, int* paramList);
 
-		long getNextEventHistory (long* paramList);
+		long getNextEventHistory (int* paramList);
 
 		//--------------
 		// CORE COMMANDS

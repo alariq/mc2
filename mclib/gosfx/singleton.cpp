@@ -103,25 +103,25 @@ void
 
 //------------------------------------------------------------------------------
 //
-bool 
-	gosFX::Singleton__Specification::IsDataValid(bool fix_data)
+bool gosFX::Singleton__Specification::IsDataValid(bool fix_data)
 {
 
-	Check_Object(this);
-	Stuff::Scalar min,max;
-	m_scale.ExpensiveComputeRange(&min,&max);
-	if( min<0.0f) 
-		if(fix_data)
-		{
-		m_scale.m_ageCurve.SetCurve(1.0f);
-		m_scale.m_seeded = false;
-		m_scale.m_seedCurve.SetCurve(1.0f);
-		PAUSE(("Warning: Curve \"scale\" in Effect \"%s\" Is Out of Range and has been Reset",(char *)m_name));
+    Check_Object(this);
+    Stuff::Scalar min,max;
+    m_scale.ExpensiveComputeRange(&min,&max);
+    if( min<0.0f) {
+        if(fix_data)
+        {
+            m_scale.m_ageCurve.SetCurve(1.0f);
+            m_scale.m_seeded = false;
+            m_scale.m_seedCurve.SetCurve(1.0f);
+            PAUSE(("Warning: Curve \"scale\" in Effect \"%s\" Is Out of Range and has been Reset",(char *)m_name));
 
-		}
-			else
-		return false;
-	return Effect__Specification::IsDataValid(fix_data);
+        }
+        else
+            return false;
+    }
+    return Effect__Specification::IsDataValid(fix_data);
 }
 //------------------------------------------------------------------------------
 //

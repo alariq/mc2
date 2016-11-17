@@ -156,7 +156,7 @@ class GoalManager {
 
 		GoalObjectPtr newGoalObject (void);
 
-		GoalObjectPtr calcGoal (long startCell[2], long goalCell[2]);
+		GoalObjectPtr calcGoal (int startCell[2], int goalCell[2]);
 
 		GoalObjectPtr calcGoal (GameObjectPtr attacker, GameObjectPtr target);
 		

@@ -569,9 +569,9 @@ void execGetContacts (void) {
 	//
 	//-----------------------------------------------------
 
-	long* contactList = ABLi_popIntegerPtr();
-	long contactCriteria = ABLi_popInteger();
-	long sortCriteria = ABLi_popInteger();
+	int* contactList = ABLi_popIntegerPtr();
+	int contactCriteria = ABLi_popInteger();
+	int sortCriteria = ABLi_popInteger();
 	
 	long numContacts = CurObject->getContacts(contactList, contactCriteria, sortCriteria);
 	ABLi_pushInteger(numContacts);
@@ -733,7 +733,7 @@ void execGetContactStatus (void) {
 	//
 	//-----------------------------------------------------
 
-	long* contactTagged = ABLi_popIntegerPtr();
+	int* contactTagged = ABLi_popIntegerPtr();
 
 	*contactTagged = 0;
 
@@ -839,8 +839,8 @@ void execGetTarget (void) {
 
 void execGetWeaponsReady (void) {
 
-	long* weaponList = ABLi_popIntegerPtr();
-	long listSize = ABLi_popInteger();
+	int* weaponList = ABLi_popIntegerPtr();
+	int listSize = ABLi_popInteger();
 
 	long numWeapons = 0;
 	if (CurObject->isMover())
@@ -853,8 +853,8 @@ void execGetWeaponsReady (void) {
 
 void execGetWeaponsLocked (void) {
 
-	long* weaponList = ABLi_popIntegerPtr();
-	long listSize = ABLi_popInteger();
+	int* weaponList = ABLi_popIntegerPtr();
+	int listSize = ABLi_popInteger();
 
 	long numWeapons = 0;
 	if (CurObject->isMover())
@@ -867,8 +867,8 @@ void execGetWeaponsLocked (void) {
 
 void execGetWeaponsInRange (void) {
 
-	long* weaponList = ABLi_popIntegerPtr();
-	long listSize = ABLi_popInteger();
+	int* weaponList = ABLi_popIntegerPtr();
+	int listSize = ABLi_popInteger();
 
 	GameObjectPtr target = CurWarrior->getCurrentTarget();
 	long numWeapons = 0;
@@ -1001,7 +1001,7 @@ void execGetAlarmTriggers (void) {
 	//
 	//-----------------------------------------------------
 
-	long* triggerList = ABLi_popIntegerPtr();
+	int* triggerList = ABLi_popIntegerPtr();
 	ABLi_pushInteger(CurWarrior->getEventHistory(CurAlarm, triggerList));
 }
 
@@ -1112,12 +1112,12 @@ void execGetAttackers (void) {
 	//-----------------------------------------------------
 
 
-	long* attackers = ABLi_popIntegerPtr();
+	int* attackers = ABLi_popIntegerPtr();
 	float seconds = ABLi_popReal();
 
 	long numAttackers = 0;
 	if (CurWarrior)
-		numAttackers = CurWarrior->getAttackers((unsigned long*)attackers, seconds);
+		numAttackers = CurWarrior->getAttackers((unsigned int*)attackers, seconds);
 	ABLi_pushInteger(numAttackers);
 }
 
@@ -1241,7 +1241,7 @@ void execHasMovePath (void) {
 void execSortWeapons (void) {
 
 
-	long* weaponList = ABLi_popIntegerPtr();
+	int* weaponList = ABLi_popIntegerPtr();
 	long listSize = ABLi_popInteger();
 	long sortType = ABLi_popInteger();
 
@@ -1305,7 +1305,7 @@ void execGetUnitMates (void) {
 
 
 	long objectId = ABLi_popInteger();
-	long* mateList = ABLi_popIntegerPtr();
+	int* mateList = ABLi_popIntegerPtr();
 
 	long numObjs = 0;
 	if ((objectId >= MIN_UNIT_PART_ID) && (objectId <= MAX_UNIT_PART_ID)) {
@@ -1355,7 +1355,7 @@ void execGetTacOrder(void) {
 
 	long objectId = ABLi_popInteger();
 	float* time = ABLi_popRealPtr();
-	long* paramList = ABLi_popIntegerPtr();
+	int* paramList = ABLi_popIntegerPtr();
 	
 	long code = 0;
 	if ((objectId >= MIN_UNIT_PART_ID) && (objectId <= MAX_UNIT_PART_ID)) {
@@ -1405,7 +1405,7 @@ void execGetLastTacOrder(void) {
 
 	long objectId = ABLi_popInteger();
 	float* time = ABLi_popRealPtr();
-	long* paramList = ABLi_popIntegerPtr();
+	int* paramList = ABLi_popIntegerPtr();
 	
 	long code = 0;
 	if ((objectId >= MIN_UNIT_PART_ID) && (objectId <= MAX_UNIT_PART_ID)) {
@@ -1444,7 +1444,7 @@ void execGetObjects (void) {
 	//-----------------------------------------------------
 
 	long criteria = ABLi_popInteger();
-	long* objList = ABLi_popIntegerPtr();
+	int* objList = ABLi_popIntegerPtr();
 
 	long numObjects = 0;
 	switch (criteria) {
@@ -2310,7 +2310,7 @@ void execObjectStatusCount (void) {
 	//		Returns: NONE
 
 	long objectId = ABLi_popInteger();
-	long* tallyList = ABLi_popIntegerPtr();
+	int* tallyList = ABLi_popIntegerPtr();
 	
 	if ((objectId >= MIN_UNIT_PART_ID) && (objectId <= MAX_UNIT_PART_ID)) {
 		//--------------------------------------------
@@ -3725,8 +3725,8 @@ void execGetSalvage (void) {
 
 	long objectId = ABLi_popInteger();
 	long itemCount = ABLi_popInteger();
-	long* items = ABLi_popIntegerPtr();
-	long* quantities = ABLi_popIntegerPtr();
+	int* items = ABLi_popIntegerPtr();
+	int* quantities = ABLi_popIntegerPtr();
 
 	for (long i = 0; i < itemCount; i++) {
 		items[i] = -1;
@@ -4847,17 +4847,17 @@ void execPathExists (void) {
 	//
 	//-----------------------------------------------------
 
-	long moverID = ABLi_popInteger();
-	long startRow = ABLi_popInteger();
-	long startCol = ABLi_popInteger();
-	long goalRow = ABLi_popInteger();
-	long goalCol = ABLi_popInteger();
+	int moverID = ABLi_popInteger();
+	int startRow = ABLi_popInteger();
+	int startCol = ABLi_popInteger();
+	int goalRow = ABLi_popInteger();
+	int goalCol = ABLi_popInteger();
 
 	//-------------------------------------------------
 	// For now, assumes we mean the ground level (0)...
-	long startArea = GlobalMoveMap[0]->calcArea(startRow, startCol);
-	long goalArea = GlobalMoveMap[0]->calcArea(goalRow, goalCol);
-	long confidence;
+	int startArea = GlobalMoveMap[0]->calcArea(startRow, startCol);
+	int goalArea = GlobalMoveMap[0]->calcArea(goalRow, goalCol);
+	int confidence;
 	long areaPathCost = GlobalMoveMap[0]->getPathCost(startArea, goalArea, false, confidence, true);
 
 	ABLi_pushInteger(areaPathCost);
@@ -4867,9 +4867,9 @@ void execPathExists (void) {
 
 void execConvertCoords (void) {
 
-	long convertType = ABLi_popInteger();
+	int convertType = ABLi_popInteger();
 	float* worldPos = ABLi_popRealPtr();
-	long* cellPos = ABLi_popIntegerPtr();
+	int* cellPos = ABLi_popIntegerPtr();
 
 	ABLi_pushInteger(0);
 
@@ -5113,7 +5113,7 @@ void execGetNextPilotEvent (void) {
 	//
 	//-----------------------------------------------------
 
-	long* paramList = ABLi_popIntegerPtr();
+	int* paramList = ABLi_popIntegerPtr();
 	
 	long eventID = CurWarrior->getNextEventHistory(paramList);
 
@@ -6181,7 +6181,7 @@ void execRemoveTriggerArea (void) {
 
 void execGetWeapons (void) {
 
-	long* weaponList = ABLi_popIntegerPtr();
+	int* weaponList = ABLi_popIntegerPtr();
 	long infoType = ABLi_popInteger();
 
 	long numWpns = 0;
@@ -6217,7 +6217,7 @@ void execGetWeapons (void) {
 
 void execGetWeaponsStatus (void) {
 
-	long* weaponList = ABLi_popIntegerPtr();
+	int* weaponList = ABLi_popIntegerPtr();
 
 	long status = 0;
 	if (CurObject && CurObject->isMover()) {
@@ -6292,7 +6292,7 @@ void execGetLastScan (void) {
 
 void execGetMapInfo (void) {
 
-	long* mapInfo = ABLi_popIntegerPtr();
+	int* mapInfo = ABLi_popIntegerPtr();
 
 	mapInfo[0] = GameMap->getHeight();
 	mapInfo[1] = GameMap->getWidth();
@@ -6315,7 +6315,7 @@ void execIsOffMap (void) {
 			return;
 		}
 	}
-	long row, col;
+	int row, col;
 	land->worldToCell(pos, row, col);
 	ABLi_pushBoolean(GameMap->getOffMap(row, col) ? true : false);
 }

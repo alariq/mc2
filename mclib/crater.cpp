@@ -149,7 +149,7 @@ long CraterManager::init (long numCraters, unsigned long craterTypeSize, const c
 	for (int i=0;i<numCraterTextures;i++)
 	{
 		char craterName[1024];
-		sprintf(craterName,"defaults\\feet%04d",i);
+		sprintf(craterName,"defaults" PATH_SEPARATOR "feet%04d",i);
 		
 		FullPathFileName craterPath;
 		craterPath.init(texturePath,craterName,".tga");

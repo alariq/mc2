@@ -117,17 +117,17 @@ class WeaponFireChunk {
 	public:
 		
 		char				targetType;
-		long				targetId;
-		long				targetCell[2];
+		int                 targetId;
+		int                 targetCell[2];
 		char				specialType;
-		long				specialId;
+		int                 specialId;
 		unsigned char		weaponIndex;
 		bool				hit;
 		char				entryAngle;
 		char				numMissiles;
 		char				hitLocation;
 
-		unsigned long		data;
+		unsigned int        data;
 
 	public:
 
@@ -424,7 +424,7 @@ class GameObject {
 			return 5000.0f;		//If we somehow miss a object class, KEEP SHOOTING!!!!
 		}
 
-		void getCellPosition (long& cellRow, long& cellCol) {
+		void getCellPosition (int& cellRow, int& cellCol) {
 			cellRow = cellPositionRow;
 			cellCol = cellPositionCol;
 		}
@@ -432,7 +432,7 @@ class GameObject {
 		virtual void handleStaticCollision (void) {
 		}
 		
-		virtual void getBlockAndVertexNumber (long &blockNum, long &vertexNum);
+		virtual void getBlockAndVertexNumber (int &blockNum, int &vertexNum);
 
 		virtual long getTypeHandle (void) {
 			return(typeHandle);
@@ -619,7 +619,7 @@ class GameObject {
 			return(0.0);
 		}
 
-		virtual long getContacts (long* contactList, long contactCriteria, long sortType) {
+		virtual long getContacts (int* contactList, int contactCriteria, int sortType) {
 			return(0);
 		}
 

@@ -1102,16 +1102,16 @@ void BattleMech::handleStaticCollision (void) {
 	{
 		//-----------------------------------------------------
 		// What is our block and vertex number?
-		long blockNumber = 0;
-		long vertexNumber = 0;
+		int blockNumber = 0;
+		int vertexNumber = 0;
 		
 		getBlockAndVertexNumber(blockNumber,vertexNumber);
 
-		long numCollidables = ObjectManager->getObjBlockNumCollidables(blockNumber);
-		long terrainObjHandle = ObjectManager->getObjBlockFirstHandle(blockNumber);
-		long colliderBlockNumber = -1;
-		long colliderVertexNumber = -1;
-		for (long i = 0; i < numCollidables; i++) 
+		int numCollidables = ObjectManager->getObjBlockNumCollidables(blockNumber);
+		int terrainObjHandle = ObjectManager->getObjBlockFirstHandle(blockNumber);
+		int colliderBlockNumber = -1;
+		int colliderVertexNumber = -1;
+		for (int i = 0; i < numCollidables; i++) 
 		{
 			GameObjectPtr terrainObj = ObjectManager->get(terrainObjHandle + i);
 			bool isTangible = false;
@@ -1395,7 +1395,7 @@ long BattleMech::init (DWORD variantNum)
 	char thisMechName[128];
 	mechFile->readString(3,2,thisMechName,127);
 	strncpy(name, thisMechName, MAXLEN_MOVER_NAME - 1);
-	name[MAXLEN_MOVER_NAME] = '\0';
+	name[MAXLEN_MOVER_NAME-1] = '\0';
 
 	mechFile->readLong(10,5,chassisBR);
 
@@ -2662,7 +2662,8 @@ void BattleMech::resetComponents (long totalComponents, long *componentList)
 	maxWeaponDamage = calcMaxTargetDamage();
 	
 	// local variable needs to be set for class
-	numJumpJets = numJumpJets;
+    //sebi: no really...
+	//numJumpJets = numJumpJets;
 }
 
 long BattleMech::init (FitIniFile* mechFile) {
@@ -2698,7 +2699,7 @@ long BattleMech::init (FitIniFile* mechFile) {
 	char thisMechName[128];
 	result = mechFile->readIdString ("Name", thisMechName, 127);
 	strncpy(name, thisMechName, MAXLEN_MOVER_NAME - 1);
-	name[MAXLEN_MOVER_NAME] = '\0'; 
+	name[MAXLEN_MOVER_NAME-1] = '\0'; 
 
 	result = mechFile->readIdLong("ChassisBR", chassisBR);
 	if (result != NO_ERR)
@@ -5380,14 +5381,14 @@ bool BattleMech::crashAvoidanceSystem (void) {
 
 	//---------------------------------------------------------------------
 	// Is this new position in a pathlocked area? If so, put on the brakes!
-	long cellR, cellC;
+	int cellR, cellC;
 	land->worldToCell(newPosition, cellR, cellC);
 	bool reachedEnd;
 	bool blockReachedEnd;
 	//-------------------------
 	// To avoid corner stops...
 	bool clippingCorner = false;
-	long dir = path->getDirection(path->curStep);
+	int dir = path->getDirection(path->curStep);
 	if ((dir == 1) || (dir == 3) || (dir == 5) || (dir == 7)) {
 		bool firstCornerClipped = getAdjacentCellPathLocked((moveLevel == 2), cellPositionRow, cellPositionCol, adjClippedCell[dir][0]);
 		bool secondCornerClipped = getAdjacentCellPathLocked((moveLevel == 2), cellPositionRow, cellPositionCol, adjClippedCell[dir][1]);
@@ -6228,7 +6229,7 @@ long BattleMech::update (void)
 	appearance->setVisibility(true,true);
 
 	//Start and stop the water wakes here.
-	long watercellR, watercellC;
+	int watercellR, watercellC;
 	land->worldToCell(position,watercellR, watercellC);
 	if (GameMap->getDeepWater(watercellR, watercellC) || 
 		GameMap->getShallowWater(watercellR, watercellC))
@@ -7140,7 +7141,7 @@ long BattleMech::buildStatusChunk (void) {
 	if (pilot) {
 		if (inJump) {
 			statusChunk.jumpOrder = true;
-			long cellRC[2];
+			int cellRC[2];
 			land->worldToCell(jumpGoal, cellRC[0], cellRC[1]);
 			statusChunk.targetCellRC[0] = cellRC[0];
 			statusChunk.targetCellRC[1] = cellRC[1];
@@ -8134,7 +8135,7 @@ long BattleMech::fireWeapon (GameObjectPtr target, float targetTime, long weapon
 				{
 					//-----------------------------------------
 					// Check for Mine hit and MOVE ON!!!
-					long cellRow, cellCol;
+					int cellRow, cellCol;
 					land->worldToCell(*targetPoint, cellRow, cellCol);
 					if (GameMap->getMine(cellRow, cellCol) == 1) 
 					{
@@ -8218,7 +8219,7 @@ long BattleMech::fireWeapon (GameObjectPtr target, float targetTime, long weapon
 				{
 					//-----------------------------------------
 					// Check for Mine hit and MOVE ON!!!
-					long cellRow, cellCol;
+					int cellRow, cellCol;
 
 					land->worldToCell(*targetPoint, cellRow, cellCol);
 					if (GameMap->getMine(cellRow, cellCol) == 1)
@@ -8364,7 +8365,7 @@ long BattleMech::fireWeapon (GameObjectPtr target, float targetTime, long weapon
 					{
 						//-----------------------------------------
 						// Check for Mine hit and MOVE ON!!!
-						long  cellRow, cellCol;
+						int  cellRow, cellCol;
 
 						land->worldToCell(positionOffset, cellRow, cellCol);
 						if (GameMap->getMine(cellRow, cellCol) == 1)
@@ -8474,7 +8475,7 @@ long BattleMech::fireWeapon (GameObjectPtr target, float targetTime, long weapon
 				{
 					//-----------------------------------------
 					// Check for Mine hit and MOVE ON!!!
-					long  cellRow, cellCol;
+					int  cellRow, cellCol;
 
 					land->worldToCell(positionOffset, cellRow, cellCol);
 					if (GameMap->getMine(cellRow, cellCol) == 1)
@@ -8589,7 +8590,7 @@ long BattleMech::handleWeaponFire (long weaponIndex,
 					{
 						//-----------------------------------------
 						// Check for Mine hit and MOVE ON!!!
-						long cellRow, cellCol;
+						int cellRow, cellCol;
 						land->worldToCell(*targetPoint, cellRow, cellCol);
 						if (GameMap->getMine(cellRow, cellCol) == 1)
 						{
@@ -8646,7 +8647,7 @@ long BattleMech::handleWeaponFire (long weaponIndex,
 				{
 					//-----------------------------------------
 					// Check for Mine hit and MOVE ON!!!
-					long  cellRow, cellCol;
+					int  cellRow, cellCol;
 					land->worldToCell(*targetPoint, cellRow, cellCol);
 					if (GameMap->getMine(cellRow, cellCol) == 1)
 					{
@@ -8699,7 +8700,7 @@ long BattleMech::handleWeaponFire (long weaponIndex,
 					{
 						//-----------------------------------------
 						// Check for Mine hit and MOVE ON!!!
-						long cellRow, cellCol;
+						int cellRow, cellCol;
 						land->worldToCell(*targetPoint, cellRow, cellCol);
 						if (GameMap->getMine(cellRow, cellCol) == 1) 
 						{
@@ -8740,7 +8741,7 @@ long BattleMech::handleWeaponFire (long weaponIndex,
 				{
 					//-----------------------------------------
 					// Check for Mine hit and MOVE ON!!!
-					long cellRow, cellCol;
+					int cellRow, cellCol;
 					land->worldToCell(*targetPoint, cellRow, cellCol);
 					if (GameMap->getMine(cellRow, cellCol) == 1) 
 					{

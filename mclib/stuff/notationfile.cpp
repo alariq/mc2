@@ -397,7 +397,7 @@ void
 		//-----------------------
 		//
 		p = buffer + strlen(buffer) - 1;
-		while (p >= buffer && *p==' ' || *p=='\t')
+		while (p >= buffer && (*p==' ' || *p=='\t'))
 			*p-- = '\0';
 		p = buffer;
 		#if defined(_ARMOR)
@@ -682,6 +682,8 @@ void
 	Check_Pointer(buffer);
 	Check_Pointer(page);
 	Check_Object(macro_tree);
+
+    PAUSE(("")); // sebi
 
 	//
 	//-------------------------

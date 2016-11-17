@@ -124,7 +124,7 @@ class Team {
 
 		bool isContact (GameObjectPtr looker, MoverPtr mover, long contactCriteria);
 
-		virtual long getContacts (GameObjectPtr looker, long* contactList, long contactCriteria, long sortType);
+		virtual long getContacts (GameObjectPtr looker, int* contactList, int contactCriteria, int sortType);
 
 		bool hasSensorContact (long teamID);
 
@@ -132,7 +132,7 @@ class Team {
 
 		Stuff::Vector3D calcEscapeVector (MoverPtr mover, float threatRange);
 
-		void statusCount (long* statusTally);
+		void statusCount (int* statusTally);
 
 		void eject (void);
 

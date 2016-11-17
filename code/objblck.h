@@ -82,7 +82,7 @@ struct OldObjData
 	short				pixelOffsetY;	//Distance from vertex 0 of tile.
 	short				vertexNumber;	//Vertex Number in Block.
 	short				blockNumber;	//Which terrain Block.
-	unsigned long		damage;			//Damage
+	unsigned int        damage;			//Damage
 	float				positionX;		//Where, physically is object.  TOO DAMNED HARD TO CALCULATE!!!!!!!!
 	float 				positionY;
 };
@@ -98,10 +98,10 @@ struct ObjData
 
 struct MiscObjectData
 {
-	long				blockNumber;	//Terrain Block I occupy
-	long				vertexNumber;	//Terrain Vertex I occupy
-	long				objectTypeNum;	//ObjectTypeNumber for this overlay tile
-	long				damaged;		//Is this overlay tile damaged or not
+	int				blockNumber;	//Terrain Block I occupy
+	int				vertexNumber;	//Terrain Vertex I occupy
+	int				objectTypeNum;	//ObjectTypeNumber for this overlay tile
+	int				damaged;		//Is this overlay tile damaged or not
 };
 
 #pragma pack()

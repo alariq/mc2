@@ -429,6 +429,7 @@ void MissionInterfaceManager::update (void)
 
 	if (eye && eye->inMovieMode)
 	{
+        SPEW(("DBG", "eye->inMovieMode: %d\n", eye->inMovieMode));
 		drawGUIOn = false;
 		userInput->mouseOff();
 		
@@ -736,7 +737,7 @@ void MissionInterfaceManager::update (void)
 	eye->inverseProject(mouseXY, wPos);
 
 	// find out if this position is passable, has line of sight
-	long cellR, cellC;
+	int cellR, cellC;
 	bool passable = 1;
 	bool lineOfSight = 0;
 	if ( Terrain::IsGameSelectTerrainPosition( wPos ) )
@@ -765,7 +766,7 @@ void MissionInterfaceManager::update (void)
 	
 	//-------------------------------
 	// Update the Debug Status Bar...
-	long row, col;
+	int row, col;
 	land->worldToCell(wPos, row, col);
 	sprintf(DebugStatusBarString, "TIME: %06d, MOUSE: [%d, %d] %d,%d,%d (%.2f, %.2f, %.2f), PATHMGR: %02d(%02d)",
 		(long)scenarioTime,
@@ -839,8 +840,10 @@ void MissionInterfaceManager::update (void)
 	
 	if( useLeftRightMouseProfile ) // using AOE control style
 	{
-		if ( WAYPOINT_KEY == -1 )
-			WAYPOINT_KEY = KEY_LCONTROL;
+        // sebi: WTF??? always false
+		//if ( WAYPOINT_KEY == -1 )
+		//	WAYPOINT_KEY = KEY_LCONTROL;
+
 		commandClicked = rightClicked;
 		selectClicked = !bLeftDouble && !lastUpdateDoubleClick && userInput->leftMouseReleased() && !userInput->getKeyDown( KEY_T) && !isDragging;
 		cameraClicked = gos_GetKeyStatus( KEY_LMENU ) == KEY_HELD;
@@ -865,8 +868,9 @@ void MissionInterfaceManager::update (void)
 		selectClicked = leftClicked && !lastUpdateDoubleClick;
 		cameraClicked = userInput->isRightDrag();
 
-		if ( WAYPOINT_KEY == -1 )
-			WAYPOINT_KEY = KEY_LCONTROL;
+        // sebi: always false
+		//if ( WAYPOINT_KEY == -1 )
+		//	WAYPOINT_KEY = KEY_LCONTROL;
 		if ( moveCameraAround( lineOfSight, passable, ctrlDn, bGui, moverCount, nonMoverCount ) )
 		{
 			bool leftClicked = (!userInput->isLeftDrag() && !userInput->isRightDrag() && userInput->isLeftClick());
@@ -1966,7 +1970,7 @@ void MissionInterfaceManager::doJump()
 	{
 		if (Terrain::IsGameSelectTerrainPosition(wPos))
 		{
-			long cellR, cellC;
+			int cellR, cellC;
 			land->worldToCell(wPos, cellR, cellC);
 			passable = GameMap->getPassable(cellR,cellC);
 		}
@@ -3107,7 +3111,7 @@ void MissionInterfaceManager::initTacMap( PacketFile* file, int packet )
 void MissionInterfaceManager::printDebugInfo()
 {
 	if (userInput->isLeftClick() || userInput->isRightClick()) {
-		long row, col;
+		int row, col;
 		land->worldToCell(wPos, row, col);
 		char debugString[256];
 		if (target)
@@ -3373,7 +3377,7 @@ bool MissionInterfaceManager::moveCameraAround( bool lineOfSight, bool passable,
 	if (cameraClicked)
 	{
 		bRetVal = 1;
-		long mouseXDelta = userInput->getMouseXDelta();
+		int mouseXDelta = userInput->getMouseXDelta();
 		float actualRot = rotationInc * 0.1f * abs(mouseXDelta);
 		if (mouseXDelta > 0)
 		{
@@ -3386,7 +3390,7 @@ bool MissionInterfaceManager::moveCameraAround( bool lineOfSight, bool passable,
 			bRetVal = 1;	
 		}
 		
-		long mouseYDelta = userInput->getMouseYDelta();
+		int mouseYDelta = userInput->getMouseYDelta();
 		float actualTilt = rotationInc * 0.1f * abs(mouseYDelta);
 		if (mouseYDelta > 0)
 		{
@@ -3494,7 +3498,7 @@ bool MissionInterfaceManager::canJumpToWPos()
 	bool passable = 0;
 	if ( Terrain::IsGameSelectTerrainPosition( wPos ) )
 	{
-		long cellR, cellC;
+		int cellR, cellC;
 		land->worldToCell(wPos, cellR, cellC);
 		passable = GameMap->getPassable(cellR,cellC);
 	}
@@ -3642,7 +3646,7 @@ bool MissionInterfaceManager::canAddVehicle( const Stuff::Vector3D& pos )
 
  	if ( paintingVtol[commanderID] )
 		return 0;
-	long tileI, tileJ;
+	int tileI, tileJ;
 	land->worldToTile( pos, tileJ, tileI );
 
 	if ( tileJ > -1 && tileJ < land->realVerticesMapSide 
@@ -3670,7 +3674,7 @@ bool MissionInterfaceManager::canRecover( const Stuff::Vector3D& pos )
  	if ( paintingVtol[commanderID] )
 		return 0;
 		
-	long tileI, tileJ;
+	int tileI, tileJ;
 	land->worldToTile( pos, tileJ, tileI );
 
 	if ( tileJ > -1 && tileJ < land->realVerticesMapSide 
@@ -3859,7 +3863,7 @@ long MissionInterfaceManager::makeTargetCursor( bool lineOfSight, long moverCoun
 				{
 					target = NULL;
 					// find out if this position is passable.  Landbridges kinda are, or they'd be useless.
-					long cellR, cellC;
+					int cellR, cellC;
 					bool passable = 1;
 					bool lineOfSight = 0;
 					if ( Terrain::IsGameSelectTerrainPosition( wPos ) )
@@ -4611,7 +4615,7 @@ int MissionInterfaceManager::togglePause()
 
 int MissionInterfaceManager::togglePauseWithoutMenu()
 {
-	bPausedWithoutMenu;
+	//bPausedWithoutMenu;
 
 	if ( !bPausedWithoutMenu )
 	{
@@ -4750,7 +4754,7 @@ int MissionInterfaceManager::quickDebugInfo() {
 	#ifndef FINAL
 	static double lastTime = 0.0;
 	if ((lastTime + 0.5) < gos_GetElapsedTime()) {
-		long row, col;
+		int row, col;
 		land->worldToCell(wPos, row, col);
 		char debugString[256];
 		if (target)

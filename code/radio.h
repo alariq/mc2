@@ -32,19 +32,49 @@
 //------------------------------------------------------------------------------------------
 #define MAX_FRAGMENTS	16
 #define MAX_RADIOS		256
+/*
+struct RadioData
+{
+	uint32_t        msgId;
+	uint32_t        msgType;
+	uint32_t        noiseId;
+	int32_t         numFragments;
+	//MemoryPtr		data[MAX_FRAGMENTS];
+	DWORD           data_Legacy32BitPtr[MAX_FRAGMENTS];
+	int32_t         dataSize[MAX_FRAGMENTS];
+	//MemoryPtr		noise[MAX_FRAGMENTS];
+	MemoryPtr		noise_Legacy32BitPtr[MAX_FRAGMENTS];
+	int32_t         noiseSize[MAX_FRAGMENTS];
+	//UserHeapPtr		msgHeap;
+	DWORD           msgHeap_Legacy32BitPtr;
+	uint32_t        turnQueued;
+	byte			priority;
+	byte			movieCode;
+	float			expirationDate;
+	//MechWarriorPtr	pilot;
+	DWORD           pilot_Legacy32BitPtr;
+};
+
+struct RadioDataRuntime {
+	MemoryPtr		data[MAX_FRAGMENTS];
+	MemoryPtr		noise[MAX_FRAGMENTS];
+	UserHeapPtr		msgHeap;
+	MechWarriorPtr	pilot;
+};
+*/
 
 struct RadioData
 {
-	unsigned long	msgId;
-	unsigned long	msgType;
-	unsigned long	noiseId;
-	long			numFragments;
+	uint32_t        msgId;
+	uint32_t        msgType;
+	uint32_t        noiseId;
+	int32_t         numFragments;
 	MemoryPtr		data[MAX_FRAGMENTS];
-	long			dataSize[MAX_FRAGMENTS];
+	int32_t         dataSize[MAX_FRAGMENTS];
 	MemoryPtr		noise[MAX_FRAGMENTS];
-	long			noiseSize[MAX_FRAGMENTS];
+	int32_t         noiseSize[MAX_FRAGMENTS];
 	UserHeapPtr		msgHeap;
-	unsigned long	turnQueued;
+	uint32_t        turnQueued;
 	byte			priority;
 	byte			movieCode;
 	float			expirationDate;

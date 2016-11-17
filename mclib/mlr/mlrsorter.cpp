@@ -451,6 +451,9 @@ void
 					break;
 					case MLRState::MultiTextureSpecularMode:
 						gos_SetRenderState( gos_State_Multitexture, gos_Multitexture_SpecularMap );
+                        //sebi: handle no multitexture mode
+                    case MLRState::MultiTextureOffMode:
+						gos_SetRenderState( gos_State_Multitexture, gos_Multitexture_None);
 					break;
 				}
 			}

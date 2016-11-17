@@ -114,7 +114,9 @@ void InfoWindow::init( FitIniFile& file )
 		}
 	}
 
-	memset( skillInfos, 0, sizeof( skillInfos ) );
+    // sebi: WTF??? thank you clang
+	//memset( skillInfos, 0, sizeof( skillInfos ));
+	memset( skillInfos, 0, sizeof( skillInfos ) * 7);
 	memset( buttonData, 0, sizeof( buttonData ) );
 
 

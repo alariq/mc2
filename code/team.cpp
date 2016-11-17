@@ -234,7 +234,7 @@ bool Team::isContact (GameObjectPtr looker, MoverPtr mover, long contactCriteria
 
 //---------------------------------------------------------------------------
 
-long Team::getContacts (GameObjectPtr looker, long* contactList, long contactCriteria, long sortType) {
+long Team::getContacts (GameObjectPtr looker, int* contactList, int contactCriteria, int sortType) {
 
 	return(SensorManager->getTeamSensor(id)->getContacts(looker, contactList, contactCriteria, sortType));
 }
@@ -704,7 +704,7 @@ Stuff::Vector3D Team::calcEscapeVector (MoverPtr mover, float threatRange) {
 
 //---------------------------------------------------------------------------
 
-void Team::statusCount (long* statusTally) {
+void Team::statusCount (int* statusTally) {
 
 	//----------------------------------------------------------
 	// statusTally counts the number of objects in the team with
@@ -1189,7 +1189,7 @@ bool Team::lineOfSight (float startLocal, long mCellRow, long mCellCol, float en
 
 				startHeight += heightLen;
 
-				long curCellRow, curCellCol;
+				int curCellRow, curCellCol;
 				land->worldToCell(currentPos,curCellRow, curCellCol);
 
 				float localElev = (worldUnitsPerMeter * 4.0f * (float)GameMap->getLocalHeight(curCellRow,curCellCol)); 
@@ -1267,8 +1267,8 @@ bool Team::lineOfSight (float startLocal, long mCellRow, long mCellCol, float en
 //---------------------------------------------------------------------------
 bool Team::lineOfSight (Stuff::Vector3D position, Stuff::Vector3D targetPosition, long teamId, float extRad, float startExtRad, bool checkVisibleBits) 
 {
-	long posCellR, posCellC;
-	long tarCellR, tarCellC;
+	int posCellR, posCellC;
+	int tarCellR, tarCellC;
 	land->worldToCell(position, posCellR, posCellC);
 	land->worldToCell(targetPosition, tarCellR, tarCellC);
 	

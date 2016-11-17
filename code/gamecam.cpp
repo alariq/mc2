@@ -437,6 +437,8 @@ inline GameObjectPtr getCamObject (long partId, bool existsOnly)
 
 	if (existsOnly) 
 	{
+        STOP((""));
+        //sebi: will crash if obj==NULL
 		if (obj && 
 			obj->getExists() && 
 			(obj->getCommanderId() == Commander::home->getId()) || 

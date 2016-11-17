@@ -793,7 +793,7 @@ void GameObjectManager::countTerrainObjects (PacketFile* terrainFile, long first
 	File* terrainObjectFile = new File;
 	terrainObjectFile->open( (char*)pBuffer, size );
 	
-	totalObjCount = terrainObjectFile->readLong();
+	totalObjCount = terrainObjectFile->readInt();
 
 	if (totalObjCount)
 	{
@@ -808,24 +808,24 @@ void GameObjectManager::countTerrainObjects (PacketFile* terrainFile, long first
 	ObjDataLoader *data = objData;
 	for ( int i = 0; i < totalObjCount; ++i )
 	{
-		data->objTypeNum = terrainObjectFile->readLong();
+		data->objTypeNum = terrainObjectFile->readInt();
 		data->vector.x = terrainObjectFile->readFloat();
 		data->vector.y = terrainObjectFile->readFloat();
 		data->vector.z = terrainObjectFile->readFloat();
 
 		data->rotation = terrainObjectFile->readFloat();		
-		data->damage = terrainObjectFile->readLong();
+		data->damage = terrainObjectFile->readInt();
 
-		data->teamId = terrainObjectFile->readLong();
-		data->parentId = terrainObjectFile->readLong();
+		data->teamId = terrainObjectFile->readInt();
+		data->parentId = terrainObjectFile->readInt();
 		
 		// padding
-		terrainObjectFile->readLong();
-		terrainObjectFile->readLong();
+		terrainObjectFile->readInt();
+		terrainObjectFile->readInt();
 
 		// convert to block and vertex
-		long tileCol;
-		long tileRow;
+		int tileCol;
+		int tileRow;
 
 		land->worldToTile( data->vector, tileRow, tileCol );
 
@@ -1200,7 +1200,7 @@ void GameObjectManager::addObject (ObjDataLoader *objData, long& curTerrainObjec
 
 		if (obj) {
 			obj->setTerrainPosition(objData->vector, numbers);
-			long cellRow, cellCol;
+			int cellRow, cellCol;
 			obj->getCellPosition(cellRow, cellCol);
 			setPartId(obj, cellRow, cellCol);
 
@@ -2134,7 +2134,7 @@ GameObjectPtr GameObjectManager::findByCellPosition (long row, long col)
 		GameObjectPtr obj = objList[objIndex];
 		if (obj->getExists())
 		{
-			long cellR, cellC;
+			int cellR, cellC;
 			objList[objIndex]->getCellPosition(cellR,cellC);
 
 			if ((cellR == row) && (cellC == col))

@@ -373,13 +373,13 @@ void CollisionGrid::checkGrid (GameObjectPtr obj1, CollisionGridNodePtr area)
 			//-------------------------------------------------------------
 			// CULL collisions between things which can never collide here
 			//------------------------------------------------------------
-			if ((obj1->getObjectClass() == TURRET) && (obj2->getObjectClass() == TURRET) ||
-				(obj1->getObjectClass() == GATE) && (obj2->getObjectClass() == GATE) ||
-				(obj1->getObjectClass() == GATE) && (obj2->getObjectClass() == TURRET) ||
-				(obj1->getObjectClass() == TURRET) && (obj2->getObjectClass() == GATE) ||
-				(obj1->getObjectClass() == TURRET) && (obj2->getObjectClass() == TREE) ||
-				(obj1->getObjectClass() == TREE) && (obj2->getObjectClass() == TURRET) ||
-				(obj1->getObjectClass() == EXPLOSION) && (obj2->getObjectClass() == EXPLOSION))
+			if (((obj1->getObjectClass() == TURRET) && (obj2->getObjectClass() == TURRET)) ||
+				((obj1->getObjectClass() == GATE) && (obj2->getObjectClass() == GATE)) ||
+				((obj1->getObjectClass() == GATE) && (obj2->getObjectClass() == TURRET)) ||
+				((obj1->getObjectClass() == TURRET) && (obj2->getObjectClass() == GATE)) ||
+				((obj1->getObjectClass() == TURRET) && (obj2->getObjectClass() == TREE)) ||
+				((obj1->getObjectClass() == TREE) && (obj2->getObjectClass() == TURRET)) ||
+				((obj1->getObjectClass() == EXPLOSION) && (obj2->getObjectClass() == EXPLOSION)))
 			{
 				
 			}
@@ -536,15 +536,15 @@ void CollisionSystem::detectCollision (GameObjectPtr obj1, GameObjectPtr obj2)
 		//---------------------------------------------------------------
 		// Objects have to be in the same move plane in order to collide.
 		// Thus, a copter can't collide with a tree...
-		long obj1Pos[2] = {0, 0};
-		long obj2Pos[2] = {0, 0};
+		int obj1Pos[2] = {0, 0};
+		int obj2Pos[2] = {0, 0};
 		obj1->getCellPosition(obj1Pos[0], obj1Pos[1]);
 		obj2->getCellPosition(obj2Pos[0], obj2Pos[1]);
 
 		//-------------------------------------------
 		// Do a cell based collision.  Ignore Radii.
-		long obj1Block, obj2Block;
-		long obj1Vertex, obj2Vertex;
+		int obj1Block, obj2Block;
+		int obj1Vertex, obj2Vertex;
 		obj1->getBlockAndVertexNumber(obj1Block,obj1Vertex);
 		obj2->getBlockAndVertexNumber(obj2Block,obj2Vertex);
 		
@@ -615,7 +615,7 @@ void CollisionSystem::detectStaticCollision (GameObjectPtr obj1, GameObjectPtr o
 		{
 			if (!(obj2->isSpecialBuilding()) && (obj2->getObjectClass() != BRIDGE))
 			{
-				long obj1Pos[2] = {0, 0};
+				int obj1Pos[2] = {0, 0};
 				obj1->getCellPosition(obj1Pos[0], obj1Pos[1]);
 				if (GameMap->getPassable(obj1Pos[0], obj1Pos[1]))
 					return;

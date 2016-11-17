@@ -255,13 +255,13 @@ class Terrain
 		void setObjBlockActive (long blockNum, bool active);
 		void clearObjBlocksActive (void);
 
-		inline void worldToTile( const Stuff::Vector3D& pos, long& tileR, long& tileC );
-		inline void worldToCell( const Stuff::Vector3D& pos, long& cellR, long& cellC );
-		inline void worldToTileCell (const Stuff::Vector3D& pos, long& tileR, long& tileC, long& cellR, long& cellC);
-		inline void tileCellToWorld (long tileR, long tileC, long cellR, long cellC, Stuff::Vector3D& worldPos);
-		inline void cellToWorld (long cellR, long cellC, Stuff::Vector3D& worldPos);
+		inline void worldToTile( const Stuff::Vector3D& pos, int& tileR, int& tileC );
+		inline void worldToCell( const Stuff::Vector3D& pos, int& cellR, int& cellC );
+		inline void worldToTileCell (const Stuff::Vector3D& pos, int& tileR, int& tileC, int& cellR, int& cellC);
+		inline void tileCellToWorld (int tileR, int tileC, int cellR, int cellC, Stuff::Vector3D& worldPos);
+		inline void cellToWorld (int cellR, int cellC, Stuff::Vector3D& worldPos);
 
-		inline void getCellPos( long cellR, long cellC,  Stuff::Vector3D& cellPos );
+		inline void getCellPos( int cellR, int cellC,  Stuff::Vector3D& cellPos );
 		
 		void initMapCellArrays(void);
 
@@ -332,26 +332,26 @@ extern TerrainPtr land;
 
 //---------------------------------------------------------------------------
 
-inline void Terrain::worldToTile( const Stuff::Vector3D& pos, long& tileR, long& tileC )
+inline void Terrain::worldToTile( const Stuff::Vector3D& pos, int& tileR, int& tileC )
 {
 	float tmpX = pos.x - land->mapTopLeft3d.x;
 	float tmpY = land->mapTopLeft3d.y - pos.y;
 
-	tileC = float2long(tmpX * oneOverWorldUnitsPerVertex);
-	tileR =	float2long(tmpY * oneOverWorldUnitsPerVertex);
+	tileC = (int)(tmpX * oneOverWorldUnitsPerVertex);
+	tileR =	(int)(tmpY * oneOverWorldUnitsPerVertex);
 }
 
 //---------------------------------------------------------------------------
 
-inline void Terrain::worldToCell( const Stuff::Vector3D& pos, long& cellR, long& cellC )
+inline void Terrain::worldToCell( const Stuff::Vector3D& pos, int& cellR, int& cellC )
 {
-	cellC = float2long(( pos.x - land->mapTopLeft3d.x ) * (oneOverWorldUnitsPerVertex*3.0f));
-	cellR = float2long(( land->mapTopLeft3d.y - pos.y ) * (oneOverWorldUnitsPerVertex*3.0f));
+	cellC = (int)(( pos.x - land->mapTopLeft3d.x ) * (oneOverWorldUnitsPerVertex*3.0f));
+	cellR = (int)(( land->mapTopLeft3d.y - pos.y ) * (oneOverWorldUnitsPerVertex*3.0f));
 }
 
 //---------------------------------------------------------------------------
 
-inline void Terrain::worldToTileCell( const Stuff::Vector3D& pos, long& tileR, long& tileC, long& cellR, long& cellC )
+inline void Terrain::worldToTileCell( const Stuff::Vector3D& pos, int& tileR, int& tileC, int& cellR, int& cellC )
 {
 	float tmpX = pos.x - land->mapTopLeft3d.x;
 	float tmpY = land->mapTopLeft3d.y - pos.y;
@@ -376,7 +376,7 @@ inline void Terrain::worldToTileCell( const Stuff::Vector3D& pos, long& tileR, l
 
 //---------------------------------------------------------------------------
 
-inline void Terrain::tileCellToWorld (long tileR, long tileC, long cellR, long cellC, Stuff::Vector3D& worldPos) 
+inline void Terrain::tileCellToWorld (int tileR, int tileC, int cellR, int cellC, Stuff::Vector3D& worldPos) 
 {
 	if ((tileC < 0) ||
 		(tileR < 0) ||
@@ -402,7 +402,7 @@ inline void Terrain::tileCellToWorld (long tileR, long tileC, long cellR, long c
 
 //---------------------------------------------------------------------------
 
-inline void Terrain::cellToWorld (long cellR, long cellC, Stuff::Vector3D& worldPos) 
+inline void Terrain::cellToWorld (int cellR, int cellC, Stuff::Vector3D& worldPos) 
 {
 	if ((cellR < 0) || 
 		(cellC < 0) || 
@@ -424,7 +424,7 @@ inline void Terrain::cellToWorld (long cellR, long cellC, Stuff::Vector3D& world
 
 //---------------------------------------------------------------------------
 
-inline void Terrain::getCellPos( long cellR, long cellC,  Stuff::Vector3D& cellPos )
+inline void Terrain::getCellPos( int cellR, int cellC,  Stuff::Vector3D& cellPos )
 {
 	cellPos.x = (cellC * (worldUnitsPerVertex/3.)) + (worldUnitsPerVertex/6.);
 	cellPos.y = (cellR * (worldUnitsPerVertex/3.)) + (worldUnitsPerVertex/6.);

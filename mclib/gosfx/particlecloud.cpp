@@ -201,7 +201,7 @@ bool
 	  }
 	 
 	  m_startingPopulation.ExpensiveComputeRange(&min,&max);
-	  if(min<0.0f) 
+	  if(min<0.0f) {
 			if(fix_data)
 			{
 				m_startingPopulation.SetCurve(0.0f);
@@ -210,8 +210,9 @@ bool
 			}
 			else
 				return false;
+      }
 	
-	if(m_maxParticleCount<1) 
+	if(m_maxParticleCount<1) {
 		if(fix_data)
 		{
 			m_maxParticleCount=1;
@@ -220,6 +221,7 @@ bool
 		}
 		else
 			return false;
+    }
 	
 	return	Effect__Specification::IsDataValid(fix_data);
 }

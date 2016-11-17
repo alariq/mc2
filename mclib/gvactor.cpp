@@ -732,7 +732,7 @@ void GVAppearance::init (AppearanceTypePtr tree, GameObjectPtr obj)
 	waterWake = NULL;
 	dustCloud = NULL;
 	activity = NULL;
-	isWaking = NULL;
+	isWaking = false;
 	movedThisFrame = false;
 	dustCloudStart = false;
 	isActivitying = false;
@@ -749,7 +749,7 @@ void GVAppearance::init (AppearanceTypePtr tree, GameObjectPtr obj)
 			gvShape->GetTextureName(i,txmName,256);
 
 			char texturePath[1024];
-			sprintf(texturePath,"%s%d\\",tglPath,ObjectTextureSize);
+			sprintf(texturePath,"%s%d"PATH_SEPARATOR, tglPath, ObjectTextureSize);
 	
 			FullPathFileName textureName;
 			textureName.init(texturePath,txmName,"");
@@ -811,7 +811,7 @@ void GVAppearance::init (AppearanceTypePtr tree, GameObjectPtr obj)
 				gvShadowShape->GetTextureName(i,txmName,256);
 		
 				char texturePath[1024];
-				sprintf(texturePath,"%s%d\\",tglPath,ObjectTextureSize);
+				sprintf(texturePath,"%s%d" PATH_SEPARATOR, tglPath, ObjectTextureSize);
 		
 				FullPathFileName textureName;
 				textureName.init(texturePath,txmName,"");
@@ -853,7 +853,7 @@ void GVAppearance::init (AppearanceTypePtr tree, GameObjectPtr obj)
 			sensorTriangleShape->GetTextureName(i,txmName,256);
 
 			char texturePath[1024];
-			sprintf(texturePath,"%s%d\\",tglPath,ObjectTextureSize);
+			sprintf(texturePath,"%s%d" PATH_SEPARATOR, tglPath, ObjectTextureSize);
 	
 			FullPathFileName textureName;
 			textureName.init(texturePath,txmName,"");
@@ -889,7 +889,7 @@ void GVAppearance::init (AppearanceTypePtr tree, GameObjectPtr obj)
 			sensorCircleShape->GetTextureName(i,txmName,256);
 
 			char texturePath[1024];
-			sprintf(texturePath,"%s%d\\",tglPath,ObjectTextureSize);
+			sprintf(texturePath,"%s%d" PATH_SEPARATOR, tglPath, ObjectTextureSize);
 	
 			FullPathFileName textureName;
 			textureName.init(texturePath,txmName,"");
@@ -1040,7 +1040,7 @@ void GVAppearance::setObjStatus (long oStatus)
 		
 		if (oStatus == OBJECT_STATUS_NORMAL)
 		{
-			if (appearType->gvShape)
+			if (appearType->gvShape[0])
 			{
 				delete gvShape;
 				gvShape = NULL;
@@ -1059,7 +1059,7 @@ void GVAppearance::setObjStatus (long oStatus)
 			gvShape->GetTextureName(i,txmName,256);
 
 			char texturePath[1024];
-			sprintf(texturePath,"%s%d\\",tglPath,ObjectTextureSize);
+			sprintf(texturePath,"%s%d"PATH_SEPARATOR, tglPath, ObjectTextureSize);
 	
 			FullPathFileName textureName;
 			textureName.init(texturePath,txmName,"");
@@ -1268,7 +1268,7 @@ void GVAppearance::resetPaintScheme (DWORD red, DWORD green, DWORD blue)
 	gvShape->GetTextureName(0,txmName,256);
 
    	char texturePath[1024];
-   	sprintf(texturePath,"%s%d\\",tglPath,ObjectTextureSize);
+   	sprintf(texturePath,"%s%d"PATH_SEPARATOR, tglPath, ObjectTextureSize);
 
    	FullPathFileName textureName;
    	textureName.init(texturePath,txmName,"");
@@ -1777,7 +1777,7 @@ bool GVAppearance::recalcBounds (void)
 								gvShape->GetTextureName(j,txmName,256);
 
 								char texturePath[1024];
-								sprintf(texturePath,"%s%d\\",tglPath,ObjectTextureSize);
+								sprintf(texturePath,"%s%d"PATH_SEPARATOR, tglPath, ObjectTextureSize);
 
 								FullPathFileName textureName;
 								textureName.init(texturePath,txmName,"");
@@ -1830,7 +1830,7 @@ bool GVAppearance::recalcBounds (void)
 								gvShape->GetTextureName(i,txmName,256);
 										
 								char texturePath[1024];
-								sprintf(texturePath,"%s%d\\",tglPath,ObjectTextureSize);
+								sprintf(texturePath,"%s%d"PATH_SEPARATOR, tglPath, ObjectTextureSize);
 						
 								FullPathFileName textureName;
 								textureName.init(texturePath,txmName,"");
@@ -2283,7 +2283,7 @@ void GVAppearance::updateGeometry (void)
 
 		if ((status == OBJECT_STATUS_NORMAL || status == OBJECT_STATUS_SHUTDOWN) && land)  //Are we still oK?
 		{
-			long cellR, cellC;
+			int cellR, cellC;
 			land->worldToCell(position,cellR, cellC);
 			if (GameMap && !GameMap->getDeepWater(cellR, cellC) && !GameMap->getShallowWater(cellR, cellC))
 			{

@@ -196,7 +196,7 @@ void InitDifficultySettings (FitIniFile *gameSystemFile);
 
 extern long GameVisibleVertices;
 
-void GetBlockedDoorCells (long moveLevel, long door, char* openCells);
+void GetBlockedDoorCells (int moveLevel, int door, char* openCells);
 void PlaceStationaryMovers (MoveMap* map);
 void PlaceMovers (void);
 
@@ -204,8 +204,8 @@ extern GameObjectFootPrint* tempSpecialAreaFootPrints;
 extern long tempNumSpecialAreas;
 extern GameLog* CombatLog;
 
-bool IsGateDisabled (long objectWID);
-bool IsGateOpen (long objectWID);
+bool IsGateDisabled (int objectWID);
+bool IsGateOpen (int objectWID);
 
 DWORD elfHash (char *name);
 

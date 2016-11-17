@@ -786,16 +786,16 @@ void GroundVehicle::handleStaticCollision (void)
 	{
 		//-----------------------------------------------------
 		// What is our block and vertex number?
-		long blockNumber = 0;
-		long vertexNumber = 0;
+		int blockNumber = 0;
+		int vertexNumber = 0;
 		
 		getBlockAndVertexNumber(blockNumber,vertexNumber);
 
-		long numCollidables = ObjectManager->getObjBlockNumCollidables(blockNumber);
-		long terrainObjHandle = ObjectManager->getObjBlockFirstHandle(blockNumber);
-		long colliderBlockNumber = -1;
-		long colliderVertexNumber = -1;
-		for (long i = 0; i < numCollidables; i++) 
+		int numCollidables = ObjectManager->getObjBlockNumCollidables(blockNumber);
+		int terrainObjHandle = ObjectManager->getObjBlockFirstHandle(blockNumber);
+		int colliderBlockNumber = -1;
+		int colliderVertexNumber = -1;
+		for (int i = 0; i < numCollidables; i++) 
 		{
 			GameObjectPtr terrainObj = ObjectManager->get(terrainObjHandle + i);
 			bool isTangible = false;
@@ -1397,7 +1397,7 @@ void GroundVehicle::mineCheck (void) {
 				//					  1);
 			}
 		}
-		else if ((mineLayer == 0))
+		else if (mineLayer == 0)
 		{
 			//---------------------------
 			// Mine here, deal with it...
@@ -2609,13 +2609,13 @@ bool GroundVehicle::crashAvoidanceSystem (void) {
 
 	//---------------------------------------------------------------------
 	// Is this new position in a pathlocked area? If so, put on the brakes!
-	long cellR, cellC;
+	int cellR, cellC;
 	land->worldToCell(newPosition, cellR, cellC);
 
 	//-------------------------
 	// To avoid corner stops...
 	bool clippingCorner = false;
-	long dir = path->getDirection(path->curStep);
+	int dir = path->getDirection(path->curStep);
 	if ((dir == 1) || (dir == 3) || (dir == 5) || (dir == 7)) {
 		bool firstCornerClipped = getAdjacentCellPathLocked((moveLevel == 2), cellPositionRow, cellPositionCol, adjClippedCell[dir][0]);
 		bool secondCornerClipped = getAdjacentCellPathLocked((moveLevel == 2), cellPositionRow, cellPositionCol, adjClippedCell[dir][1]);
@@ -2698,7 +2698,7 @@ void GroundVehicle::createVehiclePilot (void)
 		return;
 
 	//No guys allowed to come out in the water!!
-	long cellR, cellC;
+	int cellR, cellC;
 	land->worldToCell(position,cellR, cellC);
 	if (GameMap->getDeepWater(cellR, cellC) || GameMap->getShallowWater(cellR, cellC))
 		return;
@@ -3554,10 +3554,10 @@ long GroundVehicle::update (void)
 		newPosition.z = land->getTerrainElevation(newPosition);
 		if ((moveLevel == 1) && (newPosition.z < Terrain::waterElevation))
 			newPosition.z = Terrain::waterElevation;
-		long newCellRow = 0;
-		long newCellCol = 0;
-		long tileRow = 0;
-		long tileCol = 0;
+		int newCellRow = 0;
+		int newCellCol = 0;
+		int tileRow = 0;
+		int tileCol = 0;
 		land->worldToTileCell(newPosition, tileRow, tileCol, newCellRow, newCellCol);
 	}
 
@@ -3700,7 +3700,7 @@ long GroundVehicle::update (void)
 			appearance->setObjStatus(getStatus());
 	
 			//Start and stop the water wakes here.
-			long watercellR, watercellC;
+			int watercellR, watercellC;
 			land->worldToCell(position,watercellR, watercellC);
 			if (GameMap->getDeepWater(watercellR, watercellC) || 
 				GameMap->getShallowWater(watercellR, watercellC))
@@ -4730,7 +4730,7 @@ long GroundVehicle::fireWeapon (GameObjectPtr target, float targetTime, long wea
 				{
 					//-----------------------------------------
 					// Check for Mine hit and MOVE ON!!!
-					long cellRow, cellCol;
+					int cellRow, cellCol;
 					land->worldToCell(*targetPoint, cellRow, cellCol);
 					if (GameMap->getMine(cellRow, cellCol) == 1) 
 					{
@@ -4824,7 +4824,7 @@ long GroundVehicle::fireWeapon (GameObjectPtr target, float targetTime, long wea
 				{
 					//-----------------------------------------
 					// Check for Mine hit and MOVE ON!!!
-					long cellRow, cellCol;
+					int cellRow, cellCol;
 					land->worldToCell(*targetPoint, cellRow, cellCol);
 					if (GameMap->getMine(cellRow, cellCol) == 1)
 					{
@@ -4953,7 +4953,7 @@ long GroundVehicle::fireWeapon (GameObjectPtr target, float targetTime, long wea
 					if (!weaponFX) {
 						//-----------------------------------------
 						// Check for Mine hit and MOVE ON!!!
-						long cellRow, cellCol;
+						int cellRow, cellCol;
 						land->worldToCell(positionOffset, cellRow, cellCol);
 						if (GameMap->getMine(cellRow, cellCol) == 1) 
 						{
@@ -5057,7 +5057,7 @@ long GroundVehicle::fireWeapon (GameObjectPtr target, float targetTime, long wea
 				if (!weaponFX) {
 					//-----------------------------------------
 					// Check for Mine hit and MOVE ON!!!
-					long cellRow, cellCol;
+					int cellRow, cellCol;
 					land->worldToCell(positionOffset, cellRow, cellCol);
 					if (GameMap->getMine(cellRow, cellCol) == 1) 
 					{

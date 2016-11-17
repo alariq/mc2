@@ -512,26 +512,26 @@ void Carnage::handleStaticCollision (void)
 	{
 		//-----------------------------------------------------
 		// What is our block and vertex number?
-		long blockNumber = 0;
-		long vertexNumber = 0;
+		int blockNumber = 0;
+		int vertexNumber = 0;
 		getBlockAndVertexNumber(blockNumber,vertexNumber);
 			
 		//-------------------------------------------------------------------------
 		// We must now move out into other tiles for the artillery strike to work.
 		// Remember, Its pretty big!
 		// Just grab the nine vertices around this one.  Problems arise when on Block border.  Handle it.
-		long topLeftBlockNumber = blockNumber - Terrain::blocksMapSide - 1;
-		long currentBlockNumber = topLeftBlockNumber;
-		long totalBlocks = Terrain::blocksMapSide * Terrain::blocksMapSide;
+		int topLeftBlockNumber = blockNumber - Terrain::blocksMapSide - 1;
+		int currentBlockNumber = topLeftBlockNumber;
+		int totalBlocks = Terrain::blocksMapSide * Terrain::blocksMapSide;
 
-		for (long i = 0; i < 3; i++) 
+		for (int i = 0; i < 3; i++) 
 		{
-			for (long j = 0; j < 3; j++) 
+			for (int j = 0; j < 3; j++) 
 			{
 				if ((currentBlockNumber >= 0) && (currentBlockNumber < totalBlocks))
 				{
-					long numObjectsInBlock = ObjectManager->getObjBlockNumObjects(currentBlockNumber);
-					for (long objIndex = 0; objIndex < numObjectsInBlock; objIndex++) 
+					int numObjectsInBlock = ObjectManager->getObjBlockNumObjects(currentBlockNumber);
+					for (int objIndex = 0; objIndex < numObjectsInBlock; objIndex++) 
 					{
 						GameObjectPtr obj = ObjectManager->getObjBlockObject(currentBlockNumber, objIndex);
 						if (obj->getExists() && (obj->getObjectClass() != GATE) && (obj->getObjectClass() != TURRET)) 
@@ -549,19 +549,19 @@ void Carnage::handleStaticCollision (void)
 		// -fs
 		if ((effectId != MINE_EXPLOSION_ID) && (info.explosion.radius > 0.0f))
 		{
-			long CellRow, CellCol;
+			int CellRow, CellCol;
 			land->worldToCell(getPosition(), CellRow, CellCol);
 	
-			long startCellRow = CellRow - 4;
-			long startCellCol = CellCol - 4;
+			int startCellRow = CellRow - 4;
+			int startCellCol = CellCol - 4;
 				
 			for (int i = startCellRow; i < startCellRow + 9; i++) 
 			{
-				for (long j = startCellCol; j < startCellCol + 9; j++) 
+				for (int j = startCellCol; j < startCellCol + 9; j++) 
 				{
 					if (GameMap->inBounds(i,j)) 
 					{
-						long mineResult = 0;
+						int mineResult = 0;
 						mineResult = GameMap->getMine(i,j);
 						
 						if (mineResult == 1)

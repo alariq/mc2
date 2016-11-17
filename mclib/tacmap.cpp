@@ -19,8 +19,8 @@ TacMap::TacMap()
 
 void TacMap::worldToTacMap( Stuff::Vector3D& world, int xOffset, int yOffset, int xSize, int ySize, gos_VERTEX& tac )
 {
-	long tacX;
-	long tacY;
+	int tacX;
+	int tacY;
 
 	land->worldToCell( world, tacY, tacX );	
 	if ( tacX < 0 )

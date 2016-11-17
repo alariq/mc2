@@ -219,6 +219,8 @@ void
 		case LookUpLight:
 			page->SetEntry("LightType", "LookUp");
 		break;
+        default:
+            gosASSERT(0 && "Unsupported light type");
 	}
 
 	page->SetEntry("Intensity", intensity);

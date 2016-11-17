@@ -1457,14 +1457,18 @@ void Camera::updateLetterboxAndFade (void)
 	{
 		letterBoxTime -= frameLength;
 		float letterBoxPercent = letterBoxTime / MaxLetterBoxTime;
-		if (letterBoxTime < 0.0f)
+		//sebi: if letterBoxTime = 0 then letterBoxPercent also = 0 and then letterBoxPos = 0
+		// see (*) and that means that on next iteration this condition will be false
+		// but inMovieMode and startEnding will not be updated, causeing infinit stay in movie mode 
+		if (letterBoxTime <= 0.0f)
+		//if (letterBoxTime < 0.0f)
 		{
 			letterBoxPercent = 0.0f;
 			inMovieMode = false;
 			startEnding = false;
 		}
 		
-		letterBoxPos = letterBoxPercent * MaxLetterBoxPos;
+		letterBoxPos = letterBoxPercent * MaxLetterBoxPos; // (*)
 		letterBoxAlpha = (letterBoxPercent * 255.0f);
 	}
 	
@@ -1948,8 +1952,8 @@ Stuff::Vector3D actualPosition;
 //-----------------------------------------------------------------------------------------------
 bool CameraLineOfSight (Stuff::Vector3D position, Stuff::Vector3D targetPosition) 
 {
-	long posCellR, posCellC;
-	long tarCellR, tarCellC;
+	int posCellR, posCellC;
+	int tarCellR, tarCellC;
 	land->worldToCell(position, posCellR, posCellC);
 	land->worldToCell(targetPosition, tarCellR, tarCellC);
 	
@@ -1966,8 +1970,8 @@ bool CameraLineOfSight (Stuff::Vector3D position, Stuff::Vector3D targetPosition
 	startPos.Zero();
 	endPos.Zero();
 	
-	long tCellRow = tarCellR, tCellCol = tarCellC;
-	long mCellRow = posCellR, mCellCol = posCellC;
+	int tCellRow = tarCellR, tCellCol = tarCellC;
+	int mCellRow = posCellR, mCellCol = posCellC;
 	
 	land->getCellPos(tCellRow,tCellCol,endPos);
 	startPos = position;
@@ -2025,8 +2029,8 @@ bool CameraLineOfSight (Stuff::Vector3D position, Stuff::Vector3D targetPosition
 
 			startHeight += heightLen;
 			
-			long startCellC = startCellCol;
-			long startCellR = startCellRow;
+			int startCellC = startCellCol;
+			int startCellR = startCellRow;
 
 			land->getCellPos(startCellR,startCellC,currentPos);
 			//float localElev = (worldUnitsPerMeter * 4.0f * (float)GameMap->getLocalHeight(startCellR,startCellC));

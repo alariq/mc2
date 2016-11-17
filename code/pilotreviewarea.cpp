@@ -532,7 +532,10 @@ long PilotListBox::AddItem( aListItem* add )
 		if ( scrollBar  && !(itemCount % 2))
 		{
 			int itemsTotalHeight = 0;
-			if ( items )
+            // sebi: WTF? this will always be true
+            // put assert on itemCount>0 because otherwise we'll read outside of items array
+            gosASSERT(itemCount>0);
+			if ( itemCount )
 				itemsTotalHeight = items[itemCount-1]->bottom() - items[0]->top();
 
 				if ( itemsTotalHeight > scrollBar->height() )

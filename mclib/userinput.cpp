@@ -134,9 +134,12 @@ void UserInput::setMouseCursor (long state)
 	if ((state < 0) || (state >= mState_NUMMOUSESTATES))
 		return;
 
+    // sebi nodebug
+    /*
 	//DEBUG!!!!!!!!!!!!!!!!!!!!!!
 	if (state == mState_NORMAL)
 		printf("Go Flash");
+    */
 
 	mouseState = state;
 }
@@ -836,7 +839,8 @@ void UserInput::setMouseScale (float scaleFactor)
 //---------------------------------------------------------------------------
 void UserInput::render (void)						//Last thing rendered.  Draws Mouse.
 {
-	if (!mc2UseAsyncMouse)
+    //sebi, always NOT async mouse
+	//if (!mc2UseAsyncMouse)
 	{
 		if (drawMouse && mouseState != -1)
 		{

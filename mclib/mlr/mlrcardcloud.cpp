@@ -717,8 +717,9 @@ int
 					{
 						theNewOr |= srcPolygon.clipPerVertex[k];
 					}
-
-					theOr == theNewOr;
+                    // sebi: WTF? thanks clang
+					//theOr == theNewOr;
+					theOr = theNewOr;
 				} while (theNewOr != 0 && loop--);
 
 				//

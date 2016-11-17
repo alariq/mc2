@@ -1259,7 +1259,7 @@ class Mover : public GameObject {
 			return(teamRosterIndex);
 		}
 
-		virtual long getContacts (long* contactList, long contactCriteria, long sortType);
+		virtual long getContacts (int* contactList, int contactCriteria, int sortType);
 
 		long getContactStatus (long scanningTeamID, bool includingAllies);
 
@@ -1492,11 +1492,11 @@ class Mover : public GameObject {
 
 		virtual bool weaponInRange (long weaponIndex, float metersToTarget, float buffer);
 
-		virtual long getWeaponsReady (long* list, long listSize);
+		virtual long getWeaponsReady (int* list, int listSize);
 
-		virtual long getWeaponsLocked (long* list, long listSize);
+		virtual long getWeaponsLocked (int* list, int listSize);
 
-		virtual long getWeaponsInRange (long* list, long listSize, float orderFireRange);
+		virtual long getWeaponsInRange (int * list, int listSize, float orderFireRange);
 
 		virtual long getWeaponShots (long weaponIndex);
 		
@@ -1560,7 +1560,7 @@ class Mover : public GameObject {
 
 		virtual bool needsRefit(void);
 		
-		virtual long sortWeapons (long* weaponList, long* valueList, long listSize, long sortType, bool skillCheck);
+		virtual long sortWeapons (int* weaponList, long* valueList, long listSize, long sortType, bool skillCheck);
 
 		virtual float calcAttackChance (GameObjectPtr target, long aimLocation, float targetTime, long weaponIndex, float modifiers, long* range, Stuff::Vector3D* targetPoint = NULL);
 

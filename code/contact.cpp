@@ -661,7 +661,7 @@ long SensorSystem::scanMover (Mover* mover) {
 
 //---------------------------------------------------------------------------
 
-long SensorSystem::getTeamContacts (long* contactList, long contactCriteria, long sortType) {
+long SensorSystem::getTeamContacts (int* contactList, int contactCriteria, int sortType) {
 
 	Assert(master != NULL, 0, " SensorSystem.getTeamContacts: null master ");
 	return(master->getContacts(owner, contactList, contactCriteria, sortType));
@@ -878,7 +878,7 @@ bool TeamSensorSystem::hasSensorContact (long teamID) {
 
 //---------------------------------------------------------------------------
 
-long TeamSensorSystem::getContacts (GameObjectPtr looker, long* contactList, long contactCriteria, long sortType) {
+long TeamSensorSystem::getContacts (GameObjectPtr looker, int* contactList, int contactCriteria, int sortType) {
 
 	if ((sortType != CONTACT_SORT_NONE) && !looker)
 		return(0);

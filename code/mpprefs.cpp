@@ -23,7 +23,7 @@ mpprefs.cpp			: Implementation of the mpprefs component.ef
 
 MPPrefs* MPPrefs::s_instance = NULL;
 
-
+static const char* path2insignia = "data" PATH_SEPARATOR "multiplayer" PATH_SEPARATOR "insignia" PATH_SEPARATOR;
 
 MPPrefs::MPPrefs(  )
 {
@@ -156,11 +156,10 @@ void MPPrefs::begin()
 	comboBox[2].ListBox().removeAllItems( true );
 	comboBox[2].SelectItem( -1 );
 
-		// need to add items to the save game list
+    // need to add items to the save game list
 	char findString[512];
-	char path[256];
-	sprintf( path, "data\\multiplayer\\insignia\\" );
-	sprintf(findString,"%s*.tga",path);
+    char path[256];
+	sprintf(findString,"%s*.tga",path2insignia);
 
 	WIN32_FIND_DATA	findResult;
 	HANDLE searchHandle = FindFirstFile(findString,&findResult); 
@@ -170,7 +169,7 @@ void MPPrefs::begin()
 		if ((findResult.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) == 0 )
 		{
 			aBmpListItem* pItem = new aBmpListItem;
-			sprintf( path, "data\\multiplayer\\insignia\\%s",findResult.cFileName  );
+			sprintf(path, "%s%s", path2insignia, findResult.cFileName  );
 			if ( !pItem->setBmp( findResult.cFileName ) )
 			{
 				delete pItem;
@@ -301,7 +300,7 @@ void MPPrefs::update()
 
 	
 		FullPathFileName path;
-		path.init( "data\\multiplayer\\insignia\\", pName, ".tga" );
+		path.init( path2insignia, pName, ".tga" );
 		insigniaBmp.setTexture( path );
 		insigniaBmp.setUVs( 0, 0, 32, 32 );
 		statics[12].setTexture( path );
@@ -645,7 +644,7 @@ int aBmpListItem::setBmp( const char* pFileName )
 		return 0;
 
 	FullPathFileName path;
-	path.init( "data\\multiplayer\\insignia\\", pFileName, ".tga" );
+	path.init(path2insignia, pFileName, ".tga" );
 
 	TGAFileHeader header;
 	File file;

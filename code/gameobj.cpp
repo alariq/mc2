@@ -534,7 +534,7 @@ void WeaponFireChunk::buildMoverTarget (GameObjectPtr target,
 	hitLocation = _hitLocation;
 
 	Assert((targetId > -1) && (targetId < MAX_MULTIPLAYER_MOVERS), targetId, " WeaponFireChunk.buildMoverTarget: bad targetId ");
-	Assert((weaponIndex > -1) && (weaponIndex < 32), weaponIndex, " WeaponFireChunk.buildMoverTarget: bad weaponIndex ");
+	Assert((weaponIndex < 32), weaponIndex, " WeaponFireChunk.buildMoverTarget: bad weaponIndex ");
 	Assert((numMissiles > -1) && (numMissiles < 16), numMissiles, " WeaponFireChunk.buildMoverTarget: bad numMissiles ");
 	Assert((hitLocation > -2) && (hitLocation < 12), hitLocation, " WeaponFireChunk.buildMoverTarget: bad hitLocation ");
 
@@ -1569,7 +1569,7 @@ unsigned long GameObject::getWatchID (bool assign) {
 
 //---------------------------------------------------------------------------
 
-void GameObject::getBlockAndVertexNumber (long &blockNum, long &vertexNum) {
+void GameObject::getBlockAndVertexNumber (int &blockNum, int &vertexNum) {
 
 	Assert(Terrain::worldUnitsPerVertex==128,0," Optimizations now broken ");
 
@@ -1741,10 +1741,10 @@ void GameObject::setPosition (const Stuff::Vector3D& newPosition, bool calcPosit
 	position = newPosition;
 
 	if (calcPositions) {
-		long newCellRow = 0;
-		long newCellCol = 0;
-		long tileRow = 0;
-		long tileCol = 0;
+		int newCellRow = 0;
+		int newCellCol = 0;
+		int tileRow = 0;
+		int tileCol = 0;
 
 		land->worldToTileCell(position, tileRow, tileCol, newCellRow, newCellCol);
 		cellPositionRow = newCellRow + tileRow * MAPCELL_DIM;
@@ -1772,16 +1772,16 @@ float GameObject::distanceFrom (Stuff::Vector3D goal) {
 
 long GameObject::cellDistanceFrom (Stuff::Vector3D goal) {
 
-	long cellRow = 0;
-	long cellCol = 0;
+	int cellRow = 0;
+	int cellCol = 0;
 	land->worldToCell(goal, cellRow, cellCol);
 
-	long rowDelta = 0;
+	int rowDelta = 0;
 	if (cellPositionRow > cellRow)
 		rowDelta = cellPositionRow - cellRow;
 	else
 		rowDelta = cellRow - cellPositionRow;
-	long colDelta = 0;
+	int colDelta = 0;
 	if (cellPositionCol > cellCol)
 		colDelta = cellPositionCol - cellCol;
 	else
@@ -2073,11 +2073,12 @@ long GameObject::getCaptureBlocker (GameObjectPtr capturingMover, GameObjectPtr*
 			MoverPtr mover = ObjectManager->getMover(i);
 			if (capturingTeam->isEnemy(mover->getTeam()))
 				if (!mover->isMarine() && (mover->numWeapons > 0))
-					if ((distanceFrom(mover->getPosition()) < blockCaptureRange) && !mover->isDisabled() && mover->getAwake())
+					if ((distanceFrom(mover->getPosition()) < blockCaptureRange) && !mover->isDisabled() && mover->getAwake()) {
 						if (blockerList)
 							blockerList[numBlockers++] = mover;
 						else
 							return(1);
+                    }
 		}
 		}
 	else {
@@ -2086,11 +2087,12 @@ long GameObject::getCaptureBlocker (GameObjectPtr capturingMover, GameObjectPtr*
 			if (!mover->getTeam() || capturingTeam->isEnemy(mover->getTeam()))
 				if (!mover->isMarine() && (mover->numWeapons > 0))
 					if ((distanceFrom(mover->getPosition()) < blockCaptureRange) && !mover->isDisabled() && mover->getAwake())
-						if (capturingMover->getTeam()->isContact(capturingMover, mover, CONTACT_CRITERIA_VISUAL_OR_SENSOR + CONTACT_CRITERIA_ENEMY + CONTACT_CRITERIA_NOT_DISABLED))
+						if (capturingMover->getTeam()->isContact(capturingMover, mover, CONTACT_CRITERIA_VISUAL_OR_SENSOR + CONTACT_CRITERIA_ENEMY + CONTACT_CRITERIA_NOT_DISABLED)){
 							if (blockerList)
 								blockerList[numBlockers++] = mover;
 							else
 								return(1);
+                        }
 		}			
 	}
 

@@ -245,7 +245,7 @@ class TerrainObject : public GameObject {
 			return(true);
 		}
 
-		virtual void getBlockAndVertexNumber (long& blockNum, long& vertexNum) {
+		virtual void getBlockAndVertexNumber (int& blockNum, int& vertexNum) {
 			blockNum = blockNumber;
 			vertexNum = vertexNumber;
 		}

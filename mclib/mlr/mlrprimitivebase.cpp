@@ -279,7 +279,9 @@ int
 	MLRPrimitiveBase::GetSubprimitiveLength (int i) const
 { 
 	Check_Object(this); 
-	return (lengths.GetLength() > 0 ? abs(lengths[i]) : 1);
+    // sebi: WTF? and btw length is array of UNSIGNED chars
+	//return (lengths.GetLength() > 0 ? abs(lengths[i]) : 1);
+	return (lengths.GetLength() > i ? lengths[i] : 1);
 }
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

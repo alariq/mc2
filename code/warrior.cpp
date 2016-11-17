@@ -554,7 +554,7 @@ long TargetPriorityList::calcTarget (MechWarriorPtr pilot, Stuff::Vector3D locat
 					// select best gameobject that fits params
 					if (list[i].params[2]) {
 						// for now, just returns the closest contact...
-						long contactList[MAX_MOVERS];
+						int contactList[MAX_MOVERS];
 						long numContacts = CurObject->getContacts(contactList, list[i].params[2], CONTACT_SORT_DISTANCE);
 						float smallestDistance = 999999.0;
 						for (long i = 0; i < numContacts; i++) {
@@ -859,8 +859,12 @@ void MechWarrior::init (bool create) {
 		}
 		skillRank[i] = 0.0;
 		skillPoints[i] = 0.0;
-		originalSkills[NUM_SKILLS] = 0;
-		startingSkills[NUM_SKILLS] = 0;
+        //sebi: WTF???
+		//originalSkills[NUM_SKILLS] = 0;
+		//startingSkills[NUM_SKILLS] = 0;
+        // maybe like this
+		originalSkills[i] = 0;
+		startingSkills[i] = 0;
 		
 	}
 	professionalism = 40;
@@ -1371,8 +1375,11 @@ void MechWarrior::clear (void) {
 		}
 		skillRank[i] = 0.0;
 		skillPoints[i] = 0.0;
-		originalSkills[NUM_SKILLS] = 0;
-		startingSkills[NUM_SKILLS] = 0;
+        //sebi: WTF???
+		//originalSkills[NUM_SKILLS] = 0;
+		//startingSkills[NUM_SKILLS] = 0;
+		originalSkills[i] = 0;
+		startingSkills[i] = 0;
 	}
 	professionalism = 40;
 	professionalismModifier = 0;
@@ -2280,7 +2287,7 @@ AttackerRecPtr MechWarrior::getAttackerInfo (unsigned long attackerWID) {
 
 //---------------------------------------------------------------------------
 
-long MechWarrior::getAttackers (unsigned long* attackerList, float seconds) {
+long MechWarrior::getAttackers (unsigned int* attackerList, float seconds) {
 
 	long count = 0;
 	float earliestTime = scenarioTime - seconds;
@@ -2758,13 +2765,13 @@ long MechWarrior::calcMovePath (long selectionIndex, unsigned long moveParams) {
 //(e.g. on a bridge tile just blown?)?!
 //**********
 	if (!flying && !jumping) {
-		long cellRow, cellCol;
+		int cellRow, cellCol;
 		myVehicle->getCellPosition(cellRow, cellCol);
 		if (!GameMap->getPassable(cellRow, cellCol))
 			start = myVehicle->getLastValidPosition();
 	}
 
-	long posCellR, posCellC;
+	int posCellR, posCellC;
 	land->worldToCell(start, posCellR, posCellC);
 	long startArea = GlobalMoveMap[myVehicle->getMoveLevel()]->calcArea(posCellR, posCellC);
 
@@ -2945,7 +2952,7 @@ long MechWarrior::calcMovePath (long selectionIndex, unsigned long moveParams) {
 		// don't do any global pathfinding--do it all on one movemap. In other words,
 		// make it a "simple" path. Also, if we're starting on a blocked tile (burnt
 		// forest tile, for example), we'll want to do a quickmove, as well...
-		long goalCellR, goalCellC;
+		int goalCellR, goalCellC;
 		land->worldToCell(goal, goalCellR, goalCellC);
 
 		bool doQuickMove = false;
@@ -3180,7 +3187,11 @@ long MechWarrior::calcMovePath (long selectionIndex, unsigned long moveParams) {
 				thruArea[1] = moveOrders.globalPath[curGlobalStep+1].thruArea;
 				goalDoor = moveOrders.globalPath[curGlobalStep+1].goalDoor;
 			}
-			numSteps = myVehicle->calcMovePath(moveOrders.path[pathNum], start, thruArea, goalDoor, moveOrders.globalGoalLocation, &goal, globalStep->goalCell, moveParams | MOVEPARAM_STATIONARY_MOVERS);
+            //sebi: temp
+            long tmp[] = {globalStep->goalCell[0],globalStep->goalCell[1]};
+			numSteps = myVehicle->calcMovePath(moveOrders.path[pathNum], start, thruArea, goalDoor, moveOrders.globalGoalLocation, &goal, tmp, moveParams | MOVEPARAM_STATIONARY_MOVERS);
+			globalStep->goalCell[0] = tmp[0];
+			globalStep->goalCell[1] = tmp[1];
 #ifdef LAB_ONLY
 			MCTimePath4Update += (GetCycles() - startTime);
 #endif
@@ -3203,7 +3214,11 @@ long MechWarrior::calcMovePath (long selectionIndex, unsigned long moveParams) {
 			if (myVehicle->getObjectClass() != ELEMENTAL)
 				moveParams |= MOVEPARAM_AVOID_PATHLOCKS;
 			startTime = GetCycles();
-			numSteps = myVehicle->calcMovePath(moveOrders.path[pathNum], MOVEPATH_COMPLEX, start, goal, globalStep->goalCell, moveParams | MOVEPARAM_STATIONARY_MOVERS);
+            //sebi: temp
+            long tmp[] = {globalStep->goalCell[0],globalStep->goalCell[1]};
+			numSteps = myVehicle->calcMovePath(moveOrders.path[pathNum], MOVEPATH_COMPLEX, start, goal, tmp, moveParams | MOVEPARAM_STATIONARY_MOVERS);
+			globalStep->goalCell[0] = tmp[0];
+			globalStep->goalCell[1] = tmp[1];
 #ifdef LAB_ONLY
 			MCTimePath5Update += (GetCycles() - startTime);
 #endif
@@ -3358,7 +3373,7 @@ bool MechWarrior::getNextWayPoint (Stuff::Vector3D& nextPoint, bool incWayPoint)
 // COMBAT DECISION TREE
 //---------------------------------------------------------------------------
 
-long MechWarrior::calcWeaponsStatus (GameObjectPtr target, long* weaponList, Stuff::Vector3D* targetPoint) {
+long MechWarrior::calcWeaponsStatus (GameObjectPtr target, int* weaponList, Stuff::Vector3D* targetPoint) {
 
 	MoverPtr myVehicle = getVehicle();
 	if (!myVehicle->canFireWeapons())
@@ -3918,7 +3933,7 @@ bool MechWarrior::movementDecisionTree (void) {
 			// DEFINITELY use a smarter priority scheme before this thing ships :)
 			bool onBlownBridge = false;
 			MoverPtr myVehicle = getVehicle();
-			long cellRow = 0, cellCol = 0;
+			int cellRow = 0, cellCol = 0;
 			myVehicle->getCellPosition(cellRow, cellCol);
 			#ifdef USE_OVERLAYS
 			long overlay = GameMap->getOverlay(cellRow, cellCol);
@@ -4136,7 +4151,7 @@ bool MechWarrior::movementDecisionTree (void) {
 							}
 							break;
 						case GROUNDVEHICLE:
-							if (weaponsStatusResult == 0)
+							if (weaponsStatusResult == 0) {
 								if ((target && !myVehicle->lineOfSight(target)) ||
 									(!target && !myVehicle->lineOfSight(target))) {
 										recalcPath = true;
@@ -4152,9 +4167,10 @@ bool MechWarrior::movementDecisionTree (void) {
 										moveParams = MOVEPARAM_SOMEWHERE_ELSE;
 									}
 								}
+                            }
 							break;
 						case ELEMENTAL:
-							if (weaponsStatusResult == 0)
+							if (weaponsStatusResult == 0) {
 								if (numWeaponsNotReady == 0) {
 									if ((numWeaponsNotLocked > 0) || (numWeaponsTooHot > 0)) {
 										if ((getMovePath()->numSteps == 0) && !getMoveTwisting())
@@ -4165,6 +4181,7 @@ bool MechWarrior::movementDecisionTree (void) {
 										moveParams = MOVEPARAM_SOMEWHERE_ELSE;
 									}
 								}
+                            }
 							break;
 					}
 				}
@@ -4315,7 +4332,7 @@ bool MechWarrior::movementDecisionTree (void) {
 								}
 								break;
 							case GROUNDVEHICLE:
-								if (weaponsStatusResult == 0)
+								if (weaponsStatusResult == 0) {
 									if (!myVehicle->lineOfSight(target)) {
 										recalcPath = true;
 										moveParams = MOVEPARAM_SOMEWHERE_ELSE;
@@ -4330,9 +4347,10 @@ bool MechWarrior::movementDecisionTree (void) {
 											moveParams = MOVEPARAM_STEP_TOWARD_TARGET;
 										}
 									}
+                                }
 								break;
 							case ELEMENTAL:
-								if (weaponsStatusResult == 0)
+								if (weaponsStatusResult == 0) {
 									if (numWeaponsNotReady == 0) {
 										if ((numWeaponsNotLocked > 0) || (numWeaponsTooHot > 0)) {
 											if ((getMovePath()->numSteps == 0) && !getMoveTwisting())
@@ -4343,6 +4361,7 @@ bool MechWarrior::movementDecisionTree (void) {
 											moveParams = MOVEPARAM_SOMEWHERE_ELSE;
 										}
 									}
+                                }
 								break;
 						}
 					}
@@ -4549,7 +4568,7 @@ long MechWarrior::triggerAlarm (long alarmCode, unsigned long triggerId) {
 
 //---------------------------------------------------------------------------
 
-long MechWarrior::getEventHistory (long alarmCode, long* paramList) {
+long MechWarrior::getEventHistory (long alarmCode, int* paramList) {
 
 	long numValidTriggers = 0;
 	switch (alarmCode) {
@@ -4593,7 +4612,7 @@ long MechWarrior::getEventHistory (long alarmCode, long* paramList) {
 
 //-----------------------------------------------------------------------------
 
-long MechWarrior::getNextEventHistory (long* paramList) {
+long MechWarrior::getNextEventHistory (int* paramList) {
 
 	if (curEventID < NUM_PILOT_ALARMS) {
 		while ((curEventID < NUM_PILOT_ALARMS) && (alarmHistory[curEventID].numTriggers == 0))
@@ -4878,7 +4897,9 @@ void MechWarrior::updateActions (void) {
 
 long MechWarrior::mainDecisionTree (void) {
 
-	Assert(moveOrders.path != NULL, 0, " bad warrior path ");
+    // sebi: WTF??? path is an array of2 elements => comparison always true
+	//Assert(moveOrders.path != NULL, 0, " bad warrior path ");
+	Assert(moveOrders.path[0] != NULL, 0, " bad warrior path ");
 
 	if ((teamId == -1) || !brainsEnabled[teamId]) {
 		clearCurTacOrder(false);
@@ -6107,7 +6128,7 @@ long MechWarrior::orderJumpToPoint (bool unitOrder, bool setTacOrder, long origi
 		return(TACORDER_SUCCESS);
 
 	if (myVehicle->getObjectClass() == BATTLEMECH) {
-		long cellR, cellC;
+		int cellR, cellC;
 		land->worldToCell(location, cellR, cellC);
 		if (!GameMap->getPassable(cellR, cellC))
 			return(TACORDER_SUCCESS);
@@ -6154,7 +6175,7 @@ long MechWarrior::orderJumpToObject (bool unitOrder, bool setTacOrder, long orig
 		return(TACORDER_SUCCESS);
 
 	if (myVehicle->getObjectClass() == BATTLEMECH) {
-		long cellR, cellC;
+		int cellR, cellC;
 		land->worldToCell(location, cellR, cellC);
 		if (!GameMap->getPassable(cellR, cellC))
 			return(TACORDER_SUCCESS);
@@ -6653,7 +6674,7 @@ long MechWarrior::orderRecover (long origin, GameObjectPtr target, unsigned long
 long MechWarrior::orderGetFixed (long origin, GameObjectPtr target, unsigned long params)
 {
 
-	if (!target || target->getObjectClass() != TREEBUILDING && target->getRefitPoints() <= 0.0)
+	if (!target || (target->getObjectClass() != TREEBUILDING && target->getRefitPoints() <= 0.0))
 		return(TACORDER_SUCCESS);
 #ifdef USE_BUILDINGS
 	if ((getVehicle()->getObjectClass() == BATTLEMECH && ((TreeBuildingPtr) target)->mechBay == false) ||

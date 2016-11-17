@@ -159,7 +159,7 @@ class MoverGroup {
 
 		MechWarriorPtr getPointPilot (void);
 
-		void statusCount (long* statusTally);
+		void statusCount (int* statusTally);
 
 		void addToGUI (bool visible = true);
 

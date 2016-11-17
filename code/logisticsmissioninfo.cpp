@@ -948,10 +948,10 @@ bool LogisticsMissionInfo::getMissionAvailable( const char* missionName )
 			return !pGroup->infos[i]->completed;
 		}
 	}
-	return NULL;
+	return false;
 }
 
-const char*			LogisticsMissionInfo::getCurrentMissionFriendlyName() const
+const char* LogisticsMissionInfo::getCurrentMissionFriendlyName() const
 {
 	if ( currentStage >= groupCount )
 		return NULL;
@@ -964,7 +964,7 @@ const char*			LogisticsMissionInfo::getCurrentMissionFriendlyName() const
 
 }
 
-const char*			LogisticsMissionInfo::getCurrentABLScriptName() const
+const char* LogisticsMissionInfo::getCurrentABLScriptName() const
 {
 	if ( currentStage >= groupCount )
 		return NULL;

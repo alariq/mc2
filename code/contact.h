@@ -245,7 +245,7 @@ class SensorSystem {
 
 		void updateScan (bool forceUpdate = false);
 
-		long getTeamContacts (long* contactList, long contactCriteria, long sortType);
+		long getTeamContacts (int* contactList, int contactCriteria, int ortType);
 		
 		void setLOSCapability (bool flag)
 		{
@@ -324,7 +324,7 @@ class TeamSensorSystem {
 
 		bool hasSensorContact (long teamID);
 
-		long getContacts (GameObjectPtr looker, long* contactList, long contactCriteria, long sortType);
+		long getContacts (GameObjectPtr looker, int* contactList, int contactCriteria, int sortType);
 
 		long getContactStatus (MoverPtr mover, bool includingAllies);
 

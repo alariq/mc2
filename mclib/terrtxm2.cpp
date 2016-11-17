@@ -1574,7 +1574,7 @@ long TerrainColorMap::init (char *fileName)
 		{
 			/* If a detail texture doesn't exist for this mission, use the default detail texture.*/
 			detailFile.destroy();
-			sprintf(dName,"defaults\\default_detail");
+			sprintf(dName,"defaults" PATH_SEPARATOR "default_detail");
 			detailFile.init(texturePath,dName,".tga");
 		}
 		if (fileExists(detailFile))		//Otherwise, its already 0xffffffff!!
@@ -1594,7 +1594,7 @@ long TerrainColorMap::init (char *fileName)
 		{
 			/* If a water texture doesn't exist for this mission, use the default water texture.*/
 			waterFile.destroy();
-			sprintf(dName,"defaults\\default_water");
+			sprintf(dName,"defaults" PATH_SEPARATOR "default_water");
 			waterFile.init(texturePath,dName,".tga");
 		}
 		if (fileExists(waterFile))
@@ -1616,7 +1616,7 @@ long TerrainColorMap::init (char *fileName)
 			
 			if (!fileExists(waterFile))
 			{
-				sprintf(waterDetailBaseName,"defaults\\default_water");
+				sprintf(waterDetailBaseName,"defaults" PATH_SEPARATOR "default_water");
 			}
 		}
 		for (long i=0;i<MAX_WATER_DETAIL_TEXTURES;i++)
@@ -1673,7 +1673,8 @@ long TerrainColorMap::init (char *fileName)
 
 		File colorMapFile;
 		long result = colorMapFile.open(burnInJpg);
-		if (result == NO_ERR)
+		// sebi :-)
+		if (result == NO_ERR && false)
 		{
 			long fileSize = colorMapFile.fileSize();
 			MemoryPtr jpgData = (MemoryPtr)malloc(fileSize);

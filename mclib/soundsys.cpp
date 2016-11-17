@@ -952,7 +952,7 @@ bool SoundSystem::isPlayingSample (long sampleId)
 {
 	for (long i=0;i<MAX_DIGITAL_SAMPLES;i++)
 	{
-		if ((sampleId == channelSampleId[i]))
+		if (sampleId == channelSampleId[i])
 			return TRUE;
 	}
 
@@ -1007,7 +1007,7 @@ long SoundSystem::findOpenChannel (long start, long end)
 //---------------------------------------------------------------------------
 long SoundSystem::playDigitalSample (unsigned long sampleId, Stuff::Vector3D pos, bool allowDupes)
 {
-	if (useSound && allowDupes || (!isPlayingSample(sampleId) && !allowDupes))
+	if ((useSound && allowDupes) || (!isPlayingSample(sampleId) && !allowDupes))
 	{
 		if (sampleId >= numSoundBites)
 			return(-1);

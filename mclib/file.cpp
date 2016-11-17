@@ -301,7 +301,7 @@ long File::open (const char* fName, FileMode _mode, long numChild)
 						}
 
 						char msg[300];
-						sprintf(msg,"CFHandle  Length: %010d    File: %s",fileSize(),fileName);
+						sprintf(msg,"CFHandle  Length: %010ld    File: %s",fileSize(),fileName);
 						fileTrafficLog->writeLine(msg);
 					}
 
@@ -345,7 +345,7 @@ long File::open (const char* fName, FileMode _mode, long numChild)
 				}
 	
 				char msg[300];
-				sprintf(msg,"FASTF     Length: %010d    File: %s",fileSize(),fileName);
+				sprintf(msg,"FASTF     Length: %010ld    File: %s",fileSize(),fileName);
 				fileTrafficLog->writeLine(msg);
 			}
 
@@ -381,7 +381,7 @@ long File::open (const char* fName, FileMode _mode, long numChild)
 				}
 	
 				char msg[300];
-				sprintf(msg,"CFHandle  Length: %010d    File: %s",fileSize(),fileName);
+				sprintf(msg,"CFHandle  Length: %010ld    File: %s",fileSize(),fileName);
 				fileTrafficLog->writeLine(msg);
 			}
 
@@ -449,7 +449,7 @@ long File::open (FilePtr _parent, unsigned long fileSize, long numChild)
 			}
 		
 			char msg[300];
-			sprintf(msg,"CHILD     Length: %010d    File: %s",fileSize,_parent->getFilename());
+			sprintf(msg,"CHILD     Length: %010ld    File: %s",fileSize,_parent->getFilename());
 			fileTrafficLog->writeLine(msg);
 		}
 
@@ -954,8 +954,9 @@ int File::readInt(void)
 //---------------------------------------------------------------------------
 long File::readLong (void)
 {
-    gosASSERT(0 && "readLong: Most probably this function should not be called!!!");
-
+    //gosASSERT(0 && "readLong: Most probably this function should not be called!!!");
+    return readInt();
+#if 0
 	long value = 0;
 	unsigned long result = 0;
 
@@ -985,8 +986,9 @@ long File::readLong (void)
 			lastError = FILE_NOT_OPEN;
 		}
 	}
-	
+
 	return value;
+#endif
 }
 
 bool isNAN(float *pFloat)
@@ -1678,7 +1680,7 @@ unsigned long File::getLength (void)
 	{
 		length = physicalLength;
 	}
-	else if (isOpen() && ((length == 0) || (fileMode > READ) && !inRAM))
+	else if (isOpen() && ((length == 0) || ((fileMode > READ) && !inRAM)))
 	{
 		/* _fstat() was being used to get the length of the file, but it was wrong. It was
 		   not giving the *logical* size, which is what we want. */

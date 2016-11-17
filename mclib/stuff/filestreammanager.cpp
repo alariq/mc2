@@ -258,6 +258,8 @@ MString*
 {
 	Check_Object(file_name);
 
+    PAUSE(("")); // sebi
+
 	if(file_name->GetLength() == 0)
 	{
 		return file_name;
@@ -283,6 +285,9 @@ MString*
 MString*
 	Stuff::StripDirectory(MString* file_name)
 {
+
+    PAUSE(("")); // sebi
+
 	Check_Object(file_name);
 	char *p = strrchr(*file_name, '\\');
 	if (p)

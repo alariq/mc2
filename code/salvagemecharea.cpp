@@ -645,7 +645,7 @@ void SalvageMechArea::setMech( LogisticsVariant* pMech, long red, long green, lo
 		EString fileName = pMech->getFileName();
 		int index = fileName.Find( '.' );
 		fileName = fileName.Left( index );
-		index = fileName.ReverseFind( '\\' );
+		index = fileName.ReverseFind( PATH_SEPARATOR_AS_CHAR );
 		fileName = fileName.Right( fileName.Length() - index - 1 );
 		mechCamera.setMech( fileName, red, green, blue );
 

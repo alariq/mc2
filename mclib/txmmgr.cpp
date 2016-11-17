@@ -280,7 +280,7 @@ void MC_TextureManager::flush (bool justTextures)
 	//Restart MLR and the GOSFx
 	gos_PushCurrentHeap(MidLevelRenderer::Heap);
 
-	MidLevelRenderer::TGAFilePool *pool = new MidLevelRenderer::TGAFilePool("data\\tgl\\128\\");
+	MidLevelRenderer::TGAFilePool *pool = new MidLevelRenderer::TGAFilePool("data" PATH_SEPARATOR "tgl" PATH_SEPARATOR "128" PATH_SEPARATOR);
 	MidLevelRenderer::MLRTexturePool::Instance = new MidLevelRenderer::MLRTexturePool(pool);
 
 	MidLevelRenderer::MLRSortByOrder *cameraSorter = new MidLevelRenderer::MLRSortByOrder(MidLevelRenderer::MLRTexturePool::Instance);

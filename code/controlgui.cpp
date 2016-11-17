@@ -299,7 +299,7 @@ bool ControlGui::flashRPTotal (long numFlashes)
 	return true;
 }
 
-bool ControlGui::animateTacMap (long buttonId,float timeToScroll,long numFlashes)
+bool ControlGui::animateTacMap (int buttonId,float timeToScroll,long numFlashes)
 {
 	return tacMap.animate(abs(buttonId), numFlashes);
 }

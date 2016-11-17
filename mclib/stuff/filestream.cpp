@@ -18,8 +18,8 @@ Directory::Directory(
 	char *find_files,
 	bool directories
 ):
-	fileEntries(NULL,NULL),
-	folderEntries(NULL,NULL)
+	fileEntries(NULL,false),
+	folderEntries(NULL,false)
 {
 	Check_Pointer(find_files);
 
@@ -417,6 +417,8 @@ bool
 bool
 	Stuff::CreateDirectories(const char *directory_path)
 {
+
+    PAUSE(("")); // sebi
 	
 	if (directory_path == NULL)
 		return false;

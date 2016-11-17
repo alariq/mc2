@@ -1082,7 +1082,9 @@ int ECharString::Find( unsigned short Char, int Start_Index ) const
 {
 	unsigned short Tmp[2];
 	*Tmp = Char;
-	Tmp[2] = 0;
+    //sebi: WTF???
+	//Tmp[2] = 0;
+	Tmp[1] = 0;
 
 	return Find( (ECSChar*)Tmp, Start_Index );
 }

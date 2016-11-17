@@ -314,7 +314,7 @@ class TacticalOrder {
 
 		bool isWayPathOrder (void);
 
-		long getParamData (float* time, long* paramList);
+		long getParamData (float* time, int* paramList);
 
 		long pack (MoverGroupPtr unit, MoverPtr point);
 

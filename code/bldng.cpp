@@ -1537,12 +1537,12 @@ long Building::handleWeaponHit (WeaponShotInfoPtr shotInfo, bool addMultiplayChu
 
 						//Traverse the moverLists and blow anyone standing on these cells which JUST went impassable
 						long numMovers = ObjectManager->getNumMovers();
-						for (long j = 0; j < numMovers; j+= 1) 
+						for (int j = 0; j < numMovers; j+= 1) 
 						{
 							MoverPtr pMover = ObjectManager->getMover(j);
 							if (pMover && pMover->getExists())
 							{
-								long cellRow, cellCol;
+								int cellRow, cellCol;
 								land->worldToCell(pMover->getPosition(), cellRow, cellCol);
 								if ((cellCol == c) && (cellRow == r))
 								{

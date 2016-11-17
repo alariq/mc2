@@ -217,7 +217,7 @@ typedef struct _ScenarioMapCellInfo {
 	unsigned char		specialType;
 	short				specialID;
 	bool				passable;
-	long				lineOfSight;
+	int                 lineOfSight;
 } MissionMapCellInfo;
 
 //---------------------------------------------------------------------------
@@ -291,22 +291,22 @@ typedef struct _ScenarioMapCellInfo {
 #define	MAPCELL_BUILD_NOT_SET_MASK		0x80000000
 
 typedef struct _MapCell {
-	unsigned long		data;
+	unsigned int data;
 
-	unsigned long getTerrain (void) {
+	unsigned int getTerrain (void) {
 		return((data & MAPCELL_TERRAIN_MASK) >> MAPCELL_TERRAIN_SHIFT);
 	}
 
-	void setTerrain (unsigned long terrain) {
+	void setTerrain (unsigned int terrain) {
 		data &= (MAPCELL_TERRAIN_MASK ^ 0xFFFFFFFF);
 		data |= (terrain << MAPCELL_TERRAIN_SHIFT);
 	}
 
-	unsigned long getOverlay (void) {
+	unsigned int getOverlay (void) {
 		return((data & MAPCELL_OVERLAY_MASK) >> MAPCELL_OVERLAY_SHIFT);
 	}
 
-	void setOverlay (unsigned long overlay) {
+	void setOverlay (unsigned int overlay) {
 		data &= (MAPCELL_OVERLAY_MASK ^ 0xFFFFFFFF);
 		data |= (overlay << MAPCELL_OVERLAY_SHIFT);
 	}
@@ -321,11 +321,11 @@ typedef struct _MapCell {
 			data |= MAPCELL_MOVER_MASK;
 	}
 
-	unsigned long getGate (void) {
+	unsigned int getGate (void) {
 		return((data & MAPCELL_GATE_MASK) >> MAPCELL_GATE_SHIFT);
 	}
 
-	void setGate (unsigned long gate) {
+	void setGate (unsigned int gate) {
 		data &= (MAPCELL_GATE_MASK ^ 0xFFFFFFFF);
 		data |= (gate << MAPCELL_GATE_SHIFT);
 	}
@@ -351,11 +351,11 @@ typedef struct _MapCell {
 			data |= bit;
 	}
 
-	unsigned long getMine (void) {
+	unsigned int getMine (void) {
 		return((data & MAPCELL_MINE_MASK) >> MAPCELL_MINE_SHIFT);
 	}
 
-	void setMine (unsigned long mine) {
+	void setMine (unsigned int mine) {
 		data &= (MAPCELL_MINE_MASK ^ 0xFFFFFFFF);
 		data |= (mine << MAPCELL_MINE_SHIFT);
 	}
@@ -499,7 +499,7 @@ typedef MapCell* MapCellPtr;
 typedef struct _PreservedCell {
 	short				row;
 	short				col;
-	unsigned long		data;
+	unsigned int        data;
 } PreservedCell;
 
 typedef PreservedCell* PreservedCellPtr;
@@ -980,8 +980,8 @@ class MovePath {
 typedef struct _DoorLink {
 	short					doorIndex;
 	char					doorSide;
-	long					cost;
-	long					openCost;
+	int					cost;
+	int					openCost;
 } DoorLink;
 
 typedef DoorLink* DoorLinkPtr;
@@ -998,16 +998,17 @@ typedef struct _GlobalMapDoor {
 	short					areaCost[2];
 	char					direction[2];
 	short					numLinks[2];
-	DoorLinkPtr				links[2];
+	//DoorLinkPtr				links[2];
+	DWORD                   links_Legacy32bitPtr[2];
 	//------------------
 	// Pathfinding  data
-	long					cost;
-	long					parent;
-	long					fromAreaIndex;
-	unsigned long			flags;
-	long					g;
-	long					hPrime;
-	long					fPrime;
+	int					cost;
+	int					parent;
+	int					fromAreaIndex;
+	unsigned int	    flags;
+	int					g;
+	int					hPrime;
+	int					fPrime;
 } GlobalMapDoor;
 
 typedef GlobalMapDoor* GlobalMapDoorPtr;
@@ -1040,14 +1041,17 @@ typedef struct _GlobalMapArea {
 	// Map layout data
 	short					sectorR;
 	short					sectorC;
-	DoorInfoPtr				doors;
+	//DoorInfoPtr				doors;
+	DWORD                   doors_Legacy32bitPtr;
 	AreaType				type;
 	short					numDoors;
-	long					ownerWID;
+	int					    ownerWID;
 	char					teamID;
 	bool					offMap;
 	bool					open;
-	short*					cellsCovered;
+    // sebi: 64bit fix 
+	//short*					cellsCovered;
+	DWORD                   cellsCovered_Legacy32bitPtr;
 } GlobalMapArea;
 
 #pragma pack()
@@ -1055,13 +1059,13 @@ typedef struct _GlobalMapArea {
 typedef GlobalMapArea* GlobalMapAreaPtr;
 
 typedef struct _GlobalPathStep {
-	long					startDoor;
-	long					thruArea;
-	long					goalDoor;
+	int					startDoor;
+	int					thruArea;
+	int					goalDoor;
 	Stuff::Vector3D			start;			// "start" in this area
 	Stuff::Vector3D			goal;			// "goal" in this area
-	long					goalCell[2];	// which cell did we actually exit thru
-	long					costToGoal;
+	int					goalCell[2];	// which cell did we actually exit thru
+	int					costToGoal;
 } GlobalPathStep;
 
 typedef GlobalPathStep* GlobalPathStepPtr;
@@ -1088,42 +1092,51 @@ typedef struct _GlobalSpecialAreaInfo {
 	short					cells[MAX_CELLS_PER_SUB_AREA][2];
 } GlobalSpecialAreaInfo;
 
+typedef DoorLinkPtr DoorInfoLinksPtr[2];
 class GlobalMap {
 
 	public:
 
-		long						height;				// in cells
-		long						width;				// in cells
-		long						sectorDim;			// in cells
-		long						sectorHeight;		// in sectors
-		long						sectorWidth;		// in sectors
-		long						numAreas;
-		long						numDoors;
-		long						numDoorInfos;
-		long						numDoorLinks;
+		int						height;				// in cells
+		int						width;				// in cells
+		int						sectorDim;			// in cells
+		int						sectorHeight;		// in sectors
+		int						sectorWidth;		// in sectors
+		int						numAreas;
+		int						numDoors;
+		int						numDoorInfos;
+		int						numDoorLinks;
 
 		short*						areaMap;
 		GlobalMapAreaPtr			areas;
+        // sebi: moved pointer out of a struct which is loaded from file
+        // because pointer size is platform dependent (64 vs. 32bit)
+	    short**					    areas_cellsCovered;
+	    DoorInfoPtr*                areas_doors;
+
 		GlobalMapDoorPtr			doors;
+        DoorInfoLinksPtr*           doors_links;
+
 		DoorInfoPtr					doorInfos;
 		DoorLinkPtr					doorLinks;
 		GlobalMapDoorPtr			doorBuildList;
+        DoorInfoLinksPtr*           doorBuildList_links;
 #ifdef USE_PATH_COST_TABLE
 		unsigned char*				pathCostTable;
 #endif
 		unsigned char*				pathExistsTable;
 
-		long						numSpecialAreas;
+		int						    numSpecialAreas;
 		GlobalSpecialAreaInfo*		specialAreas;	// used when building data
 
 		bool						closes;
 		bool						opens;
 
-		long						goalArea;
-		long						goalSector[2];
+		int						    goalArea;
+		int						    goalSector[2];
 
-		long						startCell[2];
-		long						goalCell[2];
+		int						    startCell[2];
+		int						    goalCell[2];
 
 		bool						blank;
 		bool						hover;
@@ -1132,16 +1145,16 @@ class GlobalMap {
 		bool						badLoad;
 		bool						calcedPathCost;
 
-		long						numOffMapAreas;
+		int						    numOffMapAreas;
 		short						offMapAreas[MAX_OFFMAP_AREAS];
 
-		bool (*isGateDisabledCallback) (long objectWID);
-		bool (*isGateOpenCallback) (long objectWID);
+		bool (*isGateDisabledCallback) (int objectWID);
+		bool (*isGateOpenCallback) (int objectWID);
 
-		static long					minRow;
-		static long					maxRow;
-		static long					minCol;
-		static long					maxCol;
+		static int					minRow;
+		static int					maxRow;
+		static int					minCol;
+		static int					maxCol;
 
 		static GameLogPtr			log;
 		static bool					logEnabled;
@@ -1161,14 +1174,18 @@ class GlobalMap {
 			numAreas = 0;
 			areaMap = NULL;
 			areas = NULL;
+            areas_cellsCovered = NULL;
+            areas_doors = NULL;
 
 			numDoors = 0;
 			numDoorInfos = 0;
 			numDoorLinks = 0;
 			doors = NULL;
+            doors_links = NULL;
 			doorInfos = NULL;
 			doorLinks = NULL;
 			doorBuildList = NULL;
+			doorBuildList_links = NULL;
 
 			goalSector[0] = goalSector[1] = 0;
 			blank = false;
@@ -1256,7 +1273,7 @@ class GlobalMap {
 
 		void calcDoorLinks (void);
 
-		long getPathCost (long startArea, long goalArea, bool withSpecialAreas, long& confidence, bool calcIt);
+        long getPathCost (int startArea, int goalArea, bool withSpecialAreas, int& confidence, bool calcIt);
 
 #ifdef USE_PATH_COST_TABLE
 		void initPathCostTable (void);
@@ -1376,19 +1393,19 @@ typedef GlobalMap* GlobalMapPtr;
 #define	NUM_ADJ_CELLS	8
 
 typedef struct _MoveMapNode {
-	short				adjCells[NUM_ADJ_CELLS];
-	long				cost;								// normal cost to travel here, based upon terrain
-	long				parent;								// where we came from (parent cell)
-	unsigned long		flags;								// CLOSED, OPEN, STEP flags
-	long				g;									// known cost from START to this node
-	long				hPrime;								// estimated cost from this node to GOAL
-	long				fPrime;								// = g + hPrime
+	short		    adjCells[NUM_ADJ_CELLS];
+	int				cost;								// normal cost to travel here, based upon terrain
+	int				parent;								// where we came from (parent cell)
+	unsigned int    flags;								// CLOSED, OPEN, STEP flags
+	int				g;									// known cost from START to this node
+	int				hPrime;								// estimated cost from this node to GOAL
+	int				fPrime;								// = g + hPrime
 
-	void setFlag (unsigned long flag) {
+	void setFlag (unsigned int flag) {
 		flags |= flag;
 	}
 
-	void clearFlag (unsigned long flag) {
+	void clearFlag (unsigned int flag) {
 		flags &= (flag ^ 0xFFFFFFFF);
 	}
 } MoveMapNode;
@@ -1401,50 +1418,50 @@ class MoveMap {
 
 	public:
 
-		long				ULr;		// upper-left cell row
-		long				ULc;		// upper-left cell col
-		long				width;
-		long				height;
-		long				minRow;
-		long				maxRow;
-		long				minCol;
-		long				maxCol;
-		long				maxWidth;
-		long				maxHeight;
+		int				    ULr;		// upper-left cell row
+		int				    ULc;		// upper-left cell col
+		int				    width;
+		int				    height;
+		int				    minRow;
+		int				    maxRow;
+		int				    minCol;
+		int				    maxCol;
+		int				    maxWidth;
+		int				    maxHeight;
 		MoveMapNodePtr		map;
-		long*				mapRowStartTable;
-		long*				mapRowTable;
-		long*				mapColTable;
-		long				moveLevel;
+		int*				mapRowStartTable;
+		int*				mapRowTable;
+		int*				mapColTable;
+		int				    moveLevel;
 		Stuff::Vector3D		start;
-		long				startR;
-		long				startC;
+		int				    startR;
+		int				    startC;
 		Stuff::Vector3D		goal;			// actual world-coord goal
-		long				goalR;			// cell goal row relative to move map
-		long				goalC;			// cell goal col relative to move map
-		long				thruAreas[2];
-		long				door;
-		long				doorSide;
-		long				doorDirection;	// if goal is not a door, set to -1
+		int				    goalR;			// cell goal row relative to move map
+		int				    goalC;			// cell goal col relative to move map
+		int				    thruAreas[2];
+		int				    door;
+		int				    doorSide;
+		int				    doorDirection;	// if goal is not a door, set to -1
 		Stuff::Vector3D		target;			// actual world-coord target
-		long				clearCost;		// cost, in tenths of secs, to move to clear cell
-		long				jumpCost;		// cost, in tenths of secs, to jump to cell
-		long				numOffsets;		// set by calcMovePath function (don't touch:)
+		int				    clearCost;		// cost, in tenths of secs, to move to clear cell
+		int				    jumpCost;		// cost, in tenths of secs, to jump to cell
+		int				    numOffsets;		// set by calcMovePath function (don't touch:)
 		float				calcTime;
-		long*				overlayWeightTable;
-		long				moverWID;
-		long				moverTeamID;
+		int*				overlayWeightTable;
+		int				    moverWID;
+		int				    moverTeamID;
 		bool				moverLayingMines;
 		bool				moverWithdrawing;
 		bool				travelOffMap;
 		bool				cannotEnterOffMap;
 
-		void				(*blockedDoorCallback) (long moveLevel, long door, char* openCells);
+		void				(*blockedDoorCallback) (int moveLevel, int door, char* openCells);
 		void				(*placeStationaryMoversCallback) (MoveMapPtr map);
 
 		static float		distanceFloat[DISTANCE_TABLE_DIM][DISTANCE_TABLE_DIM];
-		static long			distanceLong[DISTANCE_TABLE_DIM][DISTANCE_TABLE_DIM];
-		static long			forestCost;
+		static int			distanceInt[DISTANCE_TABLE_DIM][DISTANCE_TABLE_DIM];
+		static int			forestCost;
 
 	protected:
 
@@ -1543,7 +1560,7 @@ class MoveMap {
 
 		void placeMovers (bool stationaryOnly);
 
-		void setOverlayWeightTable (long* table) {
+		void setOverlayWeightTable (int* table) {
 			overlayWeightTable = table;
 		}
 
@@ -1605,7 +1622,7 @@ class MoveMap {
 		}
 
 		float getDistanceLong (long rowDelta, long colDelta) {
-			return(distanceLong[rowDelta][colDelta]);
+			return(distanceInt[rowDelta][colDelta]);
 		}
 
 		void writeDebug (File* debugFile);
