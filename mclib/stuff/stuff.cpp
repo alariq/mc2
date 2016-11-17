@@ -15,10 +15,10 @@ void
 {
 	Verify(!(reinterpret_cast<size_t>(where)&3));
 	Check_Pointer(where);
-	long *filler = Cast_Pointer(long *, where);
+	int32_t* filler = Cast_Pointer(int32_t*, where);
 	for (int i = how_much >> 2; i; --i)
 	{
-		*filler++ = SNAN_NEGATIVE_LONG;
+		*filler++ = SNAN_NEGATIVE_INT32;
 	}
 }
 

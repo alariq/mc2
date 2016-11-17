@@ -35,7 +35,7 @@
 		if (Stuff::ArmorLevel>0 && (c)) SPEW((0, #c));\
 	} while(0)
 
-#define Check_Pointer(p) Verify((p) && reinterpret_cast<size_t>(p)!=Stuff::SNAN_NEGATIVE_LONG)
+#define Check_Pointer(p) Verify((p) && reinterpret_cast<size_t>(p)!=Stuff::SNAN_NEGATIVE_INT32)
 
 template <class T> T
 	Cast_Pointer_Function(T p)
@@ -47,7 +47,7 @@ template <class T> T
 
 #define Cast_Pointer(type, ptr) Stuff::Cast_Pointer_Function(reinterpret_cast<type>(ptr))
 
-#define abs_ptr(x) ((x<0) ? -(x) : (x))
+#define abs_generic(x) ((x<0) ? -(x) : (x))
 
 #define Mem_Copy(destination, source, length, available)\
 	do {\
@@ -55,7 +55,7 @@ template <class T> T
 		Check_Pointer(source);\
 		Verify((length) <= (available));\
 		Verify(\
-			abs_ptr(\
+			abs_generic(\
 				reinterpret_cast<char*>(destination)\
 				 - reinterpret_cast<const char*>(source)\
 			) >= length\
@@ -68,7 +68,7 @@ template <class T> T
 		Check_Pointer(destination);\
 		Check_Pointer(source);\
 		Verify((strlen(source) + 1) <= (available));\
-		Verify(abs(destination - source) >= (strlen(source) + 1));\
+		Verify(abs_generic(destination - source) >= (strlen(source) + 1));\
 		strcpy(destination, source);\
 	} while (0)
 

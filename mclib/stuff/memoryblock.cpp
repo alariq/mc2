@@ -374,7 +374,7 @@ void
 	BYTE **deletions = new(blockHeap) BYTE*[deletion_count+1];
 	deletion = deletedRecord;
 	int i=deletion_count-1;
-	deletions[deletion_count] = reinterpret_cast<BYTE*>(SNAN_NEGATIVE_LONG);
+	deletions[deletion_count] = reinterpret_cast<BYTE*>(SNAN_NEGATIVE_INT32);
 	deletions[i--] = deletion;
 	deletion = *Cast_Pointer(BYTE**, deletion);
 	int j;

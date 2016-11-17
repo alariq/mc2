@@ -39,7 +39,7 @@ float
 		Stuff::Is_Signature_Bad(const volatile Signature *p)
 	{
         // sebi: size_t instead of int
-		if ((p) && reinterpret_cast<size_t>(p)!=Stuff::SNAN_NEGATIVE_LONG)
+		if ((p) && reinterpret_cast<size_t>(p)!=Stuff::SNAN_NEGATIVE_INT32)
 		{
 			Verify(!(reinterpret_cast<size_t>(p) & 3));
 			if (p->mark == Signature::Destroyed)

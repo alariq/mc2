@@ -20,7 +20,7 @@ namespace Stuff {
 
 	extern int ArmorLevel;
 
-	enum {SNAN_NEGATIVE_LONG=0xffb1ffb1};
+	enum {SNAN_NEGATIVE_INT32=0xffb1ffb1};
 
 	#if !defined(Verify)
 		#if !defined(_ARMOR)
@@ -98,7 +98,8 @@ namespace Stuff {
 
 		protected:
 			Signature();
-			~Signature();
+            // because bjects inherit from it
+			virtual ~Signature();
 
 		public:
 			friend void
