@@ -31,37 +31,39 @@ LPTSTR WINAPI CharLower(
 int MessageBoxA(HWND,LPCSTR header, LPCSTR message, UINT )
 {
     printf("MSGBOX: %s : %s\n", header, message);
+    return 0;
 }
 
 int MessageBoxW(HWND,LPCWSTR header, LPCWSTR message, UINT)
 {
     printf("MSGBOX: %s : %s\n", header, message);
+    return 0;
 }
 
 LPSTR CharLowerA(LPSTR s)
 {
     char* p = s;
-    while (*p = tolower( *p )) p++;
+    while ((*p = tolower( *p ))) p++;
     return s;
 }
 
 LPSTR CharUpperA(LPSTR s)
 {
     char* p = s;
-    while (*p = toupper( *p )) p++;
+    while ((*p = toupper( *p ))) p++;
     return s;
 }
 
 LPWSTR CharLowerW(LPWSTR s)
 {
     wchar_t* p = s;
-    while (*p = towlower( *p )) p++;
+    while ((*p = towlower( *p ))) p++;
     return s;
 }
 LPWSTR CharUpperW(LPWSTR s)
 {
     wchar_t* p = s;
-    while (*p = towupper( *p )) p++;
+    while ((*p = towupper( *p ))) p++;
     return s;
 
 }

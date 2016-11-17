@@ -7,7 +7,7 @@ unsigned char *_mbslwr(
 {
     // only ok for C locale and single byte character set
     unsigned char* p = str;
-    while (*p = tolower( *p )) p++;
+    while ((*p = tolower( *p ))) p++;
     return str;
 }
 

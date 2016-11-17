@@ -2,7 +2,7 @@
 
 char* _strlwr(char* s) {
     char* p = s;
-    while (*p = tolower( *p )) p++;
+    while ((*p = tolower( *p ))) p++;
     return s;
 }
 char* strlwr(char* s) {
@@ -11,7 +11,7 @@ char* strlwr(char* s) {
 
 char* _strupr(char* s) {
     char* p = s;
-    while (*p = toupper( *p )) p++;
+    while ((*p = toupper( *p ))) p++;
     return s;
 }
 char* strupr(char* s) {

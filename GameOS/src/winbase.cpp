@@ -8,6 +8,12 @@
 #include <unistd.h>
 #include <assert.h>
 #include <errno.h>
+#include <dirent.h>
+#include <fnmatch.h>
+#include <stdint.h>
+#include <libgen.h> // dirname
+#include <stdlib.h> // free
+#include <stdio.h> // free
 
 #include"windows.h"
 #include"string.h"
@@ -191,10 +197,40 @@ WINBASEAPI PVOID WINAPI VirtualAlloc(PVOID lpAddress, DWORD dwSize, DWORD flAllo
 
 WINBASEAPI BOOL WINAPI VirtualFree(PVOID lpAddress, DWORD dwSize, DWORD dwFreeType)
 {
-    assert(dwFreeType == MEM_RELEASE);
-    int rv = munmap(lpAddress, dwSize);
+    //assert(dwFreeType == MEM_RELEASE);
+    if(dwFreeType == MEM_RELEASE) {
 
-    return rv==-1 ? FALSE : TRUE;
+        int rv = munmap(lpAddress, dwSize);
+        if(rv == -1) {
+            gGetLastError = errno;
+            return FALSE;
+        }
+        return TRUE;
+    } 
+    /*
+    else if(deFreeType == MEM_DECOMMIT) {
+
+        // http://blog.nervus.org/managing-virtual-address-spaces-with-mmap/
+        // instead of unmapping the address, we're just gonna trick 
+        // the TLB to mark this as a new mapped area which, due to 
+        // demand paging, will not be committed until used.
+
+        mmap(lpAddress, dwSize, PROT_NONE, MAP_FIXED|MAP_PRIVATE|MAP_ANON, -1, 0);
+        msync(lpAddress, dwSize, MS_SYNC|MS_INVALIDATE);
+    }*/
+    else if(dwFreeType == MEM_DECOMMIT) {
+
+        int result = mprotect((void*)lpAddress, dwSize, PROT_NONE);
+        if(result == -1) {
+            gGetLastError = errno;
+            return FALSE;
+        }
+        return TRUE;
+    }
+
+    assert(0 && "VirtualFree: Unsupported dwFreeType");
+    return FALSE;
+
 }
 
 WINBASEAPI DWORD WINAPI GetLastError()
@@ -202,23 +238,136 @@ WINBASEAPI DWORD WINAPI GetLastError()
     return gGetLastError;
 }
 
+static const char* g_current_wildcard = NULL;
+static int path_filter(const struct dirent* e) {
+    return 0 == fnmatch(g_current_wildcard, e->d_name, FNM_PATHNAME);
+}
+struct FindFileData {
+    struct dirent* entries;
+    int last_retrieved_entry;
+    int num_entries;
+    char* dir_name;
+    bool initialized;
+};
+
+static void FillFindData(const char* dir_name, const char* entry_name, LPWIN32_FIND_DATAA lpFindFileData) {
+
+        char entry_path[MAX_PATH];
+        snprintf(entry_path, MAX_PATH-1, "%s/%s", dir_name, entry_name);
+
+        struct stat s;
+        stat(entry_path, &s);
+
+        if(S_ISDIR(s.st_mode))
+            lpFindFileData->dwFileAttributes = FILE_ATTRIBUTE_DIRECTORY;
+        if(S_ISREG(s.st_mode))
+            lpFindFileData->dwFileAttributes = FILE_ATTRIBUTE_NORMAL;
+        if(S_ISBLK(s.st_mode))
+            lpFindFileData->dwFileAttributes = FILE_ATTRIBUTE_DEVICE;
+
+        // Contains a 64-bit value representing the number of 100-nanosecond intervals since January 1, 1601 (UTC).
+        uint64_t sec_since = 60*60*24*365*1601L; // well approximately
+
+        // all date setting is incorrect
+        uint64_t sec = s.st_atim.tv_sec - sec_since;
+        uint64_t nsec = sec*1e9 + s.st_atim.tv_sec;
+	    lpFindFileData->ftLastAccessTime.dwLowDateTime = (DWORD)nsec&0xffffffff;
+	    lpFindFileData->ftLastAccessTime.dwHighDateTime = (DWORD)(nsec>>32)&0xffffffff;
+
+        sec = s.st_ctim.tv_sec - sec_since;
+        nsec = sec*1e9 + s.st_ctim.tv_sec;
+	    lpFindFileData->ftCreationTime.dwLowDateTime = (DWORD)nsec&0xffffffff;
+	    lpFindFileData->ftCreationTime.dwHighDateTime = (DWORD)(nsec>>32)&0xffffffff;
+
+        sec = s.st_ctim.tv_sec - sec_since;
+        nsec = sec*1e9 + s.st_ctim.tv_sec;
+	    lpFindFileData->ftLastWriteTime.dwLowDateTime = (DWORD)nsec&0xffffffff;
+	    lpFindFileData->ftLastWriteTime.dwHighDateTime = (DWORD)(nsec>>32)&0xffffffff;
+
+        
+	    lpFindFileData->nFileSizeHigh = s.st_size&0xffffffff;
+	    lpFindFileData->nFileSizeLow = (s.st_size>>32)&0xffffffff;;
+
+        int copy_size = strlen(entry_name);
+        copy_size = copy_size < MAX_PATH ? copy_size : MAX_PATH-1;
+        strncpy(lpFindFileData->cFileName, entry_name, copy_size);
+        lpFindFileData->cFileName[copy_size] = '\0';
+}
+
 HANDLE WINAPI FindFirstFileA( LPCTSTR lpFileName, LPWIN32_FIND_DATAA lpFindFileData)
 {
-    // scandir + fnmatch
-    assert(0 && "Not implemented");
-    return 0;
+    struct dirent** entries;
+    int n = 0;
+
+    // this will NOT work correctly if directory has wildcard
+
+    char* dn = strdup(lpFileName);
+    char* bn = strdup(lpFileName);
+    char* dir_name = dirname(dn);
+    char* base_name = basename(bn);
+
+    g_current_wildcard = base_name;
+    n = scandir(dir_name, &entries, path_filter, alphasort);
+    g_current_wildcard = NULL;
+
+
+    FindFileData* ffd = NULL;
+
+    if(n > 0) {
+
+        ffd = new FindFileData();
+        ffd->entries = new dirent[n];
+        for(int i=0;i<n;++i) {
+            memcpy(ffd->entries+i, entries[i], sizeof(struct dirent));
+        }
+        ffd->last_retrieved_entry = 0;
+        ffd->num_entries = n;
+        ffd->initialized = true;
+        ffd->dir_name = strdup(dir_name);
+
+        FillFindData(ffd->dir_name, ffd->entries[0].d_name, lpFindFileData);
+    }
+
+    free(dn);
+    free(bn);
+
+    return ffd == NULL ? INVALID_HANDLE_VALUE : ffd;
 }
 
 BOOL WINAPI FindNextFileA(HANDLE hFindFile, LPWIN32_FIND_DATAA lpFindFileData)
 {
-    assert(0 && "Not implemented");
-    return FALSE;
+    assert(hFindFile!=0);
+
+    FindFileData* ffd = (FindFileData*)hFindFile;
+    assert(ffd->initialized);
+
+    assert(ffd->last_retrieved_entry < ffd->num_entries);
+
+    if(ffd->last_retrieved_entry + 1 == ffd->num_entries) {
+        gGetLastError = ERROR_NO_MORE_FILES; 
+        return FALSE;
+    } else {
+        const int e_idx = ++ffd->last_retrieved_entry;
+        FillFindData(ffd->dir_name, ffd->entries[e_idx].d_name, lpFindFileData);
+        return TRUE;
+    }
 }
 
 BOOL WINAPI FindClose(HANDLE hFindFile)
 {
-    assert(0 && "Not implemented");
-    return FALSE;
+    assert(hFindFile!=0);
+
+    if(hFindFile == INVALID_HANDLE_VALUE)
+        return TRUE;
+
+    FindFileData* ffd = (FindFileData*)hFindFile;
+    assert(ffd->initialized);
+
+    free(ffd->dir_name);
+    delete[] ffd->entries;
+    delete ffd;
+
+    return TRUE;
 }
 
 

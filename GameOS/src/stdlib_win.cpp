@@ -25,6 +25,7 @@ void _splitpath (const char* path, char* drive, char* dir, char* fname, char* ex
 
     if(dir) {
         strcpy(dir, d);
+        strcat(dir, "/"); // looks like this is what Windows version does
     }
     if(fname) {
         strcpy(fname, b);

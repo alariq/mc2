@@ -7,7 +7,7 @@
 extern "C" {
 #endif
 
-//#include <winerror.h>
+#include "winerror.h"
 
 #ifndef RC_INVOKED
 #include <string.h>
