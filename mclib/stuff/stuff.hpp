@@ -29,6 +29,7 @@
 
 #pragma warning(push,3)
 
+#define NOMINMAX
 #include<math.h>
 #include<float.h>
 #include<time.h>

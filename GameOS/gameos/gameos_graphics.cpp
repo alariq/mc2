@@ -1,9 +1,10 @@
-#include "gameos.hpp"
-#include "font3d.hpp"
-#include "gos_font.h"
 #include <vector>
 #include <map>
 #include <algorithm>
+
+#include "gameos.hpp"
+#include "font3d.hpp"
+#include "gos_font.h"
 
 #ifdef LINUX_BUILD
 #include <cstdarg>

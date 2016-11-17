@@ -52,10 +52,10 @@ long			ForceGroupIcon::pilotTextTop[17] = {0};
 
 
 DWORD ForceGroupIcon::damageColors[4][3] = 
-		{ 194 << 16 | 229 << 8 | 255 | 0xff << 24,	92 << 16 | 150 << 8 | 194 | 0xff << 24, 0 << 16 | 83 << 8 | 146 | 0xff << 24,
-		  248 << 16 | 241 << 8 | 193 | 0xff << 24,	248 << 16 | 206 << 8 | 31 | 0xff << 24, 139 << 16 | 114 << 8 | 0 | 0xff << 24,
-		  248 << 16 | 193 << 8 | 193 | 0xff << 24,	248 << 16 | 31 << 8 | 31 | 0xff << 24, 139 << 16 | 0 << 8 | 0 | 0xff << 24,
-		  94 << 16 | 101 << 8 | 101 | 0xff << 24,	56 << 16 | 64 << 8 | 64 | 0xff << 24, 26 << 16 | 33 << 8 | 33 | 0xff << 24
+		{ 194u << 16 | 229u << 8 | 255u | 0xff << 24,	92u << 16 | 150u << 8 | 194u | 0xff << 24, 0u << 16 | 83u << 8 | 146u | 0xff << 24,
+		  248u << 16 | 241u << 8 | 193u | 0xff << 24,	248u << 16 | 206u << 8 | 31u | 0xff << 24, 139u << 16 | 114u << 8 | 0u | 0xff << 24,
+		  248u << 16 | 193u << 8 | 193u | 0xff << 24,	248u << 16 | 31u << 8 | 31u | 0xff << 24, 139u << 16 | 0u << 8 | 0u | 0xff << 24,
+		  94u << 16 | 101u << 8 | 101u | 0xff << 24,	56u << 16 | 64u << 8 | 64u | 0xff << 24, 26u << 16 | 33u << 8 | 33u | 0xff << 24
 		};
 
 DWORD ForceGroupIcon::ForceGroupColors[11] = {
@@ -84,7 +84,7 @@ ForceGroupIcon::AnimationInfo ForceGroupIcon::animationInfos[NUM_DEATH_INFOS] =
 
 };
 
-unsigned long	ForceGroupIcon::s_textureHandle[5] = { -1, -1, -1, -1, -1 };
+unsigned long	ForceGroupIcon::s_textureHandle[5] = { -1u, -1u, -1u, -1u, -1u };
 bool			ForceGroupIcon::s_slotUsed[240] = { 0 };
 
 gos_VERTEX ForceGroupIcon::	bmpLocation[17][5]  = {0}; // in screen coords
@@ -1373,7 +1373,7 @@ void ForceGroupIcon::drawBar( float barStatus )
 		color = SB_RED;*/
 		
 	
-	GUI_RECT rect = { healthBar[locationIndex].left, healthBar[locationIndex].top,healthBar[locationIndex].left + barLength, healthBar[locationIndex].bottom };
+	GUI_RECT rect = { healthBar[locationIndex].left, healthBar[locationIndex].top,healthBar[locationIndex].left + (int)barLength, healthBar[locationIndex].bottom };
 	drawRect( rect, color );
 	drawEmptyRect( healthBar[locationIndex],  color, color & 0x7f7f7f );
 }

@@ -180,6 +180,8 @@ inline float mc2_atan2 (float f1, float f2)
 	return result;
 }
 
+// sebi: implemented in math.h
+#if 0
 //---------------------------------------------------------------------------
 inline float fmax (float f1, float f2)
 {
@@ -197,6 +199,14 @@ inline float fmin (float f1, float f2)
 	else
 		return f2;
 }
+#endif
+
+#ifndef max
+template<typename T> T max(const T& a, const T& b) { return a > b ? a : b; }
+#endif
+#ifndef min
+template<typename T> T min(const T& a, const T& b) { return a < b ? a : b; }
+#endif
 
 //---------------------------------------------------------------------------
 inline float sign (float f1)
