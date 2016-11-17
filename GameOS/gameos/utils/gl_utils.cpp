@@ -199,8 +199,7 @@ Texture createPBO(int w, int h, GLenum fmt, int el_size)
 	return t;
 }
 
-void
-updateTexture(const Texture& t , char* pdata) {
+void updateTexture(const Texture& t, void* pdata, TexFormat pdata_format/*= TF_COUNT*/) {
 
     glEnable(GL_TEXTURE_2D);
 	glBindTexture(GL_TEXTURE_2D, t.id);
@@ -208,17 +207,28 @@ updateTexture(const Texture& t , char* pdata) {
     if(t.fmt_ != TF_NONE) {
         // TODO: keep this all in platform dependent data of texture
         GLint int_fmt = textureInternalFormats[t.fmt_];
-        GLenum fmt = textureFormats[t.fmt_];
+        GLenum fmt = (pdata_format == TF_COUNT) ? textureFormats[t.fmt_] : textureFormats[pdata_format];
         GLenum ch_type = textureFormatChannelType[t.fmt_];
 	    glTexImage2D(GL_TEXTURE_2D, 0, int_fmt, t.w, t.h, 0, fmt, ch_type, pdata);
+        CHECK_GL_ERROR
 	    //glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, t.w, t.h, 0, GL_RGBA, GL_UNSIGNED_BYTE, pdata);
         //glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, t.w, t.h, GL_RGBA, GL_UNSIGNED_BYTE, pdata);
     } else {
         // deprecated
 	    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, t.w, t.h, 0, t.format, GL_UNSIGNED_BYTE, pdata);
+        CHECK_GL_ERROR
     }
 	glBindTexture(GL_TEXTURE_2D, 0);
+}
+
+void getTextureData(const Texture& t, int lod, unsigned char* poutdata, TexFormat format/*= TF_COUNT*/) {
+
+    glBindTexture(GL_TEXTURE_2D, t.id);
+    GLenum fmt = (format == TF_COUNT) ? textureFormats[t.fmt_] : textureFormats[format];
+    GLenum ch_type = textureFormatChannelType[t.fmt_];
+    glGetTexImage(GL_TEXTURE_2D, lod, fmt, ch_type, poutdata);
     CHECK_GL_ERROR
+    glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 void draw_quad(float x0, float y0, float x1, float y1)

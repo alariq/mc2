@@ -11,6 +11,8 @@ Cubemaps are identified with depth = 0.
 
 #include <stdio.h>
 
+struct TGAHeader;
+
 // Texture format enums
 enum FORMAT {
 	FORMAT_NONE    = 0,
@@ -93,7 +95,7 @@ public:
 
 	bool loadTGA(FILE* file);
 	bool loadBMP(FILE* file);
-
+    bool loadTGA(const unsigned char* mem, size_t len);
 
 	bool flip();
 
@@ -105,6 +107,7 @@ public:
 	unsigned char *getPixels() const { return pixels; }
 
 private:
+    bool loadTGA(const TGAHeader* header, unsigned char* readPixels);
 
 	unsigned char *pixels;
 	long width, height;

@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <cstring>
 #include <stdlib.h>
+#include <cassert>
 
 //#include "math/vec.h"
 //#include "system/types.h"
@@ -127,20 +128,61 @@ bool Image::loadTGA(FILE* file)
 	// Skip past the description if there's any
 	if (header.descLen) fseek(file, header.descLen, SEEK_CUR);
 
-	width  = header.width;
-	height = header.height;
-
 	int pixelSize = header.bpp / 8;
-	int size = width * height * pixelSize;
+	int size = header.width * header.height * pixelSize;
 
 	unsigned char *readPixels = new unsigned char[size];
 	fread(readPixels, size, 1, file);
 	fclose(file);
 
+    bool rv = loadTGA(&header, readPixels);
+    delete[] readPixels;
+    return rv;
+}
+
+bool Image::loadTGA(const unsigned char* mem, size_t len)
+{
+    assert(mem);
+    assert(len > sizeof(TGAHeader));
+
+	TGAHeader header;
+
+	memcpy(&header, mem, sizeof(header));
+    mem += sizeof(header);
+    len -= sizeof(header);
+
+	// Skip past the description if there's any
+	if (header.descLen) {
+        mem += header.descLen;
+        len -= header.descLen;
+    }
+
+	int pixelSize = header.bpp / 8;
+	int size = header.width * header.height * pixelSize;
+
+    assert(len >= header.width * header.height * pixelSize);
+
+	unsigned char *readPixels = new unsigned char[size];
+	memcpy(readPixels, mem, size);
+
+    bool rv = loadTGA(&header, readPixels);
+
+    delete[] readPixels;
+
+    return rv;
+}
+
+bool Image::loadTGA(const TGAHeader* header, unsigned char* readPixels)
+{
+	width  = header->width;
+	height = header->height;
+
+	int pixelSize = header->bpp / 8;
+
 	unsigned char *dest, *src = readPixels + width * (height - 1) * pixelSize;
 
 	int x, y;
-	switch (header.bpp) {
+	switch (header->bpp) {
 		case 8:
 			format = FORMAT_I8;
 			dest = pixels = new unsigned char[width * height];
@@ -196,9 +238,8 @@ bool Image::loadTGA(FILE* file)
 			break;
 	}
 
-	if (header.attrib & 0x20) flip();
+	if (header->attrib & 0x20) flip();
 
-	delete readPixels;
 	return true;
 }
 

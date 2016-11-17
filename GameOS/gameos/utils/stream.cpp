@@ -173,7 +173,6 @@ float file_stream::read_float() const
 size_t file_stream::read_cstr(char* c) const
 {
 	assert(_file);
-	char* start = c;
 	size_t bytes_read = 0;
 	do
 	{

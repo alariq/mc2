@@ -57,7 +57,7 @@ void camera::update(float dt)
 
 	mat4 matrot = rotY*rotX;
 
-	vec4 dpos = matrot*vec4(dx, 0, dz, 1);
+	//vec4 dpos = matrot*vec4(dx, 0, dz, 1);
 
 	vec3 p(pos[0], pos[1], pos[2]);
 

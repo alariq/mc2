@@ -78,8 +78,12 @@ static int ogl_check_val(T input, T reference, const char* message)
 Texture create2DTexture(int w, int h, TexFormat fmt, const uint8_t* texdata);
 Texture createDynamicTexture(int w, int h, TexFormat fmt);
 Texture create3DTextureF(int w, int h, int depth);
-void updateTexture(const Texture& t , char* pdata);
+// pdata_format - specifies format of data provided in pdata
+void updateTexture(const Texture& t, void* pdata, TexFormat pdata_format = TF_COUNT);
 void destroyTexture(Texture* tex);
+// fmt - desired format of returned data
+void getTextureData(const Texture& t, int lod, unsigned char* poutdata, TexFormat fmt = TF_COUNT);
+unsigned int getPixelSize(const TexFormat fmt);
 Texture createPBO(int w, int h, GLenum fmt, int el_size);
 void draw_quad(float x0, float y0, float x1, float y1);
 
