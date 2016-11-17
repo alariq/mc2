@@ -229,6 +229,9 @@ void* __cdecl operator new[](size_t size, HGOSHEAP Heap)
 
 void* __stdcall gos_Malloc(size_t bytes, HGOSHEAP Heap/* = 0*/)
 {
+    // FIXME: TODO: !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    // FIXME: TODO: each malloc should record memory allocation for current heap on a stack
+    // FIXME: TODO: so that when Heap destroy() is called all memory will be freed
     return malloc(bytes);
 }
 void __stdcall gos_Free(void* ptr)
