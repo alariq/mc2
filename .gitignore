@@ -36,3 +36,5 @@ text_tool
 *.rc
 vidcard.csv
 *.s14
+.gdb_history
+*.old
