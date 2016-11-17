@@ -304,7 +304,7 @@ void gosMesh::drawIndexed(gosShaderMaterial* material) const
 
 class gosTexture {
     public:
-        gosTexture(gos_TextureFormat fmt, const char* fname, DWORD hints, BYTE* pdata, DWORD size)
+        gosTexture(gos_TextureFormat fmt, const char* fname, DWORD hints, BYTE* pdata, DWORD size, bool from_memory)
         {
             format_ = fmt;
             if(fname) {
@@ -313,6 +313,8 @@ class gosTexture {
             } else {
                 filename_ = 0;
             }
+            texname_ = NULL;
+
             hints_ = hints;
 
             plocked_area_ = NULL;
@@ -326,6 +328,30 @@ class gosTexture {
             }
 
             is_locked_ = false;
+            is_from_memory_ = from_memory;
+        }
+
+        gosTexture(gos_TextureFormat fmt, DWORD hints, DWORD w, DWORD h, const char* texname)
+        {
+            format_ = fmt;
+            if(texname) {
+                texname_ = new char[strlen(texname)+1];
+                strcpy(texname_, texname);
+            } else {
+                texname_ = 0;
+            }
+            filename_ = NULL;
+            hints_ = hints;
+
+            plocked_area_ = NULL;
+
+            size_ = 0;
+            pcompdata_ = NULL;
+            tex_.w = w;
+            tex_.h = h;
+
+            is_locked_ = false;
+            is_from_memory_ = true;
         }
 
         bool createHardwareTexture();
@@ -340,33 +366,45 @@ class gosTexture {
                 delete[] pcompdata_;
             if(filename_)
                 delete[] filename_;
+            if(texname_)
+                delete[] texname_;
 
             destroyTexture(&tex_);
         }
 
         uint32_t getTextureId() const { return tex_.id; }
 
-        BYTE* Lock(int mipl_level, float is_read_only, int* pitch) {
+        BYTE* Lock(int mipl_level, bool is_read_only, int* pitch) {
             gosASSERT(is_locked_ == false);
             is_locked_ = true;
             // TODO:
             gosASSERT(pitch);
             *pitch = tex_.w;
 
-            // TODO: get real data if is_read_only is true
-
             gosASSERT(!plocked_area_);
-            // for now assume all have 4 channels
-            // need to ensure that user code actually checks texture format and do not assumes
-            // that all textures are GRBA8 when locking them
-            plocked_area_ = new BYTE[tex_.w*tex_.h*4];
+#if 0 
+            glBindTexture(GL_TEXTURE_2D, tex_.id);
+            GLint pack_row_length;
+            GLint pack_alignment;
+            glGetIntegerv(GL_PACK_ROW_LENGTH, &pack_row_length);
+            glGetIntegerv(GL_PACK_ALIGNMENT, &pack_alignment);
+            glBindTexture(GL_TEXTURE_2D, 0);
+#endif
+            // always return rgba8 formatted data
+            lock_type_read_only_ = is_read_only;
+            const uint32_t ts = tex_.w*tex_.h * getTexFormatPixelSize(TF_RGBA8);
+            plocked_area_ = new BYTE[ts];
+            getTextureData(tex_, 0, plocked_area_, TF_RGBA8);
             return plocked_area_;
         }
 
         void Unlock() {
             gosASSERT(is_locked_ == true);
+        
+            if(!lock_type_read_only_) {
+                updateTexture(tex_, plocked_area_, TF_RGBA8);
+            }
 
-            // TODO: update texture
             delete[] plocked_area_;
             plocked_area_ = NULL;
 
@@ -388,9 +426,12 @@ class gosTexture {
 
         gos_TextureFormat format_;
         char* filename_;
+        char* texname_;
         DWORD hints_;
 
         bool is_locked_;
+        bool lock_type_read_only_;
+        bool is_from_memory_; // not loaded from file
 };
 
 struct gosTextAttribs {
@@ -407,25 +448,55 @@ struct gosTextAttribs {
 
 bool gosTexture::createHardwareTexture() {
 
-    SPEW(("DBG", "creating texture: %s\n", filename_));
-    gosASSERT(filename_);
+    if(!is_from_memory_) {
 
-    Image img;
-    if(!img.loadFromFile(filename_)) {
-        SPEW(("DBG", "failed to load texture from file: %s\n", filename_));
-        return false;
+        gosASSERT(filename_);
+        SPEW(("DBG", "creating texture: %s\n", filename_));
+
+        Image img;
+        if(!img.loadFromFile(filename_)) {
+            SPEW(("DBG", "failed to load texture from file: %s\n", filename_));
+            return false;
+        }
+
+        // check for only those formats, because lock.unlock may incorrectly work with different channes size (e.g. 16 or 32bit or floats)
+        FORMAT img_fmt = img.getFormat();
+        if(img_fmt != FORMAT_RGB8 && img_fmt != FORMAT_RGBA8) {
+            STOP(("Unsupported texture format when loading %s\n", filename_));
+        }
+
+        TexFormat tf = img_fmt == FORMAT_RGB8 ? TF_RGB8 : TF_RGBA8;
+        tex_ = create2DTexture(img.getWidth(), img.getHeight(), tf, img.getPixels());
+        return tex_.isValid();
+    } else if(pcompdata_ && size_ > 0) {
+
+        Image img;
+        if(!img.loadTGA(pcompdata_, size_)) {
+            SPEW(("DBG", "failed to load texture from data, filename: %s, texname: %s\n", filename_? filename_ : "NO FILENAME", texname_?texname_:"NO TEXNAME"));
+            return false;
+        }
+
+        FORMAT img_fmt = img.getFormat();
+
+        if(img_fmt != FORMAT_RGB8 && img_fmt != FORMAT_RGBA8) {
+            STOP(("Unsupported texture format when loading %s\n", filename_));
+        }
+
+        TexFormat tf = img_fmt == FORMAT_RGB8 ? TF_RGB8 : TF_RGBA8;
+        tex_ = create2DTexture(img.getWidth(), img.getHeight(), tf, img.getPixels());
+        return tex_.isValid();
+    } else {
+        gosASSERT(tex_.w >0 && tex_.h > 0);
+
+        TexFormat tf = TF_RGBA8; // TODO: check format_ and do appropriate stuff
+        DWORD* pdata = new DWORD[tex_.w*tex_.h];
+        for(int i=0;i<tex_.w*tex_.h;++i)
+            pdata[i] = 0xFF00FFFF;
+        tex_ = create2DTexture(tex_.w, tex_.h, tf, (const uint8_t*)pdata);
+        delete[] pdata;
+        return tex_.isValid();
     }
 
-    FORMAT img_fmt = img.getFormat();
-    if(img_fmt != FORMAT_RGB8 && img_fmt != FORMAT_RGBA8) {
-        STOP(("Unsupported texture format when loading %s\n", filename_));
-    }
-
-    TexFormat tf = img_fmt == FORMAT_RGB8 ? TF_RGB8 : TF_RGBA8;
-
-    tex_ = create2DTexture(img.getWidth(), img.getHeight(), tf, img.getPixels());
-
-    return tex_.isValid();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -1119,7 +1190,7 @@ gosFont* gosFont::load(const char* fontFile) {
     sprintf(textureName, "%s/%s%s", dir, fname, tex_ext);
     sprintf(glyphName, "%s/%s%s", dir, fname, glyph_ext);
 
-    gosTexture* ptex = new gosTexture(gos_Texture_Detect, textureName, 0, NULL, 0);
+    gosTexture* ptex = new gosTexture(gos_Texture_Detect, textureName, 0, NULL, 0, false);
     if(!ptex || !ptex->createHardwareTexture()) {
         STOP(("Failed to create font texture: %s\n", textureName));
     }
@@ -1222,14 +1293,27 @@ void __stdcall gos_DeleteFont( HGOSFONT3D FontHandle )
 
 DWORD __stdcall gos_NewEmptyTexture( gos_TextureFormat Format, const char* Name, DWORD HeightWidth, DWORD Hints/*=0*/, gos_RebuildFunction pFunc/*=0*/, void *pInstance/*=0*/)
 {
-    gosASSERT(0 && "Not implemented");
-    return INVALID_TEXTURE_ID;
+    int w = HeightWidth;
+    int h = HeightWidth;
+    if(HeightWidth&0xffff0000)
+    {
+        h = HeightWidth >> 16;
+        w = HeightWidth & 0xffff;
+    }
+    gosTexture* ptex = new gosTexture(Format, Hints, w, h, Name);
+
+    if(!ptex->createHardwareTexture()) {
+        STOP(("Failed to create texture\n"));
+        return INVALID_TEXTURE_ID;
+    }
+
+    return g_gos_renderer->addTexture(ptex);
 }
 DWORD __stdcall gos_NewTextureFromMemory( gos_TextureFormat Format, const char* FileName, BYTE* pBitmap, DWORD Size, DWORD Hints/*=0*/, gos_RebuildFunction pFunc/*=0*/, void *pInstance/*=0*/)
 {
     gosASSERT(pFunc == 0);
 
-    gosTexture* ptex = new gosTexture(Format, FileName, Hints, pBitmap, Size);
+    gosTexture* ptex = new gosTexture(Format, FileName, Hints, pBitmap, Size, true);
     if(!ptex->createHardwareTexture()) {
         STOP(("Failed to create texture\n"));
         return INVALID_TEXTURE_ID;
@@ -1240,31 +1324,12 @@ DWORD __stdcall gos_NewTextureFromMemory( gos_TextureFormat Format, const char* 
 
 DWORD __stdcall gos_NewTextureFromFile( gos_TextureFormat Format, const char* FileName, DWORD Hints/*=0*/, gos_RebuildFunction pFunc/*=0*/, void *pInstance/*=0*/)
 {
-    gosASSERT(FileName);
-    FILE* f = fopen(FileName, "rb");
-    if(f == NULL) {
-        int last_error = errno;
-        STOP(("gos_NewTextureFromFile: fopen: %s", strerror(last_error)));
+    gosTexture* ptex = new gosTexture(Format, FileName, Hints, NULL, 0, false);
+    if(!ptex->createHardwareTexture()) {
+        STOP(("Failed to create texture\n"));
         return INVALID_TEXTURE_ID;
     }
-
-    fseek(f, 0, SEEK_END);
-    long fsize = ftell(f);
-    fseek(f, 0, SEEK_SET);
-    BYTE* pdata = new BYTE[fsize];
-
-    long num_bytes_read = 0;
-    while(!feof(f) && num_bytes_read < fsize) {
-        int nr = fread(pdata + num_bytes_read, 32*1024, 1, f);
-        num_bytes_read += nr * 32*1024;
-    }
-
-    DWORD handle = gos_NewTextureFromMemory(Format, FileName, pdata, fsize, Hints, pFunc, pInstance);
-
-    delete[] pdata;
-
-    return handle;
-
+    return g_gos_renderer->addTexture(ptex);
 }
 void __stdcall gos_DestroyTexture( DWORD Handle )
 {
@@ -1429,7 +1494,14 @@ void __stdcall gos_TextSetRegion( int Left, int Top, int Right, int Bottom )
 
 void __stdcall gos_TextStringLength( DWORD* Width, DWORD* Height, const char *fmt, ... )
 {
-    gosASSERT(Width && Height && fmt);
+    gosASSERT(Width && Height);
+
+    if(!fmt) {
+        PAUSE(("No text to calculate length!"));
+        *Width = 1;
+        *Height = 1;
+        return;
+    }
 
     const int   MAX_TEXT_LEN = 4096;
 	char        text[MAX_TEXT_LEN] = {0};
