@@ -102,7 +102,7 @@ protected:
 
 		static DWORD            damageColors[4][3];
 
-		static unsigned long	s_textureHandle[5];
+		static DWORD            s_textureHandle[5];
 		static bool				s_slotUsed[240];
 		static TGAFileHeader*	s_textureMemory;
 

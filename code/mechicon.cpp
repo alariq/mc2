@@ -84,8 +84,8 @@ ForceGroupIcon::AnimationInfo ForceGroupIcon::animationInfos[NUM_DEATH_INFOS] =
 
 };
 
-unsigned long	ForceGroupIcon::s_textureHandle[5] = { -1u, -1u, -1u, -1u, -1u };
-bool			ForceGroupIcon::s_slotUsed[240] = { 0 };
+DWORD ForceGroupIcon::s_textureHandle[5] = { -1u, -1u, -1u, -1u, -1u };
+bool ForceGroupIcon::s_slotUsed[240] = { 0 };
 
 gos_VERTEX ForceGroupIcon::	bmpLocation[17][5]  = {0}; // in screen coords
 
@@ -114,7 +114,7 @@ ForceGroupIcon::ForceGroupIcon(  )
 	if ( s_textureHandle[0] == -1 )
 	{
 		// this is the textures that all icons are using
-		long size = ( 256 * 256 * sizeof( long ) + sizeof( TGAFileHeader ) );
+		long size = ( 256 * 256 * sizeof(DWORD) + sizeof( TGAFileHeader ) );
 		s_textureMemory = (TGAFileHeader*)new char[size];
 		memset( s_textureMemory, 0, size );
 		s_textureMemory->height = 256;
@@ -195,7 +195,7 @@ ForceGroupIcon::~ForceGroupIcon()
 void ForceGroupIcon::init( FitIniFile& file, int which )
 {
 	char buffer[256];
-	sprintf( buffer, "MechIcon%ld", which );
+	sprintf( buffer, "MechIcon%d", which );
 	if ( NO_ERR != file.seekBlock( buffer ) )
 		Assert( 0, 0, "couldn't find the icon" );
 
@@ -1172,7 +1172,7 @@ bool VehicleIcon::init( Mover* pMover )
 	
 	if ( s_textureHandle[texIndex] == -1 )
 	{
-		long size = ( 256 * 256 * sizeof( long ) + sizeof( TGAFileHeader ) );
+		long size = ( 256 * 256 * sizeof(DWORD) + sizeof( TGAFileHeader ) );
 		s_textureHandle[texIndex] = gos_NewTextureFromMemory( gos_Texture_Alpha, ".tga", (unsigned char*)s_textureMemory, size, 0 );
 	}
 
