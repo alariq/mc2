@@ -369,7 +369,9 @@ void UserInput::update (void)
 		}
 	}
 	
-	if (mc2UseAsyncMouse)
+	//sebi: no ASYNC mouse data
+	//if (mc2UseAsyncMouse)
+	if (false)
 	{
 		//Wait for thread to finish.  Otherwise, we may move its data buffer halfway through!!
 		while (mc2IsInMouseTimer)
