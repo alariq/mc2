@@ -206,13 +206,14 @@ void updateTexture(const Texture& t, void* pdata, TexFormat pdata_format/*= TF_C
     assert(t.fmt_ != TF_NONE && "t.format is deprecated");
     if(t.fmt_ != TF_NONE) {
         // TODO: keep this all in platform dependent data of texture
-        GLint int_fmt = textureInternalFormats[t.fmt_];
+        //GLint int_fmt = textureInternalFormats[t.fmt_];
         GLenum fmt = (pdata_format == TF_COUNT) ? textureFormats[t.fmt_] : textureFormats[pdata_format];
         GLenum ch_type = textureFormatChannelType[t.fmt_];
-	    glTexImage2D(GL_TEXTURE_2D, 0, int_fmt, t.w, t.h, 0, fmt, ch_type, pdata);
-        CHECK_GL_ERROR
+	    //glTexImage2D(GL_TEXTURE_2D, 0, int_fmt, t.w, t.h, 0, fmt, ch_type, pdata);
+        
 	    //glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, t.w, t.h, 0, GL_RGBA, GL_UNSIGNED_BYTE, pdata);
-        //glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, t.w, t.h, GL_RGBA, GL_UNSIGNED_BYTE, pdata);
+        glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, t.w, t.h, fmt, ch_type, pdata);
+        CHECK_GL_ERROR
     } else {
         // deprecated
 	    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, t.w, t.h, 0, t.format, GL_UNSIGNED_BYTE, pdata);
