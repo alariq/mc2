@@ -396,6 +396,17 @@ class gosTexture {
             const uint32_t ts = tex_.w*tex_.h * getTexFormatPixelSize(TF_RGBA8);
             plocked_area_ = new BYTE[ts];
             getTextureData(tex_, 0, plocked_area_, TF_RGBA8);
+            for(int y=0;y<tex_.h;++y) {
+                for(int x=0;x<tex_.w;++x) {
+                    DWORD rgba = ((DWORD*)plocked_area_)[tex_.w*y + x];
+                    DWORD r = rgba&0xff;
+                    DWORD g = (rgba&0xff00)>>8;
+                    DWORD b = (rgba&0xff0000)>>16;
+                    DWORD a = (rgba&0xff000000)>>24;
+                    DWORD bgra = (a<<24) | (r<<16) | (g<<8) | b;
+                    ((DWORD*)plocked_area_)[tex_.w*y + x] = bgra;
+                }
+            }
             return plocked_area_;
         }
 
@@ -403,6 +414,17 @@ class gosTexture {
             gosASSERT(is_locked_ == true);
         
             if(!lock_type_read_only_) {
+                for(int y=0;y<tex_.h;++y) {
+                    for(int x=0;x<tex_.w;++x) {
+                        DWORD bgra = ((DWORD*)plocked_area_)[tex_.w*y + x];
+                        DWORD b = bgra&0xff;
+                        DWORD g = (bgra&0xff00)>>8;
+                        DWORD r = (bgra&0xff0000)>>16;
+                        DWORD a = (bgra&0xff000000)>>24;
+                        DWORD argb = (a<<24) | (b<<16) | (g<<8) | r;
+                        ((DWORD*)plocked_area_)[tex_.w*y + x] = argb;
+                    }
+                }
                 updateTexture(tex_, plocked_area_, TF_RGBA8);
             }
 
