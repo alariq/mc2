@@ -38,3 +38,4 @@ vidcard.csv
 *.s14
 .gdb_history
 *.old
+longpath.dbg
