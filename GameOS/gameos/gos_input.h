@@ -10,7 +10,6 @@ enum KeyState {
     KS_RELEASED // just released
 };
 
-
 struct MouseInfo {
     MouseInfo();
 
@@ -24,11 +23,23 @@ struct MouseInfo {
     KeyState button_state_[NUM_BUTTONS];
 };
 
+struct KeyboardInfo {
+    KeyboardInfo();
+    bool key_pressed_;
+    bool key_released_;
+    SDL_Keysym pressed_keysym_;
+    SDL_Keysym released_keysym_;
+    uint32_t first_pressed_;
+    uint8_t last_state_[512];
+};
+
 void handleMouseMotion(const SDL_Event* event, MouseInfo* mi);
 void handleMouseButton(const SDL_Event* event, MouseInfo* mi);
 void handleMouseWheel(const SDL_Event* event, MouseInfo* mi);
-
 void updateMouseState(MouseInfo* mi);
+
+void handleKeyEvent(const SDL_Event* event, KeyboardInfo* ki);
+void updateKeyboardState(KeyboardInfo* ki);
 
 }
 

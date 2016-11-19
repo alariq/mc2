@@ -12,6 +12,15 @@ MouseInfo::MouseInfo()
     memset(button_state_, 0 ,sizeof(button_state_));
 }
 
+KeyboardInfo::KeyboardInfo():
+    key_pressed_(false),
+    key_released_(false),
+    first_pressed_(-1)
+{
+    memset(last_state_, 0, sizeof(last_state_));
+}
+
+////////////////////////////////////////////////////////////////////////////////
 static int sdl2idx(int button) {
     switch(button) {
         case SDL_BUTTON_LEFT: return 0;
@@ -70,15 +79,61 @@ void updateMouseState(MouseInfo* mi) {
         KeyState prev_ks = mi->button_state_[idx];
 
         if(button_state & SDL_BUTTON(buttons[b])) {
-            mi->button_state_[idx] = prev_ks==KS_FREE ? KS_PRESSED : KS_HELD;
+            mi->button_state_[idx] = 
+                (prev_ks==KS_FREE||prev_ks==KS_RELEASED) ? KS_PRESSED : KS_HELD;
         } else {
-            mi->button_state_[idx] = prev_ks==KS_HELD ? KS_RELEASED : KS_FREE;
+            mi->button_state_[idx] = 
+                (prev_ks==KS_HELD||prev_ks==KS_PRESSED) ? KS_RELEASED : KS_FREE;
         }
-
+#if 0
         if(mi->button_state_[idx] == KS_PRESSED)
             printf("%d pressed\n", idx);
         if(mi->button_state_[idx] == KS_RELEASED)
             printf("%d released\n", idx);
+#endif
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// Keyboard
+//
+
+void handleKeyEvent(const SDL_Event* event, KeyboardInfo* ki) {
+    if(event->key.state == SDL_PRESSED) {
+        ki->key_pressed_ = true;
+    } else {
+        ki->key_released_ = true;
+    }
+
+    ki->pressed_keysym_ = event->key.keysym;
+}
+
+void updateKeyboardState(KeyboardInfo* ki) {
+
+    int array_len;
+    const Uint8* state = SDL_GetKeyboardState(&array_len);
+    assert(array_len <= sizeof(ki->last_state_)/sizeof(ki->last_state_[0]));
+
+    ki->first_pressed_ = -1;
+
+    for(int i=0; i<array_len; ++i) {
+
+        uint8_t ls = ki->last_state_[i];
+
+        if(state[i]) {
+           ls = (ls==KS_FREE||ls==KS_RELEASED) ? KS_PRESSED : KS_HELD;
+        } else {
+           ls = (ls==KS_HELD||ls==KS_PRESSED) ? KS_RELEASED : KS_FREE;
+        }
+        ki->last_state_[i] = ls;
+
+        if(ls == KS_PRESSED || ls==KS_RELEASED) {
+            printf("key: %d %s\n", i, ls==KS_PRESSED ? "PRESSED" : "RELEASED");
+        }
+
+        if(ki->first_pressed_==-1 && ls==KS_PRESSED) {
+            ki->first_pressed_ = i;
+        }
     }
 }
 

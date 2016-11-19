@@ -179,7 +179,8 @@ void aEdit::handleKeyboard()
 	if ( !bFocus )
 		return;
 
-	while( true ) // keep getting keys until buffer is empty
+    //sebi: input works in a bit different way now
+	//while( true ) // keep getting keys until buffer is empty
 	{
 		DWORD key = gos_GetKey();
 
@@ -607,7 +608,7 @@ bool aEdit::handleFormattingKeys(int keycode)
 			bCursorVisible=TRUE;
 			return true;
 		case KEY_LEFT:
-//sebi temp comment out            
+			PAUSE(("Implement me\n"));
 #ifndef LINUX_BUILD
 			if (gos_GetKeyStatus(KEY_LSHIFT) != KEY_FREE)
 			{

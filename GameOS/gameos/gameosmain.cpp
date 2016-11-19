@@ -15,26 +15,41 @@ extern void gos_RendererEndFrame();
 extern bool gosExitGameOS();
 
 static bool g_exit = false;
+static bool g_focus_lost = false;
 static camera g_camera;
 static glsl_program* g_myprogram = NULL;
 
 input::MouseInfo g_mouse_info;
+input::KeyboardInfo g_keyboard_info;
 
 static void handle_key_down( SDL_Keysym* keysym ) {
     switch( keysym->sym ) {
         case SDLK_ESCAPE:
-            g_exit = true;
+            if(keysym->mod & KMOD_RALT)
+                g_exit = true;
             break;
     }
 }
 
 static void process_events( void ) {
+
     SDL_Event event;
     while( SDL_PollEvent( &event ) ) {
+
+        if(g_focus_lost) {
+            if(event.type != SDL_WINDOWEVENT_FOCUS_GAINED) {
+                continue;
+            } else {
+                g_focus_lost = false;
+            }
+        }
 		
         switch( event.type ) {
         case SDL_KEYDOWN:
             handle_key_down( &event.key.keysym );
+            // fallthrough
+        case SDL_KEYUP:
+            handleKeyEvent(&event, &g_keyboard_info);
             break;
         case SDL_QUIT:
             g_exit = true;
@@ -47,6 +62,9 @@ static void process_events( void ) {
                 SPEW(("INPUT", "resize event: w: %f h:%f\n", w, h));
 			}
 			break;
+        case SDL_WINDOWEVENT_FOCUS_LOST:
+            g_focus_lost = true;
+            break;
         case SDL_MOUSEMOTION:
             input::handleMouseMotion(&event, &g_mouse_info); 
             break;
@@ -61,6 +79,7 @@ static void process_events( void ) {
     }
 
     input::updateMouseState(&g_mouse_info);
+    input::updateKeyboardState(&g_keyboard_info);
 }
 
 extern bool g_disable_quads;
