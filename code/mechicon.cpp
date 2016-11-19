@@ -331,7 +331,7 @@ void MechIcon::setDrawBack( bool bSet)
 
 	if ( s_textureHandle[textureIndex] == -1 )
 	{
-		long size = ( 256 * 256 * sizeof( long ) + sizeof( TGAFileHeader ) );
+		long size = ( 256 * 256 * sizeof(DWORD) + sizeof( TGAFileHeader ) );
 		s_textureHandle[textureIndex] = gos_NewTextureFromMemory( gos_Texture_Alpha, ".tga", (unsigned char*)s_textureMemory, size, 0 );
 	}
 
@@ -511,7 +511,7 @@ bool MechIcon::init( long whichIndex )
 
 	if ( s_textureHandle[textureIndex] == -1 )
 	{
-		long size = ( 256 * 256 * sizeof( long ) + sizeof( TGAFileHeader ) );
+		long size = ( 256 * 256 * sizeof(DWORD) + sizeof( TGAFileHeader ) );
 		s_textureHandle[textureIndex] = gos_NewTextureFromMemory( gos_Texture_Alpha, ".tga", (unsigned char*)s_textureMemory, size, 0 );
 	}
 
@@ -802,7 +802,7 @@ void MechIcon::doDraw( char* newDamage, char* oldDamage, unsigned long handle, u
 
 			if ( s_textureHandle[texIndex] == -1 )
 			{
-				long size = ( 256 * 256 * sizeof( long ) + sizeof( TGAFileHeader ) );
+				long size = ( 256 * 256 * sizeof(DWORD) + sizeof( TGAFileHeader ) );
 				s_textureHandle[texIndex] = gos_NewTextureFromMemory( gos_Texture_Alpha, ".tga", (unsigned char*)s_textureMemory, size, 0 );
 			}
 
