@@ -24,7 +24,7 @@ set(SOURCES ${SOURCES}
     utils/vec.cpp
     )
 # add -Wall sometime later
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O0 -ggdb -Wno-unused-local-typedefs -Wunused-variable -std=c++0x")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O0 -ggdb -Wno-unused-local-typedefs -Wunused-variable -std=c++0x -Wno-unknown-warning-option")
 # -Wno-unused-local-typedefs - to disable "typedef was ignored on this declaration"
 
 add_definitions(-D_DEBUG)
