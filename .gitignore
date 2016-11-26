@@ -39,3 +39,4 @@ vidcard.csv
 .gdb_history
 *.old
 longpath.dbg
+tmp/
