@@ -606,7 +606,7 @@ class MC_TextureManager
 				else	//If we got here, something is really wrong
 				{
 #ifdef _DEBUG
-					PAUSE(("Flags do not match either set of vertex Data"));
+					SPEW(("GRAPHICS", "Flags do not match either set of vertex Data\n"));
 #endif
 				}
 			}
@@ -691,7 +691,7 @@ class MC_TextureManager
 				else	//If we got here, something is really wrong
 				{
 #ifdef _DEBUG
-					PAUSE(("Flags do not match any set of untextured vertex Data"));
+					SPEW(("GRAPHICS", "Flags do not match any set of untextured vertex Data\n"));
 #endif
 				}
 			}
