@@ -1435,8 +1435,11 @@ void __stdcall gos_SetupViewport( bool FillZ, float ZBuffer, bool FillBG, DWORD 
 
 void __stdcall gos_TextDraw( const char *Message, ... )
 {
-	assert(Message);
-	if (!strlen(Message)) return;
+
+	if (!Message || !strlen(Message)) {
+        SPEW(("GRAPHICS", "Trying to draw zero legth string\n"));
+        return;
+    }
 
 	va_list	ap;
     va_start(ap, Message);
@@ -1457,9 +1460,10 @@ void __stdcall gos_TextDraw( const char *Message, ... )
 
 void __stdcall gos_TextDrawBackground( int Left, int Top, int Right, int Bottom, DWORD Color )
 {
+    // TODO: Is it correctly Implemented?
     gosASSERT(g_gos_renderer);
 
-    PAUSE((""));
+    //PAUSE((""));
 
     gos_VERTEX v[4];
     v[0].x = Left;
@@ -1520,7 +1524,7 @@ void __stdcall gos_TextStringLength( DWORD* Width, DWORD* Height, const char *fm
     gosASSERT(Width && Height);
 
     if(!fmt) {
-        PAUSE(("No text to calculate length!"));
+        SPEW(("GRAPHICS", "No text to calculate length!"));
         *Width = 1;
         *Height = 1;
         return;
