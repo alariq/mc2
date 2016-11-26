@@ -193,7 +193,8 @@ void GameSoundSystem::removeCurrentMessage(void)
 		{
 			msgHeap->Free(currentMessage->data[j]);
 			currentMessage->data[j] = NULL;
-			msgHeap->Free(currentMessage->noise[j]);
+			if(currentMessage->noise[j]!=(MemoryPtr)-1)
+				msgHeap->Free(currentMessage->noise[j]);
 			currentMessage->noise[j] = NULL;
 		}
 		
@@ -362,6 +363,10 @@ void GameSoundSystem::update (void)
 			{
 				if (currentMessage->noise[currentFragment])
 				{
+                    // sebi: TEMP AND UGLY! have to make it because noise sample fails to load and then game logic goes belly up
+                    // and somehow just plays 2 times main radio message
+					if(currentMessage->noise[currentFragment] != (MemoryPtr)-1) {
+
 					//--------------------------------------------------------------------
 					// Hand GOS sound the data it needs to create the resource Handle
 					gosAudio_Format soundFormat;
@@ -391,10 +396,11 @@ void GameSoundSystem::update (void)
 
 					gosAudio_AssignResourceToChannel(RADIO_CHANNEL, radioHandle);
 					gosAudio_SetChannelPlayMode(RADIO_CHANNEL,gosAudio_PlayOnce);
-					playingNoise = TRUE;
 					
+					}
 					if (currentMessage->pilot)
 						currentMessage->pilot->setMessagePlaying();
+					playingNoise = TRUE;
 				}
 				else
 				{
@@ -484,6 +490,10 @@ void GameSoundSystem::update (void)
 
 		if (currentMessage->noise[currentFragment])
 		{
+
+            // sebi: TEMP AND UGLY! have to make it because noise sample fails to load and then game logic goes belly up
+            // and somehow just plays 2 times main radio message
+            if(currentMessage->noise[currentFragment] != (MemoryPtr)-1) {
 			//--------------------------------------------------------------------
 			// Hand GOS sound the data it needs to create the resource Handle
 			gosAudio_Format soundFormat;
@@ -513,10 +523,12 @@ void GameSoundSystem::update (void)
 
 			gosAudio_AssignResourceToChannel(RADIO_CHANNEL, radioHandle);
 			gosAudio_SetChannelPlayMode(RADIO_CHANNEL,gosAudio_PlayOnce);
-			playingNoise = TRUE;
 			
+            }
+
 			if (currentMessage->pilot)
 				currentMessage->pilot->setMessagePlaying();
+			playingNoise = TRUE;
 		}
 		else
 		{

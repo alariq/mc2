@@ -265,7 +265,7 @@ long i, roll, callsign, fragmentNum, dropOut = 0;
 				msgData->noiseSize[fragmentNum] = messageSize;
 			} else {
 				radioHeap->Free(msgData->noise[0]);
-				msgData->noise[0] = NULL;
+				msgData->noise[0] = (MemoryPtr)-1;
 			}
 		}
 	}
