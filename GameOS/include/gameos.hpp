@@ -149,7 +149,8 @@ typedef struct _GUID
 //
 // Handles to internal structures
 //
-typedef struct	SoundResource*	HGOSAUDIO;
+//typedef struct	SoundResource*	HGOSAUDIO;
+typedef struct	gosAudio*	    HGOSAUDIO; // sebi
 typedef struct	gos_Music*		HGOSMUSIC;
 typedef struct	gos_Video*		HGOSVIDEO;
 typedef struct	gosFileStream*	HGOSFILE;

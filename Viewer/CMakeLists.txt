@@ -1,7 +1,7 @@
 cmake_minimum_required (VERSION 2.8)
 project(viewer)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O0 -ggdb -Wno-unused-local-typedefs")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O0 -ggdb -Wno-unused-local-typedefs -Wno-unknown-warning-option")
 # -Wno-unused-local-typedefs - to disable "typedef was ignored on this declaration"
 
 #PreprocessorDefinitions="_ARMOR;LAB_ONLY;WIN32;_DEBUG;_WINDOWS"
@@ -58,6 +58,7 @@ add_definitions(-DUSE_ASSEMBLER_CODE=0)
 add_definitions(-DLINUX_BUILD)
 
 find_library(SDL2 NAMES "SDL2")
+find_library(SDL2_mixer NAMES "SDL2_mixer")
 find_library(SDL2main NAMES "SDL2main")
 find_library(OPENGL NAMES "opengl32" "GL")
 find_library(GLEW NAMES "GLEW" "glew32")
@@ -75,4 +76,5 @@ message("GLEW library found in ${GLEW}")
 include_directories("./window" "../GameOS/include" "../mclib" "../gui" "../code" "../netlib")
 
 add_executable(viewer ${SOURCES})
-target_link_libraries(viewer mclib gosfx mlr stuff gui gameos windows z ${SDL2} ${SDL2main} ${OPENGL} ${GLEW} dl)
+target_link_libraries(viewer mclib gosfx mlr stuff gui gameos windows z ${SDL2} ${SDL2main} ${OPENGL} ${GLEW} dl ${SDL2_mixer})
+

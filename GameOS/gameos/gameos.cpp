@@ -1,6 +1,6 @@
 #include "gameos.hpp"
 #include "toolos.hpp"
-#include "memorymanager.hpp" // goe_Heap
+#include "memorymanager.hpp" // gos_Heap
 #include <stdio.h>
 #include <time.h>
 #include <stdlib.h> // rand
@@ -105,66 +105,6 @@ DWORD __stdcall gos_GetMachineInformation( MachineInfo mi, int Param1/*=0*/, int
     if(mi == gos_Info_NumberDevices)
         return 1;
     return 0;
-}
-
-//////////////////////////////////////////////////////////////////////////////////
-// Creates a resource to be played later
-//
-void __stdcall gosAudio_CreateResource( HGOSAUDIO* hgosaudio, enum gosAudio_ResourceType,  const char* file_name, gosAudio_Format* ga_wf, void* data, int size, bool only2D)
-{
-    
-}
-
-//////////////////////////////////////////////////////////////////////////////////
-// Destroy a resource; any sounds currently playing using the ResourceID will be
-//  stopped.
-//  Any memory the SoundAPI associated with the resource will be freed.
-//
-void __stdcall gosAudio_DestroyResource( HGOSAUDIO* hgosaudio )
-{
-}
-
-//////////////////////////////////////////////////////////////////////////////////
-// This prepares the channel for a specific type of sound playback. Optimally,
-// allocate only the properties that will need modification. Use a bitwise'd group
-// of gosAudio_Properties to set what is needed.
-//
-void __stdcall gosAudio_AllocateChannelSliders( int Channel, DWORD properties)
-{
-}
-
-//////////////////////////////////////////////////////////////////////////////////
-// Prepare a channel to play a resource of any type.
-//
-void __stdcall gosAudio_AssignResourceToChannel( int Channel, HGOSAUDIO hgosaudio)
-{
-}
-
-//////////////////////////////////////////////////////////////////////////////////
-// Get and Set functions only operate if a channel has the property enabled
-//  Channel number -1 used in SetVolume and SetPanning will alter the windows master
-//  volume and balance
-void __stdcall gosAudio_SetChannelSlider( int Channel, enum gosAudio_Properties, float value1, float value2, float value3)
-{
-}
-void __stdcall gosAudio_GetChannelSlider( int Channel, enum gosAudio_Properties, float* value1, float* value2, float* value3)
-{
-}
-
-//////////////////////////////////////////////////////////////////////////////////
-// Play, Loop, Stop, Pause, or Continue a particular channel
-//
-void __stdcall gosAudio_SetChannelPlayMode( int Channel, enum gosAudio_PlayMode ga_pm )
-{
-}
-//////////////////////////////////////////////////////////////////////////////////
-// Determine the current play mode of a channel
-//
-gosAudio_PlayMode __stdcall gosAudio_GetChannelPlayMode( int Channel )
-{
-    // TODO:
-    //gosASSERT(0 && "Not implemented");
-    return gosAudio_Loop;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -305,8 +245,6 @@ void __stdcall gosJoystick_GetInfo( DWORD index, gosJoystick_Info* gji )
 ////////////////////////////////////////////////////////////////////////////////
 char* __stdcall gos_GetFormattedDate( bool Verbose, WORD Year/*=-1*/, WORD Month/*=-1*/, WORD Day/*=-1*/ )
 {
-    STOP((""));
-
     time_t tim = time(NULL);
     struct tm* gm_time_data = gmtime(&tim);
     if(Year < 0) {
@@ -354,8 +292,6 @@ char* __stdcall gos_GetFormattedDate( bool Verbose, WORD Year/*=-1*/, WORD Month
 ////////////////////////////////////////////////////////////////////////////////
 char* __stdcall gos_GetFormattedTime( WORD Hour/*=-1*/, WORD Minute/*=-1*/, WORD Second/*=-1*/ )
 {
-    STOP((""));
-
     time_t tim = time(NULL);
     struct tm* gm_time_data = gmtime(&tim);
     if(Hour < 0) {

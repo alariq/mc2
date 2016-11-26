@@ -113,6 +113,7 @@ add_definitions(-DLINUX_BUILD)
 
 find_library(SDL2 NAMES "SDL2")
 find_library(SDL2main NAMES "SDL2main")
+find_library(SDL2_mixer NAMES "SDL2_mixer")
 find_library(OPENGL NAMES "opengl32" "GL")
 find_library(GLEW NAMES "GLEW" "glew32")
 
@@ -129,4 +130,4 @@ message("GLEW library found in ${GLEW}")
 include_directories("./GameOS/include" "./mclib" "./gui" "./code" "./netlib")
 
 add_executable(mc2 ${SOURCES})
-target_link_libraries(mc2 mclib gosfx mlr stuff gui gameos windows z ${SDL2} ${SDL2main} ${OPENGL} ${GLEW} dl)
+target_link_libraries(mc2 mclib gosfx mlr stuff gui gameos windows z ${SDL2} ${SDL2main} ${OPENGL} ${GLEW} dl ${SDL2_mixer})

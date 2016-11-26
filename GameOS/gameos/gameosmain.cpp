@@ -10,9 +10,14 @@
 #include "utils/shader_builder.h"
 #include "utils/gl_utils.h"
 
+#include <signal.h>
+
 extern void gos_CreateRenderer(int w, int h);
 extern void gos_RendererEndFrame();
 extern bool gosExitGameOS();
+
+extern bool gos_CreateAudio();
+extern void gos_DestroyAudio();
 
 static bool g_exit = false;
 static bool g_focus_lost = false;
@@ -150,6 +155,8 @@ static void draw_screen( void )
 
 int main(int argc, char** argv)
 {
+    //signal(SIGTRAP, SIG_IGN);
+
     // fills in Environment structure
     GetGameOSEnvironment("");
 
@@ -187,6 +194,10 @@ int main(int argc, char** argv)
 	}
 
     gos_CreateRenderer(w, h);
+    if(!gos_CreateAudio())
+    {   // not an error
+        SPEW(("AUDIO", "Failed to create audio\n"));
+    }
 
     Environment.InitializeGameEngine();
 
@@ -217,6 +228,8 @@ int main(int argc, char** argv)
 
     graphics::destroy_render_context(ctx);
     graphics::destroy_window(win);
+
+    gos_DestroyAudio();
 
     return 0;
 }
