@@ -1035,8 +1035,10 @@ void Camera::updateGoalPosition (Stuff::Vector3D &pos)
 	{
 		Stuff::Vector3D posDiff;
 		posDiff.Subtract(goalPosition,pos);
-		posDiff /= goalPosTime;
-		posDiff *= frameLength;
+		//sebi
+		//posDiff /= goalPosTime;
+		//posDiff *= frameLength;
+		posDiff *= frameLength / goalPosTime;
 		goalPosTime -= frameLength;
 
 		if (goalPosTime < 0.0f)
