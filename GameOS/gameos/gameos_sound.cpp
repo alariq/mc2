@@ -266,7 +266,7 @@ void __stdcall gosAudio_CreateResource( HGOSAUDIO* hgosaudio, enum gosAudio_Reso
             default: STOP(("Unsupported audio format\n"));
         }
 #else
-        Mix_Chunk* chunk = Mix_LoadWAV(file_name);
+        chunk = Mix_LoadWAV(file_name);
         if(NULL == chunk) {
             SPEW(("AUDIO", "gosAudio_CreateResource: Failed to load %s, %s\n", file_name, Mix_GetError()));
             *hgosaudio = NULL;
@@ -447,12 +447,19 @@ void __stdcall gosAudio_SetChannelSlider( int Channel, enum gosAudio_Properties 
         case gosAudio_Panning:
         {
             ci->fPanning = value1; // -1 ... +1
-            uint8_t cur_volume = (uint8_t)(ci->fVolume * MAX_VOLUME);
+            // TODO: looks like panning sets level of volume in channels (like max. posssible)
+            // so if we set Panning(0,0) and then changes volume, we will not hear anyting!
+            // probably we need to uodate panning each time we set volume...  
+            // like check dwProperties if panning property allocated and then do our dirty stuff
+            /*
+            uint8_t cur_volume = (uint8_t)(2*ci->fVolume * MAX_VOLUME);
             float t = (0.5f * ci->fPanning + 0.5f);
             t = t < 0.0f ? 0.0f : t;
             t = t > 1.0f ? 1.0f : t;
             uint8_t right = (uint8_t)(t*cur_volume);
-            //Mix_SetPanning(Channel, cur_volume - right, right);
+            Mix_SetPanning(Channel, cur_volume - right, right);
+            printf("Mix_SetPanning(%d, %d, %d)\n", Channel, cur_volume-right, right);
+            */
             break;
         }
         case gosAudio_Frequency:
