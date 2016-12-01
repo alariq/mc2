@@ -771,9 +771,9 @@ void gosRenderer::init() {
 
 void gosRenderer::initRenderStates() {
 
-	renderStates_[gos_State_Texture] = 0;
-	renderStates_[gos_State_Texture2] = 0;
-    renderStates_[gos_State_Texture3] = 0;
+	renderStates_[gos_State_Texture] = INVALID_TEXTURE_ID;
+	renderStates_[gos_State_Texture2] = INVALID_TEXTURE_ID;
+    renderStates_[gos_State_Texture3] = INVALID_TEXTURE_ID;
 	renderStates_[gos_State_Filter] = gos_FilterNone;
 	renderStates_[gos_State_ZCompare] = 1; 
     renderStates_[gos_State_ZWrite] = 1;
@@ -878,10 +878,8 @@ void gosRenderer::applyRenderStates() {
        DWORD gosTextureHandle = renderStates_[tex_states[i]];
 
        glActiveTexture(GL_TEXTURE0 + i);
-       if(gosTextureHandle != 0) {
-           gosTexture* tex = this->getTexture(gosTextureHandle);
-           gosASSERT(tex);
-
+       gosTexture* tex = this->getTexture(gosTextureHandle);
+       if(tex) {
            glBindTexture(GL_TEXTURE_2D, tex->getTextureId());
        } else {
            glBindTexture(GL_TEXTURE_2D, 0);
@@ -1117,24 +1115,28 @@ void gosRenderer::drawText(const char* text) {
         tl.z = 0;
         tl.u = u;
         tl.v = v;
+        tl.argb = 0xffffffff;
 
         tr.x = x + char_w;
         tr.y = y;
         tr.z = 0;
         tr.u = u + char_du;
         tr.v = v;
+        tr.argb = 0xffffffff;
 
         bl.x = x;
         bl.y = y + char_h;
         bl.z = 0;
         bl.u = u;
         bl.v = v + char_dv;
+        bl.argb = 0xffffffff;
 
         br.x = x + char_w;
         br.y = y + char_h;
         br.z = 0;
         br.u = u + char_du;
         br.v = v + char_dv;
+        br.argb = 0xffffffff;
 
         text_->addVertices(&tl, 1);
         text_->addVertices(&tr, 1);
