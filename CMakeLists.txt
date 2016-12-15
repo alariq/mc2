@@ -1,6 +1,8 @@
 cmake_minimum_required (VERSION 2.8)
 project(mc2)
 
+include(CMakeToolsHelpers OPTIONAL)
+
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O0 -ggdb -Wno-unused-local-typedefs -Werror=array-bounds -Wno-switch -Wno-unknown-warning-option")
 # -Wno-unused-local-typedefs - to disable "typedef was ignored on this declaration"
 
