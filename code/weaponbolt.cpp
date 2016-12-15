@@ -2563,13 +2563,13 @@ void WeaponBolt::CopyTo (WeaponBoltData *data)
 	data->startUV = startUV;
 	data->goalHeight = goalHeight;
 
-	GameObject::CopyTo(dynamic_cast<GameObjectData *>(data));
+	GameObject::CopyTo(data);
 }
 
 //---------------------------------------------------------------------------
 void WeaponBolt::Load (WeaponBoltData *data)
 {
-	GameObject::Load(dynamic_cast<GameObjectData *>(data)); 
+	GameObject::Load(data); 
 
 	ownerWID = data->ownerWID;
 	hotSpotNumber = data->hotSpotNumber;

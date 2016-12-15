@@ -384,7 +384,7 @@ bool CSpecificEnemyUnitObjectiveCondition::Read( FitIniFile* missionFile )
 {
 	long result = 0;
 
-	result = missionFile->readIdLong("MoverWID", m_pUnitWID);
+	result = missionFile->readIdInt("MoverWID", m_pUnitWID);
 	if (result != NO_ERR)
 	{
 		float positionX, positionY;
@@ -435,7 +435,7 @@ bool CSpecificStructureObjectiveCondition::Read( FitIniFile* missionFile )
 {
 	long result = 0;
 
-	result = missionFile->readIdLong("BuildingWID",m_pBuildingWID);
+	result = missionFile->readIdLong("BuildingWID", m_pBuildingWID);
 	if (result != NO_ERR)
 	{
 		float positionX, positionY;
@@ -514,7 +514,7 @@ bool CCaptureOrDestroySpecificEnemyUnit::Read( FitIniFile* missionFile )
 {
 	long result = 0;
 
-	result = missionFile->readIdLong("MoverWID", m_pUnitWID);
+	result = missionFile->readIdInt("MoverWID", m_pUnitWID);
 	if (result != NO_ERR)
 	{
 		float positionX, positionY;
@@ -653,7 +653,7 @@ bool CCaptureUnit::Read( FitIniFile* missionFile )
 {
 	long result = 0;
 
-	result = missionFile->readIdLong("MoverWID", m_pUnitWID);
+	result = missionFile->readIdInt("MoverWID", m_pUnitWID);
 	if (result != NO_ERR)
 	{
 		float positionX, positionY;
@@ -758,7 +758,7 @@ bool CGuardSpecificUnit::Read( FitIniFile* missionFile )
 {
 	long result = 0;
 
-	result = missionFile->readIdLong("MoverWID",m_pUnitWID);
+	result = missionFile->readIdInt("MoverWID", m_pUnitWID);
 	if (result != NO_ERR)
 	{
 		float positionX, positionY;

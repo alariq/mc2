@@ -1624,13 +1624,13 @@ void Building::CopyTo (BuildingData *data)
 	data->proximityTimer = proximityTimer;
 	data->updatedTurn = updatedTurn;
 
-	TerrainObject::CopyTo(dynamic_cast<TerrainObjectData *>(data));
+	TerrainObject::CopyTo(data);
 }
 
 //---------------------------------------------------------------------------
 void Building::Load (BuildingData *data)
 {
-	TerrainObject::Load(dynamic_cast<TerrainObjectData *>(data));
+	TerrainObject::Load(data);
 
 	teamId = data->teamId;
 	baseTileId = 0;

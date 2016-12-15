@@ -19,6 +19,8 @@
 #include"dobjclass.h"
 #endif
 
+#include<stdint.h>
+
 #ifndef NO_ERR
 #define NO_ERR		0
 #endif
@@ -112,9 +114,9 @@
 
 //---------------------------------------------------------------------------
 
-typedef long GameObjectHandle;
-typedef long GameObjectTypeHandle;
-typedef long GameObjectWatchID;
+typedef int32_t GameObjectHandle;
+typedef int32_t GameObjectTypeHandle;
+typedef int32_t GameObjectWatchID;
 
 class GameObject;
 typedef GameObject* GameObjectPtr;

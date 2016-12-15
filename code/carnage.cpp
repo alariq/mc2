@@ -941,13 +941,13 @@ void Carnage::CopyTo (CarnageData *data)
 
 	data->effectId = effectId;
 
-	GameObject::CopyTo(dynamic_cast<GameObjectData *>(data));
+	GameObject::CopyTo(data);
 }
 
 //---------------------------------------------------------------------------
 void Carnage::Load (CarnageData *data)
 {
-	GameObject::Load(dynamic_cast<GameObjectData *>(data)); 
+	GameObject::Load(data); 
 
 	carnageType = data->carnageType;
 	ownerWID = data->ownerWID;

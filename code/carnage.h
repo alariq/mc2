@@ -34,7 +34,7 @@ typedef union _CarnageInfo
 	struct {
 		float			timeToBurn;
 		float			radius;
-		long			reallyVisible;
+		int32_t			reallyVisible;
 	} fire;
 	
 	struct {
@@ -51,7 +51,7 @@ typedef struct _CarnageData : public GameObjectData
 	GameObjectWatchID	ownerWID;
 	CarnageInfo			info;
 
-	long				effectId;
+	int32_t				effectId;
 } CarnageData;
 
 class Carnage : public GameObject 

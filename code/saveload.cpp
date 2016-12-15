@@ -215,7 +215,7 @@ extern char versionStamp[];
 void Part::Save (FitIniFilePtr file, long partNum)
 {
 	char partId[1024];
-	sprintf(partId,"Part%d",partNum+1);
+	sprintf(partId,"Part%d", (int)partNum+1);
 
 	file->writeBlock(partId);
 
@@ -516,13 +516,13 @@ void Mission::save (const char *saveFileName)
 void Part::Load (FitIniFilePtr file, long partNum)
 {
 	char partId[1024];
-	sprintf(partId,"Part%d",partNum);
+	sprintf(partId,"Part%d", (int)partNum);
 
 	long result = file->seekBlock(partId);
 	if (result != NO_ERR)
 		STOP(("Part Number %d missing from In-Mission Save",partNum));
 
-	result = file->readIdLong("ObjectWID",objectWID);
+	result = file->readIdInt("ObjectWID", objectWID);
 	if (result != NO_ERR)
 		STOP(("Part %d ObjectWID missing from In-Mission Save",partNum));
 
@@ -1219,12 +1219,12 @@ void Mission::load (const char *loadFileName)
 		
 		memset(parts,0,sizeof(Part) * (numParts + 1));
 
-		long i;
+		int i;
 
-		for (i = 1; i < long(numParts+1); i++)
+		for (i = 1; i < numParts + 1; i++)
 		{
 			char partName[12];
-			sprintf(partName,"Part%d",i);
+			sprintf(partName,"Part%d", i);
 			
 			//------------------------------------------------------------------
 			// Find the object to load

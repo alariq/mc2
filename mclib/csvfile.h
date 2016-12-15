@@ -106,6 +106,7 @@ class CSVFile : public File
 		long readFloat (DWORD row, DWORD col, float &value);
 		
 		long readBoolean (DWORD row, DWORD col, bool &value);
+		long readInt (DWORD row, DWORD col, int &value);
 		long readLong (DWORD row, DWORD col, long &value);
 		long readULong (DWORD row, DWORD col, unsigned long &value);
 		

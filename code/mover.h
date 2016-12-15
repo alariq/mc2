@@ -214,19 +214,19 @@ typedef enum {
 
 typedef union {
 	struct {
-		long	yawRate;			//Degrees per sec
+		int32_t	yawRate;			//Degrees per sec
 	} elemental;
 	struct {
-		long	yawRate;			//Degrees per sec
-		long	turretYawRate;		//Degrees per sec
-		long	pivotRate;			//Degrees per sec
+		int32_t	yawRate;			//Degrees per sec
+		int32_t	turretYawRate;		//Degrees per sec
+		int32_t	pivotRate;			//Degrees per sec
 		float	accel;				//Meters per sec per sec
 		float	speed;				//Meters per sec
-		long	turretYaw;			//Degrees
+		int32_t	turretYaw;			//Degrees
 	} groundVehicle;
 	struct {
-		long	torsoYawRate;		//Degrees per sec
-		long	torsoYaw;			//Degrees
+		int32_t	torsoYawRate;		//Degrees per sec
+		int32_t	torsoYaw;			//Degrees
 	} mech;
 } DynamicsLimits;
 
@@ -448,7 +448,7 @@ class BodyLocation {
 	public:
 
 		bool				CASE;
-		long				totalSpaces;
+		int32_t				totalSpaces;
 		CriticalSpace		criticalSpaces[MAX_CRITSPACES_PER_BODYLOCATION];
 		float				curInternalStructure;
 		unsigned char		hotSpotNumber;
@@ -460,7 +460,7 @@ class BodyLocation {
 		void operator = (BodyLocation copy) {
 			CASE = copy.CASE;
 			totalSpaces = copy.totalSpaces;
-			for (long i = 0; i < MAX_CRITSPACES_PER_BODYLOCATION; i++)
+			for (int i = 0; i < MAX_CRITSPACES_PER_BODYLOCATION; i++)
 				criticalSpaces[i] = copy.criticalSpaces[i];
 			curInternalStructure = copy.curInternalStructure;
 			hotSpotNumber = copy.hotSpotNumber;
@@ -604,11 +604,11 @@ typedef struct _MoverData : public GameObjectData
 	bool				startDisabled;
 	float				creationTime;
 
-	long				moveType;
-	long				moveLevel;
+	int32_t				moveType;
+	int32_t				moveLevel;
 	bool				followRoads;
 
-	long				lastMapCell[2];
+	int32_t				lastMapCell[2];
 
 	float				damageRateTally;					
 	float				damageRateCheckTime;				
@@ -616,9 +616,9 @@ typedef struct _MoverData : public GameObjectData
 
 	BodyLocation		body[MAX_MOVER_BODY_LOCATIONS];		
 	char				numBodyLocations;					
-	long				fieldedCV;
+	int32_t				fieldedCV;
 
-	long				attackRange;						
+	int32_t				attackRange;						
 
 	ArmorLocation		armor[MAX_MOVER_ARMOR_LOCATIONS];	
 	char				numArmorLocations;
@@ -630,7 +630,7 @@ typedef struct _MoverData : public GameObjectData
 	unsigned char		numAmmos;
 	AmmoTally			ammoTypeTotal[MAX_AMMO_TYPES];	
 	char				numAmmoTypes;					
-	long				pilotHandle;
+	int32_t				pilotHandle;
 
 	unsigned char		cockpit;										
 	unsigned char		engine;											
@@ -646,7 +646,7 @@ typedef struct _MoverData : public GameObjectData
 	float				minRange;										
 	float				maxRange;										
 	float				optimalRange;									
-	long				numFunctionalWeapons;							
+	int32_t				numFunctionalWeapons;							
 
 	char				numAntiMissileSystems;							
 	unsigned char		antiMissileSystem[MAX_ANTI_MISSILE_SYSTEMS];	
@@ -659,18 +659,18 @@ typedef struct _MoverData : public GameObjectData
 
 	char				teamId;
 	char				groupId;
-	long				squadId;
-	long				selectionIndex;					
-	long				teamRosterIndex;				
+	int32_t				squadId;
+	int32_t				selectionIndex;					
+	int32_t				teamRosterIndex;				
 	char				commanderId;
-	long				unitGroup;						
+	int32_t				unitGroup;						
 														
-	long				iconPictureIndex;				
+	int32_t				iconPictureIndex;				
 	bool				suppressionFire;				
 
-	long				pilotCheckModifier;
-	long				prevPilotCheckModifier;
-	long				prevPilotCheckDelta;
+	int32_t				pilotCheckModifier;
+	int32_t				prevPilotCheckModifier;
+	int32_t				prevPilotCheckDelta;
 	float				prevPilotCheckUpdate;
 	bool				failedPilotingCheck;			
 	float				lastWeaponEffectivenessCalc;	
@@ -682,7 +682,7 @@ typedef struct _MoverData : public GameObjectData
 	MoverControl		control;						
 	MoverDynamics		dynamics;						
 
-	long				numWeaponHitsHandled;
+	int32_t				numWeaponHitsHandled;
 	float				timeLeft;						
 	bool				exploding;
 	bool				withdrawing;
@@ -699,17 +699,17 @@ typedef struct _MoverData : public GameObjectData
 	GameObjectWatchID	refitBuddyWID;
 	GameObjectWatchID	recoverBuddyWID;
 
-	long				crashAvoidSelf;
-	long				crashAvoidPath;
-	long				crashBlockSelf;
-	long				crashBlockPath;
+	int32_t				crashAvoidSelf;
+	int32_t				crashAvoidPath;
+	int32_t				crashBlockSelf;
+	int32_t				crashBlockPath;
 	float				crashYieldTime;
-	long				pathLockLength;
-	long				pathLockList[MAX_LOCK_RANGE][2];
+	int32_t				pathLockLength;
+	int32_t				pathLockList[MAX_LOCK_RANGE][2];
 	Stuff::Vector3D		moveCenter;
 	float				moveRadius;
 
-	long				overlayWeightClass;
+	int32_t				overlayWeightClass;
 
 	float				timeToClearSelection;
 
@@ -722,17 +722,17 @@ typedef struct _MoverData : public GameObjectData
 	bool 				mechSalvage;					
 
 	Stuff::Vector3D		teleportPosition;				
-	long				debugPage;
+	int32_t				debugPage;
 
 	bool				pathLocks;						
 	bool				isOnGui;						
 
-	long				conStat;						
+	int32_t				conStat;						
 	float				fadeTime;						
 	BYTE				alphaValue;						
-	long				causeOfDeath;
+	int32_t				causeOfDeath;
 
-	long				lowestWeaponNodeID;
+	int32_t				lowestWeaponNodeID;
 
 	DWORD				psRed;
 	DWORD				psBlue;
@@ -765,11 +765,11 @@ class Mover : public GameObject {
 
 		bool				killed;							// used to record when the kill score has been awarded
 		bool				lost;							// used to record when the loss score has been awarded
-		long				moveType;
-		long				moveLevel;
+		int32_t             moveType;
+		int32_t             moveLevel;
 		bool				followRoads;
 
-		long				lastMapCell[2];
+		int32_t             lastMapCell[2];
 		
 		float				damageRateTally;					// damage points taken since last check
 		float				damageRateCheckTime;				// time (in game time) of next damage check
@@ -777,9 +777,9 @@ class Mover : public GameObject {
 
 		BodyLocation		body[MAX_MOVER_BODY_LOCATIONS];		// body parts of this mech
 		char				numBodyLocations;					// should be set based upon mover type
-		long				fieldedCV;
+		int32_t             fieldedCV;
 
-		long				attackRange;						// attack range
+		int32_t             attackRange;						// attack range
 
 		bool				salvaged;
 
@@ -796,7 +796,7 @@ class Mover : public GameObject {
 		AmmoTally			ammoTypeTotal[MAX_AMMO_TYPES];	// tracks total ammo per ammo type
 		char				numAmmoTypes;					// number of different ammo types
 		MechWarriorPtr		pilot;
-		long				pilotHandle;
+		int32_t             pilotHandle;
 		SensorSystemPtr		sensorSystem;
 		ContactInfoPtr		contactInfo;
 
@@ -815,7 +815,7 @@ class Mover : public GameObject {
 		float				minRange;										// current min attack range
 		float				maxRange;										// current max attack range
 		float				optimalRange;									// current optimum attack range
-		long				numFunctionalWeapons;							// takes into account damage, etc.
+		int32_t             numFunctionalWeapons;							// takes into account damage, etc.
 
 		char				numAntiMissileSystems;							// number of anti-missile systems
 		unsigned char		antiMissileSystem[MAX_ANTI_MISSILE_SYSTEMS];	// anti-missile system list
@@ -831,22 +831,22 @@ class Mover : public GameObject {
 		//MoverGroupPtr		group;							// what group am I a member of?
 		char				teamId;
 		char				groupId;
-		long				squadId;
-		long				selectionIndex;					// > 0 when in selected group
-		long				teamRosterIndex;				// where am I in my team's roster?
+		int32_t				squadId;
+		int32_t				selectionIndex;					// > 0 when in selected group
+		int32_t				teamRosterIndex;				// where am I in my team's roster?
 		char				commanderId;
-		long				unitGroup;						// the thing the user sets by hitting ctrl and a number
+		int32_t				unitGroup;						// the thing the user sets by hitting ctrl and a number
 															// this is a field since they can belong to more than one
-		long				iconPictureIndex;				// the little picture that shows arms and stuff falling off
+		int32_t				iconPictureIndex;				// the little picture that shows arms and stuff falling off
 		bool				suppressionFire;				// is this guy permanently shooting at ground
 		char				prevTeamId;
 		char				prevCommanderId;
 		
 
 		// Update Info
-		long				pilotCheckModifier;
-		long				prevPilotCheckModifier;
-		long				prevPilotCheckDelta;
+		int32_t				pilotCheckModifier;
+		int32_t				prevPilotCheckModifier;
+		int32_t				prevPilotCheckDelta;
 		float				prevPilotCheckUpdate;
 		bool				failedPilotingCheck;			// Passed or failed this frame...
 //		BaseObjectPtr		collisionFreeFrom;
@@ -877,7 +877,7 @@ class Mover : public GameObject {
 		unsigned char		radioChunks[2][MAX_RADIO_CHUNKS];
 		bool				ejectOrderGiven;
 															// Still awaiting final destruct orders from update.
-		long				numWeaponHitsHandled;
+		int32_t				numWeaponHitsHandled;
 		float				timeLeft;						// How long before we return FALSE to update.
 		bool				exploding;
 		bool				withdrawing;
@@ -897,17 +897,17 @@ class Mover : public GameObject {
 		GameObjectWatchID	refitBuddyWID;
 		GameObjectWatchID	recoverBuddyWID;
 
-		long				crashAvoidSelf;
-		long				crashAvoidPath;
-		long				crashBlockSelf;
-		long				crashBlockPath;
+		int32_t				crashAvoidSelf;
+		int32_t				crashAvoidPath;
+		int32_t				crashBlockSelf;
+		int32_t				crashBlockPath;
 		float				crashYieldTime;
-		long				pathLockLength;
-		long				pathLockList[MAX_LOCK_RANGE][2];
+		int32_t				pathLockLength;
+		int32_t             pathLockList[MAX_LOCK_RANGE][2];
 		Stuff::Vector3D		moveCenter;
 		float				moveRadius;
 
-		long				overlayWeightClass;
+		int32_t				overlayWeightClass;
 
 		float				timeToClearSelection;
 
@@ -921,7 +921,7 @@ class Mover : public GameObject {
 		bool 				mechSalvage;					//As this guy dies, ONLY check once if he's salvagable!
 
 		Stuff::Vector3D		teleportPosition;				//debug feature :)
-		long				debugPage;
+		int32_t				debugPage;
 
 		static float		newThreatMultiplier;
 		static float		marginOfError[2];
@@ -948,12 +948,12 @@ class Mover : public GameObject {
 		bool				pathLocks;						//For movers which can be stepped on.  They do NOT lock!
 		bool				isOnGui;						//For movers which start out on player team but not on gui.  Like raven in 0103
 
-		long				conStat;						//Contact status stored for this frame, for this machine
+		int32_t             conStat;						//Contact status stored for this frame, for this machine
 		float				fadeTime;						//Time between fade from LOS to non-LOS
 		BYTE				alphaValue;						//Current Fade value;
-		long				causeOfDeath;
+		int32_t             causeOfDeath;
 
-		long				lowestWeaponNodeID;
+		int32_t				lowestWeaponNodeID;
 		float				lowestWeaponNodeZ;
 
 	//----------------
@@ -1714,6 +1714,7 @@ class Mover : public GameObject {
 		bool enemyRevealed (void);
 
 		virtual const char* getIfaceName(void) {
+            STOP((""));
             return ("No Name");
         }
 

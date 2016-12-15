@@ -171,7 +171,7 @@ typedef union _ArtilleryInfo {
 		short				sensorSystemIndex;
 		float				contactUpdate;
 		char				timeString[5];
-		unsigned long		explosionOffFlags;
+		uint32_t            explosionOffFlags;
 	} strike;
 } ArtilleryInfo;
 
@@ -181,7 +181,7 @@ typedef struct _ArtilleryData : public GameObjectData
 	char				teamId;
 	char				commanderId;
 	ArtilleryInfo		info;
-	long				effectId;
+	int32_t				effectId;
 
 	bool				bombRunStarted;
 	bool				inView;
@@ -200,7 +200,7 @@ class Artillery : public GameObject
 		char				teamId;
 		char				commanderId;
 		ArtilleryInfo		info;
-		long				effectId;
+		int32_t             effectId;
 		
 		gosFX::Effect		*hitEffect;
 		gosFX::Effect		*rightContrail;

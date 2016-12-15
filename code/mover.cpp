@@ -1583,9 +1583,11 @@ void MoverDynamics::init (CSVFilePtr dynamicsFile) {
 	if (type == DYNAMICS_MECH) 
 	{
 		//Its a new day!!!
-		
-		dynamicsFile->readLong(8,5,max.mech.torsoYawRate);
-		dynamicsFile->readLong(9,5,max.mech.torsoYaw);
+		long tmp, tmp2;
+		dynamicsFile->readLong(8, 5, tmp);
+		dynamicsFile->readLong(9, 5, tmp2);
+        max.mech.torsoYawRate = tmp;
+        max.mech.torsoYaw = tmp2;
 	}
 	else if (type == DYNAMICS_GROUNDVEHICLE) {
 	/*
@@ -1636,18 +1638,23 @@ void MoverDynamics::init (FitIniFilePtr dynamicsFile)
 		result = dynamicsFile->seekBlock("VehicleDynamics");
 		Assert(result == NO_ERR, result, " MoverDynamics.init: vehicle error 0 ");
 
-		result = dynamicsFile->readIdLong("maxTurretYawRate",max.groundVehicle.turretYawRate);
+        long tmp;
+		result = dynamicsFile->readIdLong("maxTurretYawRate", tmp);
+        max.groundVehicle.turretYawRate = tmp;
 		Assert(result == NO_ERR, result, " MoverDynamics.init: vehicle error 1 ");
 	
-		result = dynamicsFile->readIdLong("maxTurretYaw",max.groundVehicle.turretYaw);
+		result = dynamicsFile->readIdLong("maxTurretYaw", tmp);
+        max.groundVehicle.turretYaw = tmp;
 		Assert(result == NO_ERR, result, " MoverDynamics.init: vehicle error 2 ");
 	
-		result = dynamicsFile->readIdLong("maxVehicleYawRate",max.groundVehicle.yawRate);
+		result = dynamicsFile->readIdLong("maxVehicleYawRate", tmp);
+        max.groundVehicle.yawRate = tmp;
 		Assert(result == NO_ERR, result, " MoverDynamics.init: vehicle error 3 ");
 		if (max.groundVehicle.yawRate < 720)
 			max.groundVehicle.yawRate = 720;
 
-		result = dynamicsFile->readIdLong("maxVehiclePivotRate",max.groundVehicle.pivotRate);
+		result = dynamicsFile->readIdLong("maxVehiclePivotRate", tmp);
+        max.groundVehicle.pivotRate = tmp;
 		if (result != NO_ERR)
 			max.groundVehicle.pivotRate = (long)((float)max.groundVehicle.yawRate * GroundVehiclePivotYawMultiplier);
 
@@ -2352,6 +2359,7 @@ void Mover::init (bool create) {
 	conStat = 0;
 	fadeTime = 0.0f;
 	alphaValue = 0x0;
+	isOnGui = false;
 
 	if ( !holdFireIconHandle )
 	{
@@ -4431,7 +4439,8 @@ long Mover::calcMoveGoal (GameObjectPtr target,
 	
 	//----------------------------
 	// The Goal Map is in CELLS...
-	memset(goalMap, 0, sizeof(long) * GOALMAP_CELL_DIM * GOALMAP_CELL_DIM);
+	//memset(goalMap, 0, sizeof(long) * GOALMAP_CELL_DIM * GOALMAP_CELL_DIM);
+    MemSet(goalMap, 0);
 
 	int centerCell[2];
 	land->worldToCell(moveCenter, centerCell[0], centerCell[1]);
@@ -7202,7 +7211,7 @@ void Mover::CopyTo (MoverData *data)
 	data->positionNormal						= positionNormal;
 	data->velocity							    = velocity;                                   
 
-	memcpy(data->name,name, sizeof(char) * MAXLEN_MOVER_NAME);
+    ArrayCopy(data->name,name);
 
 	data->chassis							    = chassis;                                    
 	data->startDisabled							= startDisabled;                              
@@ -7212,31 +7221,33 @@ void Mover::CopyTo (MoverData *data)
 	data->moveLevel                             = moveLevel;                                  
 	data->followRoads                           = followRoads;                                
 																							
-	memcpy(data->lastMapCell,lastMapCell,sizeof(long) * 2);
+    ArrayCopy(data->lastMapCell, lastMapCell);
 																							
 	data->damageRateTally					    = damageRateTally;                            
 	data->damageRateCheckTime				    = damageRateCheckTime;                        
 	data->pilotCheckDamageTally 				= pilotCheckDamageTally;                      
 																							
-	memcpy(data->body,body,sizeof(BodyLocation) * MAX_MOVER_BODY_LOCATIONS);
+    ArrayCopy(data->body, body);
 
 	data->numBodyLocations					    = numBodyLocations;                           
 	data->fieldedCV                             = fieldedCV;                                  
 																							
 	data->attackRange 						    = attackRange;                                
 																							
-	memcpy(data->armor,armor, sizeof(ArmorLocation) * MAX_MOVER_ARMOR_LOCATIONS);
+    ArrayCopy(data->armor, armor);
 
 	data->numArmorLocations                     = numArmorLocations;                          
 
-	memcpy(data->longName,longName, sizeof(char) * MAXLEN_MECH_LONGNAME);
+    ArrayCopy(data->longName, longName);
 																							
-	memcpy(data->inventory,inventory,sizeof(InventoryItem) * MAX_MOVER_INVENTORY_ITEMS);
+    ArrayCopy(data->inventory,inventory);
 
 	data->numOther                              = numOther;                                   
 	data->numWeapons                            = numWeapons;                                 
 	data->numAmmos                              = numAmmos;                                   
-	memcpy(data->ammoTypeTotal,ammoTypeTotal,sizeof(AmmoTally) * MAX_AMMO_TYPES);
+
+    ArrayCopy(data->ammoTypeTotal,ammoTypeTotal);
+
 	data->numAmmoTypes					        = numAmmoTypes;                               
 	data->pilotHandle                           = pilotHandle;                                
 																							
@@ -7257,8 +7268,8 @@ void Mover::CopyTo (MoverData *data)
 	data->numFunctionalWeapons 					= numFunctionalWeapons;                       		
 																							
 	data->numAntiMissileSystems 				= numAntiMissileSystems;                      			
-	memcpy(data->antiMissileSystem,antiMissileSystem,sizeof(unsigned char) * MAX_ANTI_MISSILE_SYSTEMS);
-																							
+    ArrayCopy(data->antiMissileSystem,antiMissileSystem);
+
 	data->engineBlowTime                        = engineBlowTime;                             
 	data->maxMoveSpeed                          = maxMoveSpeed;                               
 	data->shutDownThisFrame                     = shutDownThisFrame;                          
@@ -7314,7 +7325,7 @@ void Mover::CopyTo (MoverData *data)
 	data->crashYieldTime                        = crashYieldTime;                             
 	data->pathLockLength                        = pathLockLength;                             
 
-	memcpy(data->pathLockList,pathLockList, sizeof(long) * MAX_LOCK_RANGE * 2);
+    ArrayCopy(data->pathLockList,pathLockList);
 
 	data->moveCenter                            = moveCenter;                                 
 	data->moveRadius                            = moveRadius;                                 
@@ -7355,7 +7366,7 @@ void Mover::CopyTo (MoverData *data)
 //---------------------------------------------------------------------------
 void Mover::Load (MoverData *data)
 {
-	GameObject::Load(dynamic_cast<GameObjectData *>(data));
+	GameObject::Load(data);
 
 	killed						 	  		= data->killed;                                              
 	lost						 	  		= data->lost;                                              
@@ -7372,7 +7383,7 @@ void Mover::Load (MoverData *data)
 	moveLevel                             	= data->moveLevel;                                  
 	followRoads                           	= data->followRoads;                                
 																							
-	memcpy(lastMapCell,data->lastMapCell,sizeof(long) * 2);
+	memcpy(lastMapCell,data->lastMapCell,sizeof(int32_t) * 2);
 																							
 	damageRateTally					    = data->damageRateTally;                            
 	damageRateCheckTime				    = data->damageRateCheckTime;                        
@@ -7474,7 +7485,7 @@ void Mover::Load (MoverData *data)
 	crashYieldTime                        = data->crashYieldTime;                             
 	pathLockLength                        = data->pathLockLength;                             
 
-	memcpy(pathLockList,data->pathLockList, sizeof(long) * MAX_LOCK_RANGE * 2);
+	memcpy(pathLockList,data->pathLockList, sizeof(int32_t) * MAX_LOCK_RANGE * 2);
 
 	moveCenter                            = data->moveCenter;                                 
 	moveRadius                            = data->moveRadius;                                 

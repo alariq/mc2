@@ -1737,13 +1737,13 @@ void Artillery::CopyTo (ArtilleryData *data)
 	data->inView = inView;
 	data->iFacePosition = iFacePosition;
 
-	GameObject::CopyTo(dynamic_cast<GameObjectData *>(data));
+	GameObject::CopyTo(data);
 }
 
 //---------------------------------------------------------------------------
 void Artillery::Load (ArtilleryData *data)
 {
-	GameObject::Load(dynamic_cast<GameObjectData *>(data));
+	GameObject::Load(data);
 
 	artilleryType = data->artilleryType;
 	commanderId = data->commanderId;

@@ -107,8 +107,8 @@ class TerrainObjectType : public ObjectType {
 typedef struct _TerrainObjectData : public GameObjectData
 {
 	float						damage;
-	long						vertexNumber;
-	long						blockNumber;
+	int32_t						vertexNumber;
+	int32_t						blockNumber;
 	float						pitchAngle;
 	float						fallRate;
 	GameObjectWatchID			powerSupply;
@@ -131,8 +131,8 @@ class TerrainObject : public GameObject {
 	public:
 
 		float						damage;
-		long						vertexNumber;
-		long						blockNumber;
+		int32_t						vertexNumber;
+		int32_t						blockNumber;
 		float						pitchAngle;
 		float						fallRate;
 		GameObjectWatchID			powerSupply;

@@ -198,16 +198,16 @@ typedef struct _GroundVehicleData : public MoverData
 	bool				recovering;
 	bool				mineSweeper;
 	float				sweepTime;						
-	long				mineLayer;
+	int32_t				mineLayer;
 	bool				aerospaceSpotter;
-	long				cellColToMine;
-	long				cellRowToMine;
+	int32_t				cellColToMine;
+	int32_t				cellRowToMine;
 
 	bool				notMineYet;
 
-	long				battleRating;					
+	int32_t				battleRating;					
 
-	long				descID;							
+	int32_t				descID;							
 
 	float				timeInCurrent;					
 
@@ -249,16 +249,16 @@ class GroundVehicle : public Mover {
 		bool				recovering;
 		bool				mineSweeper;
 		float				sweepTime;						// time since we last swept a mine
-		long				mineLayer;
+		int32_t             mineLayer;
 		bool				aerospaceSpotter;
-		long				cellColToMine;
-		long 				cellRowToMine;
+		int32_t             cellColToMine;
+		int32_t             cellRowToMine;
 		
 		bool				notMineYet;
 		
-		long				battleRating;					// Override of BattleRating
+		int32_t             battleRating;					// Override of BattleRating
 
-		long				descID;							//Used by Logistics to Desc.		
+		int32_t             descID;							//Used by Logistics to Desc.		
 
 		float				timeInCurrent;					//Used by MineLayers to lay mines better
 
@@ -534,6 +534,12 @@ class GroundVehicle : public Mover {
 		void CopyTo (GroundVehicleData *data);
 
 		void Load (GroundVehicleData *data);
+
+		virtual void setOnGUI (bool onGui)
+		{
+            printf("setOnGUI\n");
+			isOnGui = onGui;
+		}
 };
 
 //******************************************************************************************

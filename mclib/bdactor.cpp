@@ -154,7 +154,7 @@ void BldgAppearanceType::init (const char * fileName)
 	if (result != NO_ERR)
 	{
 		//Check for LOD filenames instead
-		for (long i=0;i<MAX_LODS;i++)
+		for (int i=0;i<MAX_LODS;i++)
 		{
 			char baseName[256];
 			char baseLODDist[256];
@@ -274,7 +274,7 @@ void BldgAppearanceType::init (const char * fileName)
 	//--------------------------------------------------------------------
 	// Load Animation Information.
 	// We can load up to 10 Animation States.
-	for (long i=0;i<MAX_BD_ANIMATIONS;i++)
+	for (int i=0;i<MAX_BD_ANIMATIONS;i++)
 	{
 		char blockId[512];
 		sprintf(blockId,"Animation:%d",i);
@@ -598,7 +598,7 @@ void BldgAppearance::init (AppearanceTypePtr tree, GameObjectPtr obj)
 
 		//-------------------------------------------------
 		// Load the texture and store its handle.
-		for (long i=0;i<bldgShape->GetNumTextures();i++)
+		for (int i=0;i<bldgShape->GetNumTextures();i++)
 		{
 			char txmName[1024];
 			bldgShape->GetTextureName(i,txmName,256);

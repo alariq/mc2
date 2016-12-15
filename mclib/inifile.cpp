@@ -905,6 +905,14 @@ long FitIniFile::readIdDouble (const char *varName, double &value)
 	return(NO_ERR);
 }
 
+long FitIniFile::readIdInt(const char *varName, int &value)
+{
+    long tmp;
+    long rv = readIdLong (varName, tmp);
+    value = tmp;
+    return rv;
+}
+
 //---------------------------------------------------------------------------
 long FitIniFile::readIdLong (const char *varName, long &value)
 {

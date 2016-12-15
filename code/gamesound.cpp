@@ -111,7 +111,7 @@ long i;
 
             // sebi: TEMP AND UGLY! have to make it because noise sample fails to load and then game logic goes belly up
             // and somehow just plays 2 times main radio message
-			if(currentMessage->noise[j]!=(MemoryPtr)-1)
+			if(queue[msgNumber]->noise[i]!=(MemoryPtr)-1)
 				msgHeap->Free(queue[msgNumber]->noise[i]);
 			queue[msgNumber]->noise[i] = NULL;
 		}

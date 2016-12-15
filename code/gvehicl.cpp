@@ -1004,7 +1004,7 @@ long GroundVehicle::init (FitIniFile* vehicleFile)
 	if (result != NO_ERR)
 		return(result);
 
-	result = vehicleFile->readIdLong( "IconIndex", iconPictureIndex );
+	result = vehicleFile->readIdInt( "IconIndex", iconPictureIndex);
 	if ( result != NO_ERR )
 		iconPictureIndex = 0;
 
@@ -1013,7 +1013,7 @@ long GroundVehicle::init (FitIniFile* vehicleFile)
 	if (result != NO_ERR)
 		return(result);
 
-	result = vehicleFile->readIdLong("DescIndex", descID);
+	result = vehicleFile->readIdInt("DescIndex", descID);
 	if (result != NO_ERR)
 		descID = -1;
 	else
@@ -1035,7 +1035,7 @@ long GroundVehicle::init (FitIniFile* vehicleFile)
 		return(result);
 	status = cStatus;
 
-	result = vehicleFile->readIdLong("BattleRating", battleRating);
+	result = vehicleFile->readIdInt("BattleRating", battleRating);
 	if (result != NO_ERR)
 		battleRating = -1;
 
@@ -5485,13 +5485,13 @@ void GroundVehicle::CopyTo (GroundVehicleData *data)
 	else
 		data->sensorOK					 = false;
 
-	Mover::CopyTo(dynamic_cast<MoverData *>(data));
+	Mover::CopyTo(data);
 }
 
 //---------------------------------------------------------------------------
 void GroundVehicle::Load (GroundVehicleData *data)
 {
-	Mover::Load(dynamic_cast<MoverData *>(data));
+	Mover::Load(data);
 
 	accel 				   	 = data->accel;               
 	velocityMag 	         = data->velocityMag;         

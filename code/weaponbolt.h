@@ -151,10 +151,10 @@ class WeaponBoltType : public ObjectType
 typedef struct _WeaponBoltData : public GameObjectData
 {
 	GameObjectWatchID	ownerWID;
-	long				hotSpotNumber;
+	int32_t				hotSpotNumber;
 
 	GameObjectWatchID	targetWID;
-	long				targetHotSpot;
+	int32_t				targetHotSpot;
 	Stuff::Vector3D		targetPosition;
 	float				distanceToTarget;
 	float				halfDistanceToTarget;
@@ -165,7 +165,7 @@ typedef struct _WeaponBoltData : public GameObjectData
 	Stuff::Vector3D		laserVertices[4];
 	Stuff::Vector3D		laserSide[4];
 
-	long				effectId;
+	int32_t				effectId;
 	bool 				hitTarget;
 
 	float				timeLeft;
@@ -185,10 +185,10 @@ class WeaponBolt : public GameObject
 		protected:
 
 			GameObjectWatchID	ownerWID;
-			long				hotSpotNumber;
+			int32_t				hotSpotNumber;
 		
 			GameObjectWatchID	targetWID;
-			long				targetHotSpot;
+			int32_t				targetHotSpot;
 			Stuff::Vector3D		*targetPosition;
 			float				distanceToTarget;
 			float				halfDistanceToTarget;
@@ -202,7 +202,7 @@ class WeaponBolt : public GameObject
 			TG_LightPtr			pointLight;
 			DWORD				lightId;
 			
-			long				effectId;
+			int32_t				effectId;
 			bool 				hitTarget;
 			
 			//NEW  GOS FX

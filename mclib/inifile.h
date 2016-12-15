@@ -144,6 +144,7 @@ class FitIniFile : public File
 		long readIdDouble (const char *varName, double &value);
 		
 		long readIdBoolean (const char *varName, bool &value);
+		long readIdInt (const char *varName, int &value);
 		long readIdLong (const char *varName, long &value);
 		long readIdULong (const char *varName, unsigned long &value);
         // sebi

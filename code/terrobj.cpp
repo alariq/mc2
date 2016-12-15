@@ -1244,13 +1244,13 @@ void TerrainObject::CopyTo (TerrainObjectData *data)
 
 	memcpy(data->cellsCovered,cellsCovered, sizeof(short) * numCellsCovered * 2);
 
-	GameObject::CopyTo(dynamic_cast<GameObjectData *>(data));
+	GameObject::CopyTo(data);
 }
 
 //---------------------------------------------------------------------------
 void TerrainObject::Load (TerrainObjectData *data)
 {
-	GameObject::Load(dynamic_cast<GameObjectData *>(data)); 
+	GameObject::Load(data); 
 
 	damage = data->damage;
 	vertexNumber = data->vertexNumber;

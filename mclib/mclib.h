@@ -195,6 +195,10 @@
 #include"weaponfx.h"
 #endif
 
+#ifndef MEMFUNC_H
+#include"memfunc.h"
+#endif
+
 #include<string.h>
 #include<stdio.h>
 #include<stdlib.h>

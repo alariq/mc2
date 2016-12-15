@@ -276,9 +276,9 @@ class BattleMechType : public ObjectType {
 typedef struct _MechData : public MoverData
 {
 	char				chassisClass;				   
-	long				chassisBR;					   
+	int32_t				chassisBR;					   
 
-	long				variantID;					   
+	int32_t				variantID;					   
 	char				variantName[64];			   
 
 	char				legStatus;					   
@@ -315,24 +315,24 @@ typedef struct _MechData : public MoverData
 	float				maxWeaponDamage;			   
 
 	char				longName[MAXLEN_MECH_LONGNAME];
-	long				pilotNum;		
+	int32_t				pilotNum;		
 
 	bool				captureable;
 	bool				notMineYet;		
 
-	long				descID;			
+	int32_t				descID;			
 
 	float				damageThisFrame;
 	bool				sentCrippledMsg;
 
 	float				rotateValues[6];
 
-	long				ItemLocationToInvLocation[MAX_MOVER_INVENTORY_ITEMS];
+	int32_t				ItemLocationToInvLocation[MAX_MOVER_INVENTORY_ITEMS];
 
 	float				damageAfterDisabled;
 											
-	long				numArmorComponents;
-	long				cBills;
+	int32_t				numArmorComponents;
+	int32_t				cBills;
 
 	MechAppearanceData	apData;
 } MechData;
@@ -345,9 +345,9 @@ class BattleMech : public Mover {
 	public:
 
 		char				chassisClass;					// none, light, medium, heavy, assault
-		long				chassisBR;						// chassis Battle Rating
+		int32_t             chassisBR;						// chassis Battle Rating
 
-		long				variantID;						// need to store this for logistics
+		int32_t             variantID;						// need to store this for logistics
 		char				variantName[64];				// user defined
 
 
@@ -391,12 +391,12 @@ class BattleMech : public Mover {
 		float				maxWeaponDamage;				// max total damage possible
 		
 		char				longName[MAXLEN_MECH_LONGNAME];		//Used by logistics (and the interface) to get long name.
-		long				pilotNum;						//Used by logistics to restore pilot on return.
+		int32_t             pilotNum;						//Used by logistics to restore pilot on return.
 
 		bool				captureable;
 		bool				notMineYet;						//Used by logsitics to drop this mech if mission lost.
 
-		long				descID;							//Used by Logistics to Desc.		
+		int32_t             descID;							//Used by Logistics to Desc.		
 //		long				variant;						// Now we have three longs storing a bytes worth of data well done SJ
 		
 		float				damageThisFrame;				// How much damage have we taken this frame.
@@ -405,13 +405,13 @@ class BattleMech : public Mover {
 
 		float				rotateValues[6];
 		
-		long				ItemLocationToInvLocation[MAX_MOVER_INVENTORY_ITEMS];
+		int32_t             ItemLocationToInvLocation[MAX_MOVER_INVENTORY_ITEMS];
 		
 		float				damageAfterDisabled;			// Stores damaged inflicted after disabled.
 															// Once we reach the threshold, BLOW the mech for real!!
 															
-		long				numArmorComponents;
-		long				cBills;
+		int32_t             numArmorComponents;
+		int32_t             cBills;
 
 	//----------------
 	//Member Functions

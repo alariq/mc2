@@ -2309,13 +2309,13 @@ void Turret::CopyTo (TurretData *data)
 	data->parent = parent;
 	data->currentWeaponNode = currentWeaponNode;
 
-	TerrainObject::CopyTo(dynamic_cast<TerrainObjectData *>(data));
+	TerrainObject::CopyTo(data);
 }
 
 //---------------------------------------------------------------------------
 void Turret::Load (TurretData *data)
 {
-	TerrainObject::Load(dynamic_cast<TerrainObjectData *>(data));
+	TerrainObject::Load(data);
 
 	teamId = data->teamId;
 	turretRotation = data->turretRotation;

@@ -122,7 +122,7 @@ typedef struct _BuildingData : public TerrainObjectData
 	//PerimeterAlarms 		
 	bool					moverInProximity;
 	float					proximityTimer;
-	long					updatedTurn;
+	int32_t					updatedTurn;
 } BuildingData;
 
 class Building : public TerrainObject 

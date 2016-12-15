@@ -270,18 +270,18 @@ class WeaponHitChunk {
 //------------------------------------------------------------------------------------------
 typedef struct _GameObjectData
 {
-	long						objectTypeNum;
+	int32_t						objectTypeNum;
 	ObjectClass					objectClass;		
 	GameObjectHandle			handle;				
-	long						partId;				
-	unsigned long				watchID;			
+	int32_t						partId;				
+	uint32_t                    watchID;			
 
 	GameObjectTypeHandle		typeHandle;
 	Stuff::Vector3D				position;			
 	unsigned short				cellPositionRow;	
 	unsigned short				cellPositionCol;
-	long						d_vertexNum;		
-	unsigned long				flags;				
+	int32_t						d_vertexNum;		
+	uint32_t                    flags;				
 	unsigned short				debugFlags;			
 	unsigned char				status;				
 
@@ -291,7 +291,7 @@ typedef struct _GameObjectData
 	GameObjectWatchID			collisionFreeFromWID;
 	float						collisionFreeTime;
 	Stuff::Vector4D				screenPos;			
-	long						windowsVisible;		
+	int32_t						windowsVisible;		
 	float						explRadius;			
 	float						explDamage;			
 	short						maxCV;
@@ -301,7 +301,7 @@ typedef struct _GameObjectData
 	unsigned char				blipFrame;
 	unsigned char				numAttackers;
 
-	long						drawFlags;			
+	int32_t						drawFlags;			
 } GameObjectData;
 
 class GameObject {
@@ -310,15 +310,15 @@ class GameObject {
 
 		ObjectClass					objectClass;		//What kind of object is this.
 		GameObjectHandle			handle;				//Used to reference into master obj table
-		long						partId;				//What is my unique part number.
-		unsigned long				watchID;			//Used to reference in the game engine
+		int32_t                     partId;				//What is my unique part number.
+		uint32_t                    watchID;			//Used to reference in the game engine
 
 		GameObjectTypeHandle		typeHandle;			//Who made me?
 		Stuff::Vector3D				position;			//Where am I?
 		unsigned short				cellPositionRow;	//Cell RC position
 		unsigned short				cellPositionCol;
-		long						d_vertexNum;		//Physical Vertex in mapData array that I'm lower right from
-		unsigned long				flags;				//See GAMEOBJECT_FLAGS_ defines
+		int32_t                     d_vertexNum;		//Physical Vertex in mapData array that I'm lower right from
+		uint32_t                    flags;				//See GAMEOBJECT_FLAGS_ defines
 		unsigned short				debugFlags;			// use ONLY for debugging purposes...
 		unsigned char				status;				//Am I normal, disabled, destroyed, etc..?
 	
@@ -328,7 +328,7 @@ class GameObject {
 		GameObjectWatchID			collisionFreeFromWID;	//Index into GameObject Table
 		float						collisionFreeTime;
 		Stuff::Vector4D				screenPos;			//Actual Screen position
-		long						windowsVisible;		//Which Windows can see me.
+		int32_t                     windowsVisible;		//Which Windows can see me.
 		float						explRadius;			//How big is my explosion.
 		float						explDamage;			//How much damage does it do?
 		short						maxCV;
@@ -338,7 +338,7 @@ class GameObject {
 		unsigned char				blipFrame;
 		unsigned char				numAttackers;
 
-		long						drawFlags;			// bars, text, brackets, and highlight colors
+		int32_t                     drawFlags;			// bars, text, brackets, and highlight colors
 
 		static unsigned long		spanMask;			//Used to preserve tile's LOS
 		static float				blockCaptureRange;

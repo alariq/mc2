@@ -123,14 +123,14 @@ typedef struct _TurretData : public TerrainObjectData
 	float					lastFireTime[MAX_TURRET_WEAPONS];
 	float					minRange;										// current min attack range
 	float					maxRange;										// current max attack range
-	long					numFunctionalWeapons;							// takes into account damage, etc.
+	int32_t                 numFunctionalWeapons;							// takes into account damage, etc.
 
 	float					idleWait;
 	Stuff::Vector3D			idlePosition;
 	Stuff::Vector3D			oldPosition;
 	DWORD					parentId;
 	GameObjectWatchID		parent;
-	long					currentWeaponNode;
+	int32_t					currentWeaponNode;
 } TurretData;
 
 class Turret : public TerrainObject {
@@ -145,7 +145,7 @@ class Turret : public TerrainObject {
 		float					lastFireTime[MAX_TURRET_WEAPONS];
 		float					minRange;										// current min attack range
 		float					maxRange;										// current max attack range
-		long					numFunctionalWeapons;							// takes into account damage, etc.
+		int32_t					numFunctionalWeapons;							// takes into account damage, etc.
 		
 		long					netRosterIndex;
 		long					numWeaponFireChunks[2];
@@ -158,7 +158,7 @@ class Turret : public TerrainObject {
 		Stuff::Vector3D			oldPosition;
 		DWORD					parentId;
 		GameObjectWatchID		parent;
-		long					currentWeaponNode;
+		int32_t					currentWeaponNode;
 
 		static bool				turretsEnabled[MAX_TEAMS];
 

@@ -1397,12 +1397,12 @@ long BattleMech::init (DWORD variantNum)
 	strncpy(name, thisMechName, MAXLEN_MOVER_NAME - 1);
 	name[MAXLEN_MOVER_NAME-1] = '\0';
 
-	mechFile->readLong(10,5,chassisBR);
+	mechFile->readInt(10,5,chassisBR);
 
 	mechFile->readFloat(3,5,tonnage);
 
 
-	mechFile->readLong(5,2,descID);
+	mechFile->readInt(5,2,descID);
 
 	cLoadString( descID, thisMechName, 127 );
 
@@ -1410,7 +1410,7 @@ long BattleMech::init (DWORD variantNum)
 	cLoadString( IDS_MFDMCH_PRINTSTRING, tmp, 256 );
 	sprintf( longName, tmp, thisMechName, tonnage );
 
-	mechFile->readLong( 12, 2, iconPictureIndex );
+	mechFile->readInt( 12, 2, iconPictureIndex );
 
 	unsigned char speed;	
 	mechFile->readUChar(7,5,speed);
@@ -1495,7 +1495,7 @@ long BattleMech::init (DWORD variantNum)
 	//-----------------------------------------------------
 	// Read in the mech's non-weapon/non-ammo components...
 	long realItemNum = 0;
-	memset(ItemLocationToInvLocation,0xff,sizeof(long)*MAX_MOVER_INVENTORY_ITEMS);
+    MemSet(ItemLocationToInvLocation, 0xff);
 
 	//Read in everything but weapons and AMMO
 	for (long curItem = 0;curItem < MAX_MOVER_INVENTORY_ITEMS;curItem++)
@@ -2056,8 +2056,8 @@ void BattleMech::resetComponents (long totalComponents, long *componentList)
 	// Remove all of the components logistics can replace.
 	// Add back in all of the components logistics replaced.
 	// Put in the right body locations using the above table.
-	long localMasterComponentList[MAX_MOVER_INVENTORY_ITEMS];
-	memset(localMasterComponentList,0xff,sizeof(long)*MAX_MOVER_INVENTORY_ITEMS);
+	int32_t localMasterComponentList[MAX_MOVER_INVENTORY_ITEMS];
+    MemSet(localMasterComponentList, 0xff);
 
 	//Copy current itemList to localLists
 	//Remove all logistics replacable components
@@ -2087,7 +2087,7 @@ void BattleMech::resetComponents (long totalComponents, long *componentList)
 	}
 
 	//-----------------------------------------------------------------------------
-	// Reset the weapon Node Data in the mech Appearance..ˆ.
+	// Reset the weapon Node Data in the mech Appearance..ï¿½.
 	appearance->resetWeaponNodes();
 		
 	//--------------------------------------------------------------------------
@@ -2217,7 +2217,7 @@ void BattleMech::resetComponents (long totalComponents, long *componentList)
 	//-----------------------------------------------------
 	// Read in the mech's non-weapon/non-ammo components...
 	long realItemNum = 0;
-	memset(ItemLocationToInvLocation,0xff,sizeof(long)*MAX_MOVER_INVENTORY_ITEMS);
+	MemSet(ItemLocationToInvLocation, 0xff);
 
 	//Read in everything but weapons and AMMO
 	for (long curItem = 0;curItem < MAX_MOVER_INVENTORY_ITEMS;curItem++)
@@ -2701,7 +2701,7 @@ long BattleMech::init (FitIniFile* mechFile) {
 	strncpy(name, thisMechName, MAXLEN_MOVER_NAME - 1);
 	name[MAXLEN_MOVER_NAME-1] = '\0'; 
 
-	result = mechFile->readIdLong("ChassisBR", chassisBR);
+	result = mechFile->readIdInt("ChassisBR", chassisBR);
 	if (result != NO_ERR)
 		chassisBR = 100;
 
@@ -2709,7 +2709,7 @@ long BattleMech::init (FitIniFile* mechFile) {
 	if (result != NO_ERR)
 		return(result);
 
-	result = mechFile->readIdLong("DescIndex", descID);
+	result = mechFile->readIdInt("DescIndex", descID);
 	if (result != NO_ERR)
 		descID = -1;
 
@@ -2723,7 +2723,7 @@ long BattleMech::init (FitIniFile* mechFile) {
 //	if (result != NO_ERR)
 //		return result;
 
-	result = mechFile->readIdLong("Pilot",pilotNum);
+	result = mechFile->readIdInt("Pilot",pilotNum);
 	if (result != NO_ERR)
 		pilotNum = -1;
 		
@@ -9093,7 +9093,7 @@ void BattleMech::CopyTo (MechData *data)
 																													 
 	memcpy(data->rotateValues,rotateValues, sizeof(float) * 6);
 																													 
-	memcpy(data->ItemLocationToInvLocation,ItemLocationToInvLocation, sizeof(long) * MAX_MOVER_INVENTORY_ITEMS);  
+	memcpy(data->ItemLocationToInvLocation,ItemLocationToInvLocation, sizeof(int32_t) * MAX_MOVER_INVENTORY_ITEMS);  
 																													 
 	data->damageAfterDisabled                                   = damageAfterDisabled;                                 
 																													 
@@ -9103,13 +9103,13 @@ void BattleMech::CopyTo (MechData *data)
 	if (appearance)
 		static_cast<Mech3DAppearance *>(appearance)->copyTo(&(data->apData));
 
-	Mover::CopyTo(dynamic_cast<MoverData *>(data));
+	Mover::CopyTo(data);
 }
 
 //---------------------------------------------------------------------------
 void BattleMech::Load (MechData *data)
 {
-	Mover::Load(dynamic_cast<MoverData *>(data));
+	Mover::Load(data);
 
 	chassisClass				                        = data->chassisClass;                                        
 	chassisBR 					                        = data->chassisBR;                                           
@@ -9164,7 +9164,7 @@ void BattleMech::Load (MechData *data)
 																													 
 	memcpy(rotateValues,data->rotateValues, sizeof(float) * 6);
 																													 
-	memcpy(ItemLocationToInvLocation,data->ItemLocationToInvLocation, sizeof(long) * MAX_MOVER_INVENTORY_ITEMS);  
+	memcpy(ItemLocationToInvLocation,data->ItemLocationToInvLocation, sizeof(int32_t) * MAX_MOVER_INVENTORY_ITEMS);  
 																													 
 	damageAfterDisabled                                   = data->damageAfterDisabled;                                 
 																												 

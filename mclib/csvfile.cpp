@@ -747,6 +747,15 @@ long CSVFile::readFloat (DWORD row, DWORD col, float &value)
 }
 
 //---------------------------------------------------------------------------
+long CSVFile::readInt (DWORD row, DWORD col, int &value)
+{
+    long tmp;
+    long rv = readLong(row, col, tmp);
+    value = tmp;
+    return rv;
+}
+
+//---------------------------------------------------------------------------
 long CSVFile::readLong (DWORD row, DWORD col, long &value)
 {
 	long result = seekRowCol(row,col);

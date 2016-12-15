@@ -481,7 +481,7 @@ class GameObjectManager {
 		void update (bool terrain, bool movers, bool other);
 		void updateAppearancesOnly( bool terrain, bool mover, bool other);
 
-		GameObjectPtr get (long handle);
+		GameObjectPtr get (GameObjectHandle handle);
 
 		GameObjectPtr getByWatchID (unsigned long watchID) {
 			if ((watchID > 0) && (watchID < nextWatchID))
