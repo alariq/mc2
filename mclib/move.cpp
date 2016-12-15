@@ -881,13 +881,13 @@ long MissionMap::write (PacketFile* packetFile, long whichPacket) {
 	if (!packetFile)
 		return(NUM_MISSIONMAP_PACKETS);
 
-	long result = packetFile->writePacket(whichPacket++, (unsigned char*)&height, sizeof(long));
+	long result = packetFile->writePacket(whichPacket++, height);
 	if (result <= 0)
 		Fatal(result, " MissionMap.write: Unable to write height packet ");
-	result = packetFile->writePacket(whichPacket++, (unsigned char*)&width, sizeof(long));
+	result = packetFile->writePacket(whichPacket++, width);
 	if (result <= 0)
 		Fatal(result, " MissionMap.write: Unable to write width packet ");
-	result = packetFile->writePacket(whichPacket++, (unsigned char*)&planet, sizeof(long));
+	result = packetFile->writePacket(whichPacket++, planet);
 	if (result <= 0)
 		Fatal(result, " MissionMap.write: Unable to write planet packet ");
 	result = packetFile->writePacket(whichPacket++, (unsigned char*)map, sizeof(MapCell) * height * width);
@@ -1690,35 +1690,35 @@ long GlobalMap::write (PacketFilePtr packetFile, long whichPacket) {
 		return(numPackets);
 
 	unsigned long version = GLOBALMAP_VERSION_NUMBER;
-	long result = packetFile->writePacket(whichPacket++, (unsigned char*)&version, sizeof(long));
+	long result = packetFile->writePacket(whichPacket++, version);
 	if (result <= 0)
 		Fatal(result, " GlobalMap.write: Unable to write version packet ");
-	result = packetFile->writePacket(whichPacket++, (unsigned char*)&height, sizeof(long));
+	result = packetFile->writePacket(whichPacket++, height);
 	if (result <= 0)
 		Fatal(result, " GlobalMap.write: Unable to write height packet ");
-	result = packetFile->writePacket(whichPacket++, (unsigned char*)&width, sizeof(long));
+	result = packetFile->writePacket(whichPacket++, width);
 	if (result <= 0)
 		Fatal(result, " GlobalMap.write: Unable to write width packet ");
 	long sectorDim = SECTOR_DIM;
-	result = packetFile->writePacket(whichPacket++, (unsigned char*)&sectorDim, sizeof(long));
+	result = packetFile->writePacket(whichPacket++, sectorDim);
 	if (result <= 0)
 		Fatal(result, " GlobalMap.write: Unable to write sectorDim packet ");
-	result = packetFile->writePacket(whichPacket++, (unsigned char*)&sectorHeight, sizeof(long));
+	result = packetFile->writePacket(whichPacket++, sectorHeight);
 	if (result <= 0)
 		Fatal(result, " GlobalMap.write: Unable to write sectorHeight packet ");
-	result = packetFile->writePacket(whichPacket++, (unsigned char*)&sectorWidth, sizeof(long));
+	result = packetFile->writePacket(whichPacket++, sectorWidth);
 	if (result <= 0)
 		Fatal(result, " GlobalMap.write: Unable to write sectorWidth packet ");
-	result = packetFile->writePacket(whichPacket++, (unsigned char*)&numAreas, sizeof(long));
+	result = packetFile->writePacket(whichPacket++, numAreas);
 	if (result <= 0)
 		Fatal(result, " GlobalMap.write: Unable to write numAreas packet ");
-	result = packetFile->writePacket(whichPacket++, (unsigned char*)&numDoors, sizeof(long));
+	result = packetFile->writePacket(whichPacket++, numDoors);
 	if (result <= 0)
 		Fatal(result, " GlobalMap.write: Unable to write numDoors packet ");
-	result = packetFile->writePacket(whichPacket++, (unsigned char*)&numDoorInfos, sizeof(long));
+	result = packetFile->writePacket(whichPacket++, numDoorInfos);
 	if (result <= 0)
 		Fatal(result, " GlobalMap.write: Unable to write numDoorInfos packet ");
-	result = packetFile->writePacket(whichPacket++, (unsigned char*)&numDoorLinks, sizeof(long));
+	result = packetFile->writePacket(whichPacket++, numDoorLinks);
 	if (result <= 0)
 		Fatal(result, " GlobalMap.write: Unable to write numDoorLinks packet ");
 

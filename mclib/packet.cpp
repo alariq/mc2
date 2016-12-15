@@ -66,7 +66,6 @@ void PacketFile::atClose (void)
 
 		if (!seekTable)
 		{
-            gosASSERT(0 && "infinite loop heh?"); // sebi: thank you clang
 			while (--currentPacket >= 0)
 			{
 				seek(TABLE_ENTRY(currentPacket));
@@ -85,7 +84,6 @@ void PacketFile::atClose (void)
 		}
 		else
 		{
-            gosASSERT(0 && "infinite loop heh?"); // sebi: thank you clang
 			while (--currentPacket >= 0)
 			{
 				tableEntry = seekTable[currentPacket];
@@ -124,7 +122,7 @@ void PacketFile::atClose (void)
 }
 
 //---------------------------------------------------------------------------
-unsigned int PacketFile::checkSumFile (void)
+int PacketFile::checkSumFile (void)
 {
 	//-----------------------------------------
 	uint32_t currentPosition  = logicalPosition;
@@ -179,11 +177,11 @@ long PacketFile::afterOpen (void)
 	{
 		if (numPackets && !seekTable)
 		{
-			seekTable = (unsigned int*)systemHeap->Malloc(numPackets * sizeof(unsigned int));
+			seekTable = (int*)systemHeap->Malloc(numPackets * sizeof(int));
 			gosASSERT(seekTable != NULL);
 				
-			seek(sizeof(unsigned int)*2);												//File Version & File Length
-			read(MemoryPtr(seekTable),(numPackets*sizeof(unsigned int)));
+			seek(sizeof(int)*2); //File Version & File Length
+			read(MemoryPtr(seekTable),(numPackets*sizeof(int)));
 		}
 	}
 	
@@ -265,7 +263,7 @@ void PacketFile::close (void)
 }
 
 //---------------------------------------------------------------------------
-unsigned int PacketFile::readPacketOffset (unsigned int packet, unsigned int* lastType)
+int PacketFile::readPacketOffset (int packet, int* lastType)
 {
 	unsigned int offset = -1;
 
@@ -284,7 +282,7 @@ unsigned int PacketFile::readPacketOffset (unsigned int packet, unsigned int* la
 }
 
 //---------------------------------------------------------------------------
-unsigned int PacketFile::readPacket (unsigned int packet, unsigned char *buffer)
+int PacketFile::readPacket (int packet, unsigned char *buffer)
 {
 	unsigned int result = 0;
 
@@ -375,9 +373,9 @@ unsigned int PacketFile::readPacket (unsigned int packet, unsigned char *buffer)
 }
 
 //---------------------------------------------------------------------------
-unsigned int PacketFile::readPackedPacket (unsigned int packet, unsigned char *buffer)
+int PacketFile::readPackedPacket (int packet, unsigned char *buffer)
 {
-	unsigned int result = 0;
+	int result = 0;
 
 	if ((packet==-1) || (packet == currentPacket) || (seekPacket(packet) == NO_ERR))
 	{
@@ -412,9 +410,9 @@ unsigned int PacketFile::readPackedPacket (unsigned int packet, unsigned char *b
 }
 
 //---------------------------------------------------------------------------
-unsigned int PacketFile::seekPacket (unsigned int packet)
+int PacketFile::seekPacket (int packet)
 {
-	unsigned int offset, next;
+	int offset, next;
 
 	//sebi: packet is unsigned => always > 0 thank you clang
 	//if (packet < 0)
@@ -491,31 +489,31 @@ void PacketFile::operator -- (void)
 }
 
 //---------------------------------------------------------------------------
-unsigned int PacketFile::getNumPackets (void) 
+int PacketFile::getNumPackets (void) 
 { 
 	return numPackets;
 }
 
 //---------------------------------------------------------------------------
-unsigned int PacketFile::getCurrentPacket (void) 
+int PacketFile::getCurrentPacket (void) 
 { 
 	return currentPacket; 
 }
 
 //---------------------------------------------------------------------------
-inline unsigned int PacketFile::getPacketOffset(void) 
+inline int PacketFile::getPacketOffset(void) 
 { 
 	return packetBase;
 }
 
 //---------------------------------------------------------------------------
-unsigned int PacketFile::getPackedPacketSize (void)
+int PacketFile::getPackedPacketSize (void)
 {
 	return packetSize;
 }
 
 //---------------------------------------------------------------------------
-unsigned int PacketFile::getStorageType (void)
+int PacketFile::getStorageType (void)
 {
 	return packetType;
 }
@@ -535,7 +533,7 @@ void PacketFile::reserve (unsigned int count, bool useCheckSum)
 	usesCheckSum = useCheckSum;
 
 	numPackets = count;
-	unsigned int firstPacketOffset = TABLE_ENTRY(numPackets);
+	int firstPacketOffset = TABLE_ENTRY(numPackets);
 	writeInt(PACKET_FILE_VERSION);
 	writeInt(firstPacketOffset);
 
@@ -550,18 +548,18 @@ void PacketFile::reserve (unsigned int count, bool useCheckSum)
 	// updated in memory and flushed when the file is closed.
 	if (!seekTable)
 	{
-		seekTable = (unsigned int*)systemHeap->Malloc(numPackets * sizeof(unsigned int));
+		seekTable = (int*)systemHeap->Malloc(numPackets * sizeof(int));
    			
    		if (seekTable != NULL)
    		{
-   			seek(sizeof(unsigned int)*2);							//File Version & File Length
-   			read(MemoryPtr(seekTable),(numPackets*sizeof(unsigned int)));
+   			seek(sizeof(int)*2);							//File Version & File Length
+   			read(MemoryPtr(seekTable),(numPackets*sizeof(int)));
    		}
 	}
 }
 
 //---------------------------------------------------------------------------
-unsigned int PacketFile::writePacket (unsigned int packet, MemoryPtr buffer, unsigned int nbytes, unsigned char pType)
+int PacketFile::writePacket (int packet, MemoryPtr buffer, unsigned int nbytes, unsigned char pType)
 {
 	//--------------------------------------------------------
 	// This function writes the packet to the current end
@@ -573,7 +571,7 @@ unsigned int PacketFile::writePacket (unsigned int packet, MemoryPtr buffer, uns
 	// same sized packet each time, if the packet already
 	// exists.  In theory, it could be smaller but the check
 	// right now doesn't allow anything but same size.
-	unsigned int result = 0;
+	int result = 0;
 
 	MemoryPtr workBuffer = NULL;
 
@@ -650,14 +648,14 @@ unsigned int PacketFile::writePacket (unsigned int packet, MemoryPtr buffer, uns
 		seekTable[packet] = SetPacketType(packetBase,packetType);
 	}
 
-	unsigned int *currentEntry = NULL;
+	int *currentEntry = NULL;
 	if (seekTable)
 	{
 		packet++;
 		currentEntry = &(seekTable[packet]);
 	}
 
-	unsigned int tableData = SetPacketType(getLength(),STORAGE_TYPE_NUL);
+	int tableData = SetPacketType(getLength(),STORAGE_TYPE_NUL);
 	while (packet < (numPackets - 1))
 	{
 		if (!seekTable)
@@ -680,7 +678,7 @@ unsigned int PacketFile::writePacket (unsigned int packet, MemoryPtr buffer, uns
 
 #define DEFAULT_MAX_PACKET		65535
 //---------------------------------------------------------------------------
-unsigned int PacketFile::insertPacket (unsigned int packet, MemoryPtr buffer, unsigned int nbytes, unsigned char pType)
+int PacketFile::insertPacket (int packet, MemoryPtr buffer, unsigned int nbytes, unsigned char pType)
 {
 	//--------------------------------------------------------
 	// This function writes the packet to the current end
@@ -690,7 +688,7 @@ unsigned int PacketFile::insertPacket (unsigned int packet, MemoryPtr buffer, un
 	// packet into a new file and basically spend many timeparts doing it.
 	// Necessary for the teditor.
 	// I Love it.	
-	unsigned int result = 0;
+	int result = 0;
 
     gosASSERT(0 && "never true"); // sebi: thank you clang
 	if (packet < 0)
@@ -733,8 +731,8 @@ unsigned int PacketFile::insertPacket (unsigned int packet, MemoryPtr buffer, un
 		else
 		{
 			seekPacket(i);
-			unsigned int storageType = getStorageType();
-			unsigned int packetSize = getPacketSize();
+			int storageType = getStorageType();
+			int packetSize = getPacketSize();
 			if (packetSize >= DEFAULT_MAX_PACKET)
 			{
 				//----------------------------------------------------
@@ -772,7 +770,7 @@ unsigned int PacketFile::insertPacket (unsigned int packet, MemoryPtr buffer, un
 }
 
 //---------------------------------------------------------------------------
-unsigned int PacketFile::writePacket (unsigned int packet, MemoryPtr buffer)
+int PacketFile::writePacket (int packet, MemoryPtr buffer)
 {
 	//--------------------------------------------------------
 	// This function replaces the packet with the contents
@@ -784,7 +782,7 @@ unsigned int PacketFile::writePacket (unsigned int packet, MemoryPtr buffer)
 	// to exactly the same length.  Returns NO_ERR if packet
 	// written successfully.  Otherwise returns error.
 	
-	unsigned int result = 0;
+	int result = 0;
 
     gosASSERT(0 && "first part of condition is never true"); // sebi: thank you clang
 	if ((packet < 0) || (packet >= numPackets))
