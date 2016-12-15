@@ -194,7 +194,7 @@ const char AmmoConservationModifiers[2][2] = {
 };
 */
 
-const char* SkillsTable[NUM_SKILLS] = {
+static const char* SkillsTable[NUM_SKILLS] = {
 	"Piloting",
 	"Sensors",
 	"Gunnery"
@@ -1128,7 +1128,7 @@ long MechWarrior::init (FitIniFile* warriorFile) {
 	result = warriorFile->seekBlock("OriginalSkills");
 	if (result == NO_ERR)
 	{
-		for (i = 0; i < NUM_SPECIALTY_SKILLS; i++) 
+		for (i = 0; i < NUM_SKILLS; i++) 
 		{
 			result = warriorFile->readIdChar(SkillsTable[i], originalSkills[i]);
 			if (result != NO_ERR)
