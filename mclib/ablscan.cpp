@@ -263,9 +263,9 @@ const char* TokenStrings[NUM_TOKENS] = {
 char			curChar;
 TokenCodeType	curToken;
 Literal			curLiteral;
-long			level = 0;
-long			lineNumber = 0;
-long			FileNumber = 0;
+int32_t         level = 0;
+int32_t         lineNumber = 0;
+int32_t         FileNumber = 0;
 ABLFile*		sourceFile = NULL;
 bool			printFlag = true;
 bool			blockFlag = false;
@@ -288,8 +288,8 @@ char*			tokenp = tokenString;
 long			digitCount = 0;
 bool			countError = false;
 
-long			pageNumber = 0;
-long			lineCount = MAX_LINES_PER_PAGE;
+int             pageNumber = 0;
+int             lineCount = MAX_LINES_PER_PAGE;
 
 char			sourceName[MAXLEN_FILENAME];
 char			date[LEN_DATESTRING];
@@ -308,11 +308,13 @@ long (*ABLFile::openCB) (void** file, const char* fName) = NULL;
 long (*ABLFile::closeCB) (void** file) = NULL;
 bool (*ABLFile::eofCB) (void* file) = NULL;
 long (*ABLFile::readCB) (void* file, unsigned char* buffer, long length) = NULL;
+int32_t (*ABLFile::readIntCB) (void* file) = NULL;
 long (*ABLFile::readLongCB) (void* file) = NULL;
 long (*ABLFile::readStringCB) (void* file, unsigned char* buffer) = NULL;
 long (*ABLFile::readLineExCB) (void* file, unsigned char* buffer, long maxLength) = NULL;
 long (*ABLFile::writeCB) (void* file, unsigned char* buffer, long length) = NULL;
 long (*ABLFile::writeByteCB) (void* file, unsigned char byte) = NULL;
+long (*ABLFile::writeIntCB) (void* file, int32_t val) = NULL;
 long (*ABLFile::writeLongCB) (void* file, long value) = NULL;
 long (*ABLFile::writeStringCB) (void* file, const char* buffer) = NULL;
 
@@ -405,6 +407,15 @@ long ABLFile::read (unsigned char* buffer, long length) {
 
 //-----------------------------------------------------------------------------
 
+int32_t ABLFile::readInt (void) {
+
+	if (file)
+		return(readIntCB(file));
+	return(-1);
+}
+
+//-----------------------------------------------------------------------------
+
 long ABLFile::readLong (void) {
 
 	if (file)
@@ -445,6 +456,15 @@ long ABLFile::writeByte (unsigned char val) {
 
 	if (file)
 		return(writeByteCB(file, val));
+	return(0);
+}
+
+//-----------------------------------------------------------------------------
+
+long ABLFile::writeInt (int32_t val) {
+
+	if (file)
+		return(writeIntCB(file, val));
 	return(0);
 }
 

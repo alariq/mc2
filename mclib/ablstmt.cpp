@@ -500,7 +500,7 @@ void statement (void) {
 			// First, do we have an assignment statement or a function call?		
 			searchAndFindAllSymTables(IdPtr);
 		
-			if ((IdPtr->defn.key == DFN_FUNCTION)/* || (IdPtr->defn.key == DFN_MODULE)*/) {
+			if (IdPtr->defn.key == DFN_FUNCTION/* || (IdPtr->defn.key == DFN_MODULE)*/) {
 				RoutineKey key = IdPtr->defn.info.routine.key;
 				if ((key == RTN_ASSERT) || (key == RTN_PRINT) || (key == RTN_CONCAT)) {
 					bool uncrunch = ((key == RTN_ASSERT) && !AssertEnabled) ||

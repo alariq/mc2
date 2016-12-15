@@ -54,16 +54,16 @@
 extern long				MaxBreaks;
 extern long				MaxWatches;
 extern DebuggerPtr		debugger;
-extern long				NumModules;
+extern int32_t          NumModules;
 extern ModuleEntryPtr	ModuleRegistry;
 extern ABLModulePtr*	ModuleInstanceRegistry;
-extern long				MaxModules;
 extern ABLModulePtr*	LibraryInstanceRegistry;
-extern long				MaxLibraries;
-extern long				NumModulesRegistered;
-extern long				NumModuleInstances;
-extern long				MaxWatchesPerModule;
-extern long				MaxBreakPointsPerModule;
+extern int32_t          MaxLibraries;
+extern int32_t          MaxModules;
+extern int32_t          NumModulesRegistered;
+extern int32_t          NumModuleInstances;
+extern int32_t          MaxWatchesPerModule;
+extern int32_t          MaxBreakPointsPerModule;
 extern long				MaxCodeBufferSize;
 extern ABLModulePtr		CurModule;
 extern ABLModulePtr		CurLibrary;
@@ -93,9 +93,9 @@ extern bool				AssertEnabled;
 extern bool				IncludeDebugInfo;
 extern bool				ProfileABL;
 extern bool				Crunch;
-extern long				level;
-extern long				lineNumber;
-extern long				FileNumber;
+extern int32_t          level;
+extern int32_t		    lineNumber;
+extern int32_t		    FileNumber;
 extern ABLFile*		sourceFile;
 extern bool				printFlag;
 extern bool				blockFlag;
@@ -123,8 +123,6 @@ extern bool				ExitFromTacOrder;
 
 extern long				dummyCount;
 
-extern long				lineNumber;
-extern long				FileNumber;
 extern long				errorCount;
 extern int              execStatementCount;
 extern long				NumSourceFiles;
@@ -133,7 +131,6 @@ extern char				SourceFiles[MAX_SOURCE_FILES][MAXLEN_FILENAME];
 extern TokenCodeType	curToken;
 extern char				wordString[];
 extern SymTableNodePtr	symTableDisplay[];
-extern long				level;
 extern bool				blockFlag;
 extern BlockType		blockType;
 extern bool				printFlag;
@@ -174,11 +171,9 @@ extern StackItemPtr		StaticDataPtr;
 extern StackItem		returnValue;
 
 extern ModuleEntryPtr	ModuleRegistry;
-extern long				MaxModules;
-extern long				NumModulesRegistered;
-extern long				MaxStaticVariables;
-extern long				NumStaticVariables;
-extern long				NumSourceFiles;
+extern long		        MaxStaticVariables;
+extern long		        NumStaticVariables;
+extern long		        NumSourceFiles;
 
 extern bool				IncludeDebugInfo;
 extern bool				AssertEnabled;
@@ -190,7 +185,7 @@ extern DebuggerPtr		debugger;
 bool					ABLenabled = false;
 char					buffer[MAXLEN_PRINTLINE];
 
-extern long				CallStackLevel;
+extern int32_t          CallStackLevel;
 extern bool				SkipOrder;
 
 extern ABLModulePtr		CurFSM;
@@ -198,8 +193,8 @@ extern bool				NewStateSet;
 
 extern void transState (SymTableNodePtr newState);
 
-long					numLibrariesLoaded = 0;
-long					NumExecutions = 0;
+int32_t                 numLibrariesLoaded = 0;
+int32_t                 NumExecutions = 0;
 
 void* (*ABLSystemMallocCallback) (unsigned long memSize) = NULL;
 void* (*ABLStackMallocCallback) (unsigned long memSize) = NULL;
@@ -352,11 +347,13 @@ void ABLi_init (unsigned long runtimeStackSize,
 				long (*fileCloseCB) (void** file),
 				bool (*fileEofCB) (void* file),
 				long (*fileReadCB) (void* file, unsigned char* buffer, long length),
+				int32_t (*fileReadIntCB) (void* file),
 				long (*fileReadLongCB) (void* file),
 				long (*fileReadStringCB) (void* file, unsigned char* buffer),
 				long (*fileReadLineExCB) (void* file, unsigned char* buffer, long maxLength),
 				long (*fileWriteCB) (void* file, unsigned char* buffer, long length),
 				long (*fileWriteByteCB) (void* file, unsigned char byte),
+				long (*fileWriteIntCB) (void* file, int32_t byte),
 				long (*fileWriteLongCB) (void* file, long value),
 				long (*fileWriteStringCB) (void* file, const char* buffer),
 				void (*debuggerPrintCallback) (const char* s),
@@ -395,11 +392,13 @@ profile = true;
 	ABLFile::closeCB = fileCloseCB;
 	ABLFile::eofCB = fileEofCB;
 	ABLFile::readCB = fileReadCB;
+	ABLFile::readIntCB = fileReadIntCB;
 	ABLFile::readLongCB = fileReadLongCB;
 	ABLFile::readStringCB = fileReadStringCB;
 	ABLFile::readLineExCB = fileReadLineExCB;
 	ABLFile::writeCB = fileWriteCB;
 	ABLFile::writeByteCB = fileWriteByteCB;
+	ABLFile::writeIntCB = fileWriteIntCB;
 	ABLFile::writeLongCB = fileWriteLongCB;
 	ABLFile::writeStringCB = fileWriteStringCB;
 
@@ -554,7 +553,7 @@ profile = true;
 	aFile->create("ablFile.txt");
 	aFile->writeString("Testing writeString");
 	aFile->writeByte(NULL);
-	aFile->writeLong(100);
+	aFile->writeInt(100);
 	aFile->close();
 	delete aFile;
 	aFile = NULL;
@@ -563,7 +562,7 @@ profile = true;
 	ABLFile* bFile = new ABLFile;
 	bFile->open("ablFile.txt");
 	bFile->readString(s);
-	long val = bFile->readLong();
+	int32_t val = bFile->readInt();
 	bFile->close();
 	delete bFile;
 	bFile = NULL;

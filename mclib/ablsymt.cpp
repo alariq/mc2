@@ -36,7 +36,7 @@
 //----------
 // EXTERNALS
 
-extern long				level;		// current nesting/scope level
+extern int32_t      level;		// current nesting/scope level
 
 //--------
 // GLOBALS

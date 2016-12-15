@@ -82,12 +82,12 @@ extern ModuleEntryPtr	ModuleRegistry;
 extern ABLModulePtr*	ModuleInstanceRegistry;
 extern ABLModulePtr		CurModule;
 extern ABLModulePtr		CurLibrary;
-extern long				NumStateTransitions;
+extern int32_t          NumStateTransitions;
 
 extern TokenCodeType	curToken;
-extern long				lineNumber;
-extern long				FileNumber;
-extern long				level;
+extern int32_t          lineNumber;
+extern int32_t          FileNumber;
+extern int32_t          level;
 extern TypePtr			IntegerTypePtr;
 extern TypePtr			CharTypePtr;
 extern TypePtr			RealTypePtr;

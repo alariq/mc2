@@ -19,6 +19,7 @@
 #endif
 
 #include<cstddef>
+#include<stdint.h>
 
 //***************************************************************************
 
@@ -171,11 +172,13 @@ class ABLFile {
 		static long (*closeCB) (void** file);
 		static bool (*eofCB) (void* file);
 		static long (*readCB) (void* file, unsigned char* buffer, long length);
+		static int32_t (*readIntCB) (void* file);
 		static long (*readLongCB) (void* file);
 		static long (*readStringCB) (void* file, unsigned char* buffer);
 		static long (*readLineExCB) (void* file, unsigned char* buffer, long maxLength);
 		static long (*writeCB) (void* file, unsigned char* buffer, long length);
 		static long (*writeByteCB) (void* file, unsigned char byte);
+		static long (*writeIntCB) (void* file, int32_t value);
 		static long (*writeLongCB) (void* file, long value);
 		static long (*writeStringCB) (void* file, const char* buffer);
 
@@ -215,6 +218,8 @@ class ABLFile {
 
 		long read (unsigned char* buffer, long length);
 
+		int32_t readInt (void);
+
 		long readLong (void);
 
 		long readString (unsigned char* buffer);
@@ -224,6 +229,8 @@ class ABLFile {
 		long write (unsigned char* buffer, long length);
 
 		long writeByte (unsigned char val);
+
+		long writeInt (int32_t val);
 
 		long writeLong (long val);
 

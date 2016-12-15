@@ -43,14 +43,14 @@
 //----------
 // EXTERNALS
 
-extern long				level;
+extern int32_t          level;
 extern long				CallStackLevel;
 extern int              execLineNumber;
 extern int              execStatementCount;
 extern char*			codeSegmentPtr;
 extern char*			statementStartPtr;
 extern TokenCodeType	codeToken;
-extern int              NumExecutions;
+extern int32_t          NumExecutions;
 
 extern StackItem*		stack;
 extern StackItemPtr		tos;

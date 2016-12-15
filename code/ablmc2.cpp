@@ -6494,6 +6494,13 @@ long ablFileReadCB (void* file, unsigned char* buffer, long length) {
 
 //-----------------------------------------------------------------------------
 
+int32_t ablFileReadIntCB (void* file) {
+
+	return(((FilePtr)file)->readInt());
+}
+
+//-----------------------------------------------------------------------------
+
 long ablFileReadLongCB (void* file) {
 
 	return(((FilePtr)file)->readLong());
@@ -6525,6 +6532,13 @@ long ablFileWriteCB (void* file, unsigned char* buffer, long length) {
 long ablFileWriteByteCB (void* file, unsigned char byte) {
 
 	return(((FilePtr)file)->writeByte(byte));
+}
+
+//-----------------------------------------------------------------------------
+
+long ablFileWriteIntCB (void* file, int32_t value) {
+
+	return(((FilePtr)file)->writeInt(value));
 }
 
 //-----------------------------------------------------------------------------
@@ -6656,11 +6670,13 @@ void initABL (void) {
 			  ablFileCloseCB,
 			  ablFileEofCB,
 			  ablFileReadCB,
+			  ablFileReadIntCB,
 			  ablFileReadLongCB,
 			  ablFileReadStringCB,
 			  ablFileReadLineExCB,
 			  ablFileWriteCB,
 			  ablFileWriteByteCB,
+			  ablFileWriteIntCB,
 			  ablFileWriteLongCB,
 			  ablFileWriteStringCB,
 			  ablDebuggerPrintCallback,

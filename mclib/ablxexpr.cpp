@@ -42,7 +42,7 @@
 //----------
 // EXTERNALS
 
-extern long				level;
+extern int32_t          level;
 extern char*			codeSegmentPtr;
 extern TokenCodeType	codeToken;
 
@@ -176,7 +176,7 @@ TypePtr execVariable (SymTableNodePtr idPtr, UseType use) {
 
 	//-----------------------------------------------------
 	// Now, push the address of the variable's data area...
-	if ((typePtr->form == FRM_ARRAY) /*|| (typePtr->form == FRM_RECORD)*/) {
+	if (typePtr->form == FRM_ARRAY /*|| (typePtr->form == FRM_RECORD)*/) {
 		//pushInteger(typePtr->size);
 		pushAddress((Address)dataPtr->address);
 		}
@@ -189,7 +189,7 @@ TypePtr execVariable (SymTableNodePtr idPtr, UseType use) {
 	// If there is a subscript (or field identifier, if records are being used in ABL)
 	// then modify the address to point to the proper element of the array (or record)...
 	getCodeToken();
-	while ((codeToken == TKN_LBRACKET) /*|| (codeTOken == TKN_PERIOD)*/) {
+	while (codeToken == TKN_LBRACKET /*|| (codeTOken == TKN_PERIOD)*/) {
 		//if (codeToken == TKN_LBRACKET)
 			typePtr = execSubscripts(typePtr);
 		//else if (codeToken == TKN_PERIOD)

@@ -39,7 +39,8 @@
 //----------
 // EXTERNALS
 
-extern long				level;
+extern int32_t          level;
+extern int32_t          lineNumber;
 extern int              execLineNumber;
 	//extern long				execStatementCount;
 extern TokenCodeType	codeToken;
@@ -57,7 +58,6 @@ extern SymTableNodePtr	symTableDisplay[];
 extern long				errorCount;
 extern char				curChar;
 extern TokenCodeType	curToken;
-extern long				lineNumber;
 extern Literal			curLiteral;
 extern long				bufferOffset;
 extern char				sourceBuffer[MAXLEN_SOURCELINE];
@@ -74,11 +74,11 @@ extern Type				DummyType;
 
 extern ModuleEntryPtr	ModuleRegistry;
 extern ABLModulePtr*	ModuleInstanceRegistry;
-extern long				MaxModules;
-extern long				NumModulesRegistered;
-extern long				NumModuleInstances;
-extern long				MaxWatchesPerModule;
-extern long				MaxBreakPointsPerModule;
+extern int32_t				MaxModules;
+extern int32_t				NumModulesRegistered;
+extern int32_t				NumModuleInstances;
+extern int32_t				MaxWatchesPerModule;
+extern int32_t				MaxBreakPointsPerModule;
 extern char*			TokenStrings[NUM_TOKENS];
 
 

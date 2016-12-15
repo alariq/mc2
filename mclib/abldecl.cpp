@@ -42,7 +42,7 @@ extern char					wordString[];
 extern Literal				curLiteral;
 
 extern SymTableNodePtr		SymTableDisplay[];
-extern long					level;
+extern int32_t              level;
 
 extern TypePtr				IntegerTypePtr;
 extern TypePtr				CharTypePtr;

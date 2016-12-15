@@ -29,9 +29,9 @@ inline signed int double2long(double _in)
 //----------
 // EXTERNALS
 
-extern long				level;
+extern int32_t          level;
+extern int32_t          FileNumber;
 extern int              execLineNumber;
-extern long				FileNumber;
 extern char*			codeSegmentPtr;
 extern TokenCodeType	codeToken;
 extern StackItem*		stack;

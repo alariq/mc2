@@ -32,8 +32,8 @@
 // EXTERNALS
 extern char*		tokenp;
 extern int          execLineNumber;
-extern int          lineNumber;
-extern long			FileNumber;
+extern int32_t      lineNumber;
+extern int32_t      FileNumber;
 extern char			SourceFiles[MAX_SOURCE_FILES][MAXLEN_FILENAME];
 extern ABLModulePtr	CurModule;
 extern char			wordString[];

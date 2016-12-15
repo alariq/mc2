@@ -52,14 +52,15 @@ ABLModulePtr ABLi_loadLibrary (const char* sourceFileName,
 
 //-------------------
 // EXTERNAL variables
-extern long				lineNumber;
+extern int32_t          level;
+extern int32_t          lineNumber;
+extern int32_t          FileNumber;
 extern long				errorCount;
 extern int              execStatementCount;
 
 extern TokenCodeType	curToken;
 extern char				wordString[];
 extern SymTableNodePtr	symTableDisplay[];
-extern long				level;
 extern bool				blockFlag;
 extern BlockType		blockType;
 extern bool				printFlag;
@@ -67,7 +68,6 @@ extern SymTableNodePtr	CurModuleIdPtr;
 extern SymTableNodePtr	CurRoutineIdPtr;
 extern long				CurModuleHandle;
 extern bool				CallModuleInit;
-extern long				FileNumber;
 
 extern Type				DummyType;
 extern char*			codeBuffer;
@@ -112,28 +112,28 @@ extern long*			EternalVariablesSizes;
 
 //-----------------------
 // CLASS static variables
-long				NumModules = 0;
+int32_t             NumModules = 0;
 
 //-----------------
 // GLOBAL variables
 ModuleEntryPtr		ModuleRegistry = NULL;
 ABLModulePtr*		ModuleInstanceRegistry = NULL;
-long				MaxModules = 0;
-long				NumModulesRegistered = 0;
-long				NumModuleInstances = 0;
-long				MaxWatchesPerModule = 20;
-long				MaxBreakPointsPerModule = 20;
+int32_t				MaxModules = 0;
+int32_t				NumModulesRegistered = 0;
+int32_t				NumModuleInstances = 0;
+int32_t				MaxWatchesPerModule = 20;
+int32_t				MaxBreakPointsPerModule = 20;
 ABLModulePtr		CurModule = NULL;
 ABLModulePtr		CurFSM = NULL;
 ABLModulePtr		CurLibrary = NULL;
 ABLModulePtr*		LibraryInstanceRegistry = NULL;
-long				NumStateTransitions = 0;
-long				MaxLibraries = 0;
+int32_t				NumStateTransitions = 0;
+int32_t				MaxLibraries = 0;
 bool				NewStateSet = false;
-extern long			numLibrariesLoaded;
+extern int32_t	    numLibrariesLoaded;
 
-extern long			NumExecutions;
-long				CallStackLevel = 0;
+extern int32_t	    NumExecutions;
+int32_t				CallStackLevel = 0;
 
 #define	MAX_PROFILE_LINELEN		128
 #define MAX_PROFILE_LINES		256
@@ -145,6 +145,8 @@ ABLFile* ProfileLog = NULL;
 long ProfileLogFunctionTimeLimit = 5;
 
 UserFilePtr			UserFile::files[MAX_USER_FILES];
+
+static int32_t ABL_ENV_MARK = 999;
 
 //***************************************************************************
 // PROFILING LOG routines
@@ -569,7 +571,7 @@ void ABLModule::write (ABLFile* moduleFile) {
 
 	moduleFile->writeString(name);
 	moduleFile->writeByte('\0');
-	moduleFile->writeLong(handle);
+	moduleFile->writeInt(handle);
 	if (prevState == NULL)
 		moduleFile->writeString("NULLPrevState");
 	else
@@ -580,7 +582,7 @@ void ABLModule::write (ABLFile* moduleFile) {
 	else
 		moduleFile->writeString(state->name);
 	moduleFile->writeByte('\0');
-	moduleFile->writeLong(initCalled ? 1 : 0);
+	moduleFile->writeInt(initCalled ? 1 : 0);
 	long numStatics = ModuleRegistry[handle].numStaticVars;
 	long* sizeList = ModuleRegistry[handle].sizeStaticVars;
 	for (long i = 0; i < numStatics; i++) {
@@ -604,13 +606,13 @@ void ABLModule::read (ABLFile* moduleFile) {
 	if (fresh) {
 		id = NumModules++;
 		moduleFile->readString((unsigned char*)name);
-		handle = moduleFile->readLong();
+		handle = moduleFile->readInt();
 		staticData = NULL;
 		}
 	else {
 		char tempName[1024];
 		moduleFile->readString((unsigned char*)tempName);
-		long ignore = moduleFile->readLong();
+		long ignore = moduleFile->readInt();
 	}
 
 	char stateName[256];
@@ -626,7 +628,7 @@ void ABLModule::read (ABLFile* moduleFile) {
 	if (strcmp(stateName, "NULLState"))
 		state = findState(stateName);
 
-	bool savedInitCalled = (moduleFile->readLong() == 1);
+	bool savedInitCalled = (moduleFile->readInt() == 1);
 
 	long numStatics = ModuleRegistry[handle].numStaticVars;
 	if (numStatics) {
@@ -1400,14 +1402,14 @@ void ABLModule::destroy (void) {
 
 void ABLi_saveEnvironment (ABLFile* ablFile) {
 
-	ablFile->writeLong(numLibrariesLoaded);
-	ablFile->writeLong(NumModulesRegistered);
-	ablFile->writeLong(NumModules);
+	ablFile->writeInt(numLibrariesLoaded);
+	ablFile->writeInt(NumModulesRegistered);
+	ablFile->writeInt(NumModules);
 	for (long i = 0; i < NumModulesRegistered; i++) {
 		ablFile->writeString(ModuleRegistry[i].fileName);
 		ablFile->writeByte('\0');
 	}
-	ablFile->writeLong(999);
+	ablFile->writeInt(ABL_ENV_MARK);
 	for (int i = 0; i < eternalOffset; i++) {
 		StackItemPtr dataPtr = (StackItemPtr)stack + i;
 		if (EternalVariablesSizes[i] > 0)
@@ -1426,9 +1428,9 @@ void ABLi_saveEnvironment (ABLFile* ablFile) {
 
 void ABLi_loadEnvironment (ABLFile* ablFile, bool malloc) {
 
-	long numLibs = ablFile->readLong();
-	long numModsRegistered = ablFile->readLong();
-	long numMods = ablFile->readLong();
+	long numLibs = ablFile->readInt();
+	long numModsRegistered = ablFile->readInt();
+	long numMods = ablFile->readInt();
 
 	for (int i = 0; i < numLibs; i++) {
 		unsigned char fileName[1024];
@@ -1467,7 +1469,14 @@ void ABLi_loadEnvironment (ABLFile* ablFile, bool malloc) {
 			}
 		}
 	}
-	long mark = ablFile->readLong();
+
+	int mark = ablFile->readInt();
+    if(mark != ABL_ENV_MARK) {
+        char err[255];
+        sprintf(err, "ABLi_loadEnvironment: mark vlue is not as expected (%d), actual: %d\n", ABL_ENV_MARK, mark);
+        ABL_Fatal(0, err);
+    }
+
 	for (int i = 0; i < eternalOffset; i++) {
 		StackItemPtr dataPtr = (StackItemPtr)stack + i;
 		if (EternalVariablesSizes[i] > 0)
