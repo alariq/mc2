@@ -40,3 +40,4 @@ vidcard.csv
 *.old
 longpath.dbg
 tmp/
+cov-int/
