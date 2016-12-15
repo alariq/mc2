@@ -40,4 +40,12 @@ vidcard.csv
 *.old
 longpath.dbg
 tmp/
+
+# Coverity
 cov-int/
+
+# CMake Tools VS Code extension
+CMakeToolsMeta.in.txt
+CMakeToolsMeta.txt
+compile_commands.json
+
