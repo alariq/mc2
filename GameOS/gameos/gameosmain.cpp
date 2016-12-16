@@ -13,7 +13,10 @@
 #include <signal.h>
 
 extern void gos_CreateRenderer(int w, int h);
+extern void gos_RendererBeginFrame();
 extern void gos_RendererEndFrame();
+extern void gos_RenderUpdateDebugInput();
+
 extern bool gosExitGameOS();
 
 extern bool gos_CreateAudio();
@@ -21,6 +24,7 @@ extern void gos_DestroyAudio();
 
 static bool g_exit = false;
 static bool g_focus_lost = false;
+bool g_debug_draw_calls = false;
 static camera g_camera;
 static glsl_program* g_myprogram = NULL;
 
@@ -32,6 +36,10 @@ static void handle_key_down( SDL_Keysym* keysym ) {
         case SDLK_ESCAPE:
             if(keysym->mod & KMOD_RALT)
                 g_exit = true;
+            break;
+        case 'd':
+            if(keysym->mod & KMOD_RALT)
+                g_debug_draw_calls = true;
             break;
     }
 }
@@ -48,7 +56,7 @@ static void process_events( void ) {
                 g_focus_lost = false;
             }
         }
-		
+
         switch( event.type ) {
         case SDL_KEYDOWN:
             handle_key_down( &event.key.keysym );
@@ -108,8 +116,6 @@ static void draw_screen( void )
 
     glViewport(0, 0, w, h);
 
-    // flush all content to screen
-    //gos_RendererEndFrame();
 
 #if 0
     gos_VERTEX q[4];
@@ -139,7 +145,10 @@ static void draw_screen( void )
     // TODO: reset all states to sane defaults!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     glDepthMask(GL_TRUE);
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
+
+    gos_RendererBeginFrame();
     Environment.UpdateRenderers();
+    gos_RendererEndFrame();
 
 	//mat4 viewproj = proj*viewM;
 	//g_myprogram->setMat4("ModelViewProjectionMatrix", (const float*)viewproj);
@@ -212,7 +221,12 @@ int main(int argc, char** argv)
         ts.tv_sec = 0;
         ts.tv_nsec = 10*1000000; // 10msec
         nanosleep(&ts, NULL);
-        Environment.DoGameLogic();
+
+        if(g_debug_draw_calls) {
+            gos_RenderUpdateDebugInput();
+        } else {
+            Environment.DoGameLogic();
+        }
 
         process_events();
 

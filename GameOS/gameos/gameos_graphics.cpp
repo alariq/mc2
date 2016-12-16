@@ -677,10 +677,23 @@ class gosRenderer {
         void drawIndexedTris(gos_VERTEX* vertices, int num_vertices, WORD* indices, int num_indices);
         void drawText(const char* text);
 
+        void beginFrame();
+        void endFrame();
+
         void init();
         void flush();
 
+        // debug interface
+        void setNumDrawCallsToDraw(uint32_t num) { num_draw_calls_to_draw_ = num; }
+        uint32_t getNumDrawCallsToDraw() { return num_draw_calls_to_draw_; }
+        void setBreakOnDrawCall(bool b_break) { break_on_draw_call_ = b_break; }
+        bool getBreakOnDrawCall() { return break_on_draw_call_; }
+        void setBreakDrawCall(uint32_t num) { break_draw_call_num_ = num; }
+
     private:
+
+        bool beforeDrawCall();
+        void afterDrawCall();
 
         // render target size
         int width_;
@@ -741,6 +754,12 @@ class gosRenderer {
         gosShaderMaterial* basic_tex_material_;
         gosShaderMaterial* text_material_;
 
+        //
+        uint32_t num_draw_calls_;
+        uint32_t num_draw_calls_to_draw_;
+        bool break_on_draw_call_;
+        uint32_t break_draw_call_num_;
+
 };
 
 void gosRenderer::init() {
@@ -767,6 +786,11 @@ void gosRenderer::init() {
     gosASSERT(basic_tex_material_);
     text_material_ = gosShaderMaterial::load("gos_text");
     gosASSERT(text_material_);
+
+    num_draw_calls_ = 0;
+    num_draw_calls_to_draw_ = 0;
+    break_on_draw_call_ = false;
+    break_draw_call_num_ = 0;
 }
 
 void gosRenderer::initRenderStates() {
@@ -889,8 +913,33 @@ void gosRenderer::applyRenderStates() {
 
 }
 
+void gosRenderer::beginFrame()
+{
+    num_draw_calls_ = 0;
+}
+
+void gosRenderer::endFrame()
+{
+}
+
+bool gosRenderer::beforeDrawCall()
+{
+    num_draw_calls_++;
+    if(break_draw_call_num_ == num_draw_calls_ && break_on_draw_call_) {
+        PAUSE(("Draw call %d break\n", num_draw_calls_ - 1));
+    }
+
+    return (num_draw_calls_ > num_draw_calls_to_draw_) && num_draw_calls_to_draw_ != 0;
+}
+
+void gosRenderer::afterDrawCall()
+{
+}
+
 void gosRenderer::drawQuads(gos_VERTEX* vertices, int count) {
     gosASSERT(vertices);
+
+    if(beforeDrawCall()) return;
 
     int num_quads = count / 4;
     int num_vertices = num_quads * 6;
@@ -922,10 +971,14 @@ void gosRenderer::drawQuads(gos_VERTEX* vertices, int count) {
         curStates_[gos_State_Texture]!=0 ? basic_tex_material_ : basic_material_;
     quads_->draw(mat);
     quads_->rewind();
+
+    afterDrawCall();
 }
 
 void gosRenderer::drawLines(gos_VERTEX* vertices, int count) {
     gosASSERT(vertices);
+
+    if(beforeDrawCall()) return;
 
     if(lines_->getNumVertices() + count > lines_->getVertexCapacity()) {
         applyRenderStates();
@@ -940,10 +993,14 @@ void gosRenderer::drawLines(gos_VERTEX* vertices, int count) {
     applyRenderStates();
     lines_->draw(basic_material_);
     lines_->rewind();
+
+    afterDrawCall();
 }
 
 void gosRenderer::drawPoints(gos_VERTEX* vertices, int count) {
     gosASSERT(vertices);
+
+    if(beforeDrawCall()) return;
 
     if(points_->getNumVertices() + count > points_->getVertexCapacity()) {
         applyRenderStates();
@@ -958,12 +1015,16 @@ void gosRenderer::drawPoints(gos_VERTEX* vertices, int count) {
     applyRenderStates();
     points_->draw(basic_material_);
     points_->rewind();
+
+    afterDrawCall();
 }
 
 void gosRenderer::drawTris(gos_VERTEX* vertices, int count) {
     gosASSERT(vertices);
 
     gosASSERT((count % 3) == 0);
+
+    if(beforeDrawCall()) return;
 
     if(tris_->getNumVertices() + count > tris_->getVertexCapacity()) {
         applyRenderStates();
@@ -982,12 +1043,16 @@ void gosRenderer::drawTris(gos_VERTEX* vertices, int count) {
         curStates_[gos_State_Texture]!=0 ? basic_tex_material_ : basic_material_;
     tris_->draw(mat);
     tris_->rewind();
+
+    afterDrawCall();
 }
 
 void gosRenderer::drawIndexedTris(gos_VERTEX* vertices, int num_vertices, WORD* indices, int num_indices) {
     gosASSERT(vertices && indices);
 
     gosASSERT((num_indices % 3) == 0);
+
+    if(beforeDrawCall()) return;
 
     bool not_enough_vertices = indexed_tris_->getNumVertices() + num_vertices > indexed_tris_->getVertexCapacity();
     bool not_enough_indices = indexed_tris_->getNumIndices() + num_indices > indexed_tris_->getIndexCapacity();
@@ -1010,6 +1075,8 @@ void gosRenderer::drawIndexedTris(gos_VERTEX* vertices, int num_vertices, WORD* 
         curStates_[gos_State_Texture]!=0 ? basic_tex_material_ : basic_material_;
     indexed_tris_->drawIndexed(mat);
     indexed_tris_->rewind();
+
+    afterDrawCall();
 }
 
 static int get_next_break(const char* text) {
@@ -1032,6 +1099,8 @@ static int get_next_break(const char* text) {
 
 void gosRenderer::drawText(const char* text) {
     gosASSERT(text);
+
+    if(beforeDrawCall()) return;
 
     const int count = (int)strlen(text);  
 /*
@@ -1182,6 +1251,8 @@ void gosRenderer::drawText(const char* text) {
     text_->rewind();
 
     setRenderState(gos_State_Texture, prev_texture);
+
+    afterDrawCall();
 }
 
 void gosRenderer::flush()
@@ -1196,9 +1267,14 @@ void gos_CreateRenderer(int w, int h) {
     g_gos_renderer->init();
 }
 
+void gos_RendererBeginFrame() {
+    gosASSERT(g_gos_renderer);
+    g_gos_renderer->beginFrame();
+}
+
 void gos_RendererEndFrame() {
     gosASSERT(g_gos_renderer);
-    g_gos_renderer->flush();
+    g_gos_renderer->endFrame();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -1412,7 +1488,7 @@ void __stdcall gos_RenderIndexedArray( gos_VERTEX* pVertexArray, DWORD NumberVer
 
 void __stdcall gos_RenderIndexedArray( gos_VERTEX_2UV* pVertexArray, DWORD NumberVertices, WORD* lpwIndices, DWORD NumberIndices )
 {
- //   gosASSERT(0 && "not implemented");
+   gosASSERT(0 && "not implemented");
 }
 
 void __stdcall gos_SetRenderState( gos_RenderState RenderState, int Value )
@@ -1568,3 +1644,4 @@ void __stdcall gos_TextStringLength( DWORD* Width, DWORD* Height, const char *fm
     *Height = (num_newlines + 1) * font->getMaxCharHeight();
 }
 
+#include "gameos_graphics_debug.cpp"
