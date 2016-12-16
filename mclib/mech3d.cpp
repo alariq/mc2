@@ -743,7 +743,7 @@ Stuff::Vector3D Mech3DAppearance::getWeaponNodePosition (long nodeId)
 }
 
 //-----------------------------------------------------------------------------
-Stuff::Vector3D Mech3DAppearance::getNodeNamePosition (char *nodeName)
+Stuff::Vector3D Mech3DAppearance::getNodeNamePosition (const char *nodeName)
 {
 	Stuff::Vector3D result = position;
 	

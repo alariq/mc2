@@ -683,7 +683,7 @@ class Mech3DAppearance: public ObjectAppearance
 		
 		virtual Stuff::Vector3D getNodePosition (long nodeId);
 		
-		virtual Stuff::Vector3D getNodeNamePosition (char *nodeName);
+		virtual Stuff::Vector3D getNodeNamePosition (const char *nodeName);
 		
 		virtual long getWeaponNode (long weapontype);
 		
