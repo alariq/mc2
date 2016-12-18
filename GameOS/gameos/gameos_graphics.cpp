@@ -476,7 +476,7 @@ struct gosTextAttribs {
     bool DisableEmbeddedCodes;
 };
 
-void makeKindaSolid(Image& img) {
+static void makeKindaSolid(Image& img) {
     // have to do this, otherwise texutre with zero alpha could be drawn with alpha blend enabled, evel though logically aplha blend should not be enabled!
     // (happens when drawing terrain, see TerrainQuad::draw() case when no detail and no owerlay bu t isCement is true)
     DWORD* pixels = (DWORD*)img.getPixels();
@@ -486,6 +486,35 @@ void makeKindaSolid(Image& img) {
             pixels[y*img.getWidth() + x] = pix | 0xff000000;
         }
     }
+}
+
+static bool doesLookLikeAlpha(const Image& img) {
+    gosASSERT(img.getFormat() == FORMAT_RGBA8);
+
+    DWORD* pixels = (DWORD*)img.getPixels();
+    for(int y=0;y<img.getHeight(); ++y) {
+        for(int x=0;x<img.getWidth(); ++x) {
+            DWORD pix = pixels[y*img.getWidth() + x];
+            if((0xFF000000 & pix) != 0xFF000000)
+                return true;
+        }
+    }
+    return false;
+}
+
+static gos_TextureFormat convertIfNecessary(Image& img, gos_TextureFormat gos_format) {
+
+    const bool has_alpha_channel = FORMAT_RGBA8 == img.getFormat();
+
+    if(gos_format == gos_Texture_Detect) {
+        bool has_alpha = has_alpha_channel ? doesLookLikeAlpha(img) : false;
+        gos_format = has_alpha ? gos_Texture_Alpha : gos_Texture_Solid;
+    }
+
+    if(gos_format == gos_Texture_Solid && has_alpha_channel)
+        makeKindaSolid(img);
+
+    return gos_format;
 }
 
 bool gosTexture::createHardwareTexture() {
@@ -509,11 +538,11 @@ bool gosTexture::createHardwareTexture() {
 
         TexFormat tf = img_fmt == FORMAT_RGB8 ? TF_RGB8 : TF_RGBA8;
 
-        if(format_ == gos_Texture_Solid && tf == TF_RGBA8)
-            makeKindaSolid(img);
+        format_ = convertIfNecessary(img, format_);
 
         tex_ = create2DTexture(img.getWidth(), img.getHeight(), tf, img.getPixels());
         return tex_.isValid();
+
     } else if(pcompdata_ && size_ > 0) {
 
         Image img;
@@ -530,8 +559,7 @@ bool gosTexture::createHardwareTexture() {
 
         TexFormat tf = img_fmt == FORMAT_RGB8 ? TF_RGB8 : TF_RGBA8;
 
-        if(format_ == gos_Texture_Solid && tf == TF_RGBA8)
-            makeKindaSolid(img);
+        format_ = convertIfNecessary(img, format_);
 
         tex_ = create2DTexture(img.getWidth(), img.getHeight(), tf, img.getPixels());
         return tex_.isValid();
