@@ -1368,6 +1368,7 @@ DWORD MC_TextureNode::get_gosTextureHandle (void)	//If texture is not in VidRAM,
 	{
 		//Somehow this texture is bad.  Probably we are using a handle which got purged between missions.
 		// Just send back, NO TEXTURE and we should be able to debug from there because the tri will have no texture!!
+		PAUSE(("txmmgr: Bad texture handle!"));
 		return 0x0;
 	}
 	
@@ -1379,13 +1380,22 @@ DWORD MC_TextureNode::get_gosTextureHandle (void)	//If texture is not in VidRAM,
 	else
 	{
 		if ((mcTextureManager->currentUsedTextures >= MAX_MC2_GOS_TEXTURES) && !mcTextureManager->flushCache())
+		{
+			PAUSE(("txmmgr: Out of texture handles!"));
 			return 0x0;		//No texture!
+		}
 	   
 		if (width == 0)
+		{
+			PAUSE(("txmmgr: Textur has zero width!"));
 			return 0;		//These faces have no texture!!
+		}
 
 		if (!textureData)
+		{
+			PAUSE(("txmmgr: Cache is out of RAM!"));
 			return 0x0;		//No Texture.  Cache is out of RAM!!
+		}
 
 		if (width > 0xf0000000)
 		{
