@@ -105,6 +105,7 @@ public:
 	FORMAT getFormat() const { return format; }
 
 	unsigned char *getPixels() const { return pixels; }
+	unsigned char *getPixels() { return pixels; }
 
 private:
     bool loadTGA(const TGAHeader* header, unsigned char* readPixels);

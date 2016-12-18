@@ -307,6 +307,10 @@ class gosTexture {
     public:
         gosTexture(gos_TextureFormat fmt, const char* fname, DWORD hints, BYTE* pdata, DWORD size, bool from_memory)
         {
+
+	        //if(fmt == gos_Texture_Detect || /*fmt == gos_Texture_Keyed ||*/ fmt == gos_Texture_Bump || fmt == gos_Texture_Normal)
+            //     PAUSE((""));
+
             format_ = fmt;
             if(fname) {
                 filename_ = new char[strlen(fname)+1];
@@ -334,6 +338,9 @@ class gosTexture {
 
         gosTexture(gos_TextureFormat fmt, DWORD hints, DWORD w, DWORD h, const char* texname)
         {
+	        //if(fmt == gos_Texture_Detect /*|| fmt == gos_Texture_Keyed*/ || fmt == gos_Texture_Bump || fmt == gos_Texture_Normal)
+            //     PAUSE((""));
+
             format_ = fmt;
             if(texname) {
                 texname_ = new char[strlen(texname)+1];
@@ -469,6 +476,18 @@ struct gosTextAttribs {
     bool DisableEmbeddedCodes;
 };
 
+void makeKindaSolid(Image& img) {
+    // have to do this, otherwise texutre with zero alpha could be drawn with alpha blend enabled, evel though logically aplha blend should not be enabled!
+    // (happens when drawing terrain, see TerrainQuad::draw() case when no detail and no owerlay bu t isCement is true)
+    DWORD* pixels = (DWORD*)img.getPixels();
+    for(int y=0;y<img.getHeight(); ++y) {
+        for(int x=0;x<img.getWidth(); ++x) {
+            DWORD pix = pixels[y*img.getWidth() + x];
+            pixels[y*img.getWidth() + x] = pix | 0xff000000;
+        }
+    }
+}
+
 bool gosTexture::createHardwareTexture() {
 
     if(!is_from_memory_) {
@@ -489,6 +508,10 @@ bool gosTexture::createHardwareTexture() {
         }
 
         TexFormat tf = img_fmt == FORMAT_RGB8 ? TF_RGB8 : TF_RGBA8;
+
+        if(format_ == gos_Texture_Solid && tf == TF_RGBA8)
+            makeKindaSolid(img);
+
         tex_ = create2DTexture(img.getWidth(), img.getHeight(), tf, img.getPixels());
         return tex_.isValid();
     } else if(pcompdata_ && size_ > 0) {
@@ -506,6 +529,10 @@ bool gosTexture::createHardwareTexture() {
         }
 
         TexFormat tf = img_fmt == FORMAT_RGB8 ? TF_RGB8 : TF_RGBA8;
+
+        if(format_ == gos_Texture_Solid && tf == TF_RGBA8)
+            makeKindaSolid(img);
+
         tex_ = create2DTexture(img.getWidth(), img.getHeight(), tf, img.getPixels());
         return tex_.isValid();
     } else {
@@ -1291,7 +1318,7 @@ gosFont* gosFont::load(const char* fontFile) {
     sprintf(textureName, "%s/%s%s", dir, fname, tex_ext);
     sprintf(glyphName, "%s/%s%s", dir, fname, glyph_ext);
 
-    gosTexture* ptex = new gosTexture(gos_Texture_Detect, textureName, 0, NULL, 0, false);
+    gosTexture* ptex = new gosTexture(gos_Texture_Alpha, textureName, 0, NULL, 0, false);
     if(!ptex || !ptex->createHardwareTexture()) {
         STOP(("Failed to create font texture: %s\n", textureName));
     }

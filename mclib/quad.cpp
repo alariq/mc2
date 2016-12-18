@@ -1479,6 +1479,7 @@ void TerrainQuad::draw (void)
 				(gVertex[2].z < 1.0f))
 			{
 				{
+					// sebi: beware this will be drawn with alpha blending, so need to make sure that alpha is not zero, because thi is a base terrain layer!
 					if ((terrainDetailHandle == 0xffffffff) && (overlayHandle == 0xffffffff) && isCement)
 						mcTextureManager->addVertices(terrainHandle,gVertex,MC2_ISTERRAIN | MC2_DRAWALPHA | MC2_ISCRATERS);
 					else
