@@ -1267,6 +1267,8 @@ enum gosEnum_KeyIndex
 	KEY_APPS		= 0x5D,		// AppMenu key
 	KEY_NUMLOCK		= 0x90,		// NUMLOCK
 	KEY_PAUSE		= 0x13,		// PAUSE Key
+	KEY_LALT		= 0xE2,		// Left Alt key
+	KEY_RALT		= 0xE6,		// Right Alt key
 	KEY_LMOUSE		= 1,		// Left mouse button
 	KEY_MMOUSE		= 2,		// Middle mouse button
 	KEY_RMOUSE		= 3,		// Right mouse button

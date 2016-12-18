@@ -159,6 +159,8 @@ gosEnum_KeyIndex remap_sdl_to_gos(const SDL_Scancode scancode) {
         case SDL_SCANCODE_RCTRL: return KEY_RCONTROL;
         case SDL_SCANCODE_LSHIFT: return KEY_LSHIFT;
         case SDL_SCANCODE_RSHIFT: return KEY_RSHIFT;
+        case SDL_SCANCODE_LALT: return KEY_LALT;
+        case SDL_SCANCODE_RALT: return KEY_RALT;
         default:
             PAUSE(("Unsupported scancode: %d\n", scancode));
     };
@@ -265,6 +267,9 @@ SDL_Scancode remap_gos_to_sdl(const gosEnum_KeyIndex key_index) {
 
         // KEY_LSHIFT
         case KEY_RSHIFT: return SDL_SCANCODE_LSHIFT;
+
+        case KEY_LALT: return SDL_SCANCODE_LALT;
+        case KEY_RALT: return SDL_SCANCODE_RALT;
         default:
             PAUSE(("Unsupported KEY_*: %d\n", key_index));
     };
