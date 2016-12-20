@@ -478,22 +478,22 @@ long TerrainTextures::initDetail (long typeNum, long detailNum)
 		switch (j)
 		{
 			case 0:
-				sprintf(mipPath,"%s%d"PATH_SEPARATOR,texturePath,TERRAIN_TXM_SIZE);
+				sprintf(mipPath,"%s%d" PATH_SEPARATOR,texturePath,TERRAIN_TXM_SIZE);
 				mipSize = TERRAIN_TXM_SIZE;
 				break;	
 
 			case 1:
-				sprintf(mipPath,"%s%d"PATH_SEPARATOR,texturePath,(TERRAIN_TXM_SIZE>>1));
+				sprintf(mipPath,"%s%d" PATH_SEPARATOR,texturePath,(TERRAIN_TXM_SIZE>>1));
 				mipSize = (TERRAIN_TXM_SIZE>>1);
 				break;
 
 			case 2:
-				sprintf(mipPath,"%s%d"PATH_SEPARATOR,texturePath,(TERRAIN_TXM_SIZE>>2));
+				sprintf(mipPath,"%s%d" PATH_SEPARATOR,texturePath,(TERRAIN_TXM_SIZE>>2));
 				mipSize = (TERRAIN_TXM_SIZE>>2);
 				break;
 
 			case 3:
-				sprintf(mipPath,"%s%d"PATH_SEPARATOR,texturePath,(TERRAIN_TXM_SIZE>>3));
+				sprintf(mipPath,"%s%d" PATH_SEPARATOR,texturePath,(TERRAIN_TXM_SIZE>>3));
 				mipSize = (TERRAIN_TXM_SIZE>>3);
 				break;
 		}
@@ -604,22 +604,22 @@ void TerrainTextures::initMask (long typeNum)
 		switch (i)
 		{
 			case 0:
-				sprintf(mipPath,"%s%dmask"PATH_SEPARATOR,texturePath,(TERRAIN_TXM_SIZE>>0));
+				sprintf(mipPath,"%s%dmask" PATH_SEPARATOR,texturePath,(TERRAIN_TXM_SIZE>>0));
 				mipSize = (TERRAIN_TXM_SIZE>>0);
 				break;	
 
 			case 1:
-				sprintf(mipPath,"%s%dmask"PATH_SEPARATOR,texturePath,(TERRAIN_TXM_SIZE>>1));
+				sprintf(mipPath,"%s%dmask" PATH_SEPARATOR,texturePath,(TERRAIN_TXM_SIZE>>1));
 				mipSize = (TERRAIN_TXM_SIZE>>1);
 				break;
 
 			case 2:
-				sprintf(mipPath,"%s%dmask"PATH_SEPARATOR,texturePath,(TERRAIN_TXM_SIZE>>2));
+				sprintf(mipPath,"%s%dmask" PATH_SEPARATOR,texturePath,(TERRAIN_TXM_SIZE>>2));
 				mipSize = (TERRAIN_TXM_SIZE>>2);
 				break;
 
 			case 3:
-				sprintf(mipPath,"%s%dmask"PATH_SEPARATOR,texturePath,(TERRAIN_TXM_SIZE>>3));
+				sprintf(mipPath,"%s%dmask" PATH_SEPARATOR,texturePath,(TERRAIN_TXM_SIZE>>3));
 				mipSize = (TERRAIN_TXM_SIZE>>3);
 				break;
 		}
@@ -665,22 +665,22 @@ long TerrainTextures::initOverlay (long overlayNum, long txmNum, char *txmName)
 		switch (j)
 		{
 			case 0:
-				sprintf(mipPath,"%s%dOverlays"PATH_SEPARATOR,texturePath,TERRAIN_TXM_SIZE);
+				sprintf(mipPath,"%s%dOverlays" PATH_SEPARATOR,texturePath,TERRAIN_TXM_SIZE);
 				mipSize = TERRAIN_TXM_SIZE;
 				break;	
 
 			case 1:
-				sprintf(mipPath,"%s%dOverlays"PATH_SEPARATOR,texturePath,(TERRAIN_TXM_SIZE>>1));
+				sprintf(mipPath,"%s%dOverlays" PATH_SEPARATOR,texturePath,(TERRAIN_TXM_SIZE>>1));
 				mipSize = (TERRAIN_TXM_SIZE>>1);
 				break;
 
 			case 2:
-				sprintf(mipPath,"%s%dOverlays"PATH_SEPARATOR,texturePath,(TERRAIN_TXM_SIZE>>2));
+				sprintf(mipPath,"%s%dOverlays" PATH_SEPARATOR,texturePath,(TERRAIN_TXM_SIZE>>2));
 				mipSize = (TERRAIN_TXM_SIZE>>2);
 				break;
 
 			case 3:
-				sprintf(mipPath,"%s%dOverlays"PATH_SEPARATOR,texturePath,(TERRAIN_TXM_SIZE>>3));
+				sprintf(mipPath,"%s%dOverlays" PATH_SEPARATOR,texturePath,(TERRAIN_TXM_SIZE>>3));
 				mipSize = (TERRAIN_TXM_SIZE>>3);
 				break;
 		}
@@ -1174,23 +1174,23 @@ long TerrainTextures::createTransition (DWORD typeInfo, DWORD overlayInfo)
 			switch (kmp)
 			{
 				case 0:
-					sprintf(mipPath,"%s%d"PATH_SEPARATOR,texturePath,(TERRAIN_TXM_SIZE>>0));
+					sprintf(mipPath,"%s%d" PATH_SEPARATOR,texturePath,(TERRAIN_TXM_SIZE>>0));
 					mipSize = (TERRAIN_TXM_SIZE>>0);
 					break;	
 
 				case 1:
-					sprintf(mipPath,"%s%d"PATH_SEPARATOR,texturePath,(TERRAIN_TXM_SIZE>>1));
+					sprintf(mipPath,"%s%d" PATH_SEPARATOR,texturePath,(TERRAIN_TXM_SIZE>>1));
 					mipSize = (TERRAIN_TXM_SIZE>>1);
 					break;
 
 				case 2:
-					sprintf(mipPath,"%s%d"PATH_SEPARATOR,texturePath,(TERRAIN_TXM_SIZE>>2));
+					sprintf(mipPath,"%s%d" PATH_SEPARATOR,texturePath,(TERRAIN_TXM_SIZE>>2));
 					mipSize = (TERRAIN_TXM_SIZE>>2);
 					break;
 
 
 				case 3:
-					sprintf(mipPath,"%s%d"PATH_SEPARATOR,texturePath,(TERRAIN_TXM_SIZE>>3));
+					sprintf(mipPath,"%s%d" PATH_SEPARATOR,texturePath,(TERRAIN_TXM_SIZE>>3));
 					mipSize = (TERRAIN_TXM_SIZE>>3);
 					break;
 			}
