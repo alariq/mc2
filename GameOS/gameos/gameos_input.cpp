@@ -191,7 +191,7 @@ SDL_Scancode remap_gos_to_sdl(const gosEnum_KeyIndex key_index) {
 
         //case KEY_APOSTROPHE: return SDL_SCANCODE_BACKSLASH;
         // KEY_AT: 
-        KEY_GRAVE: return SDL_SCANCODE_GRAVE;
+        case KEY_GRAVE: return SDL_SCANCODE_GRAVE;
 
         //KEY_YEN: //return SDL_SCANCODE_INTERNATIONAL3;
         case KEY_BACKSLASH: return SDL_SCANCODE_BACKSLASH;
