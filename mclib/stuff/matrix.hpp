@@ -29,6 +29,12 @@ namespace Stuff {
 	class Point3D;
 	class UnitQuaternion;
 
+	bool Close_Enough(
+		const Matrix4D &m1,
+		const Matrix4D &m2,
+		Scalar e = SMALL
+	);
+
 	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Matrix4D ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 	class Matrix4D

@@ -48,7 +48,8 @@ namespace Stuff {
     bool Small_Enough( const YawPitchRoll &a, Scalar e = SMALL);
 
     bool Close_Enough( const YawPitchRoll &a1, const YawPitchRoll &a2, Scalar e = SMALL);
-
+    bool Close_Enough( const EulerAngles &a1, const EulerAngles &a2, Scalar e = SMALL);
+    bool Close_Enough( const UnitQuaternion &a1, const UnitQuaternion &a2, Scalar e = SMALL);
 
 	//##########################################################################
 	//#########################    EulerAngles     #############################

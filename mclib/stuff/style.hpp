@@ -11,8 +11,10 @@
 
 // sebi: armoron,hpp needs it
 namespace Stuff {
-		inline void
-			Is_Signature_Bad(const volatile void* p);
+
+	class Signature;
+	inline void Is_Signature_Bad(const volatile void* p);
+	void Is_Signature_Bad(const volatile Signature *p);
 };
 
 

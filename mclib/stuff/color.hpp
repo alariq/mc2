@@ -49,6 +49,30 @@ namespace Stuff {
 	//##############    RGBColor    ############################################
 	//##########################################################################
 
+
+	bool Close_Enough(	const RGBColor &c1,
+				const RGBColor &c2,
+				Scalar e = SMALL
+			);
+
+	bool Close_Enough(
+				const RGBAColor &c1,
+				const RGBAColor &c2,
+				Scalar e = SMALL
+			);
+
+	bool Close_Enough(
+				const HSVColor &c1,
+				const HSVColor &c2,
+				Scalar e = SMALL
+			);
+
+	bool Close_Enough(
+				const HSVAColor &c1,
+				const HSVAColor &c2,
+				Scalar e = SMALL
+			);
+
 	class RGBColor
 	{
 		friend class RGBAColor;

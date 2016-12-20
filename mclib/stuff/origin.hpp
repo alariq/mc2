@@ -25,6 +25,12 @@ namespace Stuff {
 
 	class Motion3D;
 
+	bool Close_Enough(
+		const Origin3D &a1,
+		const Origin3D &a2,
+		Scalar e = SMALL
+	);
+
 	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Origin3D ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 	class Origin3D
