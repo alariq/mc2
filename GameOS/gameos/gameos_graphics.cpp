@@ -381,6 +381,7 @@ class gosTexture {
         }
 
         uint32_t getTextureId() const { return tex_.id; }
+        TexType getTextureType() const { return tex_.type_; }
 
         BYTE* Lock(int mipl_level, bool is_read_only, int* pitch) {
             gosASSERT(is_locked_ == false);
@@ -952,6 +953,25 @@ void gosRenderer::applyRenderStates() {
    curStates_[gos_State_AlphaMode] = renderStates_[gos_State_AlphaMode];
 
    ////////////////////////////////////////////////////////////////////////////////
+   TexFilterMode filter = TFM_NONE;
+   switch(renderStates_[gos_State_Filter]) {
+       case gos_FilterNone: filter = TFM_NEAREST; break;
+       case gos_FilterBiLinear : filter = TFM_LINEAR; break;
+       case gos_FilterTriLinear: filter = TFM_LNEAR_MIPMAP_LINEAR; break;
+   }
+   // no mips for now, so ensure no invalid filters used
+   gosASSERT(filter == TFM_NEAREST || filter == TFM_LINEAR);
+
+   // in this case does not necessaily mean, that state was set, because in OpenGL this is binded to texture (unless separate sampler state extension is used, which is not currently)
+   curStates_[gos_State_Filter] = renderStates_[gos_State_Filter];
+  
+   ////////////////////////////////////////////////////////////////////////////////
+   TexAddressMode address_mode = 
+       renderStates_[gos_State_TextureAddress] == gos_TextureWrap ? TAM_REPEAT : TAM_CLAMP;
+   // in this case does not necessaily mean, that state was set, because in OpenGL this is binded to texture (unless separate sampler state extension is used, which is not currently)
+   curStates_[gos_State_TextureAddress] = renderStates_[gos_State_TextureAddress];
+
+   ////////////////////////////////////////////////////////////////////////////////
    uint32_t tex_states[] = { gos_State_Texture, gos_State_Texture2, gos_State_Texture3 };
    for(int i=0; i<sizeof(tex_states) / sizeof(tex_states[0]); ++i) {
        DWORD gosTextureHandle = renderStates_[tex_states[i]];
@@ -960,6 +980,7 @@ void gosRenderer::applyRenderStates() {
        gosTexture* tex = this->getTexture(gosTextureHandle);
        if(tex) {
            glBindTexture(GL_TEXTURE_2D, tex->getTextureId());
+           setSamplerParams(tex->getTextureType(), address_mode, filter);
        } else {
            glBindTexture(GL_TEXTURE_2D, 0);
        }

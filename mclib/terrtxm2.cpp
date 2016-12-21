@@ -1895,8 +1895,11 @@ DWORD TerrainColorMap::getTextureHandle (VertexPtr vMin, VertexPtr vMax, Terrain
 		//We now have the position in x and y as fraction from 0.0 to 1.0
 		// The texture is easy.  Just mutiply by number of textures across.
 		#define EDGE_ADJUST_FACTOR		0.0005f
-		long txmNumX = (posX + EDGE_ADJUST_FACTOR) * numTexturesAcross;
+
+        long txmNumX = (posX + EDGE_ADJUST_FACTOR) * numTexturesAcross;
 		long txmNumY = (posY + EDGE_ADJUST_FACTOR) * numTexturesAcross;
+        //long txmNumX = (posX) * numTexturesAcross;
+		//long txmNumY = (posY) * numTexturesAcross;
 
 		long resultTexture = txmNumX + (txmNumY * numTexturesAcross);
 		
@@ -1910,35 +1913,35 @@ DWORD TerrainColorMap::getTextureHandle (VertexPtr vMin, VertexPtr vMax, Terrain
 		
 		//Also need to adjust UVs by texturePixelAdjust to handle overlaping correctly.
 		float minX = (float)txmNumX * fractionPerTexture;
-		uvData->maxU = (maxX - minX) * numTexturesAcross;
-		uvData->minU = (posX - minX) * numTexturesAcross;
+		uvData->maxU = (maxX - minX) * numTexturesAcross + 0.5f / COLOR_MAP_RES;
+		uvData->minU = (posX - minX) * numTexturesAcross + 0.5f / COLOR_MAP_RES;
 		
 		float minY = (float)txmNumY * fractionPerTexture;
-		uvData->maxV = (maxY - minY) * numTexturesAcross;
-		uvData->minV = (posY - minY) * numTexturesAcross;
+		uvData->maxV = (maxY - minY) * numTexturesAcross + 0.5f / COLOR_MAP_RES;
+		uvData->minV = (posY - minY) * numTexturesAcross + 0.5f / COLOR_MAP_RES;
 		
-		/*
+		
 		float textureAdjustFactor = (textureOffset / COLOR_MAP_RES);
 		if (uvData->minU <= textureAdjustFactor)
 			uvData->minU = textureAdjustFactor;
-		else
-			uvData->minU += xAdjust;
+		//else
+			//uvData->minU += xAdjust;
 			
 		if (uvData->minV <= textureAdjustFactor)
 			uvData->minV = textureAdjustFactor;
-		else
-			uvData->minV += yAdjust;
+		//else
+			//uvData->minV += yAdjust;
 			
 		if (uvData->maxU >= 1.0f)
 			uvData->maxU = 1.0f - textureAdjustFactor;
-		else
-			uvData->maxU += xAdjust;
+		//else
+			//uvData->maxU += xAdjust;
 		
 		if (uvData->maxV >= 1.0f)
 			uvData->maxV = 1.0f - textureAdjustFactor;
-		else
-			uvData->maxV += yAdjust;
-		*/
+		//else
+			//uvData->maxV += yAdjust;
+		
 
 #if 0
 		if ((uvData->minU < 0.0f) || (uvData->minU >= 1.0f))
