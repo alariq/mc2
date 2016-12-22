@@ -69,7 +69,7 @@ extern bool		useFog;
 extern long 	mechRGBLookup[];
 extern long 	mechRGBLookup2[];
 
-extern long		ObjectTextureSize;
+extern int 	ObjectTextureSize;
 
 extern bool		reloadBounds;
 extern float	metersPerWorldUnit;

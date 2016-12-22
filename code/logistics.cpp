@@ -444,8 +444,8 @@ void Logistics::render (void)
 
 //-----------------------------------------------------------------------------
 
-extern unsigned long MultiPlayTeamId;
-extern unsigned long MultiPlayCommanderId;
+extern unsigned int MultiPlayTeamId;
+extern unsigned int MultiPlayCommanderId;
 
 int _stdcall Logistics::beginMission(void*, int, void*[])
 {

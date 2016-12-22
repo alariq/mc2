@@ -17,7 +17,7 @@
 #include"objmgr.h"
 
 char	LogisticsPilot::skillTexts[NUM_SPECIALTY_SKILLS][255] = {0};
-extern char* SpecialtySkillsTable[NUM_SPECIALTY_SKILLS];
+extern const char* SpecialtySkillsTable[NUM_SPECIALTY_SKILLS];
 
 
 
