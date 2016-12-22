@@ -2625,7 +2625,7 @@ bool TG_Shape::PerPolySelect (float mouseX, float mouseY)
 			line2.Subtract(v1,v2);
 			
 			float order = line2.x * line1.y - line1.x * line2.y;
-			order = sign(order);
+			order = sign2(order);
 			
 			float A0 = -(v0.y - v1.y);
 			float B0 = (v0.x - v1.x);
@@ -2642,7 +2642,7 @@ bool TG_Shape::PerPolySelect (float mouseX, float mouseY)
 			float C2 = -B2*(v2.y) - A2*(v2.x);
 			float D2 = A2 * mouseX + B2 * mouseY + C2;
 			
-			if ((sign(D0) == order) && (sign(D0) == sign(D1)) && (sign(D0) == sign(D2)))
+			if ((sign2(D0) == order) && (sign2(D0) == sign2(D1)) && (sign2(D0) == sign2(D2)))
 				return true;
     	}
 	}
