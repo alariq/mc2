@@ -99,6 +99,50 @@ getTexFormatPixelSize(TexFormat fmt) {
     return textureFormatChannelSize[fmt] * textureFormatNumChannels[fmt];
 }
 
+const GLuint textureType[TT_COUNT] = {
+    0,
+    GL_TEXTURE_1D,
+    GL_TEXTURE_1D_ARRAY,
+    GL_TEXTURE_2D,
+    GL_TEXTURE_2D_ARRAY,
+    GL_TEXTURE_2D_MULTISAMPLE,
+    GL_TEXTURE_2D_MULTISAMPLE_ARRAY,
+    GL_TEXTURE_3D,
+    GL_TEXTURE_CUBE_MAP,
+    GL_TEXTURE_CUBE_MAP_ARRAY,
+};
+
+GLuint getTexType(TexType tt) {
+    assert(tt > TT_NONE && tt < TT_COUNT);
+    return textureType[tt];
+}
+
+const GLint textureAddressMode[TAM_COUNT] = {
+    0,
+    GL_CLAMP,
+    GL_REPEAT
+};
+
+GLint getTextureAddressMode(TexAddressMode address_mode) {
+    assert(address_mode > TAM_NONE && address_mode < TAM_COUNT);
+    return textureAddressMode[address_mode];
+}
+
+const GLint textureFilterMode[TFM_COUNT] = {
+    0,
+    GL_NEAREST,
+    GL_LINEAR,
+    GL_NEAREST_MIPMAP_NEAREST,
+    GL_NEAREST_MIPMAP_LINEAR,
+    GL_LINEAR_MIPMAP_NEAREST,
+    GL_LINEAR_MIPMAP_LINEAR,
+};
+
+GLint getTextureFilterMode(TexFilterMode filter_mode) {
+    assert(filter_mode > TFM_NONE && filter_mode < TFM_COUNT);
+    return textureFilterMode[filter_mode];
+}
+
 void destroyTexture(Texture* tex)
 {
     assert(tex);
@@ -110,7 +154,6 @@ void destroyTexture(Texture* tex)
 
 Texture create2DTexture(int w, int h, TexFormat fmt, const uint8_t* texdata)
 {
-    
 	GLuint texID;
 	glGenTextures(1, &texID);
 	glBindTexture(GL_TEXTURE_2D, texID);
@@ -128,15 +171,14 @@ Texture create2DTexture(int w, int h, TexFormat fmt, const uint8_t* texdata)
 	t.w = w;
 	t.h = h;
 	t.fmt_ = fmt;
+    t.type_ = TT_2D;
     t.format = (GLenum)-1;
 
 	return t;
 }
 
-
 Texture createDynamicTexture(int w, int h, TexFormat fmt)
 {
-    
 	GLuint texID;
 	glGenTextures(1, &texID);
 	glBindTexture(GL_TEXTURE_2D, texID);
@@ -154,6 +196,7 @@ Texture createDynamicTexture(int w, int h, TexFormat fmt)
 	t.w = w;
 	t.h = h;
 	t.fmt_ = fmt;
+    t.type_ = TT_2D;
     t.format = (GLenum)-1;
 
 	return t;
@@ -178,10 +221,11 @@ Texture create3DTextureF(int w, int h, int depth)
 	t.h = h;
 	t.depth = depth;
 	t.format = GL_RED;
+    t.type_ = TT_3D;
+    t.fmt_ = TF_R32F;
 
 	return t;
 }
-
 
 Texture createPBO(int w, int h, GLenum fmt, int el_size)
 {
@@ -220,6 +264,22 @@ void updateTexture(const Texture& t, void* pdata, TexFormat pdata_format/*= TF_C
         CHECK_GL_ERROR
     }
 	glBindTexture(GL_TEXTURE_2D, 0);
+}
+
+void setSamplerParams(TexType tt, TexAddressMode address_mode, TexFilterMode filter) {
+
+    GLuint tex_type = getTexType(tt);
+
+    GLint tam = getTextureAddressMode(address_mode);
+    GLint tfm = getTextureFilterMode(filter);
+
+	glTexParameteri(tex_type, GL_TEXTURE_WRAP_S, tam);
+	glTexParameteri(tex_type, GL_TEXTURE_WRAP_T, tam);
+	glTexParameteri(tex_type, GL_TEXTURE_WRAP_R, tam);
+
+	glTexParameteri(tex_type, GL_TEXTURE_MAG_FILTER, tfm);
+	glTexParameteri(tex_type, GL_TEXTURE_MIN_FILTER, tfm);
+
 }
 
 void getTextureData(const Texture& t, int lod, unsigned char* poutdata, TexFormat format/*= TF_COUNT*/) {

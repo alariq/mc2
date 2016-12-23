@@ -11,17 +11,57 @@
 #define DEPTH_NONE 0        /**< Disable depthstencil. */
 #define BLEND_NONE (-1)     /**< Disable blending. */
 
+enum TexType {
+    TT_NONE,
+    TT_1D,
+    TT_1D_ARRAY,
+    TT_2D,
+    TT_2D_ARRAY,
+    TT_2D_MULTISAMPLE,
+    TT_2D_MULTISAMPLE_ARRAY,
+    TT_3D,
+    TT_CUBE_MAP,
+    TT_CUBE_MAP_ARRAY,
+    TT_COUNT
+};
+
 enum TexFormat {
     TF_NONE,
     TF_R8,
     TF_RG8,
     TF_RGB8,
     TF_RGBA8,
-    TF_R32,
-    TF_RG32,
-    TF_RGB32,
-    TF_RGBA32,
+    TF_R32F,
+    TF_RG32F,
+    TF_RGB32F,
+    TF_RGBA32F,
     TF_COUNT
+};
+
+enum TexAddressMode {
+    TAM_NONE,
+    TAM_CLAMP,
+    TAM_REPEAT,
+    TAM_COUNT
+};
+
+/*extern const int tex_filter_mode_nearest;
+extern const int tex_filer_mode_linear;
+extern const int tex_filter_mode_nearest_mipmap_nearest;
+extern const int tex_filter_mode_nearest_mipmap_linear;
+extern const int tex_filter_mode_linear_mipmap_nearest;
+extern const int tex_filter_mode_linear_mipmap_linear;
+*/
+
+enum TexFilterMode {
+    TFM_NONE = 0,
+    TFM_NEAREST,                 //= tex_filter_mode_nearest,
+    TFM_LINEAR,                  //= tex_filer_mode_linear,
+    TFM_NEAREST_MIPMAP_NEAREST,  //= tex_filter_mode_nearest_mipmap_nearest,
+    TFM_NEAREST_MIPMAP_LINEAR,   //= tex_filter_mode_nearest_mipmap_linear,
+    TFM_LNEAR_MIPMAP_NEAREST,    //= tex_filter_mode_linear_mipmap_nearest,
+    TFM_LNEAR_MIPMAP_LINEAR,     //= tex_filter_mode_linear_mipmap_linear
+    TFM_COUNT
 };
 
 // Blending constants
@@ -78,7 +118,6 @@ extern const int READ_WRITE;
 extern const int COLOR_BUFFER;
 extern const int DEPTH_BUFFER;
 extern const int STENCIL_BUFFER;
-
 
 typedef int TextureID;      /**< Texture handle. */
 typedef int ShaderID;       /**< Shader handle. */

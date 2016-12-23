@@ -19,6 +19,8 @@ struct Texture {
 	GLenum format;
 	int w, h, depth;
     TexFormat fmt_;
+    TexType type_;
+
 };
 
 uint32_t getTexFormatPixelSize(TexFormat fmt);
@@ -78,6 +80,10 @@ static int ogl_check_val(T input, T reference, const char* message)
 Texture create2DTexture(int w, int h, TexFormat fmt, const uint8_t* texdata);
 Texture createDynamicTexture(int w, int h, TexFormat fmt);
 Texture create3DTextureF(int w, int h, int depth);
+
+// texture has to be binded before calling this
+void setSamplerParams(TexType tt, TexAddressMode address_mode, TexFilterMode filter);
+
 // pdata_format - specifies format of data provided in pdata
 void updateTexture(const Texture& t, void* pdata, TexFormat pdata_format = TF_COUNT);
 void destroyTexture(Texture* tex);

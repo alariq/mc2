@@ -126,6 +126,7 @@ HGOSHEAP __stdcall gos_CreateMemoryHeap(char const* HeapName, DWORD MaximumSize/
     }
 
 #ifdef LAB_ONLY
+    pheap->BytesAllocated = 0;
     pheap->MaximumSize = MaximumSize;
 #endif
 
@@ -161,6 +162,12 @@ void __stdcall gos_WalkMemoryHeap(HGOSHEAP pHeap, bool vociferous/* = false*/)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+void* operator new(size_t sz) {
+    return gos_Malloc(sz, NULL);
+}
+void operator delete(void* ptr) noexcept {
+    gos_Free(ptr);
+}
 
 void* __cdecl operator new[](size_t size, HGOSHEAP Heap)
 {
@@ -172,10 +179,35 @@ void* __stdcall gos_Malloc(size_t bytes, HGOSHEAP Heap/* = 0*/)
     // FIXME: TODO: !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     // FIXME: TODO: each malloc should record memory allocation for current heap on a stack
     // FIXME: TODO: so that when Heap destroy() is called all memory will be freed
+
+    /*
+    gosHeap* heap = NULL;
+
+    if(Heap) {
+        heap = (gosHeap*)Heap;
+    } else { 
+        heap = gos_GetCurrentHeap();
+    }
+
+    if(heap)
+        heap->BytesAllocated += bytes;
+
+    if(bytes > 1024*1024)
+    {
+        PAUSE((""));
+    }
+    */
     return malloc(bytes);
 }
 void __stdcall gos_Free(void* ptr)
 {
+    /*
+    gosHeap* heap = (gosHeap*)gos_GetCurrentHeap();
+    if(Heap) {
+        gosHeap* heap = (gosHeap*)Heap;
+        heap->BytesAllocated -= // ??? ;
+    }
+    */
     free(ptr);
 }
 ////////////////////////////////////////////////////////////////////////////////
