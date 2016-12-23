@@ -1406,11 +1406,11 @@ void TerrainQuad::draw (void)
 
 		gos_VERTEX gVertex[3];
 
-		float minU = 0.00f;
-		float maxU = 0.9999f;
+		float minU = 0.5f / TERRAIN_TXM_SIZE; 0.00f;
+		float maxU = 1.0f - 0.5f / TERRAIN_TXM_SIZE;//0.9999f;
 								
-		float minV = 0.00f;
-		float maxV = 0.9999f;
+		float minV = 0.5f / TERRAIN_TXM_SIZE; 0.00f;
+		float maxV = 1.0f - 0.5f / TERRAIN_TXM_SIZE; //0.9999f;
 		
 		float oldminU = 0.0078125f;
 		float oldmaxU = 0.9921875f;
