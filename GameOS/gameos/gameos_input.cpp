@@ -2,6 +2,7 @@
 
 #include <SDL2/SDL.h> // can avoid inluding this here if move MouseInfo struct to separate file
 #include "gos_input.h"
+#include "utils/vec.h"
 
 #include<string.h>
 
@@ -38,13 +39,14 @@ void __stdcall gos_GetMouseInfo( float* pXPosition, float* pYPosition, int* pXDe
     if(pYPosition)
         *pYPosition = g_mouse_info.y_ / h;
 
+	// as percentage of screen size
     if(pXDelta)
-        *pXDelta = g_mouse_info.rel_x_ / w;
+        *pXDelta = (int)(100.0f * clamp(g_mouse_info.rel_x_ / w, 0.0f, 1.0f));
     if(pYDelta)
-        *pYDelta = g_mouse_info.rel_y_ / h;
+        *pYDelta = (int)(100.0f * clamp(g_mouse_info.rel_y_ / h, 0.0f, 1.0f));
 
     if(pWheelDelta)
-        *pWheelDelta = g_mouse_info.wheel_vert_ / h;
+        *pWheelDelta = (int)(100.0f * (g_mouse_info.wheel_vert_ / h));
 
     if(pButtonsPressed) {
         DWORD bs = 0;
@@ -191,7 +193,7 @@ SDL_Scancode remap_gos_to_sdl(const gosEnum_KeyIndex key_index) {
 
         //case KEY_APOSTROPHE: return SDL_SCANCODE_BACKSLASH;
         // KEY_AT: 
-        KEY_GRAVE: return SDL_SCANCODE_GRAVE;
+        case KEY_GRAVE: return SDL_SCANCODE_GRAVE;
 
         //KEY_YEN: //return SDL_SCANCODE_INTERNATIONAL3;
         case KEY_BACKSLASH: return SDL_SCANCODE_BACKSLASH;
@@ -310,7 +312,7 @@ const char* __stdcall gos_DescribeKey( DWORD Key )
 {
     const DWORD k = (Key>>8)&0xFF;
     DWORD ascii = Key&0xFF; (void)ascii; // may be 0 if extended key
-    bool is_extended = Key&0x100; (void)is_extended;
+    bool is_extended = (Key&0x100)!=0; (void)is_extended;
 
     SDL_Scancode scancode = remap_gos_to_sdl((gosEnum_KeyIndex)k);
     return SDL_GetScancodeName(scancode);

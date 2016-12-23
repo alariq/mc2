@@ -604,7 +604,7 @@ void BldgAppearance::init (AppearanceTypePtr tree, GameObjectPtr obj)
 			bldgShape->GetTextureName(i,txmName,256);
 
 			char texturePath[1024];
-			sprintf(texturePath,"%s%d"PATH_SEPARATOR,tglPath,ObjectTextureSize);
+			sprintf(texturePath,"%s%d" PATH_SEPARATOR,tglPath,ObjectTextureSize);
 	
 			FullPathFileName textureName;
 			textureName.init(texturePath,txmName,"");
@@ -645,7 +645,7 @@ void BldgAppearance::init (AppearanceTypePtr tree, GameObjectPtr obj)
 				bldgShadowShape->GetTextureName(i,txmName,256);
 		
 				char texturePath[1024];
-				sprintf(texturePath,"%s%d"PATH_SEPARATOR,tglPath,ObjectTextureSize);
+				sprintf(texturePath,"%s%d" PATH_SEPARATOR,tglPath,ObjectTextureSize);
 		
 				FullPathFileName textureName;
 				textureName.init(texturePath,txmName,"");
@@ -845,7 +845,7 @@ void BldgAppearance::setObjStatus (long oStatus)
 				bldgShape->GetTextureName(i,txmName,256);
 	
 				char texturePath[1024];
-				sprintf(texturePath,"%s%d"PATH_SEPARATOR,tglPath,ObjectTextureSize);
+				sprintf(texturePath,"%s%d" PATH_SEPARATOR,tglPath,ObjectTextureSize);
 		
 				FullPathFileName textureName;
 				textureName.init(texturePath,txmName,"");
@@ -885,7 +885,7 @@ void BldgAppearance::setObjStatus (long oStatus)
 				bldgShadowShape->GetTextureName(i,txmName,256);
 	
 				char texturePath[1024];
-				sprintf(texturePath,"%s%d"PATH_SEPARATOR,tglPath,ObjectTextureSize);
+				sprintf(texturePath,"%s%d" PATH_SEPARATOR,tglPath,ObjectTextureSize);
 		
 				FullPathFileName textureName;
 				textureName.init(texturePath,txmName,"");
@@ -1344,7 +1344,7 @@ bool BldgAppearance::recalcBounds (void)
 								bldgShape->GetTextureName(j,txmName,256);
 
 								char texturePath[1024];
-								sprintf(texturePath,"%s%d"PATH_SEPARATOR,tglPath,ObjectTextureSize);
+								sprintf(texturePath,"%s%d" PATH_SEPARATOR,tglPath,ObjectTextureSize);
 
 								FullPathFileName textureName;
 								textureName.init(texturePath,txmName,"");
@@ -1396,7 +1396,7 @@ bool BldgAppearance::recalcBounds (void)
 								bldgShape->GetTextureName(i,txmName,256);
 										
 								char texturePath[1024];
-								sprintf(texturePath,"%s%d"PATH_SEPARATOR,tglPath,ObjectTextureSize);
+								sprintf(texturePath,"%s%d" PATH_SEPARATOR,tglPath,ObjectTextureSize);
 						
 								FullPathFileName textureName;
 								textureName.init(texturePath,txmName,"");
@@ -3220,7 +3220,7 @@ void TreeAppearance::init (AppearanceTypePtr tree, GameObjectPtr obj)
 			treeShape->GetTextureName(i,txmName,256);
 	
 			char texturePath[1024];
-			sprintf(texturePath,"%s%d"PATH_SEPARATOR,tglPath,ObjectTextureSize);
+			sprintf(texturePath,"%s%d" PATH_SEPARATOR,tglPath,ObjectTextureSize);
 	
 			FullPathFileName textureName;
 			textureName.init(texturePath,txmName,"");
@@ -3261,7 +3261,7 @@ void TreeAppearance::init (AppearanceTypePtr tree, GameObjectPtr obj)
 				treeShadowShape->GetTextureName(i,txmName,256);
 		
 				char texturePath[1024];
-				sprintf(texturePath,"%s%d"PATH_SEPARATOR,tglPath,ObjectTextureSize);
+				sprintf(texturePath,"%s%d" PATH_SEPARATOR,tglPath,ObjectTextureSize);
 		
 				FullPathFileName textureName;
 				textureName.init(texturePath,txmName,"");
@@ -3430,7 +3430,7 @@ void TreeAppearance::setObjStatus (long oStatus)
 				treeShape->GetTextureName(i,txmName,256);
 		
 				char texturePath[1024];
-				sprintf(texturePath,"%s%d"PATH_SEPARATOR,tglPath,ObjectTextureSize);
+				sprintf(texturePath,"%s%d" PATH_SEPARATOR,tglPath,ObjectTextureSize);
 		
 				FullPathFileName textureName;
 				textureName.init(texturePath,txmName,"");
@@ -3470,7 +3470,7 @@ void TreeAppearance::setObjStatus (long oStatus)
 				treeShadowShape->GetTextureName(i,txmName,256);
 		
 				char texturePath[1024];
-				sprintf(texturePath,"%s%d"PATH_SEPARATOR,tglPath,ObjectTextureSize);
+				sprintf(texturePath,"%s%d" PATH_SEPARATOR,tglPath,ObjectTextureSize);
 		
 				FullPathFileName textureName;
 				textureName.init(texturePath,txmName,"");
@@ -3765,7 +3765,7 @@ bool TreeAppearance::recalcBounds (void)
 							treeShape->GetTextureName(j,txmName,256);
 
 							char texturePath[1024];
-							sprintf(texturePath,"%s%d"PATH_SEPARATOR,tglPath,ObjectTextureSize);
+							sprintf(texturePath,"%s%d" PATH_SEPARATOR,tglPath,ObjectTextureSize);
 
 							FullPathFileName textureName;
 							textureName.init(texturePath,txmName,"");
@@ -3815,7 +3815,7 @@ bool TreeAppearance::recalcBounds (void)
 							treeShape->GetTextureName(i,txmName,256);
 									
 							char texturePath[1024];
-							sprintf(texturePath,"%s%d"PATH_SEPARATOR,tglPath,ObjectTextureSize);
+							sprintf(texturePath,"%s%d" PATH_SEPARATOR,tglPath,ObjectTextureSize);
 					
 							FullPathFileName textureName;
 							textureName.init(texturePath,txmName,"");

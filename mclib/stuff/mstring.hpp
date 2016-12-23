@@ -73,6 +73,43 @@ namespace Stuff {
 
 	class MemoryStream;
 
+	bool Close_Enough(
+		const char *str1,
+		const char *str2,
+		Scalar e = SMALL
+	);
+
+	MString operator + (
+		const MString &str1,
+		const MString &str2
+	);
+
+	MString operator + (
+		const MString &str1,
+		char ch
+	);
+
+	void Convert_From_Ascii(
+		const char *str,
+		MString *value
+	);
+
+	MStringRepresentation operator + (
+		const MStringRepresentation &str1,
+		const MStringRepresentation &str2
+	);
+
+	MStringRepresentation operator + (
+		const MStringRepresentation & str1,
+		char ch
+	);
+
+	void Convert_From_Ascii(
+		const char *str,
+		MStringRepresentation *value
+	);
+
+
 	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	// ASCII Conversions
 	//

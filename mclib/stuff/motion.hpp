@@ -22,6 +22,12 @@ namespace Stuff {class Motion3D;}
 
 namespace Stuff {
 
+	bool Close_Enough(
+		const Motion3D &a1,
+		const Motion3D &a2,
+		Scalar e = SMALL
+	);
+
 	//~~~~~~~~~~~~~~~~~~~~~~~~~~~ Motion3D ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 	class Motion3D

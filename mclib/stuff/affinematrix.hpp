@@ -27,6 +27,12 @@ namespace Stuff {
 	class UnitQuaternion;
 	class YawPitchRoll;
 
+	bool Close_Enough(
+		const AffineMatrix4D &m1,
+		const AffineMatrix4D &m2,
+		Scalar e = SMALL
+	);
+
 	//~~~~~~~~~~~~~~~~~~~~~~~~~~ AffineMatrix4D ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 	class AffineMatrix4D
