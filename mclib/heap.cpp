@@ -203,13 +203,6 @@ long HeapManager::commitHeap (unsigned long commitSize)
 
 	MemoryPtr result = (MemoryPtr)VirtualAlloc(heap,commitSize,MEM_COMMIT,PAGE_READWRITE);
 
-    size_t currentEbp0;
-    asm("mov %%rsp, %0;"
-            : "=r"(currentEbp0)
-            :
-            :
-       );
-
 	if (result == heap)
 	{
 		long actualSize = commitSize;
@@ -220,13 +213,6 @@ long HeapManager::commitHeap (unsigned long commitSize)
 		// Add this to the UEBER HEAP 
 		globalHeapList->addHeap(this);
 		#endif
-
-        size_t currentEbp1;
-        asm("mov %%rsp, %0;"
-            : "=r"(currentEbp1)
-            :
-            :
-        );
 		
 		//------------------------------
 		// Store off who called this.
@@ -236,19 +222,18 @@ long HeapManager::commitHeap (unsigned long commitSize)
 		unsigned long currentEbp;
 		unsigned long prevEbp;
 		unsigned long retAddr;
-		
-		//__asm
-		//{
-		//	mov currentEbp,esp
-		//}
 
+#ifdef PLATFORM_WINDOWS
+		__asm { mov currentEbp,esp }
+#else
+		// only correct for 64bit?
         // currentEbp = esp;
         asm("mov %%rsp, %0;"
             : "=r"(currentEbp)
             :
             :
         );
-		
+#endif
 		prevEbp = *((unsigned long *)currentEbp);
 		retAddr = *((unsigned long *)(currentEbp+4));
 		whoMadeMe = retAddr;
