@@ -42,7 +42,16 @@ public:
 		bIsInMission = true;
 	}
 
-	void setColors( long base = 0xffff7e00, long highlight = 0xffff7e00, long h2 = 0xffbcbcbc ); 
+	void setColors( long base = 0xffff7e00, long highlight = 0xffff7e00, long h2 = 0xffbcbcbc );
+
+    void pushContext() {
+        oldCam = eye;
+        eye = this;
+    }
+    void popContext() {
+        eye = oldCam;
+        oldCam = NULL;
+    }
 
 	float		bounds[4];
 
