@@ -9,6 +9,7 @@
 #include"heap.h"
 #include"fastfile.h"
 #include<ctype.h>
+#include"platform_str.h"
 
 long ffLastError = 0;
 
@@ -84,7 +85,7 @@ FastFile *FastFileFind (const char *fname, long &fastFileHandle)
 
         // sebi NB!
         // if we are here file was not found, try with backslashes
-        char* fname2 = strdup(fname);
+        char* fname2 = _strdup(fname);
         int len = (int)strlen(fname2);
         for(int i=0;i<len;++i) {
             if(fname2[i]=='/')

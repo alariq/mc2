@@ -36,6 +36,7 @@ struct KeyboardInfo {
 void handleMouseMotion(const SDL_Event* event, MouseInfo* mi);
 void handleMouseButton(const SDL_Event* event, MouseInfo* mi);
 void handleMouseWheel(const SDL_Event* event, MouseInfo* mi);
+void beginUpdateMouseState(MouseInfo* mi);
 void updateMouseState(MouseInfo* mi);
 
 void handleKeyEvent(const SDL_Event* event, KeyboardInfo* ki);

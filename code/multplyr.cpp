@@ -1176,7 +1176,7 @@ void MultiPlayer::initStartupParameters (bool fresh) {
 //---------------------------------------------------------------------------
 extern char* GetTime();
 
-extern char *SpecialtySkillsTable[NUM_SPECIALTY_SKILLS];
+extern const char *SpecialtySkillsTable[NUM_SPECIALTY_SKILLS];
 
 long MultiPlayer::saveTranscript (const char* fileName, bool debugging) {
 

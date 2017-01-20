@@ -11,6 +11,9 @@ SimpleCamera.cpp	: Implementation of the SimpleCamera component.
 #include"mission.h"
 #include"bdactor.h"
 
+// sebi: !NB remove when assert(0 && "test") is removed below
+#include <cassert>
+
 extern bool useShadows;
 extern bool drawOldWay;
 extern bool useFog;
@@ -39,6 +42,8 @@ SimpleCamera::SimpleCamera()
 	rotateLightRight(90.0f);
 
 	bIsInMission = false;
+
+    bContextNotSet = true;
 }
 
 
@@ -54,7 +59,10 @@ SimpleCamera::~SimpleCamera()
 	if ( appearanceTypeList && appearanceTypeList->pointerCanBeDeleted(pObject) )
 		delete pObject;
     */
-    delete pObject;
+
+	// sebi: added this condition ecause  appearanceTypeList used inside destructor
+	if (appearanceTypeList)
+    	delete pObject;
 
 	pObject = NULL;
 
@@ -284,6 +292,8 @@ long SimpleCamera::update()
 
 void SimpleCamera::setMech(const char* fileName, long baseColor, long highlight1, long highlight2 )
 {
+	this->pushContext();
+
 	shapeScale = 0.0f;
 
 	bIsComponent = 0;
@@ -300,7 +310,9 @@ void SimpleCamera::setMech(const char* fileName, long baseColor, long highlight1
 	if ( appearanceTypeList && appearanceTypeList->pointerCanBeDeleted(pObject) )
 		delete pObject;
         */
-    delete pObject;
+	// sebi: added this conition ecause  appearanceTypeList used inside destructor
+	if (appearanceTypeList)
+		delete pObject;
 
 
 	if ( !appearanceTypeList )
@@ -314,6 +326,7 @@ void SimpleCamera::setMech(const char* fileName, long baseColor, long highlight1
 	if ( !fileName )
 	{
 //		allNormal();
+		this->popContext();
 		return;
 	}
 
@@ -347,10 +360,13 @@ void SimpleCamera::setMech(const char* fileName, long baseColor, long highlight1
 	setPosition(position, 0);
 	ZoomTight();
 
+	this->popContext();
 }
 
 void SimpleCamera::setVehicle(const char* fileName,long base, long highlight, long h2)
 {
+    this->pushContext();
+
 	shapeScale = 0.0f;
 
 	bIsComponent = 0;
@@ -371,12 +387,18 @@ void SimpleCamera::setVehicle(const char* fileName,long base, long highlight, lo
 	if ( appearanceTypeList && appearanceTypeList->pointerCanBeDeleted(pObject) )
 		delete pObject;
         */
-    delete pObject;
+  
+	// sebi: added this conition ecause  appearanceTypeList used inside destructor
+	if (appearanceTypeList)
+    	delete pObject;
 
 	pObject = NULL;
 
 	if ( !fileName )
+	{
+		this->popContext();
 		return;
+	}
 
 	char NoPathFileName[256];
 	_splitpath( fileName, NULL, NULL, NoPathFileName, NULL );
@@ -408,12 +430,15 @@ void SimpleCamera::setVehicle(const char* fileName,long base, long highlight, lo
 	setPosition(position);
 	ZoomTight();
 
+	this->popContext();
 }
 
 
 
 void SimpleCamera::setComponent(const char* fileName )
 {
+	this->pushContext();
+
 	shapeScale = 0.0f;
 
 	bIsComponent = 1;
@@ -434,13 +459,19 @@ void SimpleCamera::setComponent(const char* fileName )
 	if ( appearanceTypeList && appearanceTypeList->pointerCanBeDeleted(pObject) )
 		delete pObject;
         */
-    delete pObject;
+
+	// sebi: added this conition ecause  appearanceTypeList used inside destructor
+	if (appearanceTypeList)
+    	delete pObject;
 
 	pObject = NULL;
 
 
 	if ( !fileName )
+	{
+		this->popContext();
 		return;
+	}
 
 	char testName[256];
 	strcpy( testName, fileName );
@@ -473,6 +504,7 @@ void SimpleCamera::setComponent(const char* fileName )
 	setPosition(position);
 	ZoomTight();
 
+	this->popContext();
 }
 void SimpleCamera::setScale( float newAltitude )
 {
@@ -492,6 +524,7 @@ void SimpleCamera::setObject( const char* pFileName, long type, long base, long 
 {
 	if ( !pFileName || !strlen( pFileName ) )
 	{
+		assert(0 && "SimpleCamera::setObject");// sebi: check if we go here
 		if ( appearanceTypeList && appearanceTypeList->pointerCanBeDeleted(pObject) )
 			delete pObject;
 

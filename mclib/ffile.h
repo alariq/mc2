@@ -99,14 +99,14 @@ class FastFile
 
 		long openFast (DWORD hash, const char *fName);
 
-		void closeFast (long localHandle);
+		void closeFast (DWORD localHandle);
 
-		long seekFast (long fastFileHandle, long off, long from = SEEK_SET);
-		long readFast (long fastFileHandle, void *bfr, long size);
-		long readFastRAW (long fastFileHandle, void *bfr, long size);
-		long tellFast (long fastFileHandle);
-		long sizeFast (long fastFileHandle);
-		long lzSizeFast (long fastFileHandle);
+		long seekFast (DWORD fastFileHandle, DWORD off, DWORD from = SEEK_SET);
+		long readFast (DWORD fastFileHandle, void *bfr, DWORD size);
+		long readFastRAW (DWORD fastFileHandle, void *bfr, DWORD size);
+		long tellFast (DWORD fastFileHandle);
+		long sizeFast (DWORD fastFileHandle);
+		long lzSizeFast (DWORD fastFileHandle);
 
 		bool isLZCompressed (void)
 		{

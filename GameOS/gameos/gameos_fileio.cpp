@@ -12,8 +12,11 @@
 //
 
 #include <stdio.h> // fopen
+#include "platform_io.h"
 
 #include <errno.h>
+
+#include "platform_io.h" // will be removed
 
 gosFileStream::gosFileStream( const char *FileName, gosEnum_FileWriteStatus fwstatus )
 {
@@ -106,7 +109,7 @@ void __stdcall gos_FileSetReadWrite(char const* FileName)
 
 DWORD __stdcall gos_FileSize(char const* FileName)
 {
-	int fd = open(FileName, O_RDONLY);
+	int fd = _open(FileName, O_RDONLY);
     if(fd == -1) {
         STOP(("gos_FileSize failed"));
         return 0;
@@ -114,7 +117,7 @@ DWORD __stdcall gos_FileSize(char const* FileName)
 
     struct stat buf;
     fstat(fd, &buf);
-    close(fd);
+    _close(fd);
     
     return buf.st_size;
 }

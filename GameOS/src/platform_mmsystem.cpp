@@ -1,5 +1,8 @@
-#include "windef.h"
-#include "mmsystem.h"
+#ifndef PLATFORM_WINDOWS
+
+#include "platform_windef.h"
+#include "platform_mmsystem.h"
+
 
 #include <time.h>
 
@@ -12,3 +15,5 @@ DWORD timeGetTime()
     milliseconds += ts.tv_nsec / 1e+6;
     return milliseconds;
 }
+
+#endif // PLATFORM_WINDOWS

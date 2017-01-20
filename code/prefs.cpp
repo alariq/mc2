@@ -2,7 +2,7 @@
 // Copyright (C) Microsoft Corporation. All rights reserved.                 //
 //===========================================================================//
 
-#include<io.h> // for _chmod()
+#include"platform_io.h" // for _chmod()
 
 #include"prefs.h"
 #include"gamesound.h"
@@ -25,7 +25,8 @@ extern bool useWaterInterestTexture;
 extern bool useUnlimitedAmmo;
 extern long GameDifficulty;
 extern long renderer;
-extern long resolution;
+extern long resolutionX;
+extern long resolutionY;
 extern long gammaLevel;
 extern bool useLeftRightMouseProfile;
 extern bool useNonWeaponEffects;
@@ -53,7 +54,10 @@ CPrefs::CPrefs() {
 	useUnlimitedAmmo = true;
 
 	renderer = 0;
-	resolution = 1;
+    resolutionX = 800;
+    resolutionY = 600;
+    bitDepth = 32;
+
 	fullScreen = false;
 	gammaLevel = 0;
 	useLeftRightMouseProfile = true; // if false, use old style commands
@@ -174,9 +178,13 @@ int CPrefs::load( const char* pFileName ) {
 				}
 			}
 				
-			result = prefsFile->readIdLong("Resolution",resolution);
+			result = prefsFile->readIdInt("ResolutionX",resolutionX);
 			if (result != NO_ERR)
-				resolution = 1;
+				resolutionX = 800;
+
+			result = prefsFile->readIdInt("ResolutionY",resolutionY);
+			if (result != NO_ERR)
+				resolutionY = 600;
 
 			result = prefsFile->readIdBoolean("FullScreen",fullScreen);
 			if (result != NO_ERR)
@@ -249,10 +257,10 @@ int CPrefs::load( const char* pFileName ) {
 			}
 			result = prefsFile->readIdChar( "BitDepth",	bitDepth );
 			if ( result != NO_ERR )
-				bitDepth = 0;
+				bitDepth = 32;
 
 			if (bitDepth && (renderer == 3))
-				bitDepth = 0;
+				bitDepth = 16;
 
 			result = prefsFile->readIdBoolean( "SaveTranscripts", saveTranscripts );
 			result = prefsFile->readIdBoolean( "Tutorials", tutorials );
@@ -315,7 +323,8 @@ int CPrefs::save() {
 			result = prefsFile->writeIdBoolean("UnlimitedAmmo",useUnlimitedAmmo);
 
 			result = prefsFile->writeIdLong("Rasterizer",renderer);
-			result = prefsFile->writeIdLong("Resolution",resolution);
+			result = prefsFile->writeIdLong("ResolutionX",resolutionX);
+			result = prefsFile->writeIdLong("ResolutionY",resolutionY);
 			result = prefsFile->writeIdBoolean("FullScreen",fullScreen);
 			result = prefsFile->writeIdLong("Brightness",gammaLevel);
 			result = prefsFile->writeIdBoolean( "useLeftRightMouseProfile", useLeftRightMouseProfile );
@@ -389,14 +398,16 @@ int CPrefs::applyPrefs(bool applyRes) {
 	::useUnlimitedAmmo = this->useUnlimitedAmmo;
 
 	::renderer = this->renderer;
-	::resolution = this->resolution;
+	//::resolution = this->resolution;
+	::resolutionX = this->resolutionX;
+	::resolutionY = this->resolutionY;
 	::gammaLevel = this->gammaLevel;
 	mc2UseAsyncMouse = this->asyncMouse;
 	::useLeftRightMouseProfile = this->useLeftRightMouseProfile;
 	::useNonWeaponEffects = this->useNonWeaponEffects;
 	::useHighObjectDetail = this->useHighObjectDetail;
 
-	int bitDepth = this->bitDepth ? 32 : 16;
+	int bitDepth = this->bitDepth;
 
 	//Play with the fog distance.
 	float fogPercent = float(fogPos) / 100.0f;
@@ -422,6 +433,13 @@ int CPrefs::applyPrefs(bool applyRes) {
 		if (Environment.fullScreen && fullScreen)
 			localFullScreen = false;
 
+
+        if (renderer == 3)
+            gos_SetScreenMode(this->resolutionX, this->resolutionY, bitDepth,0,0,0,true,localFullScreen,0,localWindow,0,localRenderer);
+        else
+            gos_SetScreenMode(this->resolutionX, this->resolutionY, bitDepth,renderer,0,0,0,localFullScreen,0,localWindow,0,localRenderer);
+
+        /*
 		switch (resolution)
 		{
 			case 0:			//640by480
@@ -474,6 +492,7 @@ int CPrefs::applyPrefs(bool applyRes) {
 					gos_SetScreenMode(1600,1200,16,renderer,0,0,0,localFullScreen,0,localWindow,0,localRenderer);
 				break;
 		}
+        */
 	}
 
 	return 0;
@@ -487,7 +506,7 @@ void CPrefs::setNewName( const char* pNewName )
     int i = 0;
 	for ( ; i < 10; i++ )
 	{
-		if ( !stricmp( pNewName, playerName[i] ) )
+		if ( !S_stricmp( pNewName, playerName[i] ) )
 		{
 			// found the same one so now we just shuffle
 			for ( int j = i; j < 9; j++ )
@@ -525,7 +544,7 @@ void CPrefs::setNewIP( const char* pNewIP )
 	// check and see if this name is already in here
 	for ( int i = 0; i < 10; i++ )
 	{
-		if ( !stricmp( pNewIP, ipAddresses[i] ) )
+		if ( !S_stricmp( pNewIP, ipAddresses[i] ) )
 		{
 			// found the same one so now we just shuffle
 			for ( int j = i; j < 9; j++ )
@@ -558,7 +577,7 @@ void CPrefs::setNewUnit( const char* pNewUnit )
     int i = 0;
 	for ( ; i < 10; i++ )
 	{
-		if ( !stricmp( pNewUnit, unitName[i] ) )
+		if ( !S_stricmp( pNewUnit, unitName[i] ) )
 		{
 			// found the same one so now we just shuffle
 			for ( int j = i; j < 9; j++ )

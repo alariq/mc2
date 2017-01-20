@@ -66,7 +66,7 @@
 //#include<sessionmanager.h>
 //#endif
 
-#include<windows.h>
+#include"platform_windows.h"
 //#include<stdio.h>
 
 //***************************************************************************

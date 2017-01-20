@@ -161,15 +161,15 @@ MLRLight*
 	
 	page->GetEntry("LightType", &type, true);
 	MLRLight *light = NULL;
-	if (!_stricmp(type, "Ambient"))
+	if (!S_stricmp(type, "Ambient"))
 		light = new MLRAmbientLight(page);
-	else if (!_stricmp(type, "Infinite"))
+	else if (!S_stricmp(type, "Infinite"))
 		light = new MLRInfiniteLight(MLRInfiniteLight::DefaultData, page);
-	else if (!_stricmp(type, "Point"))
+	else if (!S_stricmp(type, "Point"))
 		light = new MLRPointLight(page);
-	else if (!_stricmp(type, "Spot"))
+	else if (!S_stricmp(type, "Spot"))
 		light = new MLRSpotLight(page);
-	else if (!_stricmp(type, "LookUp"))
+	else if (!S_stricmp(type, "LookUp"))
 		light = new MLRLookUpLight(page);
 	else
 		STOP(("Bad light type"));

@@ -189,7 +189,7 @@ ControlGui::ControlGui()
 
 	objectiveInfos = 0;
 
-	swapResolutions( Environment.screenWidth );
+	swapResolutions( Environment.screenWidth, Environment.screenHeight );
 	resultsTime = 0;
 
 	twoMinWarningPlayed = false;
@@ -452,8 +452,8 @@ void ControlGui::render( bool bPaused )
 			{
 				float scaleX = Environment.screenWidth <= 1024 ? Environment.screenWidth : 1024;
 				float scaleY = Environment.screenHeight <= 768 ? Environment.screenHeight : 768;
-				GUI_RECT rect = { 51 * scaleX/640.f + ControlGui::hiResOffsetX, 317 * scaleY/480.f + ControlGui::hiResOffsetY,
-								74 *scaleX/640.f + ControlGui::hiResOffsetX, 337 * scaleY/480.f  + ControlGui::hiResOffsetY};
+				GUI_RECT rect = { (long)(51 * scaleX/640.f + ControlGui::hiResOffsetX), (long)(317 * scaleY/480.f + ControlGui::hiResOffsetY),
+								(long)(74 *scaleX/640.f + ControlGui::hiResOffsetX), (long)(337 * scaleY/480.f  + ControlGui::hiResOffsetY)};
 				drawRect( rect, 0xff000000 );
 			}
 		}
@@ -779,8 +779,8 @@ void ControlGui::renderPlayerStatus(float xDelta)
 			mpStats[i].showGUIWindow( 0 );
 	}
 
-	GUI_RECT rect = { mpStats[0].left()-5+xDelta, mpStats[0].top()-5, 
-		mpStats[0].right()+5+xDelta, mpStats[0].bottom()+5};
+	GUI_RECT rect = { (long)(mpStats[0].left()-5+xDelta), (long)(mpStats[0].top()-5), 
+		(long)(mpStats[0].right()+5+xDelta), (long)(mpStats[0].bottom()+5)};
 	
 	for (int i = 1; i < 9; i++ )
 	{
@@ -1886,8 +1886,8 @@ void ControlGui::renderVehicleTab()
 		{
 			ControlButton::makeUVs( vehicleButtons[i].location, ControlButton::ENABLED, *vehicleButtons[i].data );	
 			cost = vehicleCosts[i];
-			GUI_RECT rect = { vehicleButtons[i].location[0].x, vehicleButtons[i].location[0].y,
-				vehicleButtons[i].location[2].x, vehicleButtons[i].location[2].y };
+			GUI_RECT rect = { (long)vehicleButtons[i].location[0].x, (long)vehicleButtons[i].location[0].y,
+				(long)vehicleButtons[i].location[2].x, (long)vehicleButtons[i].location[2].y };
 			vehicleButtons[i].render();
 			drawEmptyRect( rect, 0xffffffff, 0xffffffff );
 			color = 0xffffffff;
@@ -2287,6 +2287,9 @@ void ControlButton::initButtons( FitIniFile& buttonFile, long buttonCount, Contr
 
 
 		Buttons[i].data = &Data[i];
+
+        // sebi: initialize state so it is not garbage
+		Buttons[i].state = ENABLED;
 		
 		Buttons[i].location[0].x = Buttons[i].location[1].x = x;
 		Buttons[i].location[0].y = Buttons[i].location[3].y = y;
@@ -2310,7 +2313,7 @@ void ControlButton::initButtons( FitIniFile& buttonFile, long buttonCount, Contr
 			strcpy( file, artPath );
 			strcat( file, Buttons[i].data->fileName );
 			strcat( file, ".tga" );
-			_strlwr( file );
+			S_strlwr( file );
 			int ID = mcTextureManager->loadTexture( file, gos_Texture_Alpha, 0, 0, 0x2 );
 			int gosID = mcTextureManager->get_gosTextureHandle( ID );
 			TEXTUREPTR textureData;
@@ -2587,7 +2590,7 @@ void ControlGui::initStatics( FitIniFile& file )
 void ControlGui::initRects( FitIniFile& file )
 {
 	if ( rectInfos )
-		delete rectInfos;
+		delete[] rectInfos;
 
 	rectInfos = 0;
 	rectCount = 0;
@@ -2627,23 +2630,30 @@ void ControlGui::initRects( FitIniFile& file )
 	}
 }
 
-void ControlGui::swapResolutions( int resolution )
+void ControlGui::swapResolutions( int resolutionX, int resolutionY )
 {
 	FitIniFile buttonFile;
 	char path[256];
 	strcpy( path, artPath );
 	
 	char fileName[32];
+
+    int y_correction = 0;
 	
-	if ( resolution == 1600)
+	if ( resolutionX == 1920)
+    {
+		strcpy( fileName, "buttonlayout1920.fit" ); // 1920x1200
+        y_correction = resolutionY - 1200;
+    }
+	else if ( resolutionX == 1600)
 		strcpy( fileName, "buttonlayout1600.fit" ); 
-	else if ( resolution == 1280)
+	else if ( resolutionX == 1280)
 		strcpy( fileName, "buttonlayout1280.fit" ); 
-	else if ( resolution == 1024)
+	else if ( resolutionX == 1024)
 		strcpy( fileName, "buttonlayout1024.fit" ); 
-	else if ( resolution == 800 )
+	else if ( resolutionX == 800 )
 		strcpy( fileName, "buttonlayout800.fit" );
-	else if ( resolution == 640 )
+	else if ( resolutionX == 640 )
 		strcpy( fileName, "buttonlayout640.fit" );
 	else 
 		strcpy( fileName, "buttonlayout1024.fit" );
@@ -2668,6 +2678,8 @@ void ControlGui::swapResolutions( int resolution )
 		result = buttonFile.readIdLong("yOffset",hiResOffsetY);
 		if (result != NO_ERR)
 			hiResOffsetY = 0;
+        else
+            hiResOffsetY += y_correction;
 	}
 	else
 	{
@@ -3137,6 +3149,7 @@ bool ControlGui::playPilotVideo( MechWarrior* pPilot, char movieCode )
 
 	char realPilotName[8];
 	strncpy(realPilotName, pPilot->getName(), 7);
+	realPilotName[7] = '\0'; // sebi: fix
 
 	strcat( fileName, realPilotName ); // swap in pilot name when videos are done
 	char tmp[3];

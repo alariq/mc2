@@ -1,4 +1,6 @@
-#include "io.h"
+#ifndef PLATFORM_WINDOWS
+
+#include "platform_io.h"
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -10,3 +12,4 @@ long _filelength(int fd) {
     return buf.st_size;
 }
 
+#endif // PLATFORM_WINDOWS

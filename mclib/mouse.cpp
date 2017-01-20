@@ -44,7 +44,7 @@
 
 #include"dstd.h"
 #include"userinput.h"
-#include<windows.h>
+#include"platform_windows.h"
 // sebi
 #ifndef LINUX_BUILD
 #include<mmsystem.h>

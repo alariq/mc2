@@ -118,7 +118,7 @@ void aObject::init(FitIniFile* file, const char* blockName, DWORD neverFlush)
 			char buffer[256];
 			strcpy( buffer, artPath );
 			strcat( buffer, fileName );
-			_strlwr( buffer );
+			S_strlwr( buffer );
 			if ( !strstr( buffer, ".tga" ) )
 				strcat( buffer, ".tga" );
 			int ID = mcTextureManager->loadTexture( buffer, bAlpha ? gos_Texture_Alpha : gos_Texture_Keyed, 0, 0, 0x2);
@@ -731,7 +731,7 @@ void aText::setText(const EString& str)
 
 void aText::render()
 {
-	if ( showWindow )
+	if ( showWindow && text.Length()>0)
 		font.render( text, location[0].x, location[0].y, location[2].x - location[0].x, 
 		location[2].y - location[0].y, location[0].argb, 0, alignment );
 }

@@ -11,6 +11,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <ctime>
+#include <string.h> // strlen needed for linux and windows
 
 
 #include "string_utils.h"

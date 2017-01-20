@@ -26,6 +26,8 @@ class MissionBegin
 {
 	public:
 
+		enum { DIM_SCREEN_X = 5, DIM_SCREEN_Y = 3};
+
 		//Tutorial - SAVE with savegame, please!!
 		static bool 				FirstTimePurchase;
 		static bool					FirstTimeMechLab;
@@ -77,9 +79,9 @@ class MissionBegin
 	
 		bool						bMultiplayer;
 
-		LogisticsScreen*			multiplayerScreens[5/*dim screen X*/][3/*dim screen Y*/];
-		LogisticsScreen*			singlePlayerScreens[5/*dim screen X*/][3/*dim screen Y*/];
-		LogisticsScreen*			screens[5/*dim screen X*/][3/*dim screen Y*/];
+		LogisticsScreen*			multiplayerScreens[DIM_SCREEN_X][DIM_SCREEN_Y];
+		LogisticsScreen*			singlePlayerScreens[DIM_SCREEN_X][DIM_SCREEN_Y];
+		LogisticsScreen*			screens[DIM_SCREEN_X][DIM_SCREEN_Y];
 		LogisticsScreen*			placeHolderScreen;
 
 		long						curScreenX;

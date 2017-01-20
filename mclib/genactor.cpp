@@ -68,7 +68,7 @@ extern bool		useFog;
 extern long 	mechRGBLookup[];
 extern long 	mechRGBLookup2[];
 
-extern int 	ObjectTextureSize;
+extern int		ObjectTextureSize;
 
 extern bool reloadBounds;
 //-----------------------------------------------------------------------------
@@ -137,11 +137,12 @@ void GenericAppearanceType::init (const char * fileName)
 		genDmgShape = NULL;
 	}
 
-		
 	//--------------------------------------------------------------------
 	// Load Animation Information.
+    // sebi: how this could possible work!!! MAX_BD_ANIMATIONS=10 
+    // but MAX_GEN_ANIMATIONS=5! so 5 times out of bounds array access!!!
 	// We can load up to 10 Animation States.
-	for (long i=0;i<MAX_BD_ANIMATIONS;i++)
+	for (int i=0;i<MAX_GEN_ANIMATIONS;i++)
 	{
 		char blockId[512];
 		sprintf(blockId,"Animation:%d",i);
@@ -271,6 +272,8 @@ void GenericAppearance::init (AppearanceTypePtr tree, GameObjectPtr obj)
 	homeTeamRelationship = 0;
 	actualRotation = rotation;
 
+    status = OBJECT_STATUS_NORMAL; // sebi: init to not contain garbage
+
 	OBBRadius = -1.0f;
 	
 	if (appearType)
@@ -295,7 +298,7 @@ void GenericAppearance::init (AppearanceTypePtr tree, GameObjectPtr obj)
 	
 			if (fileExists(textureName))
 			{
-				if (strnicmp(txmName,"a_",2) == 0)
+				if (S_strnicmp(txmName,"a_",2) == 0)
 				{
 					DWORD gosTextureHandle = mcTextureManager->loadTexture(textureName,gos_Texture_Alpha,gosHint_DisableMipmap | gosHint_DontShrink);
 					genShape->SetTextureHandle(i,gosTextureHandle);
@@ -486,7 +489,7 @@ void GenericAppearance::setObjectParameters (const Stuff::Vector3D &pos, float R
 //-----------------------------------------------------------------------------
 void GenericAppearance::changeSkyToSkyNum (char *txmName, char *newName)
 {
-	if (strnicmp(txmName,"sky",3) != 0)
+	if (S_strnicmp(txmName,"sky",3) != 0)
 	{
 		strcpy(newName,txmName);
 	}
@@ -526,7 +529,7 @@ void GenericAppearance::setSkyNumber (long skyNum)
 
 		if (fileExists(textureName))
 		{
-			if (strnicmp(newName,"a_",2) == 0)
+			if (S_strnicmp(newName,"a_",2) == 0)
 			{
 				DWORD gosTextureHandle = mcTextureManager->loadTexture(textureName,gos_Texture_Alpha,gosHint_DisableMipmap | gosHint_DontShrink);
 				genShape->SetTextureHandle(i,gosTextureHandle);

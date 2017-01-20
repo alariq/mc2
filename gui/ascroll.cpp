@@ -81,7 +81,7 @@ void aScrollBar::render()
 	scrollTab.moveTo( globalX() + 2, scrollTab.globalY() );
 
 	aObject::render();
- 	GUI_RECT area = { location[0].x, location[0].y, location[2].x, location[2].y };
+ 	GUI_RECT area = { (long)location[0].x, (long)location[0].y, (long)location[2].x, (long)location[2].y };
 	drawEmptyRect( area, color, color );
 }
 

@@ -2071,7 +2071,7 @@ void TacticalOrder::debugString (MechWarriorPtr pilot, char* s) {
 			curPos.z = 0.0;
 			int cell[2];
 			land->worldToCell(curPos, cell[0], cell[1]);
-			sprintf(s, "jump to pt (%.0f, %.0f)",
+			sprintf(s, "jump to pt (%.0f, %.0f), cell:(%d, %d)",
 				moveParams.wayPath.points[0],
 				moveParams.wayPath.points[1],
 				cell[0], cell[1]);

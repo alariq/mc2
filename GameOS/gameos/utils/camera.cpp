@@ -3,9 +3,6 @@
 #include "utils/vec.h"
 #include "utils/camera.h"
 
-#ifdef PLATFORM_WINDOWS
-#include <windows.h>
-#endif
 //#include <GL/glew.h>
 //#include <graphics/gl_utils.h>
 #include "utils/matrix.h"

@@ -19,7 +19,7 @@
 #include"file.h"
 #endif
 
-#include<windows.h>
+#include"platform_windows.h"
 #ifndef USE_GOS_HEAP
 #include<imagehlp.h>
 #endif
@@ -30,14 +30,13 @@
 #include<tchar.h>
 #endif
 
-#include<stdio.h>             // For sprintf
-#include<string.h>            // For strchr
-#include"string_win.h" 
+#include"platform_str.h" 
+#include <ctype.h> // toupper
 
 //---------------------------------------------------------------------------
 // Static Globals
-static char CorruptMsg[] = "Heap check failed.\n";
-static char pformat[] = "%s %s\n";
+static const char CorruptMsg[] = "Heap check failed.\n";
+static const char pformat[] = "%s %s\n";
 
 GlobalHeapRec HeapList::heapRecords[MAX_HEAPS];
 HeapListPtr globalHeapList = NULL;
@@ -203,13 +202,6 @@ long HeapManager::commitHeap (unsigned long commitSize)
 
 	MemoryPtr result = (MemoryPtr)VirtualAlloc(heap,commitSize,MEM_COMMIT,PAGE_READWRITE);
 
-    size_t currentEbp0;
-    asm("mov %%rsp, %0;"
-            : "=r"(currentEbp0)
-            :
-            :
-       );
-
 	if (result == heap)
 	{
 		long actualSize = commitSize;
@@ -220,13 +212,6 @@ long HeapManager::commitHeap (unsigned long commitSize)
 		// Add this to the UEBER HEAP 
 		globalHeapList->addHeap(this);
 		#endif
-
-        size_t currentEbp1;
-        asm("mov %%rsp, %0;"
-            : "=r"(currentEbp1)
-            :
-            :
-        );
 		
 		//------------------------------
 		// Store off who called this.
@@ -236,19 +221,18 @@ long HeapManager::commitHeap (unsigned long commitSize)
 		unsigned long currentEbp;
 		unsigned long prevEbp;
 		unsigned long retAddr;
-		
-		//__asm
-		//{
-		//	mov currentEbp,esp
-		//}
 
+#ifdef PLATFORM_WINDOWS
+		__asm { mov currentEbp,esp }
+#else
+		// only correct for 64bit?
         // currentEbp = esp;
         asm("mov %%rsp, %0;"
             : "=r"(currentEbp)
             :
             :
         );
-		
+#endif
 		prevEbp = *((unsigned long *)currentEbp);
 		retAddr = *((unsigned long *)(currentEbp+4));
 		whoMadeMe = retAddr;
@@ -2026,7 +2010,7 @@ long getStringFromMap (File &mapFile, unsigned long addr, char *result)
 	
 	while (strstr(mapFileLine,"0001:") != NULL)
 	{
-		if (strnicmp(currentAddress,actualAddr,8) > 0)
+		if (S_strnicmp(currentAddress,actualAddr,8) > 0)
 		{
 			//-----------------------------------------------
 			// We've found it, print the previous address.

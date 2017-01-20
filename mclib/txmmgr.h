@@ -203,7 +203,7 @@ class gos_VERTEXManager : public HeapManager
 		
 		gos_VERTEX *getVertexBlock(long numVertices)
 		{
-			gos_VERTEX *start = (gos_VERTEX *)getHeapPtr();
+			gos_VERTEX *start = reinterpret_cast<gos_VERTEX *>(getHeapPtr());
 			start = &(start[currentVertex]);
 			currentVertex += numVertices;
 			gosASSERT(currentVertex < totalVertices);
@@ -510,12 +510,14 @@ class MC_TextureManager
 				{
 					gos_VERTEX * vertices = masterTextureNodes[nodeId].vertexData2->currentVertex;
 					
+                    //sebi: looks like assert may happen if more vertices added than was calculated on stage when addTriange was called. As one can see in (*) first time we go here, we allocate enough memory for all potential vertices, but if it is not enough this assert will trigger
 					#if defined( _DEBUG) || defined(_ARMOR)
 					gos_VERTEX * oldVertices = vertices;
 					gos_VERTEX * oldStart = (masterTextureNodes[nodeId].vertexData2->vertices + masterTextureNodes[nodeId].vertexData2->numVertices);
 					#endif
 					gosASSERT(oldVertices < oldStart);
 
+                    // (*)
 					if (!vertices && !masterTextureNodes[nodeId].vertexData2->vertices)
 					{
 						masterTextureNodes[nodeId].vertexData2->currentVertex =

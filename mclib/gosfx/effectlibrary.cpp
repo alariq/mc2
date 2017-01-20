@@ -97,7 +97,7 @@ gosFX::Effect::Specification*
 		if (spec)
 		{
 			Check_Object(spec);
-			if (!_stricmp(spec->m_name, name))
+			if (!S_stricmp(spec->m_name, name))
 			{
 				Verify( spec->m_effectID == i );
 				return spec;

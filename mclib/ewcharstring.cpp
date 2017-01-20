@@ -29,7 +29,7 @@
 
 
 
-#include<windows.h>
+#include"platform_windows.h"
 #include<stdio.h>
 #include"ewcharstring.h"
 
@@ -37,7 +37,7 @@
 
 #ifdef UNICODE
 #include<malloc.h>
-#include<tchar.h>
+#include"platform_tchar.h"
 #endif
 
 

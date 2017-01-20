@@ -176,7 +176,7 @@ DWORD				Mech3DAppearance::numPaintSchemata = 0;
 
 TG_TypeMultiShapePtr Mech3DAppearanceType::SensorSquareShape = NULL;
 
-extern int 	ObjectTextureSize;
+extern int ObjectTextureSize;
 
 #define FOOTPRINT_SLOP			2
 
@@ -1106,7 +1106,7 @@ void Mech3DAppearance::init (AppearanceTypePtr tree, GameObjectPtr obj)
 	
 			if (fileExists(textureName))
 			{
-				if (strnicmp(txmName,"a_",2) == 0)
+				if (S_strnicmp(txmName,"a_",2) == 0)
 				{
 					DWORD gosTextureHandle = mcTextureManager->loadTexture(textureName,gos_Texture_Alpha,gosHint_DisableMipmap | gosHint_DontShrink);
 					sensorTriangleShape->SetTextureHandle(i,gosTextureHandle);
@@ -1144,7 +1144,7 @@ void Mech3DAppearance::init (AppearanceTypePtr tree, GameObjectPtr obj)
 		
 				if (fileExists(textureName))
 				{
-					if (strnicmp(txmName,"a_",2) == 0)
+					if (S_strnicmp(txmName,"a_",2) == 0)
 					{
 						DWORD gosTextureHandle = mcTextureManager->loadTexture(textureName,gos_Texture_Alpha,gosHint_DisableMipmap | gosHint_DontShrink);
 						sensorSquareShape->SetTextureHandle(i,gosTextureHandle);
@@ -1182,7 +1182,7 @@ void Mech3DAppearance::init (AppearanceTypePtr tree, GameObjectPtr obj)
 		
 				if (fileExists(textureName))
 				{
-					if (strnicmp(txmName,"a_",2) == 0)
+					if (S_strnicmp(txmName,"a_",2) == 0)
 					{
 						DWORD gosTextureHandle = mcTextureManager->loadTexture(textureName,gos_Texture_Alpha,gosHint_DisableMipmap | gosHint_DontShrink);
 						sensorSquareShape->SetTextureHandle(i,gosTextureHandle);
@@ -1308,6 +1308,7 @@ void Mech3DAppearance::init (AppearanceTypePtr tree, GameObjectPtr obj)
 
 	currentStateGoal = -1;		//Always start ready to change gestures
 	currentGestureId = 2;		//Always start in Stand Mode
+    inCombatMode = false;       // sebi: init, so will not contain garbage
 
 	transitionState = 0;
 	oldStateGoal = 1;			//Always start in Stand Mode
@@ -1359,7 +1360,7 @@ void Mech3DAppearance::init (AppearanceTypePtr tree, GameObjectPtr obj)
 
 			if (fileExists(textureName))
 			{
-				if (strnicmp(txmName,"a_",2) == 0)
+				if (S_strnicmp(txmName,"a_",2) == 0)
 				{
 					DWORD gosTextureHandle = mcTextureManager->loadTexture(textureName,gos_Texture_Alpha,gosHint_DisableMipmap | gosHint_DontShrink);
 					gosASSERT(gosTextureHandle != 0xffffffff);
@@ -2909,7 +2910,7 @@ void Mech3DAppearance::setObjStatus (long oStatus)
 		
 				if (fileExists(textureName))
 				{
-					if (strnicmp(txmName,"a_",2) == 0)
+					if (S_strnicmp(txmName,"a_",2) == 0)
 					{
 						DWORD gosTextureHandle = 0;
 						
@@ -4213,6 +4214,11 @@ long Mech3DAppearance::update (bool animate)
 		
 		qRotation = Stuff::EulerAngles(dRot[1].x * DEGREES_TO_RADS, dRot[1].y * DEGREES_TO_RADS, dRot[1].z * DEGREES_TO_RADS);
 
+        // sebi: update texture handle, it will not be updated it updateGeometry 
+        // is not caaled which is not correct and leads to 
+        // "Flags do not match either set of vertex Data" (see txmmgr.h)
+		leftArm->SetTextureHandle(0,localTextureHandle);
+
 		leftArm->SetFogRGB(0xffffffff);
 		leftArm->SetLightList(eye->getWorldLights(),eye->getNumLights());
 		leftArm->TransformMultiShape(&xlatPosition,&qRotation);
@@ -4291,6 +4297,11 @@ long Mech3DAppearance::update (bool animate)
 		xlatPosition.z = rightArmPos.y;
 		
 		qRotation = Stuff::EulerAngles(dRot[0].x * DEGREES_TO_RADS, dRot[0].y * DEGREES_TO_RADS, dRot[0].z * DEGREES_TO_RADS);
+
+        // sebi: update texture handle, it will not be updated it updateGeometry 
+        // is not caaled which is not correct and leads to 
+        // "Flags do not match either set of vertex Data" (see txmmgr.h)
+		rightArm->SetTextureHandle(0,localTextureHandle);
 
 		rightArm->SetFogRGB(0xffffffff);
 		rightArm->SetLightList(eye->getWorldLights(),eye->getNumLights());

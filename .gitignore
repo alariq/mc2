@@ -1,6 +1,11 @@
 tags
 CMakeCache.txt
 out/
+bin/
+build/
+build-rel/
+build-dbg/
+build-reldbginfo/
 *.exe
 *.cmake
 Makefile
@@ -41,8 +46,25 @@ vidcard.csv
 longpath.dbg
 tmp/
 
+*.h~
+*.hpp~
+*.c~
+*.cpp~
+
+*~
+
+*.pdb
+*.ilk
+*.exp
+*.obj
+*.tlog
+
+
 # Coverity
 cov-int/
+
+#web site
+site/
 
 # CMake Tools VS Code extension
 CMakeToolsMeta.in.txt

@@ -1,3 +1,5 @@
+#ifndef PLATFORM_WINDOWS
+
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
@@ -14,10 +16,10 @@
 #include <libgen.h> // dirname
 #include <stdlib.h> // free
 #include <stdio.h> // free
+#include<wchar.h> // wcscpy
 
-#include"windows.h"
-#include"string.h"
-#include"wchar.h"
+#include"platform_windows.h"
+#include"platform_str.h"
 
 static int gGetLastError = 0;
 
@@ -319,13 +321,17 @@ HANDLE WINAPI FindFirstFileA( LPCTSTR lpFileName, LPWIN32_FIND_DATAA lpFindFileD
         ffd->entries = new dirent[n];
         for(int i=0;i<n;++i) {
             memcpy(ffd->entries+i, entries[i], sizeof(struct dirent));
+            free(entries[i]);
         }
+        free(entries);
+        entries = NULL;
         ffd->last_retrieved_entry = 0;
         ffd->num_entries = n;
         ffd->initialized = true;
         ffd->dir_name = strdup(dir_name);
 
         FillFindData(ffd->dir_name, ffd->entries[0].d_name, lpFindFileData);
+
     }
 
     free(dn);
@@ -371,6 +377,7 @@ BOOL WINAPI FindClose(HANDLE hFindFile)
 }
 
 
+#endif // PLATFORM_WINDOWS
 
 
 

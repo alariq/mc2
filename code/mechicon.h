@@ -132,7 +132,7 @@ protected:
 
 
 		friend class ForceGroupBar;
-		friend void TerminateGameEngine(void);
+		friend void __stdcall TerminateGameEngine(void);
 
 		bool	bDrawBack;
 

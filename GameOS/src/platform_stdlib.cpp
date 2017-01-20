@@ -1,4 +1,5 @@
-#include "stdlib_win.h"
+#ifndef PLATFORM_WINDOWS
+#include "platform_stdlib.h"
 
 #include <libgen.h>
 #include <string.h>
@@ -81,3 +82,6 @@ void _itoa(int value, char* str, int radix)
 {
    i32toa_naive(value, str); 
 }
+
+
+#endif // PLATFORM_WINDOWS

@@ -34,6 +34,11 @@ void TriggerAreaManager::destroy (void) {
 
 long TriggerAreaManager::add (long ULrow, long ULcol, long LRrow, long LRcol, long type, long param) {
 
+    gosASSERT(ULrow >= 0 && ULrow/3 + 1 < MAX_MAP_CELL_WIDTH/3);
+    gosASSERT(LRrow >= 0 && LRrow/3 + 1 < MAX_MAP_CELL_WIDTH/3);
+    gosASSERT(ULcol >= 0 && ULcol/3 + 1 < MAX_MAP_CELL_WIDTH/3);
+    gosASSERT(LRcol >= 0 && LRcol/3 + 1 < MAX_MAP_CELL_WIDTH/3);
+
     int i;
 	for (i = 1; i < MAX_TRIGGER_AREAS; i++)
 		if (triggerAreas[i].type == TRIGGER_AREA_NONE)
@@ -54,7 +59,7 @@ long TriggerAreaManager::add (long ULrow, long ULcol, long LRrow, long LRcol, lo
 		tileDims[3] = LRcol / 3 + 1;
 		for (long r = tileDims[0]; r < tileDims[2]; r++)
 			for (long c = tileDims[1]; c < tileDims[3]; c++) {
-				//sert((map[r][c] == 0) || (map[r][c] == i), i," Duplicate Trigger ");
+				//assert((map[r][c] == 0) || (map[r][c] == i), i," Duplicate Trigger ");
 				map[r][c] = i;
 			}
 		return(i);

@@ -69,7 +69,7 @@ extern bool		useFog;
 extern long 	mechRGBLookup[];
 extern long 	mechRGBLookup2[];
 
-extern int 	ObjectTextureSize;
+extern int		ObjectTextureSize;
 
 extern bool		reloadBounds;
 extern float	metersPerWorldUnit;
@@ -474,7 +474,7 @@ Stuff::Vector3D BldgAppearance::getWeaponNodePosition (long nodeId)
    	torsoRot = Stuff::EulerAngles(0.0f,(turretYaw * DEGREES_TO_RADS),0.0f);
 	if (rotationalNodeId == -1)
 	{
-		if (stricmp(appearType->rotationalNodeId,"NONE") != 0)
+		if (S_stricmp(appearType->rotationalNodeId,"NONE") != 0)
 			rotationalNodeId = bldgShape->GetNodeNameId(appearType->rotationalNodeId);
 		else
 			rotationalNodeId = -2;
@@ -542,6 +542,8 @@ void BldgAppearance::init (AppearanceTypePtr tree, GameObjectPtr obj)
 
 	shapeMin.x = shapeMin.y = -25;
 	shapeMax.x = shapeMax.y = 50;
+
+    status = OBJECT_STATUS_NORMAL; // sebi: init so will not be garbage
 
 	bdAnimationState =-1;
 	currentFrame = 0.0f;
@@ -611,7 +613,7 @@ void BldgAppearance::init (AppearanceTypePtr tree, GameObjectPtr obj)
 	
 			if (fileExists(textureName))
 			{
-				if (strnicmp(txmName,"a_",2) == 0)
+				if (S_strnicmp(txmName,"a_",2) == 0)
 				{
 					DWORD gosTextureHandle = mcTextureManager->loadTexture(textureName,gos_Texture_Alpha,gosHint_DisableMipmap | gosHint_DontShrink);
 					gosASSERT(gosTextureHandle != 0xffffffff);
@@ -652,7 +654,7 @@ void BldgAppearance::init (AppearanceTypePtr tree, GameObjectPtr obj)
 		
 				if (fileExists(textureName))
 				{
-					if (strnicmp(txmName,"a_",2) == 0)
+					if (S_strnicmp(txmName,"a_",2) == 0)
 					{
 						DWORD gosTextureHandle = mcTextureManager->loadTexture(textureName,gos_Texture_Alpha,gosHint_DisableMipmap | gosHint_DontShrink);
 						gosASSERT(gosTextureHandle != 0xffffffff);
@@ -852,7 +854,7 @@ void BldgAppearance::setObjStatus (long oStatus)
 		
 				if (fileExists(textureName))
 				{
-					if (strnicmp(txmName,"a_",2) == 0)
+					if (S_strnicmp(txmName,"a_",2) == 0)
 					{
 						DWORD gosTextureHandle = mcTextureManager->loadTexture(textureName,gos_Texture_Alpha,gosHint_DisableMipmap | gosHint_DontShrink);
 						gosASSERT(gosTextureHandle != 0xffffffff);
@@ -892,7 +894,7 @@ void BldgAppearance::setObjStatus (long oStatus)
 		
 				if (fileExists(textureName))
 				{
-					if (strnicmp(txmName,"a_",2) == 0)
+					if (S_strnicmp(txmName,"a_",2) == 0)
 					{
 						DWORD gosTextureHandle = mcTextureManager->loadTexture(textureName,gos_Texture_Alpha,gosHint_DisableMipmap | gosHint_DontShrink);
 						gosASSERT(gosTextureHandle != 0xffffffff);
@@ -1351,7 +1353,7 @@ bool BldgAppearance::recalcBounds (void)
 
 								if (fileExists(textureName))
 								{
-									if (strnicmp(txmName,"a_",2) == 0)
+									if (S_strnicmp(txmName,"a_",2) == 0)
 									{
 										DWORD gosTextureHandle = mcTextureManager->loadTexture(textureName,gos_Texture_Alpha,gosHint_DisableMipmap | gosHint_DontShrink);
 										gosASSERT(gosTextureHandle != 0xffffffff);
@@ -1403,7 +1405,7 @@ bool BldgAppearance::recalcBounds (void)
 										
 								if (fileExists(textureName))
 								{
-									if (strnicmp(txmName,"a_",2) == 0)
+									if (S_strnicmp(txmName,"a_",2) == 0)
 									{
 										DWORD gosTextureHandle = mcTextureManager->loadTexture(textureName,gos_Texture_Alpha,gosHint_DisableMipmap | gosHint_DontShrink);
 										gosASSERT(gosTextureHandle != 0xffffffff);
@@ -1630,7 +1632,7 @@ long BldgAppearance::render (long depthFixup)
 
 			if (rotationalNodeId == -1)
 			{
-				if (stricmp(appearType->rotationalNodeId,"NONE") != 0)
+				if (S_stricmp(appearType->rotationalNodeId,"NONE") != 0)
 	   				rotationalNodeId = bldgShape->GetNodeNameId(appearType->rotationalNodeId);
 				else
 					rotationalNodeId = -2;
@@ -1666,7 +1668,7 @@ long BldgAppearance::render (long depthFixup)
 	
 				if (rotationalNodeId == -1)
 				{
-					if (stricmp(appearType->rotationalNodeId,"NONE") != 0)
+					if (S_stricmp(appearType->rotationalNodeId,"NONE") != 0)
 		   				rotationalNodeId = bldgShape->GetNodeNameId(appearType->rotationalNodeId);
 					else
 						rotationalNodeId = -2;
@@ -2164,7 +2166,7 @@ long BldgAppearance::update (bool animate)
 
 			if (rotationalNodeId == -1)
 			{
-				if (stricmp(appearType->rotationalNodeId,"NONE") != 0)
+				if (S_stricmp(appearType->rotationalNodeId,"NONE") != 0)
 	   				rotationalNodeId = bldgShape->GetNodeNameId(appearType->rotationalNodeId);
 				else
 					rotationalNodeId = -2;
@@ -2201,7 +2203,7 @@ long BldgAppearance::update (bool animate)
 	
 				if (rotationalNodeId == -1)
 				{
-					if (stricmp(appearType->rotationalNodeId,"NONE") != 0)
+					if (S_stricmp(appearType->rotationalNodeId,"NONE") != 0)
 		   				rotationalNodeId = bldgShape->GetNodeNameId(appearType->rotationalNodeId);
 					else
 						rotationalNodeId = -2;
@@ -2285,7 +2287,7 @@ void BldgAppearance::startActivity (long effectId, bool loop)
 
    		if (rotationalNodeId == -1)
    		{
-   			if (stricmp(appearType->rotationalNodeId,"NONE") != 0)
+   			if (S_stricmp(appearType->rotationalNodeId,"NONE") != 0)
       				rotationalNodeId = bldgShape->GetNodeNameId(appearType->rotationalNodeId);
    			else
    				rotationalNodeId = -2;
@@ -2321,7 +2323,7 @@ void BldgAppearance::startActivity (long effectId, bool loop)
 
 			if (rotationalNodeId == -1)
 			{
-				if (stricmp(appearType->rotationalNodeId,"NONE") != 0)
+				if (S_stricmp(appearType->rotationalNodeId,"NONE") != 0)
 	   				rotationalNodeId = bldgShape->GetNodeNameId(appearType->rotationalNodeId);
 				else
 					rotationalNodeId = -2;
@@ -2443,7 +2445,7 @@ long BldgAppearance::calcCellsCovered (Stuff::Vector3D& pos, short* cellList) {
 	for (int i=0;i<bldgShape->GetNumShapes();i++)
 	{
 		//Check if the artists meant for this piece to NOT block passability!!
-		if (strnicmp(bldgShape->GetNodeId(i),"_PAB",4) != 0)
+		if (S_strnicmp(bldgShape->GetNodeId(i),"_PAB",4) != 0)
 		{
 			for (int j=0;j<bldgShape->GetNumVerticesInShape(i);j++) 
 			{
@@ -2514,7 +2516,7 @@ void BldgAppearance::markTerrain (_ScenarioMapCellInfo* pInfo, int type, int cou
 		for (int i=0;i<bldgShape->GetNumShapes();i++)
 		{
 			//Check if the artists meant for this piece to NOT block passability!!
-			if (strnicmp(bldgShape->GetNodeId(i),"_PAB",4) != 0)
+			if (S_strnicmp(bldgShape->GetNodeId(i),"_PAB",4) != 0)
 			{
 				for (int j=0;j<bldgShape->GetNumVerticesInShape(i);j++)
 				{
@@ -2587,7 +2589,7 @@ void BldgAppearance::markTerrain (_ScenarioMapCellInfo* pInfo, int type, int cou
 		for (int i=0;i<bldgShape->GetNumShapes();i++)
 		{
 			//Check if the artists meant for this piece to NOT block passability!!
-			if (strnicmp(bldgShape->GetNodeId(i),"_PAB",4) != 0)
+			if (S_strnicmp(bldgShape->GetNodeId(i),"_PAB",4) != 0)
 			{
 				for (int j=0;j<bldgShape->GetNumVerticesInShape(i);j++)
 				{
@@ -2685,7 +2687,7 @@ void BldgAppearance::markTerrain (_ScenarioMapCellInfo* pInfo, int type, int cou
 		for (int i=0;i<bldgShape->GetNumShapes();i++)
 		{
 			//Check if the artists meant for this piece to NOT block passability!!
-			if (strnicmp(bldgShape->GetNodeId(i),"_PAB",4) != 0)
+			if (S_strnicmp(bldgShape->GetNodeId(i),"_PAB",4) != 0)
 			{
 				for (int j=0;j<bldgShape->GetNumVerticesInShape(i);j++)
 				{
@@ -2776,7 +2778,7 @@ long BldgAppearance::markMoveMap (bool passable, long* lineOfSightRect, bool use
 		for (int i = 0; i < tempBldgShape->GetNumShapes(); i++) 
 		{
 			//Check if the artists meant for this piece to NOT block passability!!
-			if (strnicmp(tempBldgShape->GetNodeId(i),"_PAB",4) != 0)
+			if (S_strnicmp(tempBldgShape->GetNodeId(i),"_PAB",4) != 0)
 			{
 				for (int j=0;j<tempBldgShape->GetNumVerticesInShape(i);j++) 
 				{
@@ -2820,7 +2822,7 @@ long BldgAppearance::markMoveMap (bool passable, long* lineOfSightRect, bool use
 		for (int i=0;i<tempBldgShape->GetNumShapes();i++)
 		{
 			//Check if the artists meant for this piece to NOT block passability!!
-			if (strnicmp(tempBldgShape->GetNodeId(i),"_PAB",4) != 0)
+			if (S_strnicmp(tempBldgShape->GetNodeId(i),"_PAB",4) != 0)
 			{
 				for (int j=0;j<tempBldgShape->GetNumVerticesInShape(i);j++)
 				{
@@ -2901,8 +2903,8 @@ void BldgAppearance::markLOS (bool clearIt)
 		//Check if the artists meant for this piece to NOT block LOS!!
 		// Probably should check for light cones,too!
 		
-		if ((strnicmp(tempBldgShape->GetNodeId(i),"LOS_",4) != 0) &&
-			(strnicmp(tempBldgShape->GetNodeId(i),"SpotLight_",10) != 0))
+		if ((S_strnicmp(tempBldgShape->GetNodeId(i),"LOS_",4) != 0) &&
+			(S_strnicmp(tempBldgShape->GetNodeId(i),"SpotLight_",10) != 0))
 		{
 			for (int j=0;j<tempBldgShape->GetNumVerticesInShape(i);j++)
 			{
@@ -3208,6 +3210,12 @@ void TreeAppearance::init (AppearanceTypePtr tree, GameObjectPtr obj)
 	fogLightSet = false;
 	lightRGB = fogRGB = 0xffffffff;
 
+    // sebi: init so will not be garbage
+    status = OBJECT_STATUS_NORMAL; 
+    forceLightsOut = false;
+    treeShape = NULL;
+    //
+
 	if (appearType)
 	{
 		treeShape = appearType->treeShape[0]->CreateFrom();
@@ -3227,7 +3235,7 @@ void TreeAppearance::init (AppearanceTypePtr tree, GameObjectPtr obj)
 	
 			if (fileExists(textureName))
 			{
-				if (strnicmp(txmName,"a_",2) == 0)
+				if (S_strnicmp(txmName,"a_",2) == 0)
 				{
 					DWORD gosTextureHandle = mcTextureManager->loadTexture(textureName,gos_Texture_Alpha,gosHint_DisableMipmap | gosHint_DontShrink);
 					gosASSERT(gosTextureHandle != 0xffffffff);
@@ -3268,7 +3276,7 @@ void TreeAppearance::init (AppearanceTypePtr tree, GameObjectPtr obj)
 		
 				if (fileExists(textureName))
 				{
-					if (strnicmp(txmName,"a_",2) == 0)
+					if (S_strnicmp(txmName,"a_",2) == 0)
 					{
 						DWORD gosTextureHandle = mcTextureManager->loadTexture(textureName,gos_Texture_Alpha,gosHint_DisableMipmap | gosHint_DontShrink);
 						gosASSERT(gosTextureHandle != 0xffffffff);
@@ -3437,7 +3445,7 @@ void TreeAppearance::setObjStatus (long oStatus)
 		
 				if (fileExists(textureName))
 				{
-					if (strnicmp(txmName,"a_",2) == 0)
+					if (S_strnicmp(txmName,"a_",2) == 0)
 					{
 						DWORD gosTextureHandle = mcTextureManager->loadTexture(textureName,gos_Texture_Alpha,gosHint_DisableMipmap | gosHint_DontShrink);
 						gosASSERT(gosTextureHandle != 0xffffffff);
@@ -3477,7 +3485,7 @@ void TreeAppearance::setObjStatus (long oStatus)
 		
 				if (fileExists(textureName))
 				{
-					if (strnicmp(txmName,"a_",2) == 0)
+					if (S_strnicmp(txmName,"a_",2) == 0)
 					{
 						DWORD gosTextureHandle = mcTextureManager->loadTexture(textureName,gos_Texture_Alpha,gosHint_DisableMipmap | gosHint_DontShrink);
 						gosASSERT(gosTextureHandle != 0xffffffff);
@@ -3772,7 +3780,7 @@ bool TreeAppearance::recalcBounds (void)
 
 							if (fileExists(textureName))
 							{
-								if (strnicmp(txmName,"a_",2) == 0)
+								if (S_strnicmp(txmName,"a_",2) == 0)
 								{
 									DWORD gosTextureHandle = mcTextureManager->loadTexture(textureName,gos_Texture_Alpha,gosHint_DisableMipmap | gosHint_DontShrink);
 									gosASSERT(gosTextureHandle != 0xffffffff);
@@ -3822,7 +3830,7 @@ bool TreeAppearance::recalcBounds (void)
 									
 							if (fileExists(textureName))
 							{
-								if (strnicmp(txmName,"a_",2) == 0)
+								if (S_strnicmp(txmName,"a_",2) == 0)
 								{
 									DWORD gosTextureHandle = mcTextureManager->loadTexture(textureName,gos_Texture_Alpha,gosHint_DisableMipmap | gosHint_DontShrink);
 									gosASSERT(gosTextureHandle != 0xffffffff);
@@ -4160,7 +4168,7 @@ void TreeAppearance::markTerrain (_ScenarioMapCellInfo* pInfo, int type, int cou
 	for (int i=0;i<treeShape->GetNumShapes();i++)
 	{
 		//Check if the artists meant for this piece to NOT block passability!!
-		if (strnicmp(treeShape->GetNodeId(i),"_PAB",4) != 0)
+		if (S_strnicmp(treeShape->GetNodeId(i),"_PAB",4) != 0)
 		{
 			for (int j=0;j<treeShape->GetNumVerticesInShape(i);j++)
 			{
@@ -4216,8 +4224,8 @@ void TreeAppearance::markLOS (bool clearIt)
 		//Check if the artists meant for this piece to NOT block LOS!!
 		// Probably should check for light cones,too!
 		
-		if ((strnicmp(treeShape->GetNodeId(i),"LOS_",4) != 0) &&
-			(strnicmp(treeShape->GetNodeId(i),"SpotLight_",10) != 0))
+		if ((S_strnicmp(treeShape->GetNodeId(i),"LOS_",4) != 0) &&
+			(S_strnicmp(treeShape->GetNodeId(i),"SpotLight_",10) != 0))
 		{
 			for (int j=0;j<treeShape->GetNumVerticesInShape(i);j++)
 			{

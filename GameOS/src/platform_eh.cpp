@@ -1,6 +1,8 @@
+#ifndef PLATFORM_WINDOWS
+
 #include<exception>
 #include<stdio.h>
-#include"eh.h"
+#include"platform_eh.h"
 
 static exception_handler_ptr_t original_handler = NULL;
 
@@ -17,3 +19,5 @@ void set_terminate(exception_handler_ptr_t eh)
     std::set_terminate(my_handler_proxy);
     original_handler = eh;
 }
+
+#endif // PLATFORM_WINDOWS

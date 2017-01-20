@@ -10,7 +10,7 @@
 #include<stdio.h>
 #include<stdlib.h>
 #include<string.h>
-#include<string_win.h>
+#include"platform_str.h"
 
 #ifndef ABLGEN_H
 #include"ablgen.h"
@@ -112,8 +112,8 @@ extern char*			bufferp;
 extern char*			tokenp;
 extern long				digitCount;
 extern bool				countError;
-extern int 				pageNumber;
-extern int 				lineCount;
+extern int				pageNumber;
+extern int				lineCount;
 
 extern long				CurAlarm;
 
@@ -570,13 +570,13 @@ profile = true;
 
 //***************************************************************************
 
-long ABLi_preProcess (const char* sourceFileName, long* numErrors, long* numLinesProcessed, long* numFilesProcessed, bool printLines) {
+int32_t ABLi_preProcess (const char* sourceFileName, long* numErrors, long* numLinesProcessed, long* numFilesProcessed, bool printLines) {
 
     char* source_fn = strdup(sourceFileName);
-    source_fn = strlwr(source_fn);
+    source_fn = S_strlwr(source_fn);
 	//--------------------------------------------------------------------------------
 	// First, check if this module has already been registered into the environment...
-	for (long i = 0; i < NumModulesRegistered; i++)
+	for (int i = 0; i < NumModulesRegistered; i++)
     {
 		if (strcmp(source_fn, ModuleRegistry[i].fileName) == 0)
         {
@@ -626,8 +626,11 @@ long ABLi_preProcess (const char* sourceFileName, long* numErrors, long* numLine
 	//---------------------------------------
 	// Now, let's open the ABL source file...	
 	long openErr = ABL_NO_ERR;
-	if ((openErr = openSourceFile(sourceFileName)) != ABL_NO_ERR)
+	if ((openErr = openSourceFile(source_fn)) != ABL_NO_ERR)
+	{
+		free(source_fn);
 		return(openErr);
+	}
 
 	//------------------------
 	// Set up the code buffer.
@@ -710,13 +713,12 @@ long ABLi_preProcess (const char* sourceFileName, long* numErrors, long* numLine
 
 	//--------------------------------------------------
 	// Register the new module in the ABL environment...
-	ModuleRegistry[NumModulesRegistered].fileName = (char*)ABLStackMallocCallback(strlen(sourceFileName) + 1);
+	ModuleRegistry[NumModulesRegistered].fileName = (char*)ABLStackMallocCallback(strlen(source_fn) + 1);
 	if (!ModuleRegistry[NumModulesRegistered].fileName)
 		ABL_Fatal(0, " ABL: Unable to AblStackHeap->malloc module filename ");
     // sebi
 	//strcpy(ModuleRegistry[NumModulesRegistered].fileName, strlwr(sourceFileName));
-	strcpy(ModuleRegistry[NumModulesRegistered].fileName, sourceFileName);
-    strlwr(ModuleRegistry[NumModulesRegistered].fileName);
+	strcpy(ModuleRegistry[NumModulesRegistered].fileName, source_fn);
 	ModuleRegistry[NumModulesRegistered].moduleIdPtr = moduleIdPtr;
 
 	ModuleRegistry[NumModulesRegistered].numSourceFiles = NumSourceFiles;
@@ -773,6 +775,7 @@ long ABLi_preProcess (const char* sourceFileName, long* numErrors, long* numLine
 	if (numErrors)
 		*numErrors = errorCount;
 
+	free(source_fn);
 	return(NumModulesRegistered - 1);
 }
 
@@ -977,7 +980,7 @@ ABLModulePtr ABLi_loadLibrary (const char* sourceFileName, long* numErrors, long
 	//-------------------------------------------------------------
 	// Preprocess the library. Note that a library should be loaded
 	// just once.
-	long libraryHandle = ABLi_preProcess(sourceFileName, numErrors, numLinesProcessed, numFilesProcessed, printLines);
+	int libraryHandle = ABLi_preProcess(sourceFileName, numErrors, numLinesProcessed, numFilesProcessed, printLines);
 	if (libraryHandle < (NumModulesRegistered - 1)) {
 		//------------------
 		// Already loaded...
@@ -1021,7 +1024,7 @@ ABLParamPtr ABLi_createParamList (long numParameters) {
 
 //***************************************************************************
 
-void ABLi_setIntegerParam (ABLParamPtr paramList, long index, long value) {
+void ABLi_setIntegerParam (ABLParamPtr paramList, int index, int value) {
 
 	if (paramList) {
 		paramList[index].type = ABL_PARAM_INTEGER;
@@ -1031,7 +1034,7 @@ void ABLi_setIntegerParam (ABLParamPtr paramList, long index, long value) {
 
 //***************************************************************************
 
-void ABLi_setRealParam (ABLParamPtr paramList, long index, float value) {
+void ABLi_setRealParam (ABLParamPtr paramList, int index, float value) {
 
 	if (paramList) {
 		paramList[index].type = ABL_PARAM_REAL;
@@ -1076,7 +1079,7 @@ void ABLi_addFunction (const char* name,
 
 //***************************************************************************
 
-long ABLi_registerInteger (char* name, long* address, long numElements) {
+int ABLi_registerInteger (char* name, int* address, int numElements) {
 
 	if (strlen(name) >= MAXLEN_TOKENSTRING)
 		ABL_Fatal(0, " ABLi_registerInteger: variable name too long ");
@@ -1099,7 +1102,7 @@ long ABLi_registerInteger (char* name, long* address, long numElements) {
 
 //***************************************************************************
 
-long ABLi_registerReal (char* name, float* address, long numElements) {
+int ABLi_registerReal (char* name, float* address, int numElements) {
 
 	if (strlen(name) >= MAXLEN_TOKENSTRING)
 		ABL_Fatal(0, " ABLi_registerInteger: variable name too long ");

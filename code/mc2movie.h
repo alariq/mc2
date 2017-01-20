@@ -20,7 +20,7 @@
 #include"heap.h"
 #endif
 
-#include<windows.h>
+#include"platform_windows.h"
 
 //--------------------------------------------------------------------------
 const DWORD MAX_TEXTURES_NEEDED = 6;

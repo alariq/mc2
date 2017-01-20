@@ -15,7 +15,7 @@ SalvageMechArea.cpp			: Implementation of the SalvageMechArea component.
 #include"mech.h"
 #include<malloc.h>
 #include"mechicon.h"
-#include"windows.h"
+#include"platform_windows.h"
 #include"gamesound.h"
 
 aText*		DeadPilotListItem::s_nameText = NULL;

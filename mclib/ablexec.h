@@ -71,11 +71,11 @@ typedef StackItem* StackItemPtr;
 typedef struct {
 	long			type;
 	union {
-		long		integer;
+		int         integer;
 		float		real;
 		bool		boolean;
 		char		character;
-		long*		integerPtr;
+		int*		integerPtr;
 		float*		realPtr;
 		bool*		booleanPtr;
 		char*		characterPtr;
@@ -147,14 +147,14 @@ void crunchStatementMarker (void);
 void uncrunchStatementMarker (void);
 char* crunchAddressMarker (Address address);
 char* fixupAddressMarker (Address address);
-void crunchInteger (long value);
+void crunchInteger (int value);
 void crunchByte (unsigned char value);
 void crunchOffset (Address address);
 char* createCodeSegment (long& codeSegmentSize);
 SymTableNodePtr getCodeSymTableNodePtr (void);
-long getCodeStatementMarker (void);
+int getCodeStatementMarker (void);
 char* getCodeAddressMarker (void);
-long getCodeInteger (void);
+int getCodeInteger (void);
 unsigned char getCodeByte (void);
 char* getCodeAddress (void);
 
@@ -164,7 +164,7 @@ char* getCodeAddress (void);
 
 void pop (void);
 void getCodeToken (void);
-void pushInteger (long value);
+void pushInteger (int value);
 void pushReal (float value);
 void pushByte (char value);
 void pushAddress (Address address);

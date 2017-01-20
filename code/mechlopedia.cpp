@@ -319,7 +319,7 @@ void Mechlopedia::MechScreen::begin()
 			for ( int j = 0; j < groupListBox->GetItemCount(); j++ )
 			{
 				aTextListItem* pItem = (aTextListItem*)groupListBox->GetItem( j );
-				if ( stricmp( name, pItem->getText() ) < 0 )
+				if ( S_stricmp( name, pItem->getText() ) < 0 )
 				{
 					groupListBox->InsertItem( pEntry, j );
 					bFound = true;
@@ -342,7 +342,7 @@ void Mechlopedia::MechScreen::begin()
 			for ( int j = 0; j < groupListBox->GetItemCount(); j++ )
 			{
 				aTextListItem* pItem = (aTextListItem*)groupListBox->GetItem( j );
-				if ( stricmp( pCopters[i]->getName(), pItem->getText() ) < 0 )
+				if ( S_stricmp( pCopters[i]->getName(), pItem->getText() ) < 0 )
 				{
 					groupListBox->InsertItem( pEntry, j );
 					bFound = true;
@@ -366,7 +366,7 @@ void Mechlopedia::MechScreen::begin()
 			const LogisticsVariant* cur = pChassis[i];
 			for ( int j = 0; j <= i; ++j )
 			{
-				if ( stricmp( cur->getName(), pChassis[j]->getName() ) < 0  )
+				if ( S_stricmp( cur->getName(), pChassis[j]->getName() ) < 0  )
 				{
 					for ( int l = i-1; l >= j; l-- )
 					{
@@ -700,7 +700,7 @@ int __cdecl sortWeapon( const void* pW1, const void* pW2 )
 	LogisticsComponent* p1 = *(LogisticsComponent**)pW1;
 	LogisticsComponent* p2 = *(LogisticsComponent**)pW2;
 
-	return stricmp( p1->getName(), p2->getName() );
+	return S_stricmp( p1->getName(), p2->getName() );
 
 }
 
@@ -1111,7 +1111,7 @@ void Mechlopedia::BuildingScreen::begin()
 		bool bFound = 0;
 		for ( int j = 0; j < groupListBox->GetItemCount(); j++ )
 		{
-			if ( stricmp(  str, ((aTextListItem*)groupListBox->GetItem( j ))->getText() ) < 0 )
+			if ( S_stricmp(  str, ((aTextListItem*)groupListBox->GetItem( j ))->getText() ) < 0 )
 			{
 				MechlopediaListItem* pItem = new MechlopediaListItem();
 				pItem->setText( str );

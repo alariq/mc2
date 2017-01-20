@@ -98,7 +98,7 @@
 
 #include "../resource.h"
 
-#include"windows.h"
+#include"platform_windows.h"
 
 #include"gvehicl.h" // remove
 
@@ -608,7 +608,7 @@ void MissionInterfaceManager::update (void)
 	#define MC2_DAMAGE_RRTORSO		9	
 	#define MC2_DAMAGE_RCTORSO		10	
 			
-	DWORD CheatCommand = -1;
+	DWORD CheatCommand = 0xffffffff;
 	if (userInput->getKeyDown(KEY_1) && shiftDn && ctrlDn && altDn)
 		CheatCommand = MC2_DAMAGE_HEAD;
 	if (userInput->getKeyDown(KEY_2) && shiftDn && ctrlDn && altDn)
@@ -636,7 +636,7 @@ void MissionInterfaceManager::update (void)
 
 	switch (CheatCommand)
 	{
-		case -1:
+		case 0xffffffff:
 			break;
 			
 		case MC2_DAMAGE_HEAD:
@@ -3087,7 +3087,7 @@ void MissionInterfaceManager::initTacMap( PacketFile* file, int packet )
 	file->readPacket( packet, mem );
 
 	controlGui.initTacMapBuildings( mem, size );
-	delete mem;
+	delete[] mem;
 
 	file->seekPacket(packet + 1);
 	size = file->getPacketSize( );
@@ -3096,7 +3096,7 @@ void MissionInterfaceManager::initTacMap( PacketFile* file, int packet )
 	file->readPacket( packet + 1, mem );
 
 	controlGui.initTacMap( mem, size );
-	delete mem;
+	delete[] mem;
 
 	swapTime = 0.f;
 
@@ -4651,7 +4651,7 @@ bool MissionInterfaceManager::isPausedWithoutMenu()
 
 void	MissionInterfaceManager::swapResolutions()
 {
-	controlGui.swapResolutions( Environment.screenWidth );
+	controlGui.swapResolutions( Environment.screenWidth, Environment.screenHeight );
 	resolution = Environment.screenWidth;
 	keyboardRef->init();
 }

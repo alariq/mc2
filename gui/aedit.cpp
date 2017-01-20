@@ -11,8 +11,8 @@ aEdit.cpp			: Implementation of the aEdit component of the GUI library.
 #include"ctype.h"
 #include"inifile.h"
 #include"mclib.h"
-#include<windows.h>
-//#include<mbstring.h>
+#include"platform_windows.h"
+#include"platform_mbstring.h" // isleadbyte
 //#include<winnls.h>
 #include"soundsys.h"
 #include "../resource.h"
@@ -33,6 +33,7 @@ aEdit::aEdit(  )
 	if (acp == 0) {
         //sebi !NB
 		acp = 899;//GetACP();
+        SPEW(("INPUT", "GetACP is not imlemented"));
 
 		gos_SetIMELevel( 2 );
 		gos_GetIMEAppearance( &g_ia );
@@ -199,8 +200,7 @@ void aEdit::handleKeyboard()
 			if (key == 0)
 				return;
 			DWORD key2 = 0;
-// sebi: temporarily comment out            
-#ifndef LINUX_BUILD 
+
 			if ( isleadbyte( key ) )
 			{
 				key2 = gos_GetKey( );	
@@ -273,11 +273,11 @@ void aEdit::handleKeyboard()
 				if ( key2 )
 				{
 					str[1] = key2;
-					str[2] = NULL;
+					str[2] = '\0';
 					amountToAdd = 2;
 				}
 				else
-					str[1] = NULL;
+					str[1] = '\0';
 				
 				if (nInsertion1 < text.Length() )
 				{
@@ -289,7 +289,6 @@ void aEdit::handleKeyboard()
 				nInsertion1 += amountToAdd;
 				nInsertion2 = nInsertion1;
 			}
-#endif // LINUX_BUILD
 		}
 
 
@@ -334,14 +333,13 @@ void aEdit::render()
 		int nMax = nInsertion1<nInsertion2?nInsertion2:nInsertion1;
 		if ( nMax > text.Length() )
 			nMax = text.Length();
-//sebi: temp comment out        
-#ifndef LINUX_BUILD        
+
 		if ( nMax > 1 )
 		{
 			if (isleadbyte( nMax -2 ) )
 				nMax -= 2;
 		}
-#endif
+
 		int nXSelStart = (int)(globalX() + charXPos(nMin) - nLeftOffset + ENTRY_MARGIN);
 		int nXSelEnd = (int)(globalX() + charXPos(nMax) - nLeftOffset + ENTRY_MARGIN);
 		if (nXSelStart < globalX())
@@ -518,14 +516,13 @@ void aEdit:: backSpace(int nPosition)
 		return;
 	}
 	nCharCount = 1;
-    //sebi temp comment out
-#ifndef LINUX_BUILD
+
 	if ( nPosition > 1 )
 	{
 		unsigned char* pPrev = _mbsdec( (const unsigned char*)(const char*)text, (const unsigned char*)(const char*)text + nPosition );		
 		nCharCount = (const unsigned char*)(const char*)text + nPosition - pPrev;
 	}
-#endif
+
 	text.Remove( nPosition-nCharCount, nPosition-1 );
 	nInsertion2 = nInsertion1 = nPosition-nCharCount;
 
@@ -608,8 +605,6 @@ bool aEdit::handleFormattingKeys(int keycode)
 			bCursorVisible=TRUE;
 			return true;
 		case KEY_LEFT:
-			PAUSE(("Implement me\n"));
-#ifndef LINUX_BUILD
 			if (gos_GetKeyStatus(KEY_LSHIFT) != KEY_FREE)
 			{
 				if (nInsertion2)
@@ -639,7 +634,7 @@ bool aEdit::handleFormattingKeys(int keycode)
 				}
 				nInsertion2 = nInsertion1;
 			}
-#endif 
+
 			makeCursorVisible();
 			bCursorVisible=TRUE;
 			return true;
@@ -740,21 +735,17 @@ int		aEdit::findChar(int nXPos)
 	unsigned char* pNext = pBegin;
 	if ( text.Length() )
 	{
-        //sebi temp comment out
-#ifndef LINUX_BUILD        
 		do
 		{	
 			pNext = _mbsinc( pCur );
 			unsigned char tmp = *pNext;
-			*pNext = NULL;
+			*pNext = '\0';
 			nLastPos = nNextPos;
 			nNextPos = font.width(text);
 			*pNext = tmp;
 			if ( nXPos > nNextPos )			
 				pCur = pNext;
 		}	while ( *pCur && nXPos > nNextPos);
-#endif
-
 	}
 
 	if ( nXPos - nLastPos < nNextPos - nXPos )
@@ -812,12 +803,8 @@ int aEdit::charLength( int index )
 		return 0;
 
 	char tmp = text[index];
-    //sebi temp comment out
-#ifndef LINUX_BUILD
 	if ( isleadbyte( tmp ) )
 		return 2;
-#endif
-
 
 	return 1;
 }

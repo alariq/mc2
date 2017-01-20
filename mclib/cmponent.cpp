@@ -17,7 +17,7 @@
 #include"heap.h"
 #endif
 
-#include"string_win.h"
+#include "platform_str.h"
 
 #include"utilities.h"
 //******************************************************************************************
@@ -140,7 +140,7 @@ long MasterComponent::initEXCEL (char* dataLine, float baseSensorRange) {
 	
 	field = strtok(NULL, ",");
 	unsigned char rangeType = 255;
-	_strlwr(field);
+	S_strlwr(field);
 	if (strcmp(field, "0") != 0) {
 		if (strcmp(field, WeaponRangeString[WEAPON_RANGE_SHORT]) == 0)
 			rangeType = WEAPON_RANGE_SHORT;

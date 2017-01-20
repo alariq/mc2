@@ -663,7 +663,7 @@ void initSymTable (void) {
 	integerIdPtr->defn.key = DFN_TYPE;
 	integerIdPtr->typePtr = IntegerTypePtr;
 	IntegerTypePtr->form = FRM_SCALAR;
-	IntegerTypePtr->size = sizeof(long);
+	IntegerTypePtr->size = sizeof(int);
 	IntegerTypePtr->typeIdPtr = integerIdPtr;
 
 	charIdPtr->defn.key = DFN_TYPE;
@@ -681,7 +681,7 @@ void initSymTable (void) {
 	booleanIdPtr->defn.key = DFN_TYPE;
 	booleanIdPtr->typePtr = BooleanTypePtr;
 	BooleanTypePtr->form = FRM_ENUM;
-	BooleanTypePtr->size = sizeof(long);
+	BooleanTypePtr->size = sizeof(int);
 	BooleanTypePtr->typeIdPtr = booleanIdPtr;
 
 	//----------------------------------------------------

@@ -20,6 +20,7 @@ bool gos_load_glyphs(const char* glyphFile, gosGlyphInfo& gi)
     fread(&gi.start_glyph_, sizeof(gi.start_glyph_), 1, glyph_info);
 
     fread(&gi.max_advance_, sizeof(gi.max_advance_), 1, glyph_info);
+    fread(&gi.font_ascent_, sizeof(gi.font_ascent_), 1, glyph_info);
     fread(&gi.font_line_skip_, sizeof(gi.font_line_skip_), 1, glyph_info);
 
     size_t num_structs_read = 0;

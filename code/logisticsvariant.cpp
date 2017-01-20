@@ -980,7 +980,7 @@ bool		LogisticsVariant::allComponentsAvailable() const
 {
 
 	// 06/05/01 hack, we wan't to hide this atlas for the whole game.
-	if ( stricmp( "Renard's Atlas", variantName ) == 0 )
+	if ( S_stricmp( "Renard's Atlas", variantName ) == 0 )
 		return 0;
 
 	for ( int i = 0; i < componentCount; i++ )
@@ -996,7 +996,7 @@ bool		LogisticsVariant::allComponentsAvailable() const
 void		LogisticsVariant::setAvailable( bool available ) 
 { 
 	// 06/05/01 hack, we wan't to hide this atlas for the whole game.
-	if ( stricmp( "Renard's Atlas", variantName ) == 0 )
+	if ( S_stricmp( "Renard's Atlas", variantName ) == 0 )
 		availableToUser = 0;
 
 	else

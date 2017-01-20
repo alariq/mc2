@@ -517,12 +517,12 @@ namespace Stuff {
 
 		IteratorPosition ret = 0;
 
-		register int i, r, len = stringLength >> 2;
+		/*register*/ int i, r, len = stringLength >> 2;
 
 		for(i=0;i<len;i++)
 		{
 			r = ((int *)stringText)[i];
-// sebi: NB!            
+// sebi: !NB            
 #ifndef LINUX_BUILD
 			_asm mov ecx, i
 			_asm ror r, cl

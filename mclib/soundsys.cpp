@@ -19,7 +19,7 @@
 #include"camera.h"
 #endif
 
-#include "stdlib_win.h" // _splitpath
+#include "platform_stdlib.h" // _splitpath
 
 //---------------------------------------------------------------------------
 // static globals
@@ -54,6 +54,14 @@ void SoundSystem::destroy (void)
 		delete soundHeap;
 		soundHeap = NULL;
 	}
+
+    delete soundDataFile;
+    soundDataFile = NULL;
+    delete bettyDataFile;
+    bettyDataFile = NULL;
+    delete supportDataFile;
+    supportDataFile = NULL;
+
 }
 
 //---------------------------------------------------------------------------

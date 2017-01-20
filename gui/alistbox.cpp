@@ -305,7 +305,7 @@ void aListBox::render()
 		// draw black box above this
 		if ( bTop || bBottom )
 		{
-			GUI_RECT rect = { globalX(), globalY() - topHeight, globalX() + width(), globalY() };
+			GUI_RECT rect = { globalX(), globalY() - topHeight, (globalX() + (long)width()), globalY() };
 			if ( bTop )
 				drawRect( rect, 0xff000000 ); 
 			rect.top = globalY() + height()+1;
@@ -1266,6 +1266,7 @@ aTextListItem::aTextListItem(long newFontResID)
 	aListItem::init( width, 0, Environment.screenWidth, ((float)height*1.25) );
 	state = ENABLED;
 	alignment = 0;
+	bForceToTop = 0;
 }
 
 void aTextListItem::init(long newFontResID)

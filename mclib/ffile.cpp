@@ -18,16 +18,18 @@
 
 #include"lz.h"
 
-#include"zlib.h"
+#include<zlib.h>
 
-#include<windows.h>
+
+
+#include"platform_windows.h"
 
 #include<string.h>
-#include<string_win.h>
+#include"platform_str.h"
 #include<gameos.hpp>
 
 MemoryPtr 		LZPacketBuffer = NULL;
-unsigned int 		LZPacketBufferSize = 512000;
+unsigned int	LZPacketBufferSize = 512000;
 
 extern char CDInstallPath[];
 void EnterWindowMode();
@@ -92,7 +94,7 @@ long FastFile::open (const char* fName)
 		
 	strncpy(fileName,fName,fNameLength+1);
 
-	handle = fopen(fileName,"r");
+	handle = fopen(fileName,"rb");
 	if (handle != NULL)
 	{
 		logicalPosition = 0;
@@ -181,7 +183,7 @@ long FastFile::open (const char* fName)
 
 	files = (FILE_HANDLE*)malloc(sizeof(FILE_HANDLE) * numFiles);
 
-	for (long i=0;i<numFiles;i++)
+	for (DWORD i=0;i<numFiles;i++)
 	{
 		files[i].pfe = (FILEENTRY *)malloc(sizeof(FILEENTRY));
 		memset(files[i].pfe,0,sizeof(FILEENTRY));
@@ -216,7 +218,7 @@ void FastFile::close (void)
 
 	//---------------------------------------------
 	//-- First Long is number of filenames present.
-	for (long i=0;i<numFiles;i++)
+	for (DWORD i=0;i<numFiles;i++)
 	{
 		free(files[i].pfe);
 	}
@@ -232,9 +234,9 @@ long FastFile::openFast (DWORD hash, const char *fName)
 {
 	//------------------------------------------------------------------
 	//-- In order to use this, the file name must be part of the index.
-	for (long i=0;i<numFiles;i++)
+	for (DWORD i=0;i<numFiles;i++)
 	{
-		if ((hash == files[i].pfe->hash) && (stricmp(files[i].pfe->name,fName) == 0))
+		if ((hash == files[i].pfe->hash) && (S_stricmp(files[i].pfe->name,fName) == 0))
 		{
 			files[i].inuse = TRUE;
 			files[i].pos = 0;
@@ -246,7 +248,7 @@ long FastFile::openFast (DWORD hash, const char *fName)
 }
 
 //---------------------------------------------------------------------------
-void FastFile::closeFast (long fastFileHandle)
+void FastFile::closeFast (DWORD fastFileHandle)
 {
 	if ((fastFileHandle >= 0) && (fastFileHandle < numFiles) && files[fastFileHandle].inuse)
 	{
@@ -256,7 +258,7 @@ void FastFile::closeFast (long fastFileHandle)
 }
 
 //---------------------------------------------------------------------------
-long FastFile::seekFast (long fastFileHandle, long off, long how)
+long FastFile::seekFast (DWORD fastFileHandle, DWORD off, DWORD how)
 {
 	if ((fastFileHandle >= 0) && (fastFileHandle < numFiles) && files[fastFileHandle].inuse)
 	{
@@ -270,7 +272,7 @@ long FastFile::seekFast (long fastFileHandle, long off, long how)
 				break;
 	
 			case SEEK_END:
-				if ((abs(off) > files[fastFileHandle].pfe->size) || (off > 0))
+				if (((DWORD)abs((long)off) > files[fastFileHandle].pfe->size) || (off > 0))
 				{
 					return READ_PAST_EOF_ERR;
 				}
@@ -320,7 +322,7 @@ long FastFile::seekFast (long fastFileHandle, long off, long how)
 }
 
 //---------------------------------------------------------------------------
-long FastFile::readFast (long fastFileHandle, void *bfr, long size)
+long FastFile::readFast (DWORD fastFileHandle, void *bfr, DWORD size)
 {
 	size;
 
@@ -356,7 +358,7 @@ long FastFile::readFast (long fastFileHandle, void *bfr, long size)
 					return 0;
 			}
 				
-			if ((long)LZPacketBufferSize < files[fastFileHandle].pfe->size)
+			if ((DWORD)LZPacketBufferSize < files[fastFileHandle].pfe->size)
 			{
 				LZPacketBufferSize = files[fastFileHandle].pfe->size;
 				
@@ -432,7 +434,7 @@ long FastFile::readFast (long fastFileHandle, void *bfr, long size)
 // This function pulls the raw compressed data out of the file and sticks it in the buffer
 // passed in.  This way, we can load the textures directly from file to RAM and not
 // have to decompress them!!
-long FastFile::readFastRAW (long fastFileHandle, void *bfr, long size)
+long FastFile::readFastRAW (DWORD fastFileHandle, void *bfr, DWORD size)
 {
 	size;
 
@@ -483,7 +485,7 @@ long FastFile::readFastRAW (long fastFileHandle, void *bfr, long size)
 }
 
 //---------------------------------------------------------------------------
-long FastFile::tellFast (long fastFileHandle)
+long FastFile::tellFast (DWORD fastFileHandle)
 {
 	if ((fastFileHandle >= 0) && (fastFileHandle < numFiles) && files[fastFileHandle].inuse)
 		return files[fastFileHandle].pos;
@@ -492,7 +494,7 @@ long FastFile::tellFast (long fastFileHandle)
 }
 
 //---------------------------------------------------------------------------
-long FastFile::sizeFast (long fastFileHandle)
+long FastFile::sizeFast (DWORD fastFileHandle)
 {
 	if ((fastFileHandle >= 0) && (fastFileHandle < numFiles) && files[fastFileHandle].inuse)
 		return files[fastFileHandle].pfe->realSize;
@@ -501,7 +503,7 @@ long FastFile::sizeFast (long fastFileHandle)
 }
 
 //---------------------------------------------------------------------------
-long FastFile::lzSizeFast (long fastFileHandle)
+long FastFile::lzSizeFast (DWORD fastFileHandle)
 {
 	if ((fastFileHandle >= 0) && (fastFileHandle < numFiles) && files[fastFileHandle].inuse)
 		return files[fastFileHandle].pfe->size;

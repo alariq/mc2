@@ -61,7 +61,7 @@ void PilotReadyScreen::init(FitIniFile* file)
 	char path[256];
 	strcpy( path, artPath );
 	strcat( path, "mcl_gn_deploymentteams.fit" );
-	strlwr( path );
+	S_strlwr( path );
 	if ( NO_ERR != iconFile.open( path ) )
 	{
 		gosASSERT( "couldn't open the MCL_GN_DevploymentTeams file" );

@@ -20,16 +20,16 @@
 #include"lz.h"
 #endif
 
-#include"zlib.h"
+#include<zlib.h>
 
-#ifndef _MBCS
+//#ifndef _MBCS
 #include<gameos.hpp>
-#else
-#include<assert.h>
-#define gosASSERT assert
-#define gos_Malloc malloc
-#define gos_Free free
-#endif
+//#else
+//#include<assert.h>
+//#define gosASSERT assert
+//#define gos_Malloc malloc
+//#define gos_Free free
+//#endif
 
 #include<string.h>
 //---------------------------------------------------------------------------
@@ -307,7 +307,7 @@ int PacketFile::readPacket (int packet, unsigned char *buffer)
 						gosASSERT(LZPacketBuffer);
 					}
 						
-					if ((unsigned int)LZPacketBufferSize < packetSize)
+					if ((int)LZPacketBufferSize < packetSize)
 					{
 						LZPacketBufferSize = packetSize;
 						
@@ -340,7 +340,7 @@ int PacketFile::readPacket (int packet, unsigned char *buffer)
 						gosASSERT(LZPacketBuffer);
 					}
 						
-					if ((unsigned int)LZPacketBufferSize < packetSize)
+					if ((int)LZPacketBufferSize < packetSize)
 					{
 						LZPacketBufferSize = packetSize;
 						
@@ -613,8 +613,9 @@ int PacketFile::writePacket (int packet, MemoryPtr buffer, unsigned int nbytes, 
 		unsigned int compressedResult = compress2(workBuffer,&workBufferSize,buffer,nbytes,Z_DEFAULT_COMPRESSION);
 		if (compressedResult != Z_OK)
 			STOP(("Unable to write packet %d to file %s.  Error %d",packet,fileName,compressedResult));
-			
-		compressedResult = uncompress(buffer,&oldBufferSize,workBuffer,nbytes);
+		//sebi:	
+		compressedResult = uncompress(buffer,&oldBufferSize,workBuffer,workBufferSize);
+		//compressedResult = uncompress(buffer,&oldBufferSize,workBuffer,nbytes);
 		if (oldBufferSize != nbytes)
 			STOP(("Packet size changed after compression.  Was %d is now %d",nbytes,oldBufferSize));
 
@@ -713,7 +714,7 @@ int PacketFile::insertPacket (int packet, MemoryPtr buffer, unsigned int nbytes,
 	
 	tmpFile.reserve(numPackets);
 		
-	for (unsigned int i=0;i<numPackets;i++)
+	for (int i=0;i<numPackets;i++)
 	{
 		if (i == packet)
 		{

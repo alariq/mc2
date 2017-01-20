@@ -57,7 +57,9 @@ int KeyboardRef::init()
 	case 1600:
 		path.init( artPath, "mcui_keyref_1600", ".fit" );
 		break;
-
+	case 1920:
+		path.init( artPath, "mcui_keyref_1920", ".fit" );
+		break;
 	default:
 		gosASSERT( !"Invalid resolution" );
 		return -1;

@@ -5,8 +5,6 @@ LogisticsComponent.cpp			: Implementation of the LogisticsComponent component.
 // Copyright (C) Microsoft Corporation. All rights reserved.                 //
 //===========================================================================//
 \*************************************************************************************************/
-#include<string_win.h>
-
 #include"logisticscomponent.h"
 #include<gameos.hpp>
 #include"cmponent.h"
@@ -14,6 +12,7 @@ LogisticsComponent.cpp			: Implementation of the LogisticsComponent component.
 #include"../resource.h"
 #include"utilities.h"
 
+#include "platform_str.h"
 
 
 extern const char* ComponentFormString[];
@@ -68,13 +67,13 @@ LogisticsComponent::LogisticsComponent()
 LogisticsComponent::~LogisticsComponent()
 {
 	if ( name )
-		delete name;
+		delete[] name;
 
 	if ( iconFileName )
-		delete iconFileName;
+		delete[] iconFileName;
 
 	if ( pictureFileName )
-		delete pictureFileName;
+		delete[] pictureFileName;
 }
 
 int LogisticsComponent::init( char* dataLine )
@@ -92,7 +91,7 @@ int LogisticsComponent::init( char* dataLine )
     int i = 0;
 	for ( ; i < NUM_COMPONENT_FORMS; ++i )
 	{
-		if ( 0 == stricmp( ComponentFormString[i], pBuffer ) )
+		if ( 0 == S_stricmp( ComponentFormString[i], pBuffer ) )
 		{
 			Type = i;
 			break;
@@ -131,17 +130,17 @@ int LogisticsComponent::init( char* dataLine )
 
 	// we need to figure out where things can go
 	extractString( pLine, pBuffer, 1024 );
-	bHead = stricmp( pBuffer, "Yes" ) ? false : true;
+	bHead = S_stricmp( pBuffer, "Yes" ) ? false : true;
 	
 	extractString( pLine, pBuffer, 1024 );
-	bTorso = stricmp( pBuffer, "Yes" ) ? false : true;
+	bTorso = S_stricmp( pBuffer, "Yes" ) ? false : true;
 	
 	// ignore the next 4 columns
 	for ( i = 0; i < 4; ++i )
 		extractString( pLine, pBuffer, 1024 );
 	
 	extractString( pLine, pBuffer, 1024 );
-	bLegs = stricmp( pBuffer, "Yes" ) ? false : true;
+	bLegs = S_stricmp( pBuffer, "Yes" ) ? false : true;
 	
 	// ignore the next 4 columns
 	for ( i = 0; i < 4; ++i )
@@ -249,7 +248,7 @@ bool LogisticsComponent::compare( LogisticsComponent* second, int type )
 			return second->heat > heat;
 			break;
 		case NAME:
-			return stricmp( name, second->name ) > 0;
+			return S_stricmp( name, second->name ) > 0;
 			break;
 		case RANGE:
 			return second->damage > damage;

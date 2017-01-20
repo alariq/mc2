@@ -2,20 +2,19 @@ cmake_minimum_required (VERSION 2.8)
 project(windows)
 
 set(SOURCES ${SOURCES}
-    winbase.cpp
-    winnls.cpp
-    winuser.cpp
-    string_win.cpp
-    stdlib_win.cpp
-    tchar.cpp
-    mbstring.cpp
-    eh.cpp
-    io.cpp
-    mmsystem.cpp
-    )
+    platform_winbase.cpp
+    platform_winnls.cpp
+    platform_winuser.cpp
+    platform_stdlib.cpp
+    platform_tchar.cpp
+    platform_mbstring.cpp
+    platform_eh.cpp
+    platform_io.cpp
+    platform_mmsystem.cpp
+    platform_str.cpp
+)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O0 -ggdb -Wno-unused-local-typedefs")
-# -Wno-unused-local-typedefs - to disable "typedef was ignored on this declaration"
+#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O0 -ggdb")
 
 add_definitions(-D_DEBUG)
 add_definitions(-DUSE_ASSEMBLER_CODE=0)

@@ -36,7 +36,10 @@ public:
 	bool useUnlimitedAmmo;
 
 	long renderer;
-	long resolution;
+	//long resolution;
+    int resolutionX;
+    int resolutionY;
+
 	bool fullScreen;
 	long gammaLevel;
 	bool useLeftRightMouseProfile; // if false, use old style commands

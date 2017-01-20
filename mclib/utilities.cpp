@@ -280,7 +280,7 @@ void StaticInfo::init( FitIniFile& file, const char* blockName, long hiResOffset
 	if ( !textureHandle )
 	{
 		FullPathFileName fullPath;
-		_strlwr( fileName );
+		S_strlwr( fileName );
 		fullPath.init( artPath, fileName, ".tga" );
 		int ID = mcTextureManager->loadTexture( fullPath, gos_Texture_Alpha, 0, 0, 0x2 );
 		textureHandle = ID;

@@ -9,6 +9,7 @@
 #include "utils/camera.h"
 #include "utils/shader_builder.h"
 #include "utils/gl_utils.h"
+#include "utils/timing.h"
 
 #include <signal.h>
 
@@ -16,6 +17,7 @@ extern void gos_CreateRenderer(graphics::RenderContextHandle ctx_h, graphics::Re
 extern void gos_DestroyRenderer();
 extern void gos_RendererBeginFrame();
 extern void gos_RendererEndFrame();
+extern void gos_RendererHandleEvents();
 extern void gos_RenderUpdateDebugInput();
 
 extern bool gosExitGameOS();
@@ -46,6 +48,8 @@ static void handle_key_down( SDL_Keysym* keysym ) {
 }
 
 static void process_events( void ) {
+
+    beginUpdateMouseState(&g_mouse_info);
 
     SDL_Event event;
     while( SDL_PollEvent( &event ) ) {
@@ -106,16 +110,14 @@ static void draw_screen( void )
     glEnable(GL_TEXTURE_2D);
     //CHECK_GL_ERROR;
     
-    const int w = Environment.screenWidth;
-    const int h = Environment.screenHeight;
+	const int viewport_w = Environment.drawableWidth;
+	const int viewport_h = Environment.drawableHeight;
+    glViewport(0, 0, viewport_w, viewport_h);
 
     mat4 proj;
     g_camera.get_projection(&proj);
     mat4 viewM;
     g_camera.get_view(&viewM);
-
-    glViewport(0, 0, w, h);
-
 
 #if 0
     gos_VERTEX q[4];
@@ -161,6 +163,8 @@ static void draw_screen( void )
     glUseProgram(0);
     //CHECK_GL_ERROR;
 }
+
+extern float frameRate;
 
 int main(int argc, char** argv)
 {
@@ -215,12 +219,12 @@ int main(int argc, char** argv)
 	g_camera.set_projection(proj_mat);
 	g_camera.set_view(mat4::translation(vec3(0, 0, -16)));
 
+	timing::init();
+
     while( !g_exit ) {
 
-        timespec ts;
-        ts.tv_sec = 0;
-        ts.tv_nsec = 10*1000000; // 10msec
-        nanosleep(&ts, NULL);
+		uint64_t start_tick = timing::gettickcount();
+		timing::sleep(10*1000000);
 
         if(g_debug_draw_calls) {
             gos_RenderUpdateDebugInput();
@@ -230,12 +234,17 @@ int main(int argc, char** argv)
 
         process_events();
 
-        // TODO: add window as context member, to not pass 2 parameters
+		gos_RendererHandleEvents();
+
         graphics::make_current_context(ctx);
         draw_screen();
         graphics::swap_window(win);
 
         g_exit |= gosExitGameOS();
+
+		uint64_t end_tick = timing::gettickcount();
+		uint64_t dt = timing::ticks2ms(end_tick - start_tick);
+		frameRate = 1000.0f / (float)dt;
     }
     
     Environment.TerminateGameEngine();

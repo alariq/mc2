@@ -34,11 +34,11 @@
 #include<float.h>
 #include<time.h>
 #include<string.h>
-#include<string_win.h>
+#include"platform_str.h"
 #include<memory.h>
 #include<stdio.h>
 #include<stdlib.h>
-#include<stdlib_win.h>
+#include"platform_stdlib.h"
 #include<limits.h>
 #pragma warning(pop)
 

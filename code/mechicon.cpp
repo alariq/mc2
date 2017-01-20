@@ -14,7 +14,7 @@ MechIcon.cpp			: Implementation of the MechIcon component.
 #include"gamecam.h"
 #include"controlgui.h"
 #include"gamesound.h"
-#include<windows.h>
+#include"platform_windows.h"
 
 #ifndef MISSION_H
 #include"mission.h"
@@ -84,7 +84,7 @@ ForceGroupIcon::AnimationInfo ForceGroupIcon::animationInfos[NUM_DEATH_INFOS] =
 
 };
 
-DWORD ForceGroupIcon::s_textureHandle[5] = { -1u, -1u, -1u, -1u, -1u };
+DWORD ForceGroupIcon::s_textureHandle[5] = { 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff };
 bool ForceGroupIcon::s_slotUsed[240] = { 0 };
 
 gos_VERTEX ForceGroupIcon::	bmpLocation[17][5]  = {0}; // in screen coords
@@ -444,7 +444,7 @@ bool MechIcon::initTextures()
 		else 
 			strcat( path, "mcui_high7.tga" );
 
-		_strlwr( path );
+		S_strlwr( path );
 
 		if ( NO_ERR != file.open( path ) ) 
 		{

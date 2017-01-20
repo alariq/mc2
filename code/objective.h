@@ -9,7 +9,7 @@ Objective.h			: Interface for the Objective component.
 
 #include"elist.h"
 #include"estring.h"
-#include"tchar.h"
+#include"platform_tchar.h"
 #include"mover.h"
 
 #ifndef BLDNG_H
@@ -71,7 +71,6 @@ enum MARKER_TYPES
 	NAV = 1,
 	NUMERIC = 2
 };
-
 
 static const char *g_conditionSpeciesStringArray[] = {
 	"DestroyAllEnemyUnits",

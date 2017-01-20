@@ -36,7 +36,7 @@
 #include"terrain.h"
 #endif
 
-#include"windows.h"
+#include"platform_windows.h"
 
 //---------------------------------------------------------------------------
 // Static Globals

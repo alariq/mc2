@@ -10,13 +10,14 @@
 #include <cstdarg>
 #endif
 
-#include "stdlib_win.h"
+#include "platform_stdlib.h"
+#include "platform_str.h"
 
 #include "utils/shader_builder.h"
 #include "utils/gl_utils.h"
 #include "utils/Image.h"
 #include "utils/vec.h"
-
+#include "utils/string_utils.h"
 #include "gos_render.h"
 
 class gosRenderer;
@@ -43,8 +44,8 @@ class gosShaderMaterial {
             gosShaderMaterial* pmat = new gosShaderMaterial();
             char vs[256];
             char ps[256];
-            snprintf(vs, 255, "shaders/%s.vert", shader);
-            snprintf(ps, 255, "shaders/%s.frag", shader);
+            StringFormat(vs, 255, "shaders/%s.vert", shader);
+            StringFormat(ps, 255, "shaders/%s.frag", shader);
             pmat->program_ = glsl_program::makeProgram(shader, vs, ps);
             if(!pmat->program_) {
                 SPEW(("SHADERS", "Failed to create %s material\n", shader));
@@ -258,7 +259,7 @@ void gosMesh::draw(gosShaderMaterial* material) const
     if(num_vertices_ == 0)
         return;
 
-    updateBuffer(vb_, GL_ARRAY_BUFFER, pvertex_data_, num_vertices_*sizeof(gos_VERTEX), GL_DYNAMIC_DRAW);
+    updateBuffer(vb_, GL_ARRAY_BUFFER, pvertex_data_, num_vertices_*sizeof(gos_VERTEX));
 
     material->apply();
 
@@ -557,7 +558,6 @@ bool gosTexture::createHardwareTexture() {
     if(!is_from_memory_) {
 
         gosASSERT(filename_);
-        SPEW(("DBG", "creating texture: %s\n", filename_));
 
         Image img;
         if(!img.loadFromFile(filename_)) {
@@ -616,28 +616,38 @@ bool gosTexture::createHardwareTexture() {
 
 ////////////////////////////////////////////////////////////////////////////////
 class gosFont {
+        friend class gosRenderer;
     public:
         static gosFont* load(const char* fontFile);
-        static void destroy(gosFont* font);
 
         int getMaxCharWidth() const { return gi_.max_advance_; }
         int getMaxCharHeight() const { return gi_.font_line_skip_; }
+        int getFontAscent() const { return gi_.font_ascent_; }
 
         int getCharWidth(int c) const;
         void getCharUV(int c, uint32_t* u, uint32_t* v) const;
         int getCharAdvance(int c) const;
+        const gosGlyphMetrics& getGlyphMetrics(int c) const;
+
 
         DWORD getTextureId() const { return tex_id_; }
         const char* getName() const { return font_name_; }
+        const char* getId() const { return font_id_; }
+
+        uint32_t getRefCount() { return ref_count_; }
+        uint32_t addRef() { return ++ref_count_; }
+        uint32_t decRef() { gosASSERT(ref_count_>0); return --ref_count_; }
 
     private:
-        gosFont(){};
-        // TODO: free texture and other stuff
-        ~gosFont(){};
+        static uint32_t destroy(gosFont* font);
+        gosFont():font_name_(0), font_id_(0), tex_id_(0), ref_count_(1) {};
+        ~gosFont();
 
         char* font_name_;
+        char* font_id_;
         gosGlyphInfo gi_;
         DWORD tex_id_;
+        uint32_t ref_count_;
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -685,9 +695,28 @@ class gosRenderer {
             if(it != fontList_.end())
             {
                 gosFont* font = *it;
-                fontList_.erase(it);
-                gosFont::destroy(font);
+                if(0 == gosFont::destroy(font))
+                    fontList_.erase(it);
             }
+        }
+
+        gosFont* findFont(const char* font_id) {
+            
+            struct equals_to {
+                const char* font_id_;
+                bool operator()(const gosFont* fnt) {
+                    return strcmp(fnt->getId(), font_id_)==0;
+                }
+            };
+
+            equals_to eq;
+            eq.font_id_ = font_id;
+
+            std::vector<gosFont*>::iterator it = 
+                std::find_if(fontList_.begin(), fontList_.end(), eq);
+            if(it != fontList_.end())
+                return *it;
+            return NULL;
         }
 
         gosTexture* getTexture(DWORD texture_id) {
@@ -787,6 +816,10 @@ class gosRenderer {
         bool getBreakOnDrawCall() { return break_on_draw_call_; }
         void setBreakDrawCall(uint32_t num) { break_draw_call_num_ = num; }
 
+        graphics::RenderContextHandle getRenderContextHandle() { return ctx_h_; }
+
+		void handleEvents();
+
     private:
 
         bool beforeDrawCall();
@@ -810,7 +843,7 @@ class gosRenderer {
         DWORD reqHeight;
         DWORD reqBitDepth;
         DWORD reqAntiAlias;
-        DWORD reqGotoFullscreen;
+        bool reqGotoFullscreen;
         bool pendingRequest;
 
         // states data
@@ -908,6 +941,7 @@ void gosRenderer::init() {
 
     // add fake texture so that no one will get 0 index, as it is invalid in this game
     DWORD tex_id = gos_NewEmptyTexture( gos_Texture_Solid, "DEBUG_this_is_not_a_real_texture_debug_it!", 1);
+    (void)tex_id;
     gosASSERT(tex_id == INVALID_TEXTURE_ID);
 }
 
@@ -924,15 +958,17 @@ void gosRenderer::destroy() {
     gosShaderMaterial::destroy(basic_tex_material_);
     gosShaderMaterial::destroy(text_material_);
 
+    // delete fonts before textures, because they refer them
+    for(size_t i=0; i<fontList_.size(); i++) {
+        while(gosFont::destroy(fontList_[i])) {};
+    }
+    fontList_.clear();
+
     for(size_t i=0; i<textureList_.size(); i++) {
         delete textureList_[i];
     }
     textureList_.clear();
 
-    for(size_t i=0; i<textureList_.size(); i++) {
-        gosFont::destroy(fontList_[i]);
-    }
-    fontList_.clear();
 }
 
 void gosRenderer::initRenderStates() {
@@ -1104,6 +1140,10 @@ void gosRenderer::beginFrame()
 
 void gosRenderer::endFrame()
 {
+}
+
+void gosRenderer::handleEvents()
+{
     if(pendingRequest) {
 
         width_ = reqWidth;
@@ -1117,11 +1157,15 @@ void gosRenderer::endFrame()
                 0, 0, 1.0f, 0.0f,
                 0, 0, 0.0f, 1.0f);
 
-        if(graphics::resize_window(win_h_, width_, height_)) {
-            glViewport(0, 0, width_, height_);
+        if(graphics::resize_window(win_h_, width_, height_))
+		{
+            graphics::set_window_fullscreen(win_h_, reqGotoFullscreen);
 
             Environment.screenWidth = width_;
             Environment.screenHeight = height_;
+
+			graphics::get_drawable_size(win_h_, &Environment.drawableWidth, &Environment.drawableHeight);
+
         }
         pendingRequest = false;
     }
@@ -1363,7 +1407,7 @@ int calcTextHeight(const char* text, const int count, const gosFont* font, int r
     return num_lines;
 }
 
-void addCharacter(gosMesh* text_, const float u, const float v, const float char_du, const float char_dv, const int x, const int y, const int char_w, const int char_h) {
+void addCharacter(gosMesh* text_, const float u, const float v, const float u2, const float v2, const float x, const float y, const float x2, const float y2) {
 
     gos_VERTEX tr, tl, br, bl;
 
@@ -1374,25 +1418,25 @@ void addCharacter(gosMesh* text_, const float u, const float v, const float char
     tl.v = v;
     tl.argb = 0xffffffff;
 
-    tr.x = x + char_w;
+    tr.x = x2;
     tr.y = y;
     tr.z = 0;
-    tr.u = u + char_du;
+    tr.u = u2;
     tr.v = v;
     tr.argb = 0xffffffff;
 
     bl.x = x;
-    bl.y = y + char_h;
+    bl.y = y2;
     bl.z = 0;
     bl.u = u;
-    bl.v = v + char_dv;
+    bl.v = v2;
     bl.argb = 0xffffffff;
 
-    br.x = x + char_w;
-    br.y = y + char_h;
+    br.x = x2;
+    br.y = y2;
     br.z = 0;
-    br.u = u + char_du;
-    br.v = v + char_dv;
+    br.u = u2;
+    br.v = v2;
     br.argb = 0xffffffff;
 
     text_->addVertices(&tl, 1);
@@ -1425,27 +1469,23 @@ void gosRenderer::drawText(const char* text) {
     
     gosASSERT(text_->getNumVertices() + 6 * count <= text_->getVertexCapacity());
 
-    int x, y;
-    getTextPos(x, y);
-    const int start_x = x;
+    int ix, iy;
+    getTextPos(ix, iy);
+	float x = (float)ix, y = (float)iy;
+    const float start_x = x;
 
     const gosTextAttribs& ta = g_gos_renderer->getTextAttributes();
     const gosFont* font = ta.FontHandle;
-    const int char_w = font->getMaxCharWidth();
-    const int char_h = font->getMaxCharHeight();
-
 
     const DWORD tex_id = font->getTextureId();
     const gosTexture* tex = getTexture(tex_id);
     gosTextureInfo ti;
     tex->getTextureInfo(&ti);
-    const float tex_width = (float)ti.width_;
-    const float tex_height = (float)ti.height_;
+    const float oo_tex_width = 1.0f / (float)ti.width_;
+    const float oo_tex_height = 1.0f / (float)ti.height_;
     
-    const float char_du = (float)char_w / tex_width;
-    const float char_dv = (float)char_h / tex_height;
-
     const int font_height = font->getMaxCharHeight();
+    const int font_ascent = font->getFontAscent();
 
     const int region_width = getTextRegionWidth();
     const int region_height = getTextRegionHeight();
@@ -1467,8 +1507,7 @@ void gosRenderer::drawText(const char* text) {
             case 0: break;
             case 1: x += region_width - str_width; break;
             case 2: x += (region_width - str_width) / 2; break;
-            case 3: //ehh... handle later, must know number of lines
-                    // for now only center in X
+            case 3: // see vertical centering above
                     x += (region_width - str_width) / 2;
                     break;
         }
@@ -1476,15 +1515,26 @@ void gosRenderer::drawText(const char* text) {
         for(int i=0; i<num_chars; ++i) {
 
             const char c = text[i + pos];
-            int advance;
-            uint32_t iu, iv;
-            font->getCharUV(c, &iu, &iv);
-            advance = font->getCharAdvance(c);
-            float u = (float)iu / tex_width;
-            float v = (float)iv / tex_height;
-            addCharacter(text_, u, v, char_du, char_dv, x, y, char_w, char_h);
 
-            x += advance;
+            const gosGlyphMetrics& gm = font->getGlyphMetrics(c);
+            int char_off_x = gm.minx;
+            int char_off_y = font_ascent - gm.maxy;
+            int char_w = gm.maxx - gm.minx;
+            int char_h = gm.maxy - gm.miny;
+
+            uint32_t iu0 = gm.u + char_off_x;
+            uint32_t iv0 = gm.v + char_off_y;
+            uint32_t iu1 = iu0 + char_w;
+            uint32_t iv1 = iv0 + char_h;
+
+            float u0 = (float)iu0 * oo_tex_width;
+            float v0 = (float)iv0 * oo_tex_height;
+            float u1 = (float)iu1 * oo_tex_width;
+            float v1 = (float)iv1 * oo_tex_height;
+
+            addCharacter(text_, u0, v0, u1, v1, (float)(x + char_off_x), (float)(y + char_off_y), (float)(x + char_off_x + char_w), (float)(y + char_off_y + char_h));
+
+            x += font->getCharAdvance(c);
         }
         y += font_height;
         pos += num_chars;
@@ -1504,10 +1554,10 @@ void gosRenderer::drawText(const char* text) {
 
     //ta.Foreground
     vec4 fg;
-    fg.x = (ta.Foreground & 0xFF0000) >> 16;
-    fg.y = (ta.Foreground & 0xFF00) >> 8;
-    fg.z = ta.Foreground & 0xFF;
-    fg.w = 255;//(ta.Foreground & 0xFF000000) >> 24;
+    fg.x = (float)((ta.Foreground & 0xFF0000) >> 16);
+    fg.y = (float)((ta.Foreground & 0xFF00) >> 8);
+    fg.z = (float)(ta.Foreground & 0xFF);
+    fg.w = 255.0f;//(ta.Foreground & 0xFF000000) >> 24;
     fg = fg / 255.0f; 
     mat->getShader()->setFloat4("Foreground", fg);
     //ta.Size 
@@ -1540,7 +1590,7 @@ void gos_CreateRenderer(graphics::RenderContextHandle ctx_h, graphics::RenderWin
 void gos_DestroyRenderer() {
 
     g_gos_renderer->destroy();
-    delete[] g_gos_renderer;
+    delete g_gos_renderer;
 }
 
 void gos_RendererBeginFrame() {
@@ -1553,6 +1603,22 @@ void gos_RendererEndFrame() {
     g_gos_renderer->endFrame();
 }
 
+void gos_RendererHandleEvents() {
+    gosASSERT(g_gos_renderer);
+    g_gos_renderer->handleEvents();
+}
+
+
+gosFont::~gosFont()
+{
+    if(tex_id_ != INVALID_TEXTURE_ID)
+        getGosRenderer()->deleteTexture(tex_id_);
+
+    delete[] gi_.glyphs_;
+    delete[] font_name_;
+    delete[] font_id_;
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 gosFont* gosFont::load(const char* fontFile) {
 
@@ -1561,14 +1627,20 @@ gosFont* gosFont::load(const char* fontFile) {
     _splitpath(fontFile, NULL, dir, fname, NULL);
     const char* tex_ext = ".bmp";
     const char* glyph_ext = ".glyph";
-
-    const uint32_t textureNameSize = strlen(fname) + sizeof('/') + strlen(dir) + strlen(tex_ext) + 1;
+    
+	const uint32_t textureNameSize = strlen(fname) + sizeof('/') + strlen(dir) + strlen(tex_ext) + 1;
     char* textureName = new char[textureNameSize];
+	memset(textureName, 0, textureNameSize);
 
-    const uint32_t glyphNameSize = strlen(fname) + sizeof('/') + strlen(dir) + strlen(glyph_ext) + 1;
+	const uint32_t glyphNameSize = strlen(fname) + sizeof('/') + strlen(dir) + strlen(glyph_ext) + 1;
     char* glyphName = new char[glyphNameSize];
-    snprintf(textureName, textureNameSize, "%s/%s%s", dir, fname, tex_ext);
-    snprintf(glyphName, glyphNameSize, "%s/%s%s", dir, fname, glyph_ext);
+	memset(glyphName, 0, glyphNameSize);
+
+    uint32_t formatted_len = S_snprintf(textureName, textureNameSize, "%s/%s%s", dir, fname, tex_ext);
+	gosASSERT(formatted_len <= textureNameSize - 1);
+
+    formatted_len = S_snprintf(glyphName, glyphNameSize, "%s/%s%s", dir, fname, glyph_ext);
+	gosASSERT(formatted_len <= glyphNameSize - 1);
 
     gosTexture* ptex = new gosTexture(gos_Texture_Alpha, textureName, 0, NULL, 0, false);
     if(!ptex || !ptex->createHardwareTexture()) {
@@ -1586,6 +1658,10 @@ gosFont* gosFont::load(const char* fontFile) {
 
     font->font_name_ = new char[strlen(fname) + 1];
     strcpy(font->font_name_, fname);
+
+    font->font_id_ = new char[strlen(fontFile) + 1];
+    strcpy(font->font_id_, fontFile);
+
     font->tex_id_ = tex_id;
 
     delete[] textureName;
@@ -1595,15 +1671,20 @@ gosFont* gosFont::load(const char* fontFile) {
 
 }
 
-void gosFont::destroy(gosFont* font) {
-    delete font;
+uint32_t gosFont::destroy(gosFont* font) {
+    uint32_t rc = font->decRef();
+    if(0 == rc) {
+        delete font;
+    }
+
+    return rc;
 }
 
 void gosFont::getCharUV(int c, uint32_t* u, uint32_t* v) const {
 
     gosASSERT(u && v);
 
-    int pos = c - gi_.start_glyph_;
+    int32_t pos = c - gi_.start_glyph_;
     if(pos < 0 || pos >= gi_.num_glyphs_) {
         *u = *v = 0;
         return;
@@ -1616,11 +1697,19 @@ void gosFont::getCharUV(int c, uint32_t* u, uint32_t* v) const {
 int gosFont::getCharAdvance(int c) const
 {
     int pos = c - gi_.start_glyph_;
-    if(pos < 0 || pos >= gi_.num_glyphs_) {
+    if(pos < 0 || pos >= (int)gi_.num_glyphs_) {
         return getMaxCharWidth();
     }
 
     return gi_.glyphs_[pos].advance;
+}
+
+const gosGlyphMetrics& gosFont::getGlyphMetrics(int c) const {
+    int pos = c - gi_.start_glyph_;
+    if(pos < 0 || pos >= (int)gi_.num_glyphs_)
+        pos = 0;
+
+    return gi_.glyphs_[pos];
 }
 
 
@@ -1659,8 +1748,15 @@ void __stdcall gos_GetViewport( float* pViewportMulX, float* pViewportMulY, floa
 
 HGOSFONT3D __stdcall gos_LoadFont( const char* FontFile, DWORD StartLine/* = 0*/, int CharCount/* = 256*/, DWORD TextureHandle/*=0*/)
 {
-    gosFont* font = gosFont::load(FontFile);
-    getGosRenderer()->addFont(font);
+
+    gosFont* font = getGosRenderer()->findFont(FontFile);
+    if(!font) {
+        font = gosFont::load(FontFile);
+        getGosRenderer()->addFont(font);
+    } else {
+        font->addRef();
+    }
+
     return font;
 }
 
@@ -1825,8 +1921,8 @@ void __stdcall gos_TextDrawBackground( int Left, int Top, int Right, int Bottom,
     //PAUSE((""));
 
     gos_VERTEX v[4];
-    v[0].x = Left;
-    v[0].y = Top;
+    v[0].x = (float)Left;
+    v[0].y = (float)Top;
     v[0].z = 0;
 	v[0].argb = Color;
 	v[0].frgb = 0;
@@ -1835,15 +1931,15 @@ void __stdcall gos_TextDrawBackground( int Left, int Top, int Right, int Bottom,
     memcpy(&v[1], &v[0], sizeof(gos_VERTEX));
     memcpy(&v[2], &v[0], sizeof(gos_VERTEX));
     memcpy(&v[3], &v[0], sizeof(gos_VERTEX));
-    v[1].x = Right;
+    v[1].x = (float)Right;
     v[1].u = 1.0f;
 
-    v[2].x = Right;
-    v[2].y = Bottom;
+    v[2].x = (float)Right;
+    v[2].y = (float)Bottom;
     v[2].u = 1.0f;
     v[2].v = 0.0f;
 
-    v[1].y = Bottom;
+    v[1].y = (float)Bottom;
     v[1].v = 1.0f;
 
     if(g_disable_quads == false )
@@ -1910,7 +2006,7 @@ void __stdcall gos_TextStringLength( DWORD* Width, DWORD* Height, const char *fm
     const char* txtptr = text;
 
     while(*txtptr) {
-        if(*txtptr++ == '\n') {
+        if(*txtptr == '\n') {
             num_newlines++;
             max_width = max_width > cur_width ? max_width : cur_width;
             cur_width = 0;
@@ -1918,11 +2014,55 @@ void __stdcall gos_TextStringLength( DWORD* Width, DWORD* Height, const char *fm
             const int cw = font->getCharAdvance(*txtptr);
             cur_width += cw;
         }
+        txtptr++;
     }
     max_width = max_width > cur_width ? max_width : cur_width;
 
     *Width = max_width;
     *Height = (num_newlines + 1) * font->getMaxCharHeight();
+}
+
+////////////////////////////////////////////////////////////////////////////////
+size_t __stdcall gos_GetMachineInformation( MachineInfo mi, int Param1/*=0*/, int Param2/*=0*/, int Param3/*=0*/, int Param4/*=0*/)
+{
+    // TODO:
+    if(mi == gos_Info_GetDeviceLocalMemory)
+        return 1024*1024*1024;
+    if(mi == gos_Info_GetDeviceAGPMemory)
+        return 512*1024*1024; 
+    if (mi == gos_Info_CanMultitextureDetail)
+        return true;
+    if(mi == gos_Info_NumberDevices)
+        return 1;
+    if(mi == gos_Info_GetDeviceName)
+        return (size_t)glGetString(GL_RENDERER);
+    if(mi == gos_Info_ValidMode) {
+        int xres = Param2;
+        int yres = Param3;
+        int bpp = Param4;
+        return graphics::is_mode_supported(xres, yres, bpp) ? 1 : 0;
+    }
+    if(mi == gos_Info_GetIMECaretStatus)
+        return 1;
+
+    return 0;
+}
+
+int gos_GetWindowDisplayIndex()
+{   
+    gosASSERT(g_gos_renderer);
+    
+    return graphics::get_window_display_index(g_gos_renderer->getRenderContextHandle());
+}
+
+int gos_GetNumDisplayModes(int DisplayIndex)
+{
+    return graphics::get_num_display_modes(DisplayIndex);
+}
+
+bool gos_GetDisplayModeByIndex(int DisplayIndex, int ModeIndex, int* XRes, int* YRes, int* BitDepth)
+{
+    return graphics::get_display_mode_by_index(DisplayIndex, ModeIndex, XRes, YRes, BitDepth);
 }
 
 #include "gameos_graphics_debug.cpp"

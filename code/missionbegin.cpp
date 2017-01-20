@@ -47,9 +47,9 @@ bool	MissionBegin::FirstTimeMechLab = true;
 
 MissionBegin::MissionBegin()
 {
-	memset( screens, 0, sizeof( LogisticsScreen* ) * 5/*dim screen X*/ * 3/*dim screen Y*/ );
-	memset( singlePlayerScreens, 0, sizeof( LogisticsScreen* ) * 5/*dim screen X*/ * 3/*dim screen Y*/ );
-	memset( multiplayerScreens, 0, sizeof( LogisticsScreen* ) * 5/*dim screen X*/ * 3/*dim screen Y*/ );
+	memset( screens, 0, sizeof( screens));
+	memset( singlePlayerScreens, 0, sizeof(singlePlayerScreens));
+	memset( multiplayerScreens, 0, sizeof( multiplayerScreens));
 
 	curScreenX = -1;
 	curScreenY = 1;
@@ -374,9 +374,9 @@ void MissionBegin::begin()
 	singlePlayerScreens[2][2] = pMechLabScreen;
 	singlePlayerScreens[4][1] = pLoadScreen;
 
-	for ( int i = 0; i < 4; i++ )
+	for ( int i = 0; i < DIM_SCREEN_X; i++ )
 	{
-		for ( int j = 0; j < 4; j++ )
+		for ( int j = 0; j < DIM_SCREEN_Y; j++ )
 		{
 			if ( singlePlayerScreens[i][j] )
 			{

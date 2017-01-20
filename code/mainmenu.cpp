@@ -7,7 +7,7 @@ MainMenu.cpp			: Implementation of the MainMenu component.
 \*************************************************************************************************/
 
 #ifdef LINUX_BUILD
-#include "windows.h"
+#include "platform_windows.h"
 struct DDSURFACEDESC2 {
 };
 #else
@@ -511,7 +511,7 @@ void MainMenu::update()
 			strcpy( name, savePath );
 			strcat( name, LogisticsSaveDialog::instance()->getFileName() );
 			int index = strlen( name ) - 4;
-			if ( stricmp( &name[index], ".fit" ) !=0 ) 
+			if ( S_stricmp( &name[index], ".fit" ) !=0 ) 
 				strcat( name, ".fit" );
 
 			
@@ -548,7 +548,8 @@ void MainMenu::update()
 			}
 			else
 			{
-				if ( NO_ERR != file.open( name ) )
+				const bool do_not_make_lower = true;
+				if ( NO_ERR != file.open( name, READ, 50, do_not_make_lower ) )
 				{
 					char errorStr[1024];
 					sprintf( errorStr, "couldn't open the file %s", name );

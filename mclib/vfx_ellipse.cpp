@@ -6,11 +6,10 @@ extern char SpecialColor[];
 //extern void AG_ellipse_draw(PANE *pane, LONG xc, LONG yc, LONG width, LONG height, LONG color);
 //extern void AG_ellipse_fill(PANE *pane, LONG xc, LONG yc, LONG width, LONG height, LONG color);
 
+#ifndef LINUX_BUILD
 static signed int paneY0,paneY1,paneX0,paneX1,DestWidth,DestBuffer,x_top,y_top,Bsquared,TwoBsquared,Asquared,TwoAsquared,var_dx,var_dy,x_vector,line_left,line_right;
 static int DrawRoutine;
-
-
-
+#endif
 
 
 void AG_ellipse_draw(PANE *pane, LONG xc, LONG yc, LONG width, LONG height, LONG color)
@@ -21,20 +20,19 @@ void AG_ellipse_draw(PANE *pane, LONG xc, LONG yc, LONG width, LONG height, LONG
 		return;
 	}
 
-	DestWidth = pane->window->x_max+1;
 
+#ifdef LINUX_BUILD
+#else
 	long paneX0 = (pane->x0 < 0) ? 0 : pane->x0;
 	long paneY0 = (pane->y0 < 0) ? 0 : pane->y0;
 	long paneX1 = (pane->x1 >= DestWidth) ? pane->window->x_max : pane->x1;
 	long paneY1 = (pane->y1 >= (pane->window->y_max+1)) ? pane->window->y_max : pane->y1;
 
 	UBYTE* DestBuffer = pane->window->buffer;
+	DestWidth = pane->window->x_max+1;
 
 	xc+=paneX0;
 	yc+=paneY0;
-
-#ifdef LINUX_BUILD
-#else
 
 	_asm{
 
@@ -322,6 +320,9 @@ void AG_ellipse_fill(PANE *pane, LONG xc, LONG yc, LONG width, LONG height, LONG
 		return;
 	}
 
+#ifdef LINUX_BUILD
+#else
+
 	DestWidth = pane->window->x_max+1;
 
 	long paneX0 = (pane->x0 < 0) ? 0 : pane->x0;
@@ -333,8 +334,6 @@ void AG_ellipse_fill(PANE *pane, LONG xc, LONG yc, LONG width, LONG height, LONG
 
 	xc+=paneX0;
 	yc+=paneY0;
-#ifdef LINUX_BUILD
-#else
 	_asm{
 
 		mov eax,color
@@ -624,6 +623,10 @@ void AG_ellipse_fillOr(PANE *pane, LONG xc, LONG yc, LONG width, LONG height, LO
 		return;
 	}
 
+
+#ifdef LINUX_BUILD
+#else
+
 	DestWidth = pane->window->x_max+1;
 
 	long paneX0 = (pane->x0 < 0) ? 0 : pane->x0;
@@ -635,9 +638,6 @@ void AG_ellipse_fillOr(PANE *pane, LONG xc, LONG yc, LONG width, LONG height, LO
 
 	xc+=paneX0;
 	yc+=paneY0;
-
-#ifdef LINUX_BUILD
-#else
 	_asm{
 
 		mov eax,color
@@ -827,8 +827,6 @@ void andLineCallback (int x, int y)
 
 void AG_ellipse_fillXor(PANE *pane, LONG xc, LONG yc, LONG width, LONG height, LONG color)
 {
-	long xorResult = color ^ 0xff;
-	unsigned char xorColor = (unsigned char)xorResult;
 	
 	if( width==0 || height==0 )
 	{
@@ -837,6 +835,15 @@ void AG_ellipse_fillXor(PANE *pane, LONG xc, LONG yc, LONG width, LONG height, L
 		VFX_line_draw( pane, xc-width, yc-height, xc+width, yc+height, LD_EXECUTE,(long)(&andLineCallback) );
 		return;
 	}
+
+
+#ifdef LINUX_BUILD
+    // sebi !NB (checkk othes _asm in this file)
+#else
+
+	long xorResult = color ^ 0xff;
+
+	unsigned char xorColor = (unsigned char)xorResult;
 
 	DestWidth = pane->window->x_max+1;
 
@@ -850,9 +857,6 @@ void AG_ellipse_fillXor(PANE *pane, LONG xc, LONG yc, LONG width, LONG height, L
 	xc+=paneX0;
 	yc+=paneY0;
 
-#ifdef LINUX_BUILD
-    // sebi !NB (checkk othes _asm in this file)
-#else
 	_asm{
 
 		mov eax,color

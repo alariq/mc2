@@ -86,6 +86,7 @@ class FitIniFile : public File
 		double textToDouble (const char *num);
 		
 		long textToLong (const char *num);
+		int textToInt(const char *num);
 		unsigned long textToULong (const char *num);
 		
 		short textToShort (const char *num);
@@ -124,7 +125,7 @@ class FitIniFile : public File
 		FitIniFile (void);
 		~FitIniFile (void);
 
-		virtual long open (const char* fName, FileMode _mode = READ, long numChildren = 50);
+		virtual long open (const char* fName, FileMode _mode = READ, long numChildren = 50, bool doNotLower = false);
 		virtual long open (FilePtr _parent, unsigned long fileSize, long numChildren = 50);
 		
 		virtual long create (const char* fName);
@@ -146,7 +147,7 @@ class FitIniFile : public File
 		long readIdBoolean (const char *varName, bool &value);
 		long readIdInt (const char *varName, int &value);
 		long readIdLong (const char *varName, long &value);
-		long readIdULong (const char *varName, unsigned long &value);
+		long readIdULong (const char *varName, uint64_t &value);
         // sebi
 		long readIdULong (const char *varName, DWORD &value);
 		
@@ -162,6 +163,8 @@ class FitIniFile : public File
 		
 		long readIdFloatArray (const char *varName, float *result, unsigned long numElements);
 		
+		long readIdIntArray (const char *varName, int *result, unsigned int numElements);
+
 		long readIdLongArray (const char *varName, long *result, unsigned long numElements);
 		long readIdULongArray (const char *varName, unsigned long *result, unsigned long numElements);
 		

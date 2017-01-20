@@ -472,7 +472,7 @@ bool
 			(size_t)record + m_databaseHandle->m_baseAddress
 		);
 		Check_Object(record);
-		if (record->m_hash == hash && !_stricmp(m_name,record->m_name))
+		if (record->m_hash == hash && !S_stricmp(m_name,record->m_name))
 		{
 			m_length = record->m_length;
 			m_data = &record->m_data[record->m_nameLength];

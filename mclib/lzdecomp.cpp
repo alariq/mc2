@@ -20,7 +20,7 @@
 #define NULL			0
 #endif
 
-#include "zlib.h"
+#include <zlib.h>
 
 typedef unsigned char* MemoryPtr;
 
@@ -268,7 +268,7 @@ eof:
 // LZ DeCompress Routine
 // Takes a pointer to dest buffer, a pointer to source buffer and len of source.
 // returns length of decompressed image.
-long LZDecomp (MemoryPtr dest, MemoryPtr src, unsigned long srcLen)
+size_t LZDecomp (MemoryPtr dest, MemoryPtr src, size_t srcLen)
 {
     const int CHUNK = 16384;
     int ret;
@@ -295,6 +295,7 @@ long LZDecomp (MemoryPtr dest, MemoryPtr src, unsigned long srcLen)
         strm.avail_in = len_left>CHUNK ? CHUNK : len_left;
         memcpy(in, dataptr, strm.avail_in);
         dataptr += strm.avail_in;
+		len_left -= strm.avail_in;
 
         if (strm.avail_in == 0)
             break;
@@ -311,7 +312,7 @@ long LZDecomp (MemoryPtr dest, MemoryPtr src, unsigned long srcLen)
                     ret = Z_DATA_ERROR;     /* and fall through */
                 case Z_DATA_ERROR:
                 case Z_MEM_ERROR:
-                    (void)inflateEnd(&strm);
+                        (void)inflateEnd(&strm);
                     return 0;
             }
 

@@ -37,7 +37,7 @@
 #include"txmmgr.h"
 #endif
 
-#include<windows.h>
+#include"platform_windows.h"
 
 #include<stuff/stuff.hpp>
 #include<math.h>

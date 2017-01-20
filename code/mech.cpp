@@ -1146,6 +1146,9 @@ void BattleMech::init (bool create) {
 	cBills = 0;
 	playedHeloDestruct = false;
 
+    control.reset();
+    control.settings.mech.throttle = 100; // sebiL init to not cause garbage
+
 	numBodyLocations = NUM_MECH_BODY_LOCATIONS;
 	for (long i = 0; i < numBodyLocations; i++) {
 		body[i].CASE = false;
@@ -1496,6 +1499,16 @@ long BattleMech::init (DWORD variantNum)
 	// Read in the mech's non-weapon/non-ammo components...
 	long realItemNum = 0;
     MemSet(ItemLocationToInvLocation, 0xff);
+
+	// sebi: init inventory items to uninitialized. Original mc2 memeory allocator seemed to init all by 0xff which coincidentally
+	// marked all inventory items as not valid, our memory allocation does not do this and so there was garbage (0xcd), leading to
+	// all items in inventory behind last loaded from file to contain garbage. I wonder how many are such things still present.
+	// Before similar issue led to some in-game characters be invisible (salvage aircraft for example)
+	for (long curItem = 0;curItem < MAX_MOVER_INVENTORY_ITEMS;curItem++)
+	{
+		inventory[curItem].masterID = 0xff;
+		inventory[realItemNum].disabled = true;
+	}
 
 	//Read in everything but weapons and AMMO
 	for (long curItem = 0;curItem < MAX_MOVER_INVENTORY_ITEMS;curItem++)
@@ -2663,6 +2676,7 @@ void BattleMech::resetComponents (long totalComponents, long *componentList)
 	
 	// local variable needs to be set for class
     //sebi: no really...
+	// should set it to zero ?
 	//numJumpJets = numJumpJets;
 }
 
@@ -6796,7 +6810,7 @@ bool BattleMech::hitInventoryItem (long itemIndex, bool setupOnly) {
 		case COMPONENT_FORM_SENSOR:
 			break;
 		case COMPONENT_FORM_ACTUATOR:
-			if ((bodyLocation == MECH_BODY_LOCATION_LLEG) || (MECH_BODY_LOCATION_RLEG))
+			if ((bodyLocation == MECH_BODY_LOCATION_LLEG) || (bodyLocation == MECH_BODY_LOCATION_RLEG))
 				pilotingCheck(0); //pilotCheckModifier += PilotCheckModifierTable[0];
 			break;
 		case COMPONENT_FORM_ENGINE:
@@ -7059,8 +7073,12 @@ void BattleMech::calcCriticalHit (long hitLocation) {
 			for (hitSpace = 0; hitSpace < numBodySpaces; hitSpace++) 
 			{
 				numSpaces = 0;
-				if (body[bodyLocation].criticalSpaces[hitSpace].inventoryID < 255)
-					numSpaces = MasterComponent::masterList[inventory[body[bodyLocation].criticalSpaces[hitSpace].inventoryID].masterID].getSize();
+				unsigned char inv_id = body[bodyLocation].criticalSpaces[hitSpace].inventoryID;
+				if (inv_id < 255)
+				{
+					gosASSERT(inv_id < MAX_MOVER_INVENTORY_ITEMS);
+					numSpaces = MasterComponent::masterList[inventory[inv_id].masterID].getSize();
+				}
 
 				if (critHitRoll < numSpaces)
 					break;

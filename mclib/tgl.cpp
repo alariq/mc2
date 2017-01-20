@@ -32,7 +32,7 @@
 #include"txmmgr.h"
 #endif
 
-#include "string_win.h"
+#include "platform_str.h"
 
 //-------------------------------------------------------------------------------
 // Include Files
@@ -224,8 +224,8 @@ TG_ShapePtr TG_TypeNode::CreateFrom (void)
 	for (long i=0;i<MAX_SHADOWS;i++)
 		newShape->shadowsVisible[i] = false;
 
-	newShape->isSpotlight = (strnicmp(newShape->getNodeName(),"SpotLight_",10) == 0);
-	newShape->isWindow = (strnicmp(newShape->getNodeName(),"LitWin_",6) == 0);
+	newShape->isSpotlight = (S_strnicmp(newShape->getNodeName(),"SpotLight_",10) == 0);
+	newShape->isWindow = (S_strnicmp(newShape->getNodeName(),"LitWin_",6) == 0);
 
 	if (newShape->isSpotlight)
 		newShape->noShadow = true;
@@ -436,8 +436,8 @@ TG_ShapePtr TG_TypeShape::CreateFrom (void)
 	for (long i=0;i<MAX_SHADOWS;i++)
 		newShape->shadowsVisible[i] = false;
 		
-	newShape->isSpotlight = (strnicmp(newShape->getNodeName(),"SpotLight_",10) == 0);
-	newShape->isWindow = (strnicmp(newShape->getNodeName(),"LitWin_",6) == 0);
+	newShape->isSpotlight = (S_strnicmp(newShape->getNodeName(),"SpotLight_",10) == 0);
+	newShape->isWindow = (S_strnicmp(newShape->getNodeName(),"LitWin_",6) == 0);
 
 	if (newShape->isSpotlight)
 		newShape->noShadow = true;
@@ -1313,7 +1313,7 @@ int TG_TypeShape::LoadTGShapeFromASE (const char *fileName)
 
 	//----------------------------------------
 	// Check for valid ASE Header data.
-	gosASSERT(strnicmp(ASE_HEADER,(char *)aseContents,strlen(ASE_HEADER)) == 0);
+	gosASSERT(S_strnicmp(ASE_HEADER,(char *)aseContents,strlen(ASE_HEADER)) == 0);
 
 	//---------------------------------------
 	// Find the number of Textures
@@ -3033,7 +3033,7 @@ long TG_Shape::RenderShadows (long startFace)
 		return startFace;
 		
 	//Can make this a flag to optimize!
-	if (strnicmp(getNodeName(),"SpotLight_",10) == 0)
+	if (S_strnicmp(getNodeName(),"SpotLight_",10) == 0)
 		return startFace;
 		
 	if (!listOfVertices ||

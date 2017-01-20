@@ -2468,7 +2468,7 @@ void WeaponBolt::init (bool create, ObjectTypePtr _type)
 	//----------------------------------------------
 	// Get a texture Handle from the textureManager
 	// Assume ALPHA!
-	if (((WeaponBoltTypePtr)_type)->textureName && stricmp(((WeaponBoltTypePtr)_type)->textureName,"NONE") != 0)
+	if (((WeaponBoltTypePtr)_type)->textureName && S_stricmp(((WeaponBoltTypePtr)_type)->textureName,"NONE") != 0)
 	{
 		char tPath[1024];
 		sprintf(tPath,"%s128" PATH_SEPARATOR, tglPath);

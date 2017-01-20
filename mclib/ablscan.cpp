@@ -11,7 +11,7 @@
 #include<stdlib.h>
 #include<math.h>
 #include<string.h>
-#include<string_win.h>
+#include"platform_str.h"
 #include<time.h>
 
 #ifndef ABLGEN_H
@@ -619,7 +619,7 @@ void languageDirective (void) {
 		getChar();
 	}
 	directive[directiveLength] = '\0';
-	_strlwr(directive);
+	S_strlwr(directive);
 
 	if (strcmp(directive, "include") == 0) {
 		//---------------------
@@ -757,7 +757,7 @@ void languageDirective (void) {
 						getChar();
 					}
 					directive2[directiveLength] = '\0';
-					_strlwr(directive2);
+					S_strlwr(directive2);
 					if (strcmp(directive2, "#debug_start") == 0)
 						nestedLevel++;
 					else if (strcmp(directive2, "#debug_end") == 0) {
@@ -1052,7 +1052,7 @@ void getNumber (void) {
 //			curToken = TKN_ERROR;
 //			return;
 //		}
-		curLiteral.value.integer = (long)numberValue;
+		curLiteral.value.integer = (int)numberValue;
 		}
 	else
 		curLiteral.value.real = numberValue;

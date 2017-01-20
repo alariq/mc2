@@ -57,7 +57,7 @@ void LogisticsMissionInfo::clear()
 	for ( FILE_LIST::EIterator iter = additionalPurchaseFiles.Begin();
 	!iter.IsDone(); iter++ )
 	{
-		delete *iter;
+		delete[] *iter;
 	}
 
 	additionalPurchaseFiles.Clear();
@@ -651,7 +651,7 @@ long LogisticsMissionInfo::setNextMission( const char* missionName )
 		MISSION_LIST::EIterator iter = pGroup->infos.Begin();
 		while( !iter.IsDone() )
 		{
-			if ( stricmp( (*iter)->fileName, missionName ) == 0 )
+			if ( S_stricmp( (*iter)->fileName, missionName ) == 0 )
 			{
 				bFound = 1;
 			

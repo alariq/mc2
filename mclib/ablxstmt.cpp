@@ -44,7 +44,7 @@
 // EXTERNALS
 
 extern int32_t          level;
-extern int32_t 		CallStackLevel;
+extern int32_t          CallStackLevel;
 extern int              execLineNumber;
 extern int              execStatementCount;
 extern char*			codeSegmentPtr;
@@ -127,7 +127,7 @@ void execStatement (void) {
 						//-----------------------------------------------------------------
 						// We called an Order function, and we're in an Orders/State block,
 						// so do we continue the flow of orders or stop here?
-						long returnVal = tos->integer;
+						int returnVal = tos->integer;
 						pop();
 						if (returnVal == 0)
 							execOrderReturn(returnVal);
@@ -456,7 +456,7 @@ void execSwitchStatement (void) {
 	getCodeToken();
 	TypePtr switchExpressionTypePtr = execExpression();
 
-	long switchExpressionValue;
+	int switchExpressionValue;
 	if ((switchExpressionTypePtr == IntegerTypePtr) || (switchExpressionTypePtr->form == FRM_ENUM))
 		switchExpressionValue = tos->integer;
 	else
@@ -467,11 +467,11 @@ void execSwitchStatement (void) {
 	// Now, search the branch table for the expression value...
 	codeSegmentPtr = branchTableLocation;
 	getCodeToken();
-	long caseLabelCount = getCodeInteger();
+	int caseLabelCount = getCodeInteger();
 	bool done = false;
 	char* caseBranchLocation = NULL;
 	while (!done && caseLabelCount--) {
-		long caseLabelValue = getCodeInteger();
+		int caseLabelValue = getCodeInteger();
 		caseBranchLocation = getCodeAddress();
 		done = (caseLabelValue == switchExpressionValue);
 	}
@@ -533,7 +533,7 @@ void execForStatement (void) {
 	// Eval the initial expression...
 	getCodeToken();
 	execExpression();
-	long initialValue;
+	int initialValue;
 	if (controlTypePtr == IntegerTypePtr)
 		initialValue = tos->integer;
 	else
@@ -542,7 +542,7 @@ void execForStatement (void) {
 	// The initial value...
 	pop();
 
-	long deltaValue;
+	int deltaValue;
 	if (codeToken == TKN_TO)
 		deltaValue = 1;
 	else
@@ -552,7 +552,7 @@ void execForStatement (void) {
 	// Now, eval the final expression...
 	getCodeToken();
 	execExpression();
-	long finalValue;
+	int finalValue;
 	if (controlTypePtr == IntegerTypePtr)
 		finalValue = tos->integer;
 	else
@@ -565,11 +565,11 @@ void execForStatement (void) {
 	// Address of start of loop...
 	char* loopStartLocation = codeSegmentPtr;
 
-	long controlValue = initialValue;
+	int controlValue = initialValue;
 
 	//-----------------------------
 	// Now, execute the FOR loop...
-	long iterations = 0;
+	int iterations = 0;
 	if (deltaValue == 1)
 		while (controlValue <= finalValue) {
 			if (controlTypePtr == IntegerTypePtr)
@@ -710,7 +710,7 @@ void execRepeatStatement (void) {
 
 	char* loopStartLocation = codeSegmentPtr;
 
-	long iterations = 0;
+	int iterations = 0;
 	do {
 		getCodeToken();
 
@@ -749,7 +749,7 @@ void execWhileStatement (void) {
 	char* testLocation = codeSegmentPtr;
 
 	bool loopDone = false;
-	long iterations = 0;
+	int iterations = 0;
 	do {
 		//-------------------------------
 		// Eval the boolean expression...

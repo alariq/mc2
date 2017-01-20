@@ -1,4 +1,6 @@
-#include<tchar.h>
+#ifndef PLATFORM_WINDOWS
+
+#include "platform_tchar.h"
 
 // http://www.gnu.org/software/libc/manual/html_node/Converting-a-Character.html#Converting-a-Character
 
@@ -14,3 +16,5 @@ const wchar_t* _wcsinc( const wchar_t *current) {
 }
 
 #endif 
+
+#endif // PLATFORM_WINDOWS

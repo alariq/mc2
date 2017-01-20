@@ -175,8 +175,8 @@ void LogisticsMechIcon::render(long xOffset, long yOffset )
 
 	if ( bDisabled )
 	{
-		GUI_RECT tmprect = { outline.left() + xOffset, outline.top() + yOffset,
-			outline.right() + xOffset, outline.bottom() + yOffset };
+		GUI_RECT tmprect = { (long)(outline.left() + xOffset), (long)(outline.top() + yOffset),
+			(long)(outline.right() + xOffset), (long)(outline.bottom() + yOffset) };
 
 		drawRect( tmprect, 0xff000000 );
 

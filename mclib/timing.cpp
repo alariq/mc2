@@ -11,8 +11,7 @@
 #include"timing.h"
 #endif
 
-#include<windows.h>
-#include<winbase.h>
+#include"platform_windows.h"
 
 #include<math.h>
 

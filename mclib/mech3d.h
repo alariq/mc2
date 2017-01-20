@@ -26,6 +26,8 @@
 #include"msl.h"
 #endif
 
+#include"memfunc.h"
+
 #include<gosfx/gosfxheaders.hpp>
 //-------------------------------------------------------------------------------
 // Structs used by layer.
@@ -165,6 +167,12 @@ class Mech3DAppearanceType: public AppearanceType
 			numSmokeNodes = numWeaponNodes = numJumpNodes = 0;
 
 			mechShadowShape = NULL;
+    
+            //sebi: init to not contain garbage
+ 		    mechForwardDmgShape = mechBackwardDmgShape = NULL;
+            leftArm = rightArm = NULL;
+            numFootNodes = 0;
+            MemSet(gestures, 0);
 		}
 
 		Mech3DAppearanceType (void) 

@@ -10,7 +10,7 @@ LogisticsDialog.cpp			: Implementation of the LogisticsDialog component.
 #include"abutton.h"
 #include"inifile.h"
 #include"mclib.h"
-#include"windows.h"
+#include"platform_windows.h"
 #include "../resource.h"
 #include"aedit.h"
 #include"logisticsdata.h"
@@ -602,11 +602,13 @@ void LogisticsSaveDialog::initDialog( const char* path, bool bCampaign )
 bool LogisticsSaveDialog::isCorrectVersionSaveGame( char* fileName )
 {
 	FullPathFileName path;
-	path.init( savePath, fileName, ".fit" );
+	// sebi: save file can be arbitrary
+	bool do_not_make_lower = true;
+	path.init( savePath, fileName, ".fit", do_not_make_lower);
 
 	FitIniFile file;
 
-	if ( NO_ERR != file.open( (char*)(const char*)path ) )
+	if ( NO_ERR != file.open( (char*)(const char*)path, READ, 50, do_not_make_lower))
 	{
 		char errorStr[256];
 		sprintf( errorStr, "couldn't open file %s", (const char*)path );
@@ -722,7 +724,8 @@ void LogisticsSaveDialog::update()
 	{
 
 		FullPathFileName path;
-		path.init( bCampaign ? campaignPath : savePath, fileName, ".fit" );
+		const bool do_not_lower = true;
+		path.init( bCampaign ? campaignPath : savePath, fileName, ".fit" , do_not_lower);
 
 		if ( fileExists( path ) )
 			getButton( YES )->disable( false );
@@ -1256,7 +1259,7 @@ void LogisticsVariantDialog::initTranscript()
 	{
 		do
 		{
-			if ((findResult.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) == 0 && stricmp( findResult.cFileName, "transcript.txt" ) != 0 )
+			if ((findResult.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) == 0 && S_stricmp( findResult.cFileName, "transcript.txt" ) != 0 )
 			{
 				aAnimTextListItem* pEntry = new aAnimTextListItem(IDS_DIALOG_LIST_FONT);
 				*pEntry = s_instance->templateItem;

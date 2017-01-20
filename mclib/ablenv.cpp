@@ -10,7 +10,8 @@
 #include<stdio.h>
 #include<stdlib.h>
 #include<string.h>
-#include<string_win.h>
+#include<cassert>
+#include"platform_str.h"
 
 #ifndef ABLGEN_H
 #include"ablgen.h"
@@ -37,7 +38,7 @@
 #endif
 
 //***************************************************************************
-long ABLi_preProcess (const char* sourceFileName,
+int32_t ABLi_preProcess (const char* sourceFileName,
 					  long* numErrors = NULL,
 					  long* numLinesProcessed = NULL,
 					  long* numFilesProcessed = NULL,
@@ -281,7 +282,7 @@ void UserFile::write (const char* s) {
 	//	s[MAX_USER_FILE_LINELEN - 1] = '\0';
 
 	//sprintf(buffer, "%s\n", s);
-	snprintf(buffer, MAX_USER_FILE_LINELEN - 1, "%s\n", s);
+	S_snprintf(buffer, MAX_USER_FILE_LINELEN - 1, "%s\n", s);
 	
     //sebi 
     if (strlen(s) > (MAX_USER_FILE_LINELEN - 1))
@@ -289,6 +290,8 @@ void UserFile::write (const char* s) {
     //
 
 	strncpy(lines[numLines], buffer, MAX_USER_FILE_LINELEN - 1);
+	lines[numLines][MAX_USER_FILE_LINELEN - 1] = '\0';
+
 	numLines++;
 	totalLines++;
 }
@@ -481,7 +484,7 @@ long ABLModule::getRealId (void)
 
 //---------------------------------------------------------------------------
 
-long ABLModule::init (long moduleHandle) {
+long ABLModule::init (int moduleHandle) {
 
 	if (moduleHandle == -1) {
 		//----------
@@ -613,6 +616,7 @@ void ABLModule::read (ABLFile* moduleFile) {
 		char tempName[1024];
 		moduleFile->readString((unsigned char*)tempName);
 		long ignore = moduleFile->readInt();
+        (void)ignore;
 	}
 
 	char stateName[256];
@@ -756,7 +760,7 @@ void ABLModule::clearOrderCallFlag(unsigned char dword, unsigned char bit) {
 
 //---------------------------------------------------------------------------
 
-long ABLModule::getPrevStateHandle (void) {
+int ABLModule::getPrevStateHandle (void) {
 
 	if (!prevState)
 		return(0);
@@ -770,7 +774,7 @@ long ABLModule::getPrevStateHandle (void) {
 
 //---------------------------------------------------------------------------
 
-long ABLModule::getStateHandle (void) {
+int ABLModule::getStateHandle (void) {
 
 	if (!state)
 		return(0);
@@ -1065,14 +1069,14 @@ SymTableNodePtr ABLModule::findSymbol (const char* symbolName, SymTableNodePtr c
 
 	if (curFunction) {
         char* sn = strdup(symbolName);
-		SymTableNodePtr symbol = searchSymTable(strlwr(sn), curFunction->defn.info.routine.localSymTable);
+		SymTableNodePtr symbol = searchSymTable(S_strlwr(sn), curFunction->defn.info.routine.localSymTable);
         free(sn);
 		if (symbol)
 			return(symbol);
 	}
 
     char* sn = strdup(symbolName);
-    sn = strlwr(sn);
+    sn = S_strlwr(sn);
 
 	SymTableNodePtr symbol = searchSymTable(sn, ModuleRegistry[handle].moduleIdPtr->defn.info.routine.localSymTable);
 
@@ -1103,7 +1107,7 @@ SymTableNodePtr ABLModule::findFunction (const char* functionName, bool searchLi
             memset(temp, 0, 1024 );
             strncpy( temp, functionName, (strlen(functionName) > 1020) ? 1020 : strlen(functionName) );
 
-			symbol = searchSymTable(_strlwr(temp), ModuleRegistry[ModuleRegistry[handle].librariesUsed[i]->handle].moduleIdPtr->defn.info.routine.localSymTable);
+			symbol = searchSymTable(S_strlwr(temp), ModuleRegistry[ModuleRegistry[handle].librariesUsed[i]->handle].moduleIdPtr->defn.info.routine.localSymTable);
 
 			if (symbol)
 				break;
@@ -1123,7 +1127,7 @@ SymTableNodePtr ABLModule::findState (const char* stateName) {
 
 //---------------------------------------------------------------------------
 
-long ABLModule::findStateHandle (const char* stateName) {
+int ABLModule::findStateHandle (const char* stateName) {
 
 	for (long i = 1; i < ModuleRegistry[handle].numStateHandles; i++)
 		if (strcmp(stateName, ModuleRegistry[handle].stateHandles[i].name) == 0)
@@ -1133,7 +1137,7 @@ long ABLModule::findStateHandle (const char* stateName) {
 
 //---------------------------------------------------------------------------
 
-long ABLModule::setStaticInteger (char* name, long value) {
+int ABLModule::setStaticInteger (char* name, int value) {
 
 	SymTableNodePtr symbol = findSymbol(name);
 	if (!symbol)
@@ -1146,13 +1150,13 @@ long ABLModule::setStaticInteger (char* name, long value) {
 		return(3);
 
 	StackItemPtr dataPtr = staticData + symbol->defn.info.data.offset;
-	*((long*)dataPtr) = value;
+	*((int*)dataPtr) = value;
 	return(0);
 }
 
 //---------------------------------------------------------------------------
 
-long ABLModule::getStaticInteger (char* name) {
+int ABLModule::getStaticInteger (char* name) {
 
 	SymTableNodePtr symbol = findSymbol(name);
 	if (!symbol)
@@ -1165,12 +1169,12 @@ long ABLModule::getStaticInteger (char* name) {
 		return(0xFFFFFFFF);
 
 	StackItemPtr dataPtr = staticData + symbol->defn.info.data.offset;
-	return(*((long*)dataPtr));
+	return(*((int*)dataPtr));
 }
 
 //---------------------------------------------------------------------------
 
-long ABLModule::setStaticReal (char* name, float value) {
+int ABLModule::setStaticReal (char* name, float value) {
 
 	SymTableNodePtr symbol = findSymbol(name);
 	if (!symbol)
@@ -1196,10 +1200,16 @@ float ABLModule::getStaticReal (char* name) {
 		return(-999999.0);
 	
 	if (symbol->typePtr != RealTypePtr)
+    {
+        assert(0 && "ABLModule::getStaticReal");
 		return(-999999.0);
+    }
 
 	if (symbol->defn.info.data.varType != VAR_TYPE_STATIC)
+    {
+        assert(0 && "ABLModule::getStaticReal");
 		return(-999999.0);
+    }
 
 	StackItemPtr dataPtr = staticData + symbol->defn.info.data.offset;
 	return(*((float*)dataPtr));
@@ -1207,7 +1217,7 @@ float ABLModule::getStaticReal (char* name) {
 
 //---------------------------------------------------------------------------
 
-long ABLModule::setStaticIntegerArray (char* name, long numValues, long* values) {
+int ABLModule::setStaticIntegerArray (char* name, int numValues, int* values) {
 
 	SymTableNodePtr symbol = findSymbol(name);
 	if (!symbol)
@@ -1223,14 +1233,14 @@ long ABLModule::setStaticIntegerArray (char* name, long numValues, long* values)
 		return(3);
 
 	StackItemPtr dataPtr = staticData + symbol->defn.info.data.offset;
-	memcpy(dataPtr->address, values, 4 * numValues);
+	memcpy(dataPtr->address, values, sizeof(values[0]) * numValues);
 	
 	return(0);
 }
 
 //---------------------------------------------------------------------------
 
-long ABLModule::getStaticIntegerArray (char* name, long numValues, long* values) {
+int ABLModule::getStaticIntegerArray (char* name, int numValues, int* values) {
 
 	SymTableNodePtr symbol = findSymbol(name);
 	if (!symbol)
@@ -1246,13 +1256,13 @@ long ABLModule::getStaticIntegerArray (char* name, long numValues, long* values)
 		return(0);
 
 	StackItemPtr dataPtr = staticData + symbol->defn.info.data.offset;
-	memcpy(values, dataPtr->address, 4 * numValues);
+	memcpy(values, dataPtr->address, sizeof(values[0]) * numValues);
 	return(1);
 }
 
 //---------------------------------------------------------------------------
 
-long ABLModule::setStaticRealArray (char* name, long numValues, float* values) {
+int ABLModule::setStaticRealArray (char* name, int numValues, float* values) {
 
 	SymTableNodePtr symbol = findSymbol(name);
 	if (!symbol)
@@ -1268,14 +1278,14 @@ long ABLModule::setStaticRealArray (char* name, long numValues, float* values) {
 		return(3);
 
 	StackItemPtr dataPtr = staticData + symbol->defn.info.data.offset;
-	memcpy(dataPtr->address, values, 4 * numValues);
+	memcpy(dataPtr->address, values, sizeof(values[0]) * numValues);
 
 	return(0);
 }
 
 //---------------------------------------------------------------------------
 
-long ABLModule::getStaticRealArray (char* name, long numValues, float* values) {
+int ABLModule::getStaticRealArray (char* name, int numValues, float* values) {
 
 	SymTableNodePtr symbol = findSymbol(name);
 	if (!symbol)
@@ -1291,24 +1301,24 @@ long ABLModule::getStaticRealArray (char* name, long numValues, float* values) {
 		return(0);
 
 	StackItemPtr dataPtr = staticData + symbol->defn.info.data.offset;
-	memcpy(values, dataPtr->address, 4 * numValues);
+	memcpy(values, dataPtr->address, sizeof(values[0]) * numValues);
 
 	return(1);
 }
 
 //---------------------------------------------------------------------------
 
-char* ABLModule::getSourceFile (long fileNumber) {
+char* ABLModule::getSourceFile (int fileNumber) {
 
 	return(ModuleRegistry[handle].sourceFiles[fileNumber]);
 }
 
 //---------------------------------------------------------------------------
 
-char* ABLModule::getSourceDirectory (long fileNumber, char* directory) {
+char* ABLModule::getSourceDirectory (int fileNumber, char* directory) {
 
 	char* fileName = ModuleRegistry[handle].sourceFiles[fileNumber];
-	long curChar = strlen(fileName);
+	int curChar = strlen(fileName);
     //sebi
 	//while ((curChar > -1) && (fileName[curChar] != '\\'))
 	while ((curChar > -1) && (fileName[curChar] != '\\') && (fileName[curChar] != '/'))
@@ -1461,7 +1471,7 @@ void ABLi_loadEnvironment (ABLFile* ablFile, bool malloc) {
 		}
 		long numErrors, numLinesProcessed;
 		if (malloc) {
-			long handle = ABLi_preProcess((const char*)fileName, &numErrors, &numLinesProcessed);
+			int handle = ABLi_preProcess((const char*)fileName, &numErrors, &numLinesProcessed);
 			if (handle < 0) {
 				char err[255];
 				sprintf(err, "ABLi_loadEnvironment: Unable to preprocess [Module %d]", i);

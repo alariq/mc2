@@ -35,10 +35,10 @@ static int sdl2idx(int button) {
 void handleMouseMotion(const SDL_Event* event, MouseInfo* mi) {
     assert(event && mi);
 
-    mi->x_ = event->motion.x;
-    mi->y_ = event->motion.y;
-    mi->rel_x_ = event->motion.xrel;
-    mi->rel_y_ = event->motion.yrel;
+    mi->x_ = (float)event->motion.x;
+    mi->y_ = (float)event->motion.y;
+    mi->rel_x_ = (float)event->motion.xrel;
+    mi->rel_y_ = (float)event->motion.yrel;
 }
 
 void handleMouseButton(const SDL_Event* event, MouseInfo* mi) {
@@ -53,8 +53,8 @@ void handleMouseButton(const SDL_Event* event, MouseInfo* mi) {
 void handleMouseWheel(const SDL_Event* event, MouseInfo* mi) {
     assert(event && mi);
     
-    mi->wheel_vert_ = event->wheel.y;
-    mi->wheel_hor_ = event->wheel.x;
+    mi->wheel_vert_ = (float)event->wheel.y;
+    mi->wheel_hor_ = (float)event->wheel.x;
 
     /* not in my SDL, apparenty >= SDL 2.0.4
     if(event->wheel.direction == SDL_MOUSEWHEEL_FLIPPED) {
@@ -62,6 +62,11 @@ void handleMouseWheel(const SDL_Event* event, MouseInfo* mi) {
         mi->wheel_hor_ *= -1;
     }
     */
+}
+
+void beginUpdateMouseState(MouseInfo* mi) {
+    mi->rel_x_ = mi->rel_y_ = 0.0f;
+    mi->wheel_hor_ = mi->wheel_vert_ = 0.0f;
 }
 
 void updateMouseState(MouseInfo* mi) {
@@ -127,9 +132,11 @@ void updateKeyboardState(KeyboardInfo* ki) {
         }
         ki->last_state_[i] = ls;
 
+#if 0
         if(ls == KS_PRESSED || ls==KS_RELEASED) {
             printf("key: %d %s\n", i, ls==KS_PRESSED ? "PRESSED" : "RELEASED");
         }
+#endif
 
         if(ki->first_pressed_==-1 && ls==KS_PRESSED) {
             ki->first_pressed_ = i;

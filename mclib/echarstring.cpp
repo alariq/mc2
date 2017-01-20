@@ -27,7 +27,7 @@
 
 
 
-#include<windows.h>
+#include"platform_windows.h"
 #include<stdio.h>
 #include<ctype.h> // isspace
 #ifdef LINUX_BUILD

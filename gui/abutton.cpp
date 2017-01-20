@@ -5,7 +5,7 @@
 #include"abutton.h"
 #include"afont.h"
 #include"mclib.h"
-#include<windows.h>
+#include"platform_windows.h"
 #include"soundsys.h"
 
 extern SoundSystem *sndSystem;
@@ -359,7 +359,7 @@ void aButton::init( FitIniFile& buttonFile, const char* str, HGOSFONT3D font )
 		char file[256];
 		strcpy( file, artPath );
 		strcat( file, data.fileName );
-		_strlwr( file );
+		S_strlwr( file );
 		if ( !strstr( data.fileName, ".tga" ) )
 			strcat( file, ".tga" );
 		

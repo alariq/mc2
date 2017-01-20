@@ -20,7 +20,8 @@
 #define gos_Free free
 #endif
 
-#include "zlib.h"
+#include <zlib.h>
+#include "memfunc.h"
 
 // 128K and more cold be faster
 #define CHUNK 16384
@@ -551,7 +552,7 @@ size_t LZCompress (MemoryPtr dest, MemoryPtr src, size_t srcLen)
 
         strm.avail_in = len_left >= CHUNK ? CHUNK : len_left;
         flush = len_left > CHUNK ? Z_NO_FLUSH : Z_FINISH ;
-        memcpy(in, dataptr, strm.avail_in);
+        MemCpy(in, dataptr, strm.avail_in);
         strm.next_in = in;
 
         dataptr += strm.avail_in;
@@ -565,7 +566,7 @@ size_t LZCompress (MemoryPtr dest, MemoryPtr src, size_t srcLen)
             gosASSERT(ret != Z_STREAM_ERROR);  /* state not clobbered */
 
             have = CHUNK - strm.avail_out;
-            memcpy(dest, out, have);
+            MemCpy(dest, out, have);
             dest += have;
             out_size += have;
 

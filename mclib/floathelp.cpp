@@ -108,8 +108,7 @@ void FloatHelp::getTextStringLength (char * txt,
 	gos_TextSetAttributes (gosFontHandle, fColor, gosFontScale, wordWrap, proportional, bold, italic);
 
     // sebi
-	//unsigned long gHeight = 0, gWidth = 0;
-	unsigned int gHeight = 0, gWidth = 0;
+	DWORD gHeight = 0, gWidth = 0;
 	if (txt[0])
 	{
 		gos_TextStringLength(&gWidth,&gHeight,txt);

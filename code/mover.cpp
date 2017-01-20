@@ -1679,10 +1679,14 @@ void MoverDynamics::init (FitIniFilePtr dynamicsFile)
 
 void MoverControl::reset (void) {
 
+    //PAUSE(("sebi: see where it gets called from to see why throttle should not be reset\n"));
+
 	switch (dataType) {
 		case CONTROL_DATA_BASE:
 			break;
 		case CONTROL_DATA_MECH:
+            // sebi: thi s icommented, but causes valgrind complain because it is not initialized...
+            // for now just initialize it in init() but need to check why it is commented and do something about it
 			//settings.mech.throttle = 100;
 			settings.mech.rotate = 0.0;
 			settings.mech.facingRotate = 0.0f;
@@ -2043,7 +2047,7 @@ long Mover::loadGameSystem (FitIniFilePtr mechFile, float visualRange) {
 //	if (result != NO_ERR)
 //		return(result);
 
-	result = mechFile->readIdLong("SkillIncreaseCap", MechWarrior::increaseCap);
+	result = mechFile->readIdInt("SkillIncreaseCap", MechWarrior::increaseCap);
 	Assert(result == NO_ERR, result, " Couldn't find SkillCap variable in Warrior block of gamesys.fit ");
 
 	result = mechFile->readIdFloat("SkillMax", MechWarrior::maxSkill);
@@ -2168,6 +2172,7 @@ void Mover::set (Mover copy) {
 	velocity = copy.velocity;
 	rotation = copy.rotation;
 	strncpy(name, copy.name, MAXLEN_MOVER_NAME - 1);
+	name[MAXLEN_MOVER_NAME - 1] = '\0'; 
 	chassis = copy.chassis;
 	damageRateTally = copy.damageRateTally;
 	damageRateCheckTime = copy.damageRateCheckTime;
@@ -3648,7 +3653,7 @@ void Mover::printHandleWeaponHitDebugInfo (WeaponShotInfo* shotInfo) {
 	if (attacker)
 		sprintf(s, "     attacker = (%05d)%s", attacker->getPartId(), attacker->getName());
 	else
-		sprintf(s, "     attacker = (%05)<unknown WID>", shotInfo->attackerWID);
+		sprintf(s, "     attacker = (%05d)<unknown WID>", shotInfo->attackerWID);
 	CombatLog->write(s);
 	sprintf(s, "     weapon = (%03d)%s, hitLocation = (%d)%s, damage = %.2f, angle = %.2f",
 		shotInfo->masterId, MasterComponent::masterList[shotInfo->masterId].getName(),
@@ -4958,11 +4963,11 @@ long Mover::calcMoveGoal (GameObjectPtr target,
 
 //---------------------------------------------------------------------------
 
-long Mover::calcMovePath (MovePathPtr path,
+int Mover::calcMovePath (MovePathPtr path,
 						  long pathType,
 						  Stuff::Vector3D start,
 						  Stuff::Vector3D goal,
-						  long* goalCell,
+						  int* goalCell,
 						  unsigned long moveParams) {
 
 	//-------------------------------------------------------------------------
@@ -5038,7 +5043,7 @@ long Mover::calcMovePath (MovePathPtr path,
 			// Set up debug info...
 			DebugMovePathType = pathType;
 
-			long goalCell[2];
+			int goalCell[2];
 			if (numOffsets > 8)
 				result = PathFindMap[SIMPLE_PATHMAP]->calcPathJUMP(path, NULL, goalCell);
 			else
@@ -5138,10 +5143,10 @@ long Mover::calcMovePath (MovePathPtr path,
 
 //---------------------------------------------------------------------------
 
-long Mover::calcEscapePath (MovePathPtr path,
+int Mover::calcEscapePath (MovePathPtr path,
 							Stuff::Vector3D start,
 							Stuff::Vector3D goal,
-							long* goalCell,
+							int* goalCell,
 							unsigned long moveParams,
 							Stuff::Vector3D& escapeGoal) {
 
@@ -5264,6 +5269,8 @@ bool Mover::getPathRangeLock (long range, bool* reachedEnd) {
 	MovePathPtr path = pilot->getMovePath();
 	if (path)
 		return(path->isLocked((moveLevel == 2), -1, range, reachedEnd));
+    if(reachedEnd)
+       *reachedEnd = true; // sebi: !NB false ? need to init to something, to not leave garbage there
 	return(false);
 }
 
@@ -5333,6 +5340,8 @@ bool Mover::getPathRangeBlocked (long range, bool* reachedEnd) {
 	MovePathPtr path = pilot->getMovePath();
 	if (path)
 		return(path->isBlocked(-1, range, reachedEnd));
+    if(reachedEnd)
+        *reachedEnd = true; // sebi: !NB set to soemthing to not leave garbage
 	return(false);
 }
 
@@ -5406,13 +5415,13 @@ long Mover::bounceToAdjCell (void) {
 
 //---------------------------------------------------------------------------
 
-long Mover::calcMovePath (MovePathPtr path,
+int Mover::calcMovePath (MovePathPtr path,
 						  Stuff::Vector3D start,
 						  long thruArea[2],
 						  long goalDoor,
 						  Stuff::Vector3D finalGoal,
 						  Stuff::Vector3D* goal,
-						  long* goalCell,
+						  int* goalCell,
 						  unsigned long moveParams) {
 
 	//-------------------------------------------------------------------------

@@ -157,7 +157,7 @@ bool Image::loadTGA(const unsigned char* mem, size_t len)
         len -= header.descLen;
     }
 
-	int pixelSize = header.bpp / 8;
+	unsigned int pixelSize = header.bpp / 8;
 	int size = header.width * header.height * pixelSize;
 
     assert(len >= header.width * header.height * pixelSize);
@@ -262,6 +262,9 @@ bool Image::loadBMP(FILE* file)
 		return false;
 	}
 
+    // seek to start of image data
+    fseek(file, header.bfOffBits, SEEK_SET);
+
 	width    = header.biWidth;
 	height   = header.biHeight;
 
@@ -293,7 +296,7 @@ bool Image::loadBMP(FILE* file)
 				} while (--len);
 				tmp -= width;
 			}
-			delete tmp;
+			delete[] tmp;
 			break;
 		case 24:
 		case 32:
@@ -332,7 +335,7 @@ bool Image::flip(){
 		memcpy(newPixels + i * lineWidth, pixels + (height - 1 - i) * lineWidth, lineWidth);
 	}
 
-	delete pixels;
+	delete[] pixels;
 	pixels = newPixels;
 
 	return true;

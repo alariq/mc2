@@ -411,8 +411,8 @@ void MPPrefs::updateBaseColors( const MC2Player* players, long playerCount, bool
 				{
 					if ( MPlayer->colors[players[i].baseColor[BASECOLOR_PREFERENCE]] == rects[j].getColor() )
 					{
-						GUI_RECT rect = { rects[j].globalX() - 1, rects[j].globalY() - 1,
-							rects[j].right(), rects[j].bottom() };
+						GUI_RECT rect = { (long)(rects[j].globalX() - 1), (long)(rects[j].globalY() - 1),
+							(long)rects[j].right(), (long)rects[j].bottom() };
 
 						if ( bDrawRect )
 							drawEmptyRect( rect, 0xffffffff, 0xffffffff );
@@ -455,8 +455,8 @@ void MPPrefs::updateStripeColors(const MC2Player* players, long playerCount, boo
 				{
 					if ( MPlayer->colors[players[i].stripeColor] == rects[j].getColor() )
 					{
-						GUI_RECT rect = { rects[j].globalX() - 1, rects[j].globalY() - 1,
-							rects[j].right(), rects[j].bottom() };
+						GUI_RECT rect = { (long)(rects[j].globalX() - 1), (long)(rects[j].globalY() - 1),
+							(long)(rects[j].right()), (long)(rects[j].bottom()) };
 
 						if ( bDrawRect )
 							drawEmptyRect( rect, 0xffffffff, 0xffffffff );

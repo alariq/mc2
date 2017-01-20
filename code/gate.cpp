@@ -871,7 +871,7 @@ void Gate::CopyTo (GateData *data)
 
 	data->updatedTurn = updatedTurn;
 
-	TerrainObject::CopyTo(dynamic_cast<TerrainObjectData *>(data));
+	TerrainObject::CopyTo(data);
 }
 
 //---------------------------------------------------------------------------
