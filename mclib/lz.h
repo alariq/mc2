@@ -11,8 +11,8 @@
 
 //---------------------------------------------------------------------------
 typedef unsigned char* MemoryPtr;
-size_t LZDecomp (MemoryPtr dest, MemoryPtr src, size_t srcLen);
-size_t LZCompress (MemoryPtr dest,  MemoryPtr src, size_t len);
+long LZDecomp (MemoryPtr dest, MemoryPtr src, size_t srcLen);
+long LZCompress (MemoryPtr dest,  MemoryPtr src, size_t len);
 
 //---------------------------------------------------------------------------
 #endif

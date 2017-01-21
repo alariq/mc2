@@ -27,7 +27,7 @@
 #include<gameos.hpp>
 
 MemoryPtr 		LZPacketBuffer = NULL;
-unsigned long	LZPacketBufferSize = 512000;
+unsigned int 		LZPacketBufferSize = 512000;
 
 extern char CDInstallPath[];
 void EnterWindowMode();

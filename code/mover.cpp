@@ -204,7 +204,7 @@ float WeaponFireModifiers[NUM_WEAPONFIRE_MODIFIERS] = {
 };
 
 extern float				WarriorRankScale[NUM_WARRIOR_RANKS];
-extern char *				SpecialtySkillsTable[NUM_SPECIALTY_SKILLS];
+extern const char *			SpecialtySkillsTable[NUM_SPECIALTY_SKILLS];
 
 float						WeaponSpecialistModifier = 20.0f;
 

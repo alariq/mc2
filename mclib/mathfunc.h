@@ -209,7 +209,7 @@ template<typename T> T min(const T& a, const T& b) { return a < b ? a : b; }
 #endif
 
 //---------------------------------------------------------------------------
-inline float sign (float f1)
+inline float sign2 (float f1)
 {
 	if (f1 < 0.0f)
 		return -1.0f;

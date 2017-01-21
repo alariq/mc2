@@ -96,7 +96,7 @@ extern long				digitCount;
 extern bool				countError;
 
 extern bool				eofFlag;
-extern long				pageNumber;
+extern int 				pageNumber;
 
 extern SymTableNodePtr	SymTableDisplay[MAX_NESTING_LEVEL];
 extern TypePtr			IntegerTypePtr;

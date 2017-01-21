@@ -10,12 +10,15 @@
 //
 // Pragmas needed to compile at Warning 4
 //
+//
 #pragma pack(push,4)
+#ifdef PLATFORM_WINDOWS
 #pragma warning( disable: 4725 )					// fdiv generates a warning
 #pragma warning( disable: 4127 )					// conditional expression is constant eg: Asserts will not work otherwise
 #pragma warning( disable: 4200 )					// zero size array
 #pragma warning( disable: 4201 )					// Nameless struct or union
 #pragma warning( disable: 4514 )					// Unreferenced inline function
+#endif
 
 #ifdef _ICECAP
 #include "icecap.h"
@@ -25,7 +28,7 @@
 #define __stdcall
 #define _stdcall
 #define __cdecl
-#pragma warning( disable: 4091)					// typedef was ignored on this declaration
+//#pragma warning( disable: 4091)					// typedef was ignored on this declaration
 #include<inttypes.h>
 //typedef int64_t __int64;
 #include<stdlib.h> // size_t 
@@ -150,12 +153,12 @@ typedef struct _GUID
 // Handles to internal structures
 //
 //typedef struct	SoundResource*	HGOSAUDIO;
-typedef struct	gosAudio*	    HGOSAUDIO; // sebi
+typedef class gosAudio*	    HGOSAUDIO; // sebi
 typedef struct	gos_Music*		HGOSMUSIC;
 typedef struct	gos_Video*		HGOSVIDEO;
 typedef struct	gosFileStream*	HGOSFILE;
 //typedef struct	_FontInfo*		HGOSFONT3D;
-typedef struct	gosFont*		HGOSFONT3D;
+typedef class gosFont*		HGOSFONT3D;
 typedef struct  gosForceEffect*	HGOSFORCEEFFECT;
 typedef struct	gos_Heap*		HGOSHEAP;
 typedef struct gos_StringRes*   HSTRRES; //sebi

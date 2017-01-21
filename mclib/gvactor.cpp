@@ -78,7 +78,7 @@ extern long 	mechRGBLookup2[];
 
 extern bool 	useShadows;
 
-extern long			ObjectTextureSize;
+extern int 	ObjectTextureSize;
 TG_TypeMultiShapePtr GVAppearanceType::SensorTriangleShape = NULL;
 TG_TypeMultiShapePtr GVAppearanceType::SensorCircleShape = NULL;
 

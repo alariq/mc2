@@ -16,7 +16,7 @@ LogisticsComponent.cpp			: Implementation of the LogisticsComponent component.
 
 
 
-extern char* ComponentFormString[];
+extern const char* ComponentFormString[];
 
 long LogisticsComponent::XICON_FACTOR = 48;
 long LogisticsComponent::YICON_FACTOR = 32;

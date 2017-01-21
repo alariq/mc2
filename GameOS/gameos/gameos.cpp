@@ -15,7 +15,7 @@
 #include "strres.h"
 
 ////////////////////////////////////////////////////////////////////////////////
-void AddDebuggerMenuItem(char const*, bool (*)(), void (*)(), bool (*)(), DWORD (*)(char const*, DWORD))
+void __stdcall AddDebuggerMenuItem(char const*, bool (__stdcall *)(), void (__stdcall *)(), bool (__stdcall *)(), DWORD (__stdcall *)(char const*, DWORD))
 {
     // TODO: maybe use dconsole for this
 }

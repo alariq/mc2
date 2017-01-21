@@ -288,8 +288,8 @@ char*			tokenp = tokenString;
 long			digitCount = 0;
 bool			countError = false;
 
-int             pageNumber = 0;
-int             lineCount = MAX_LINES_PER_PAGE;
+int             	pageNumber = 0;
+int             	lineCount = MAX_LINES_PER_PAGE;
 
 char			sourceName[MAXLEN_FILENAME];
 char			date[LEN_DATESTRING];
