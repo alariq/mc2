@@ -80,7 +80,7 @@ Image::Image(void)
 
 Image::~Image(void)
 {
-	delete pixels;
+	delete[] pixels;
 }
 
 unsigned char *Image::create(const FORMAT fmt, const int w, const int h){
@@ -89,7 +89,7 @@ unsigned char *Image::create(const FORMAT fmt, const int w, const int h){
 	height = h;
 
 	int size = w*h;
-	delete pixels;
+	delete[] pixels;
 	pixels = new unsigned char[size];
 
 	return pixels;

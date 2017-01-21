@@ -172,7 +172,7 @@ glsl_shader* glsl_shader::makeShader(Shader_t stype, const char* fname)
     const char* strings[] = { psource };
 
     glShaderSource(shader, 1, strings, 0);
-    delete strings[0];
+    delete[] strings[0];
 
     glCompileShader(shader);
 
@@ -230,7 +230,7 @@ bool glsl_shader::reload()
     const char* strings[] = { psource };
 
     glShaderSource(shader_, 1, strings, 0);
-    delete strings[0];
+    delete[] strings[0];
 
     glCompileShader(shader_);
 
