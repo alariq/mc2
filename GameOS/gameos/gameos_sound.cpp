@@ -296,6 +296,7 @@ void __stdcall gosAudio_CreateResource( HGOSAUDIO* hgosaudio, enum gosAudio_Reso
 
     uint8_t* audio_data = new uint8_t[audio_data_size];
     memset(audio_data, 0, audio_data_size);
+    uint8_t* tmp_req_buf = NULL;
 
     const bool needs_conversion = g_sound_engine->needsConversion(src_fmt, src_channels, src_freq);
     if(needs_conversion) {
@@ -313,16 +314,17 @@ void __stdcall gosAudio_CreateResource( HGOSAUDIO* hgosaudio, enum gosAudio_Reso
             return;
         }
 
-        gosASSERT(cvt.needed);
-        gosASSERT(audio_data_size >= cvt.len * cvt.len_mult);
-
         cvt.len = src_datasize;
 
-        if(audio_data_size > src_datasize) {
-            cvt.buf = audio_data;
-            memcpy(cvt.buf, databuf, src_datasize);
-        } else {
+        gosASSERT(cvt.needed);
+        const int tmp_req_buf_size = cvt.len * cvt.len_mult;
+
+        if(src_datasize >= tmp_req_buf_size) {
             cvt.buf = databuf;
+        } else {
+            tmp_req_buf = new uint8_t[tmp_req_buf_size];
+            memcpy(tmp_req_buf, databuf, src_datasize);
+            cvt.buf = tmp_req_buf;
         }
 
         // conversion is in-place
@@ -332,6 +334,7 @@ void __stdcall gosAudio_CreateResource( HGOSAUDIO* hgosaudio, enum gosAudio_Reso
             if(from_file)
                 SDL_FreeWAV(databuf);
             *hgosaudio = NULL;
+            delete[] tmp_req_buf;
             return;
         }
 
@@ -345,6 +348,8 @@ void __stdcall gosAudio_CreateResource( HGOSAUDIO* hgosaudio, enum gosAudio_Reso
     } else {
         memcpy(audio_data, databuf, audio_data_size);
     }
+
+    delete[] tmp_req_buf;
 
 #ifndef USE_MIX_LOAD
     if(from_file)
