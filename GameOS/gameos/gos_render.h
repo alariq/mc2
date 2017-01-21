@@ -11,14 +11,15 @@ typedef RenderContext*   RenderContextHandle;
 
 void set_verbose(bool is_verbose);
 
-RenderWindowHandle  create_window(const char* pwinname, int width, int height);
-RenderContextHandle init_render_context(RenderWindowHandle render_window);
+RenderWindowHandle  create_window   (const char* pwinname, int width, int height);
+bool                resize_window   (RenderWindowHandle rw_handle, int width, int height);
+void                get_window_size (RenderWindowHandle rw_handle, int* width, int* height);
+void                swap_window     (RenderWindowHandle h);
+void                destroy_window  (RenderWindowHandle rw_handle);
 
-void swap_window(RenderWindowHandle h);
-void make_current_context(RenderContextHandle ctx_h, RenderWindowHandle win_h);
-
-void destroy_render_context(RenderContextHandle rc_handle);
-void destroy_window(RenderWindowHandle rw_handle);
+RenderContextHandle init_render_context     (RenderWindowHandle render_window);
+void                make_current_context    (RenderContextHandle ctx_h);
+void                destroy_render_context  (RenderContextHandle rc_handle);
 
 };
 

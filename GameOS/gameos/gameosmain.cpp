@@ -12,7 +12,8 @@
 
 #include <signal.h>
 
-extern void gos_CreateRenderer(int w, int h);
+extern void gos_CreateRenderer(graphics::RenderContextHandle ctx_h, graphics::RenderWindowHandle win_h, int w, int h);
+extern void gos_DestroyRenderer();
 extern void gos_RendererBeginFrame();
 extern void gos_RendererEndFrame();
 extern void gos_RenderUpdateDebugInput();
@@ -108,7 +109,6 @@ static void draw_screen( void )
     const int w = Environment.screenWidth;
     const int h = Environment.screenHeight;
 
-
     mat4 proj;
     g_camera.get_projection(&proj);
     mat4 viewM;
@@ -194,21 +194,21 @@ int main(int argc, char** argv)
         return 1;
     }
 
-    graphics::make_current_context(ctx, win);
-
-	g_myprogram = glsl_program::makeProgram("object_tex", "shaders/object_tex.vert", "shaders/object_tex.frag");
-    if(!g_myprogram) {
-		SPEW(("SHADERS", "Failed to create object_tex material\n"));
-        return 1;
-	}
-
-    gos_CreateRenderer(w, h);
+    gos_CreateRenderer(ctx, win, w, h);
     if(!gos_CreateAudio())
     {   // not an error
         SPEW(("AUDIO", "Failed to create audio\n"));
     }
 
     Environment.InitializeGameEngine();
+
+    graphics::make_current_context(ctx);
+
+	g_myprogram = glsl_program::makeProgram("object_tex", "shaders/object_tex.vert", "shaders/object_tex.frag");
+    if(!g_myprogram) {
+		SPEW(("SHADERS", "Failed to create object_tex material\n"));
+        return 1;
+	}
 
 	float aspect = (float)w/(float)h;
 	mat4 proj_mat = frustumProjMatrix(-aspect*0.5f, aspect*0.5f, -.5f, .5f, 1.0f, 100.0f);
@@ -231,7 +231,7 @@ int main(int argc, char** argv)
         process_events();
 
         // TODO: add window as context member, to not pass 2 parameters
-        graphics::make_current_context(ctx, win);
+        graphics::make_current_context(ctx);
         draw_screen();
         graphics::swap_window(win);
 
@@ -239,6 +239,8 @@ int main(int argc, char** argv)
     }
     
     Environment.TerminateGameEngine();
+
+    gos_DestroyRenderer();
 
     graphics::destroy_render_context(ctx);
     graphics::destroy_window(win);

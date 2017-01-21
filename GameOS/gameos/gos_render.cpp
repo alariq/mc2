@@ -7,6 +7,7 @@
 #include <assert.h>
 #include <SDL2/SDL.h>
 #include <GL/gl.h>
+#include "utils/logging.h"
 
 // FIXME: think how to make it better when different parts need window
 SDL_Window* g_sdl_window = NULL;
@@ -26,6 +27,7 @@ struct RenderWindow {
 
 struct RenderContext {
    SDL_GLContext glcontext_;
+   RenderWindow* render_window_;
 };
 
 static void PrintRenderer(SDL_RendererInfo * info);
@@ -69,6 +71,21 @@ RenderWindow* create_window(const char* pwinname, int width, int height)
     }
     if (VERBOSE_VIDEO) {
         fprintf(stderr, "Video driver: %s\n", SDL_GetCurrentVideoDriver());
+    }
+
+    //not really related to video, but let it be here
+    if (VERBOSE_VIDEO) {
+        printf("SDL revision: %s\n", SDL_GetRevision());
+
+        SDL_version compiled;
+        SDL_version linked;
+
+        SDL_VERSION(&compiled);
+        SDL_GetVersion(&linked);
+        fprintf(stderr, "We compiled against SDL version %d.%d.%d \n",
+            compiled.major, compiled.minor, compiled.patch);
+        fprintf(stderr, "But we are linking against SDL version %d.%d.%d.\n",
+           linked.major, linked.minor, linked.patch);
     }
 
     SDL_GL_SetAttribute( SDL_GL_RED_SIZE, 8 );
@@ -210,6 +227,7 @@ RenderWindow* create_window(const char* pwinname, int width, int height)
 
     return rw;
 }
+
 //==============================================================================
 void swap_window(RenderWindowHandle h)
 {
@@ -325,10 +343,12 @@ RenderContextHandle init_render_context(RenderWindowHandle render_window)
 
     RenderContext* rc = new RenderContext();
     rc->glcontext_ = glcontext;
+    rc->render_window_ = render_window;
 
 	return rc;
 }
 
+//==============================================================================
 void destroy_render_context(RenderContextHandle rc_handle)
 {
     RenderContext* rc = (RenderContext*)rc_handle;
@@ -338,16 +358,54 @@ void destroy_render_context(RenderContextHandle rc_handle)
     delete rc;
 }
 
-void make_current_context(RenderContextHandle ctx_h, RenderWindowHandle win_h)
+//==============================================================================
+void make_current_context(RenderContextHandle ctx_h)
 {
     RenderContext* rc = (RenderContext*)ctx_h;
-    RenderWindow* rw = (RenderWindow*)win_h;
+    RenderWindow* rw = rc->render_window_;
     
     assert(rc && rc->glcontext_ && rw && rw->window_);
 
     SDL_GL_MakeCurrent(rw->window_, rc->glcontext_);
 }
 
+//==============================================================================
+bool resize_window(RenderWindowHandle rw_handle, int width, int height)
+{
+    RenderWindow* rw = (RenderWindow*)rw_handle;
+    assert(rw);
+#if 0
+    int displayIndex = 0;
+    SDL_DisplayMode desired = { .format = 0, .w = width, .h = height, .refresh_rate = 0, .driverdata = 0};
+    SDL_DisplayMode returned;
+    
+    if(NULL == SDL_GetClosestDisplayMode(displayIndex, &desired, &returned)) {
+        log_error("resize_window: %s\n", SDL_GetError());
+        return false;
+    }
+
+    int rv = SDL_SetWindowDisplayMode(rw->window_, &returned);
+    if(rv) {
+        log_error("resize_window: %s\n", SDL_GetError());
+        return false;
+    }
+#endif
+    SDL_SetWindowSize(rw->window_, width, height);
+    rw->width_ = width;
+    rw->height_ = height;
+    return true;
+}
+
+//==============================================================================
+void get_window_size(RenderWindowHandle rw_handle, int* width, int* height)
+{
+    RenderWindow* rw = (RenderWindow*)rw_handle;
+    assert(rw && width && height);
+    *width = rw->width_;
+    *height = rw->height_;
+}
+
+//==============================================================================
 void destroy_window(RenderWindowHandle rw_handle)
 {
     RenderWindow* rw = (RenderWindow*)rw_handle;
@@ -357,6 +415,7 @@ void destroy_window(RenderWindowHandle rw_handle)
     g_sdl_window = NULL;
 }
 
+//==============================================================================
 static void PrintRendererFlag(Uint32 flag)
 {
 	switch (flag) {
@@ -372,6 +431,7 @@ static void PrintRendererFlag(Uint32 flag)
 	}
 }
 
+//==============================================================================
 static void PrintPixelFormat(Uint32 format)
 {
 	switch (format) {
@@ -471,6 +531,7 @@ static void PrintPixelFormat(Uint32 format)
 	}
 }
 
+//==============================================================================
 static void PrintRenderer(SDL_RendererInfo * info)
 {
     size_t i, count;
