@@ -16,6 +16,7 @@ bool                resize_window   (RenderWindowHandle rw_handle, int width, in
 void                get_window_size (RenderWindowHandle rw_handle, int* width, int* height);
 void                swap_window     (RenderWindowHandle h);
 void                destroy_window  (RenderWindowHandle rw_handle);
+bool                is_mode_supported(int width, int height, int bpp);
 
 RenderContextHandle init_render_context     (RenderWindowHandle render_window);
 void                make_current_context    (RenderContextHandle ctx_h);

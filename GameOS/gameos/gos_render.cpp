@@ -374,9 +374,25 @@ bool resize_window(RenderWindowHandle rw_handle, int width, int height)
 {
     RenderWindow* rw = (RenderWindow*)rw_handle;
     assert(rw);
-#if 0
+
+    SDL_SetWindowSize(rw->window_, width, height);
+    rw->width_ = width;
+    rw->height_ = height;
+
+    return true;
+}
+
+//==============================================================================
+bool is_mode_supported(int width, int height, int bpp) {
+
     int displayIndex = 0;
-    SDL_DisplayMode desired = { .format = 0, .w = width, .h = height, .refresh_rate = 0, .driverdata = 0};
+    //displayIndex = SDL_GetWindowDisplayIndex(win_h);
+
+    SDL_DisplayMode desired = { .format = bpp==16 ? SDL_PIXELFORMAT_RGB565 : SDL_PIXELFORMAT_RGB888, 
+                                .w = width, 
+                                .h = height, 
+                                .refresh_rate = 0, 
+                                .driverdata = 0};
     SDL_DisplayMode returned;
     
     if(NULL == SDL_GetClosestDisplayMode(displayIndex, &desired, &returned)) {
@@ -384,16 +400,13 @@ bool resize_window(RenderWindowHandle rw_handle, int width, int height)
         return false;
     }
 
-    int rv = SDL_SetWindowDisplayMode(rw->window_, &returned);
-    if(rv) {
-        log_error("resize_window: %s\n", SDL_GetError());
-        return false;
-    }
-#endif
-    SDL_SetWindowSize(rw->window_, width, height);
-    rw->width_ = width;
-    rw->height_ = height;
-    return true;
+    //const char* df = SDL_GetPixelFormatName(desired.format);
+    //const char* rf = SDL_GetPixelFormatName(returned.format);
+
+    if(returned.w == desired.w && returned.h == desired.h && returned.format == desired.format)
+        return true;
+
+    return false;
 }
 
 //==============================================================================

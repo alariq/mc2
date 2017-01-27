@@ -1540,7 +1540,7 @@ void gos_CreateRenderer(graphics::RenderContextHandle ctx_h, graphics::RenderWin
 void gos_DestroyRenderer() {
 
     g_gos_renderer->destroy();
-    delete[] g_gos_renderer;
+    delete g_gos_renderer;
 }
 
 void gos_RendererBeginFrame() {
@@ -1923,6 +1923,29 @@ void __stdcall gos_TextStringLength( DWORD* Width, DWORD* Height, const char *fm
 
     *Width = max_width;
     *Height = (num_newlines + 1) * font->getMaxCharHeight();
+}
+
+////////////////////////////////////////////////////////////////////////////////
+size_t __stdcall gos_GetMachineInformation( MachineInfo mi, int Param1/*=0*/, int Param2/*=0*/, int Param3/*=0*/, int Param4/*=0*/)
+{
+    // TODO:
+    if(mi == gos_Info_GetDeviceLocalMemory)
+        return 1024*1024*1024;
+    if(mi == gos_Info_GetDeviceAGPMemory)
+        return 512*1024*1024; 
+    if (mi == gos_Info_CanMultitextureDetail)
+        return true;
+    if(mi == gos_Info_NumberDevices)
+        return 1;
+    if(mi == gos_Info_GetDeviceName)
+        return (size_t)glGetString(GL_RENDERER);
+    if(mi == gos_Info_ValidMode) {
+        int xres = Param2;
+        int yres = Param3;
+        int bpp = Param4;
+        return graphics::is_mode_supported(xres, yres, bpp) ? 1 : 0;
+    }
+    return 0;
 }
 
 #include "gameos_graphics_debug.cpp"

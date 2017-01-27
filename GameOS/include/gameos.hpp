@@ -3055,7 +3055,7 @@ enum MachineInfo
 //
 // Returns machine information, valid for THE CURRENT FRAME ONLY
 //
-DWORD __stdcall gos_GetMachineInformation( MachineInfo mi, int Param1=0, int Param2=0, int Param3=0, int Param4=0 );
+size_t __stdcall gos_GetMachineInformation( MachineInfo mi, int Param1=0, int Param2=0, int Param3=0, int Param4=0 );
 
 
 

@@ -439,9 +439,7 @@ void OptionsGraphics::init(long xOffset, long yOffset)
 
 		if (gos_GetMachineInformation(gos_Info_GetDeviceLocalMemory, i) >= minTextureRam)
 		{
-            //sebi:
-			//char *deviceName = (char*)gos_GetMachineInformation( gos_Info_GetDeviceName, i);
-            const char* deviceName = "fix me: gos_GetMachineInformation";
+			const char *deviceName = (const char*)gos_GetMachineInformation( gos_Info_GetDeviceName, i);
 		
 			//Save name to other string here.
 			cardList.AddItem( deviceName, 0xffffffff );
