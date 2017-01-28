@@ -1140,7 +1140,7 @@ long File::readLine (MemoryPtr buffer, long maxLength)
 			unsigned char *readAddress = (unsigned char *)fileImage+logicalPosition;
 
             //sebi support linux created files
-			while ((i<maxLength) && ((i+logicalPosition) < fileSize()) && readAddress[i]!='\r' && && readAddress[i]!='\n' )
+			while ((i<maxLength) && ((i+logicalPosition) < fileSize()) && readAddress[i]!='\r' && readAddress[i]!='\n' )
 				i++;
 
 			memcpy( buffer, readAddress, i );
