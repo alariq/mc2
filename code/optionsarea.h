@@ -96,6 +96,16 @@ class OptionsGraphics : public LogisticsScreen
 {
 
 public:
+
+    typedef struct 
+    {
+    	int xRes;
+    	int yRes;
+    	int bitDepth;
+    } ResModes;
+
+    OptionsGraphics();
+
 	void init(long xOffset, long yOffset);
 	virtual void render();
 	virtual void update();
@@ -109,6 +119,10 @@ private:
 	aDropList		resolutionList;
 	aDropList		cardList;
 	bool			bExpanded;
+
+    ResModes        *resolutionModes;
+    char            **resolutionModesStr;
+    int             numResolutionModes;
 
 };
 

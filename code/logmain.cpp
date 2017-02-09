@@ -44,7 +44,8 @@ long DigitalMasterVolume = 0;
 long MusicVolume = 0;
 long SFXVolume = 0;
 long RadioVolume = 0;
-long resolution = 0;
+long resolutionX = 0;
+long resolutionY = 0;
 long FilterState = gos_FilterNone;
 bool quitGame = FALSE;
 bool justStartMission = FALSE;
@@ -355,9 +356,13 @@ void InitializeGameEngine()
 			if (result != NO_ERR)
 				TERRAIN_TXM_SIZE = 64;
 
-			result = prefs->readIdLong("Resolution",resolution);
+			result = prefs->readIdLong("ResolutionX",resolutionX);
 			if (result != NO_ERR)
-				resolution = 0;
+				resolutionX = 800;
+
+			result = prefs->readIdLong("ResolutionY",resolutionY);
+			if (result != NO_ERR)
+				resolutionY = 600;
 
 			result = prefs->readIdLong("ObjectTextureRes",ObjectTextureSize);
 			if (result != NO_ERR)
@@ -417,25 +422,26 @@ void InitializeGameEngine()
 	prefs = NULL;
 	//---------------------------------------------------------------------
 
-	switch (resolution)
+	switch (resolutionX)
 	{
-		case 0:			//640by480
+		case 640:			//640by480
+        default:
 			gos_SetScreenMode(640,480);
 			break;
 
-		case 1:			//800by600
+		case 800:			//800by600
 			gos_SetScreenMode(800,600);
 			break;
 
-		case 2:			//1024by768
+		case 1024:			//1024by768
 			gos_SetScreenMode(1024,768);
 			break;
 
-		case 3:			//1280by1024
+		case 1280:			//1280by1024
 			gos_SetScreenMode(1280,1024);
 			break;
 
-		case 4:			//1600by1200
+		case 1600:			//1600by1200
 			gos_SetScreenMode(1600,1200);
 			break;
 	}

@@ -787,6 +787,8 @@ class gosRenderer {
         bool getBreakOnDrawCall() { return break_on_draw_call_; }
         void setBreakDrawCall(uint32_t num) { break_draw_call_num_ = num; }
 
+        graphics::RenderContextHandle getRenderContextHandle() { return ctx_h_; }
+
     private:
 
         bool beforeDrawCall();
@@ -1118,6 +1120,9 @@ void gosRenderer::endFrame()
                 0, 0, 0.0f, 1.0f);
 
         if(graphics::resize_window(win_h_, width_, height_)) {
+
+            graphics::set_window_fullscreen(win_h_, reqGotoFullscreen);
+
             glViewport(0, 0, width_, height_);
 
             Environment.screenWidth = width_;
@@ -1946,6 +1951,23 @@ size_t __stdcall gos_GetMachineInformation( MachineInfo mi, int Param1/*=0*/, in
         return graphics::is_mode_supported(xres, yres, bpp) ? 1 : 0;
     }
     return 0;
+}
+
+int gos_GetWindowDisplayIndex()
+{   
+    gosASSERT(g_gos_renderer);
+    
+    return graphics::get_window_display_index(g_gos_renderer->getRenderContextHandle());
+}
+
+int gos_GetNumDisplayModes(int DisplayIndex)
+{
+    return graphics::get_num_display_modes(DisplayIndex);
+}
+
+bool gos_GetDisplayModeByIndex(int DisplayIndex, int ModeIndex, int* XRes, int* YRes, int* BitDepth)
+{
+    return graphics::get_display_mode_by_index(DisplayIndex, ModeIndex, XRes, YRes, BitDepth);
 }
 
 #include "gameos_graphics_debug.cpp"

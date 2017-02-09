@@ -301,7 +301,8 @@ float BaseHeadShotElevation		= 1.0f;
 
 bool DisplayCameraAngle = false;
 extern long MaxResourcePoints;
-extern long resolution;
+extern long resolutionX;
+extern long resolutionY;
 extern long renderer;
 
 bool loadInMissionSave = false;

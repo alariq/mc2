@@ -199,7 +199,7 @@ RenderWindow* create_window(const char* pwinname, int width, int height)
 
     {
         window = SDL_CreateWindow(pwinname ? pwinname : "--", 
-                100, 100, width, height, SDL_WINDOW_OPENGL);
+                SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width, height, SDL_WINDOW_OPENGL);
 
         if (!window) {
             fprintf(stderr, "Couldn't create window: %s\n", SDL_GetError());
@@ -362,9 +362,10 @@ void destroy_render_context(RenderContextHandle rc_handle)
 void make_current_context(RenderContextHandle ctx_h)
 {
     RenderContext* rc = (RenderContext*)ctx_h;
+    assert(rc && rc->render_window_ && rc->glcontext_);
+
     RenderWindow* rw = rc->render_window_;
-    
-    assert(rc && rc->glcontext_ && rw && rw->window_);
+    assert(rw && rw->window_);
 
     SDL_GL_MakeCurrent(rw->window_, rc->glcontext_);
 }
@@ -378,6 +379,22 @@ bool resize_window(RenderWindowHandle rw_handle, int width, int height)
     SDL_SetWindowSize(rw->window_, width, height);
     rw->width_ = width;
     rw->height_ = height;
+
+    return true;
+}
+
+//==============================================================================
+bool set_window_fullscreen(RenderWindowHandle rw_handle, bool fullscreen)
+{
+    RenderWindow* rw = (RenderWindow*)rw_handle;
+    assert(rw);
+
+    Uint32 flags = fullscreen ? /*SDL_WINDOW_FULLSCREEN*/ SDL_WINDOW_FULLSCREEN_DESKTOP : 0;
+    
+    if(0 != SDL_SetWindowFullscreen(rw->window_, flags)) {
+        log_error("SDL_SetWindowFullscreen: %s\n", SDL_GetError());
+        return false;
+    }
 
     return true;
 }
@@ -407,6 +424,58 @@ bool is_mode_supported(int width, int height, int bpp) {
         return true;
 
     return false;
+}
+
+//==============================================================================
+int get_window_display_index(RenderContextHandle ctx_h)
+{
+    RenderContext* rc = (RenderContext*)ctx_h;
+    assert(rc);
+
+    RenderWindow* rw = rc->render_window_;
+    assert(rw && rw->window_);
+
+    return SDL_GetWindowDisplayIndex(rw->window_);
+}
+
+//==============================================================================
+int get_num_display_modes(int display_index)
+{
+    return SDL_GetNumDisplayModes(display_index);
+}
+
+//==============================================================================
+bool get_desktop_display_mode(int display_index, int* width, int* height, int* bpp)
+{
+    assert(width && height && bpp);
+
+    SDL_DisplayMode dm;
+    if (SDL_GetDesktopDisplayMode(display_index, &dm) != 0) {
+        log_error("SDL_GetDesktopDisplayMode failed: %s", SDL_GetError());
+        return false;
+    }
+
+    *width = dm.w;
+    *height = dm.h;
+    *bpp = SDL_BITSPERPIXEL(dm.format);
+    return true;
+}
+
+//==============================================================================
+bool get_display_mode_by_index(int display_index, int mode_index, int* width, int* height, int* bpp)
+{
+    assert(width && height && bpp);
+
+    SDL_DisplayMode dm;
+    if (SDL_GetDisplayMode(display_index, mode_index, &dm) != 0) {
+        log_error("SDL_GetDisplayMode failed: %s", SDL_GetError());
+        return false;
+    }
+
+    *width = dm.w;
+    *height = dm.h;
+    *bpp = SDL_BITSPERPIXEL(dm.format);
+    return true;
 }
 
 //==============================================================================
