@@ -681,7 +681,8 @@ void MC_TextureManager::renderLists (void)
 	if (Environment.Renderer != 3)
 	{
 		gos_SetRenderState( gos_State_ShadeMode, gos_ShadeGouraud);
-		gos_SetRenderState(	gos_State_ZWrite, 1);
+		// sebi: do not draw in depth for terrain overlays, otherwise other overlay data, like craters, start to flicker
+		gos_SetRenderState(	gos_State_ZWrite, 0);
 	}
 
  	//Draw the Overlays after the detail textures on the terrain.  There should never be anything here in the OLD universe.
@@ -743,7 +744,8 @@ void MC_TextureManager::renderLists (void)
 		gos_SetRenderState( gos_State_MonoEnable, 1);
 		gos_SetRenderState( gos_State_Perspective, 0);
 		gos_SetRenderState( gos_State_Specular, 1);
-		gos_SetRenderState(	gos_State_ZWrite, 1);
+		// sebi: shadows do not draw in depth, we do not want z-fighting
+		gos_SetRenderState(	gos_State_ZWrite, 0);
 		gos_SetRenderState( gos_State_ZCompare, 2);
 	}
 

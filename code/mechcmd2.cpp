@@ -184,7 +184,7 @@ char buildNumber[80];
 extern int TERRAIN_TXM_SIZE;
 int ObjectTextureSize = 128;
 
-extern unsigned long MultiPlayCommanderId;
+extern unsigned int MultiPlayCommanderId;
 extern bool	useRealLOS;
 bool reloadBounds = false;
 

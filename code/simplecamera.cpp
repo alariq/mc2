@@ -221,6 +221,8 @@ long SimpleCamera::update()
 		shadowPool->reset();
 		trianglePool->reset();
 
+        // sebi: why do it two times???
+        
 		//reset the TGL RAM pools.
 		colorPool->reset();
 		vertexPool->reset();

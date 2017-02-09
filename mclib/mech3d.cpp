@@ -176,7 +176,7 @@ DWORD				Mech3DAppearance::numPaintSchemata = 0;
 
 TG_TypeMultiShapePtr Mech3DAppearanceType::SensorSquareShape = NULL;
 
-extern long			ObjectTextureSize;
+extern int 	ObjectTextureSize;
 
 #define FOOTPRINT_SLOP			2
 

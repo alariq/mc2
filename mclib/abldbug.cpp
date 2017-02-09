@@ -79,7 +79,7 @@ extern int32_t				NumModulesRegistered;
 extern int32_t				NumModuleInstances;
 extern int32_t				MaxWatchesPerModule;
 extern int32_t				MaxBreakPointsPerModule;
-extern char*			TokenStrings[NUM_TOKENS];
+extern const char*			TokenStrings[NUM_TOKENS];
 
 
 //extern StackItem*		stack;

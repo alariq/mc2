@@ -112,8 +112,8 @@ extern char*			bufferp;
 extern char*			tokenp;
 extern long				digitCount;
 extern bool				countError;
-extern long				pageNumber;
-extern long				lineCount;
+extern int 				pageNumber;
+extern int 				lineCount;
 
 extern long				CurAlarm;
 
@@ -160,7 +160,6 @@ extern long				digitCount;
 extern bool				countError;
 
 extern bool				eofFlag;
-extern long				pageNumber;
 
 extern SymTableNodePtr	SymTableDisplay[MAX_NESTING_LEVEL];
 extern TypePtr			IntegerTypePtr;
