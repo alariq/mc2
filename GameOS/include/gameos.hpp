@@ -1639,6 +1639,8 @@ void __stdcall gos_SaveDataToRegistry( const char* keyName,  void* pData,  DWORD
 void __stdcall gos_SaveStringToRegistry( const char* keyName,  char* pData,  DWORD szData );
 
 
+// sebi:
+bool __stdcall gos_GetUserDataDirectory(char* user_dir, const int len);
 
 
 

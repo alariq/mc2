@@ -225,6 +225,10 @@ void _stdcall gos_PositionIME(DWORD x, DWORD y)
 void _stdcall gos_SetIMELevel(DWORD dwImeLevel)
 {
 }
+void gos_FinalizeStringIME()
+{
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 float __stdcall gosJoystick_GetAxis( DWORD index, GOSJoystickAxis axis )
 {
@@ -447,6 +451,63 @@ void __stdcall gos_SaveDataToRegistry( const char* keyName,  void* pData,  DWORD
 void __stdcall gos_SaveStringToRegistry( const char* keyName,  char* pData,  DWORD szData )
 {
     // TODO;
+}
+
+bool __stdcall gos_GetUserDataDirectory(char* user_dir, const int len)
+{
+    const char* home_dir = getenv("HOME");
+    if(home_dir == NULL)
+    {
+        SPEW(("gos_GetUserDataDirectory", "home directory is not set\n"));
+        return false;
+    }
+
+    const int cfg_dir_size = 1024;
+    char cfg_dir[cfg_dir_size] = {0};
+    struct stat st;
+
+    const char* config_dir = getenv("XDG_CONFIG_HOME");
+    if(config_dir != NULL) {
+        strncpy(cfg_dir, config_dir, cfg_dir_size-1);
+        cfg_dir[cfg_dir_size-1] = '\0';
+
+        if(-1 == stat(cfg_dir, &st)) {
+            int last_err = errno;
+            SPEW(("stat: %s\n", strerror(last_err)));
+            return false;
+        }
+
+        if(!S_ISDIR(st.st_mode)) {
+            SPEW(("SAVELOAD", "gos_GetUserDataDirectory: %s is not directory\n", cfg_dir));
+            return false;
+        }
+    } else {
+        strncpy(cfg_dir, home_dir, cfg_dir_size-1);
+        cfg_dir[cfg_dir_size-1] = '\0';
+    }
+
+    // 1 + 1 =  for \0 and /
+    char* mc2_conf_dir = new char[strlen(cfg_dir) + strlen(g_user_config_dir) + 1 + 1];
+    sprintf(mc2_conf_dir, "%s/%s", cfg_dir, g_user_config_dir);
+
+    // if directory does not exist create it
+    int permissions = S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH;      
+    if(-1 == stat(mc2_conf_dir, &st)) {
+        if(-1 == mkdir(mc2_conf_dir, permissions)) {
+            int last_err = errno;
+            SPEW(("stat: %s\n", strerror(last_err)));
+            delete[] mc2_conf_dir;
+            return false;
+        }
+    }
+    
+    int conf_len = strlen(mc2_conf_dir);
+    conf_len = len - 1 < conf_len ? len - 1 : conf_len;
+
+    strncpy(user_dir, mc2_conf_dir, conf_len);
+    user_dir[conf_len] = '\0';
+    delete[] mc2_conf_dir;
+    return true;
 }
 
 
