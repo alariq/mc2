@@ -1915,7 +1915,7 @@ void __stdcall gos_TextStringLength( DWORD* Width, DWORD* Height, const char *fm
     const char* txtptr = text;
 
     while(*txtptr) {
-        if(*txtptr++ == '\n') {
+        if(*txtptr == '\n') {
             num_newlines++;
             max_width = max_width > cur_width ? max_width : cur_width;
             cur_width = 0;
@@ -1923,6 +1923,7 @@ void __stdcall gos_TextStringLength( DWORD* Width, DWORD* Height, const char *fm
             const int cw = font->getCharAdvance(*txtptr);
             cur_width += cw;
         }
+        txtptr++;
     }
     max_width = max_width > cur_width ? max_width : cur_width;
 
@@ -1950,6 +1951,9 @@ size_t __stdcall gos_GetMachineInformation( MachineInfo mi, int Param1/*=0*/, in
         int bpp = Param4;
         return graphics::is_mode_supported(xres, yres, bpp) ? 1 : 0;
     }
+    if(mi == gos_Info_GetIMECaretStatus)
+        return 1;
+
     return 0;
 }
 
