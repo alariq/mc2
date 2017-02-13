@@ -93,21 +93,6 @@ double __stdcall gos_GetElapsedTime( int RealTime )
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-DWORD __stdcall gos_GetMachineInformation( MachineInfo mi, int Param1/*=0*/, int Param2/*=0*/, int Param3/*=0*/, int Param4/*=0*/)
-{
-    // TODO:
-    if(mi == gos_Info_GetDeviceLocalMemory)
-        return 1024*1024*1024;
-    if(mi == gos_Info_GetDeviceAGPMemory)
-        return 512*1024*1024; 
-    if (mi == gos_Info_CanMultitextureDetail)
-        return true;
-    if(mi == gos_Info_NumberDevices)
-        return 1;
-    return 0;
-}
-
-////////////////////////////////////////////////////////////////////////////////
 
 static const int g_hepsStackSize = 128;
 static gos_Heap* g_heapsStack[g_hepsStackSize];

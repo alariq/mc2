@@ -787,6 +787,8 @@ class gosRenderer {
         bool getBreakOnDrawCall() { return break_on_draw_call_; }
         void setBreakDrawCall(uint32_t num) { break_draw_call_num_ = num; }
 
+        graphics::RenderContextHandle getRenderContextHandle() { return ctx_h_; }
+
     private:
 
         bool beforeDrawCall();
@@ -1118,6 +1120,9 @@ void gosRenderer::endFrame()
                 0, 0, 0.0f, 1.0f);
 
         if(graphics::resize_window(win_h_, width_, height_)) {
+
+            graphics::set_window_fullscreen(win_h_, reqGotoFullscreen);
+
             glViewport(0, 0, width_, height_);
 
             Environment.screenWidth = width_;
@@ -1540,7 +1545,7 @@ void gos_CreateRenderer(graphics::RenderContextHandle ctx_h, graphics::RenderWin
 void gos_DestroyRenderer() {
 
     g_gos_renderer->destroy();
-    delete[] g_gos_renderer;
+    delete g_gos_renderer;
 }
 
 void gos_RendererBeginFrame() {
@@ -1923,6 +1928,46 @@ void __stdcall gos_TextStringLength( DWORD* Width, DWORD* Height, const char *fm
 
     *Width = max_width;
     *Height = (num_newlines + 1) * font->getMaxCharHeight();
+}
+
+////////////////////////////////////////////////////////////////////////////////
+size_t __stdcall gos_GetMachineInformation( MachineInfo mi, int Param1/*=0*/, int Param2/*=0*/, int Param3/*=0*/, int Param4/*=0*/)
+{
+    // TODO:
+    if(mi == gos_Info_GetDeviceLocalMemory)
+        return 1024*1024*1024;
+    if(mi == gos_Info_GetDeviceAGPMemory)
+        return 512*1024*1024; 
+    if (mi == gos_Info_CanMultitextureDetail)
+        return true;
+    if(mi == gos_Info_NumberDevices)
+        return 1;
+    if(mi == gos_Info_GetDeviceName)
+        return (size_t)glGetString(GL_RENDERER);
+    if(mi == gos_Info_ValidMode) {
+        int xres = Param2;
+        int yres = Param3;
+        int bpp = Param4;
+        return graphics::is_mode_supported(xres, yres, bpp) ? 1 : 0;
+    }
+    return 0;
+}
+
+int gos_GetWindowDisplayIndex()
+{   
+    gosASSERT(g_gos_renderer);
+    
+    return graphics::get_window_display_index(g_gos_renderer->getRenderContextHandle());
+}
+
+int gos_GetNumDisplayModes(int DisplayIndex)
+{
+    return graphics::get_num_display_modes(DisplayIndex);
+}
+
+bool gos_GetDisplayModeByIndex(int DisplayIndex, int ModeIndex, int* XRes, int* YRes, int* BitDepth)
+{
+    return graphics::get_display_mode_by_index(DisplayIndex, ModeIndex, XRes, YRes, BitDepth);
 }
 
 #include "gameos_graphics_debug.cpp"

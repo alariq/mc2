@@ -261,7 +261,8 @@ int	OptionsXScreen::handleMessage( unsigned long message, unsigned long who)
 
 		case YES:
 			{
-				int oldRes = prefs.resolution;
+				int oldResX = prefs.resolutionX;
+				int oldResY = prefs.resolutionY;
 				int oldDepth = prefs.bitDepth;
 				for ( int i = 0; i < 4; i++ )
 					tabAreas[i]->end();
@@ -270,10 +271,11 @@ int	OptionsXScreen::handleMessage( unsigned long message, unsigned long who)
 				prefs.applyPrefs(0);
 				LoadScreenWrapper::changeRes();
 
-				int newRes = prefs.resolution;
+				int newResX = prefs.resolutionX;
+				int newResY = prefs.resolutionY;
 				int newDepth = prefs.bitDepth;
 
-				if ( newRes != oldRes || newDepth != oldDepth )
+				if ( newResX != oldResX || newResY != oldResY || newDepth != oldDepth )
 				{
 					LogisticsOneButtonDialog::instance()->setText( IDS_SWAP_RESOLUTION_WARNING, IDS_DIALOG_OK, IDS_DIALOG_OK );
 					LogisticsOneButtonDialog::instance()->begin();
@@ -336,13 +338,7 @@ void OptionsXScreen::updateOptions()
 
 
 //////////////////////////////////////////////
-typedef struct 
-{
-	long xRes;
-	long yRes;
-	long bitDepth;
-} ResModes;
-
+/*
 ResModes resModes[10] = {
 	 640, 480, 16,
 	 640, 480, 32, 
@@ -360,6 +356,15 @@ bool availableMode[10] = {
 	true,true,true,true,true,
 	true,true,true,true,true
 };
+*/
+
+
+OptionsGraphics::OptionsGraphics()
+{
+    resolutionModes = NULL;
+    resolutionModesStr = NULL;
+    numResolutionModes = 0;
+}
 
 void OptionsGraphics::init(long xOffset, long yOffset)
 {
@@ -381,6 +386,23 @@ void OptionsGraphics::init(long xOffset, long yOffset)
 	resolutionList.move( xOffset, yOffset );
 	resolutionList.ListBox().setOrange( true );
 
+    const int num_modes = gos_GetNumDisplayModes(0);
+    gosASSERT(!resolutionModes && !resolutionModesStr);
+    resolutionModes = new ResModes[num_modes];
+    resolutionModesStr = new char*[num_modes];
+    numResolutionModes = num_modes;
+
+    const int displayIndex = gos_GetWindowDisplayIndex();
+
+	for ( int i = 0; i < num_modes; i++ ) {
+        gos_GetDisplayModeByIndex(displayIndex, i, &resolutionModes[i].xRes, &resolutionModes[i].yRes, &resolutionModes[i].bitDepth);
+
+        resolutionModesStr[i] = new char[256];
+        snprintf(resolutionModesStr[i], 256, "%dx%dx%d", resolutionModes[i].xRes, resolutionModes[i].yRes, resolutionModes[i].bitDepth);
+        resolutionList.AddItem( resolutionModesStr[i], 0xffffffff );
+    }
+
+    /*
 	for ( int i = IDS_RESOLUTION0; i < IDS_RESOLUTION9 + 1; i++ )
 	{
 		if ( 1!=gos_GetMachineInformation( gos_Info_ValidMode, 
@@ -398,6 +420,7 @@ void OptionsGraphics::init(long xOffset, long yOffset)
 			resolutionList.AddItem( cstr, 0xffffffff );
 		}
 	}
+    */
 
 	file.close();
 
@@ -439,9 +462,7 @@ void OptionsGraphics::init(long xOffset, long yOffset)
 
 		if (gos_GetMachineInformation(gos_Info_GetDeviceLocalMemory, i) >= minTextureRam)
 		{
-            //sebi:
-			//char *deviceName = (char*)gos_GetMachineInformation( gos_Info_GetDeviceName, i);
-            const char* deviceName = "fix me: gos_GetMachineInformation";
+			const char *deviceName = (const char*)gos_GetMachineInformation( gos_Info_GetDeviceName, i);
 		
 			//Save name to other string here.
 			cardList.AddItem( deviceName, 0xffffffff );
@@ -567,6 +588,12 @@ void OptionsGraphics::end()
 	if ( sel > -1 )
 	{
 		long actualSel = -1;
+        gosASSERT(numResolutionModes > sel);
+        prefs.resolutionX = resolutionModes[sel].xRes;
+        prefs.resolutionY = resolutionModes[sel].yRes;
+        prefs.bitDepth = resolutionModes[sel].bitDepth;
+
+        /*
 		for ( int i = IDS_RESOLUTION0; i < IDS_RESOLUTION9 + 1; i++ )
 		{
 			if (availableMode[i-IDS_RESOLUTION0])
@@ -611,7 +638,19 @@ void OptionsGraphics::end()
 				break;
 			}
 		}
+        */
 	}
+
+    delete[] resolutionModes;
+    for(int i=0;i<numResolutionModes;++i) {
+        delete[] resolutionModesStr[i];
+        resolutionModesStr[i] = NULL;
+    }
+    delete[] resolutionModesStr;
+
+    resolutionModes = NULL;
+    resolutionModesStr = NULL;
+    numResolutionModes = 0;
 
 	int index = cardList.GetSelectedItem( );
 	if ( (index != -1) && (prefs.renderer != 3))
@@ -630,6 +669,20 @@ void OptionsGraphics::reset(const CPrefs& newPrefs)
 	getButton( MSG_ASYNC_MOUSE )->press( newPrefs.asyncMouse );
 	getButton( MSG_HARDWARE_RASTERIZER )->press( (newPrefs.renderer != 3) );
 
+    // find index of mode
+    int index = -1;
+    for(int i=0;i<numResolutionModes;++i) {
+        if( resolutionModes[i].xRes == newPrefs.resolutionX && 
+            resolutionModes[i].yRes == newPrefs.resolutionY && 
+            resolutionModes[i].bitDepth == newPrefs.bitDepth) {
+            index = i;
+            break;
+        }
+    }
+
+    resolutionList.SelectItem(index==-1 ? 0 : index);
+
+    /*
 	if (availableMode[1])
 	{
 		resolutionList.SelectItem( newPrefs.resolution * 2 + newPrefs.bitDepth );
@@ -638,6 +691,7 @@ void OptionsGraphics::reset(const CPrefs& newPrefs)
 	{
 		resolutionList.SelectItem( newPrefs.resolution );
 	}
+    */
 }
 
 //*************************************************************************************************

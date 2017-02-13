@@ -90,6 +90,7 @@ void LoadScreenWrapper::changeRes()
 {
 	const char* Appendix = NULL;
 
+    /*
 	switch( prefs.resolution )
 	{
 	case 0:
@@ -114,6 +115,29 @@ void LoadScreenWrapper::changeRes()
 
 		break;
 
+	default:
+		Assert( 0, 0, "Unexpected resolution found in prefs" );
+		break;
+	}
+    */
+
+	switch( prefs.resolutionX )
+	{
+	case 640:
+		Appendix = "_640";
+		break;
+	case 1024:
+		Appendix = "_1024";
+		break;
+	case 1280:
+		Appendix = "_1280";
+		break;
+	case 1600:
+		Appendix = "_1600";
+		break;
+	case 1920:
+		Appendix = "_1920";
+		break;
 	default:
 		Assert( 0, 0, "Unexpected resolution found in prefs" );
 		break;

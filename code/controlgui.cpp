@@ -2635,7 +2635,9 @@ void ControlGui::swapResolutions( int resolution )
 	
 	char fileName[32];
 	
-	if ( resolution == 1600)
+	if ( resolution == 1920)
+		strcpy( fileName, "buttonlayout1920.fit" ); 
+	else if ( resolution == 1600)
 		strcpy( fileName, "buttonlayout1600.fit" ); 
 	else if ( resolution == 1280)
 		strcpy( fileName, "buttonlayout1280.fit" ); 

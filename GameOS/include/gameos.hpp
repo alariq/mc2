@@ -3055,12 +3055,11 @@ enum MachineInfo
 //
 // Returns machine information, valid for THE CURRENT FRAME ONLY
 //
-DWORD __stdcall gos_GetMachineInformation( MachineInfo mi, int Param1=0, int Param2=0, int Param3=0, int Param4=0 );
+size_t __stdcall gos_GetMachineInformation( MachineInfo mi, int Param1=0, int Param2=0, int Param3=0, int Param4=0 );
 
-
-
-
-
+int gos_GetWindowDisplayIndex();
+int gos_GetNumDisplayModes(int DisplayIndex);
+bool gos_GetDisplayModeByIndex(int DisplayIndex, int ModeIndex, int* XRes, int* YRes, int* BitDepth);
 
 //
 //

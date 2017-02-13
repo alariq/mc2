@@ -93,7 +93,8 @@ extern long MusicVolume;
 extern long sfxVolume;
 extern long RadioVolume;
 extern long BettyVolume;
-long resolution = 0;
+long resolutionX = 0;
+long resolutionY = 0;
 long renderer = 0;
 long FilterState = gos_FilterNone;
 bool quitGame = FALSE;
@@ -1303,9 +1304,17 @@ void InitializeGameEngine()
 				if ((renderer < 0) || (renderer > 3))
 					renderer = 0;
 	
-				result = optsFile->readIdLong("Resolution",resolution);
+				//result = optsFile->readIdLong("Resolution",resolution);
+				//if (result != NO_ERR)
+				//	resolution = 0;
+                
+				result = optsFile->readIdLong("ResolutionX",resolutionX);
 				if (result != NO_ERR)
-					resolution = 0;
+					resolutionX = 800;
+                
+				result = optsFile->readIdLong("ResolutionY",resolutionY);
+				if (result != NO_ERR)
+					resolutionX = 600;
 	
 				result = optsFile->readIdBoolean("FullScreen",fullScreen);
 				if (result != NO_ERR)

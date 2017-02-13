@@ -63,7 +63,8 @@ long FilterState = gos_FilterNone;
 long gammaLevel = 0;
 long renderer = 0;
 long GameDifficulty = 0;
-long resolution = 0;
+long resolutionX = 0;
+long resolutionY = 0;
 bool useUnlimitedAmmo = true;
 
 Camera* eye = NULL;

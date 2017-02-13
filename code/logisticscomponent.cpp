@@ -68,7 +68,7 @@ LogisticsComponent::LogisticsComponent()
 LogisticsComponent::~LogisticsComponent()
 {
 	if ( name )
-		delete name;
+		delete[] name;
 
 	if ( iconFileName )
 		delete iconFileName;
