@@ -3139,6 +3139,7 @@ bool ControlGui::playPilotVideo( MechWarrior* pPilot, char movieCode )
 
 	char realPilotName[8];
 	strncpy(realPilotName, pPilot->getName(), 7);
+	realPilotName[7] = '\0'; // sebi: fix
 
 	strcat( fileName, realPilotName ); // swap in pilot name when videos are done
 	char tmp[3];
