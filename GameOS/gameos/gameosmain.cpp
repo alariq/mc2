@@ -47,6 +47,8 @@ static void handle_key_down( SDL_Keysym* keysym ) {
 
 static void process_events( void ) {
 
+    beginUpdateMouseState(&g_mouse_info);
+
     SDL_Event event;
     while( SDL_PollEvent( &event ) ) {
 
