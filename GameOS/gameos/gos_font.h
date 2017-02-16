@@ -17,6 +17,7 @@ struct gosGlyphInfo {
     uint32_t start_glyph_;
     gosGlyphMetrics* glyphs_;
     uint32_t max_advance_;
+    uint32_t font_ascent_;
     uint32_t font_line_skip_;
 };
 

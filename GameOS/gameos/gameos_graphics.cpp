@@ -622,10 +622,13 @@ class gosFont {
 
         int getMaxCharWidth() const { return gi_.max_advance_; }
         int getMaxCharHeight() const { return gi_.font_line_skip_; }
+        int getFontAscent() const { return gi_.font_ascent_; }
 
         int getCharWidth(int c) const;
         void getCharUV(int c, uint32_t* u, uint32_t* v) const;
         int getCharAdvance(int c) const;
+        const gosGlyphMetrics& getGlyphMetrics(int c) const;
+
 
         DWORD getTextureId() const { return tex_id_; }
         const char* getName() const { return font_name_; }
@@ -1368,7 +1371,7 @@ int calcTextHeight(const char* text, const int count, const gosFont* font, int r
     return num_lines;
 }
 
-void addCharacter(gosMesh* text_, const float u, const float v, const float char_du, const float char_dv, const int x, const int y, const int char_w, const int char_h) {
+void addCharacter(gosMesh* text_, const float u, const float v, const float u2, const float v2, const int x, const int y, const int x2, const int y2) {
 
     gos_VERTEX tr, tl, br, bl;
 
@@ -1379,25 +1382,25 @@ void addCharacter(gosMesh* text_, const float u, const float v, const float char
     tl.v = v;
     tl.argb = 0xffffffff;
 
-    tr.x = x + char_w;
+    tr.x = x2;
     tr.y = y;
     tr.z = 0;
-    tr.u = u + char_du;
+    tr.u = u2;
     tr.v = v;
     tr.argb = 0xffffffff;
 
     bl.x = x;
-    bl.y = y + char_h;
+    bl.y = y2;
     bl.z = 0;
     bl.u = u;
-    bl.v = v + char_dv;
+    bl.v = v2;
     bl.argb = 0xffffffff;
 
-    br.x = x + char_w;
-    br.y = y + char_h;
+    br.x = x2;
+    br.y = y2;
     br.z = 0;
-    br.u = u + char_du;
-    br.v = v + char_dv;
+    br.u = u2;
+    br.v = v2;
     br.argb = 0xffffffff;
 
     text_->addVertices(&tl, 1);
@@ -1436,21 +1439,16 @@ void gosRenderer::drawText(const char* text) {
 
     const gosTextAttribs& ta = g_gos_renderer->getTextAttributes();
     const gosFont* font = ta.FontHandle;
-    const int char_w = font->getMaxCharWidth();
-    const int char_h = font->getMaxCharHeight();
-
 
     const DWORD tex_id = font->getTextureId();
     const gosTexture* tex = getTexture(tex_id);
     gosTextureInfo ti;
     tex->getTextureInfo(&ti);
-    const float tex_width = (float)ti.width_;
-    const float tex_height = (float)ti.height_;
+    const float oo_tex_width = 1.0f / (float)ti.width_;
+    const float oo_tex_height = 1.0f / (float)ti.height_;
     
-    const float char_du = (float)char_w / tex_width;
-    const float char_dv = (float)char_h / tex_height;
-
     const int font_height = font->getMaxCharHeight();
+    const int font_ascent = font->getFontAscent();
 
     const int region_width = getTextRegionWidth();
     const int region_height = getTextRegionHeight();
@@ -1481,15 +1479,26 @@ void gosRenderer::drawText(const char* text) {
         for(int i=0; i<num_chars; ++i) {
 
             const char c = text[i + pos];
-            int advance;
-            uint32_t iu, iv;
-            font->getCharUV(c, &iu, &iv);
-            advance = font->getCharAdvance(c);
-            float u = (float)iu / tex_width;
-            float v = (float)iv / tex_height;
-            addCharacter(text_, u, v, char_du, char_dv, x, y, char_w, char_h);
 
-            x += advance;
+            const gosGlyphMetrics& gm = font->getGlyphMetrics(c);
+            int char_off_x = gm.minx;
+            int char_off_y = font_ascent - gm.maxy;
+            int char_w = gm.maxx - gm.minx;
+            int char_h = gm.maxy - gm.miny;
+
+            uint32_t iu0 = gm.u + char_off_x;
+            uint32_t iv0 = gm.v + char_off_y;
+            uint32_t iu1 = iu0 + char_w;
+            uint32_t iv1 = iv0 + char_h;
+
+            float u0 = (float)iu0 * oo_tex_width;
+            float v0 = (float)iv0 * oo_tex_height;
+            float u1 = (float)iu1 * oo_tex_width;
+            float v1 = (float)iv1 * oo_tex_height;
+
+            addCharacter(text_, u0, v0, u1, v1, x + char_off_x, y + char_off_y, x + char_off_x + char_w, y + char_off_y + char_h);
+
+            x += font->getCharAdvance(c);
         }
         y += font_height;
         pos += num_chars;
@@ -1626,6 +1635,14 @@ int gosFont::getCharAdvance(int c) const
     }
 
     return gi_.glyphs_[pos].advance;
+}
+
+const gosGlyphMetrics& gosFont::getGlyphMetrics(int c) const {
+    int pos = c - gi_.start_glyph_;
+    if(pos < 0 || pos >= gi_.num_glyphs_)
+        pos = 0;
+
+    return gi_.glyphs_[pos];
 }
 
 

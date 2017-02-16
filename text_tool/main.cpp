@@ -36,6 +36,7 @@ bool gos_save_glyphs(const char* glyphFile, const gosGlyphInfo& gi)
     fwrite(&gi.start_glyph_, sizeof(gi.start_glyph_), 1, glyph_info);
 
     fwrite(&gi.max_advance_, sizeof(gi.max_advance_), 1, glyph_info);
+    fwrite(&gi.font_ascent_, sizeof(gi.font_ascent_), 1, glyph_info);
     fwrite(&gi.font_line_skip_, sizeof(gi.font_line_skip_), 1, glyph_info);
 
     size_t num_structs_written = 0;
@@ -106,7 +107,7 @@ int main(int argc, char** argv)
         return 1;
     }
 
-    graphics::make_current_context(ctx, win);
+    graphics::make_current_context(ctx);
 
     // do stuff
 
@@ -168,7 +169,7 @@ int main(int argc, char** argv)
     }
 
     // calculate required texture width and height
-    int num_chars_in_line = 32;;
+    int num_chars_in_line = 32;
     int fontTextureWidth = num_chars_in_line * max_advance;
     int num_lines = (NUM_GLYPHS + num_chars_in_line - 1) / num_chars_in_line;
     int fontTextureHeight = num_lines * fontLineSkip;
@@ -225,6 +226,7 @@ int main(int argc, char** argv)
     gi.start_glyph_ = START_GLYPH;
     gi.glyphs_ = gm;
     gi.max_advance_ = max_advance;
+    gi.font_ascent_ = maxFontAscent;
     gi.font_line_skip_ = fontLineSkip;
 
     // save glyph information
