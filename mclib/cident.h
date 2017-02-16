@@ -217,17 +217,17 @@ class FullPathFileName
 			fullName = NULL;
 		}
 
-		void init (const char *dir_path, const char *name, const char *ext);
+		void init (const char *dir_path, const char *name, const char *ext, bool do_not_make_lower = false);
 
 		FullPathFileName (void)
 		{
 			init();
 		}
 
-		FullPathFileName (const char *dir_path, const char *name, const char *ext)
+		FullPathFileName (const char *dir_path, const char *name, const char *ext, bool do_not_make_lower = false)
 		{
 			init();
-			init(dir_path, name, ext);
+			init(dir_path, name, ext, do_not_make_lower);
 		}
 
 		inline operator const char * (void) const 

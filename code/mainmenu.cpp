@@ -548,7 +548,8 @@ void MainMenu::update()
 			}
 			else
 			{
-				if ( NO_ERR != file.open( name ) )
+				const bool do_not_make_lower = true;
+				if ( NO_ERR != file.open( name, READ, 50, do_not_make_lower ) )
 				{
 					char errorStr[1024];
 					sprintf( errorStr, "couldn't open the file %s", name );

@@ -47,7 +47,7 @@ void FullPathFileName::destroy (void)
 }
 
 //---------------------------------------------------------------------------
-void FullPathFileName::init (const char * dir_path, const char * name, const char * ext)
+void FullPathFileName::init (const char * dir_path, const char * name, const char * ext, bool do_not_make_lower)
 {
 	destroy();
 
@@ -69,7 +69,8 @@ void FullPathFileName::init (const char * dir_path, const char * name, const cha
 	if (ext && stricmp( fullName + strlen( fullName ) - strlen( ext ), ext ) != 0)
 		strcat(fullName,ext);
 
-	CharLower(fullName);
+    if(!do_not_make_lower)
+	    CharLower(fullName);
 }
 
 void FullPathFileName::changeExt (const char *from, const char *to)

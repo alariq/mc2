@@ -491,7 +491,7 @@ bool __stdcall gos_GetUserDataDirectory(char* user_dir, const int len)
     sprintf(mc2_conf_dir, "%s/%s", cfg_dir, g_user_config_dir);
 
     // if directory does not exist create it
-    int permissions = S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH;      
+    int permissions = S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH | S_IXUSR | S_IXGRP;      
     if(-1 == stat(mc2_conf_dir, &st)) {
         if(-1 == mkdir(mc2_conf_dir, permissions)) {
             int last_err = errno;

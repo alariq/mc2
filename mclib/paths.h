@@ -14,7 +14,7 @@
 //---------------------------------------------------------------------------
 // static Globals
 
-extern char savePath[];
+extern char savePath[256];
 extern char saveTempPath[];
 extern char terrainPath[];
 extern char palettePath[];
