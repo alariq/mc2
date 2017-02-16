@@ -15,9 +15,10 @@ int isleadbyte(
         int c 
         );
 
-const unsigned char *_mbsinc(
+unsigned char *_mbsinc(
            const unsigned char *current 
         );
 
+unsigned char *_mbsdec(const unsigned char* start, const unsigned char* current);
 
 #endif // MBSTRIG_H
