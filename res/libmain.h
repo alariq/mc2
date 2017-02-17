@@ -1,13 +1,21 @@
 #ifndef LIBMAIN_H
 #define LIBMAIN_H
 
+#ifdef PLATFORM_WINDOWS
+#define DLL_EXPORT __declspec(dllexport)
+#define CDECL __cdecl
+#else
+#define DLL_EXPORT
+#define CDECL
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-extern const char* getStringById(unsigned int id);
-extern void initStringResources();
-extern void freeStringResources();
+DLL_EXPORT const char* CDECL getStringById(unsigned int id);
+DLL_EXPORT void CDECL initStringResources();
+DLL_EXPORT void CDECL freeStringResources();
 
 #ifdef __cplusplus
 }
