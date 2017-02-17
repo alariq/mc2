@@ -7,6 +7,8 @@
 #include<string.h>
 #endif
 
+#include <cassert>
+
 template <typename T, int N>
 void ArrayCopy(T (&dst)[N], T (&src)[N]) {
     for(int i=0;i<N;++i) {
