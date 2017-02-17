@@ -1,6 +1,8 @@
 tags
 CMakeCache.txt
 out/
+bin/
+build/
 *.exe
 *.cmake
 Makefile
@@ -40,6 +42,20 @@ vidcard.csv
 *.old
 longpath.dbg
 tmp/
+
+*.h~
+*.hpp~
+*.c~
+*.cpp~
+
+*~
+
+*.pdb
+*.ilk
+*.exp
+*.obj
+*.tlog
+
 
 # Coverity
 cov-int/
