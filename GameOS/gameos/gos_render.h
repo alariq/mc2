@@ -14,6 +14,8 @@ void set_verbose(bool is_verbose);
 RenderWindowHandle  create_window           (const char* pwinname, int width, int height);
 bool                resize_window           (RenderWindowHandle rw_handle, int width, int height);
 void                get_window_size         (RenderWindowHandle rw_handle, int* width, int* height);
+// may be different than window size (e.g. when switching to fullscreen)
+void                get_drawable_size       (RenderWindowHandle rw_handle, int* width, int* height);
 void                swap_window             (RenderWindowHandle h);
 void                destroy_window          (RenderWindowHandle rw_handle);
 bool                set_window_fullscreen   (RenderWindowHandle rw_handle, bool fullscreen);

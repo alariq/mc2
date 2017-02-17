@@ -199,7 +199,7 @@ RenderWindow* create_window(const char* pwinname, int width, int height)
 
     {
         window = SDL_CreateWindow(pwinname ? pwinname : "--", 
-                SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width, height, SDL_WINDOW_OPENGL);
+                SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width, height, SDL_WINDOW_OPENGL|SDL_WINDOW_ALLOW_HIGHDPI);
 
         if (!window) {
             fprintf(stderr, "Couldn't create window: %s\n", SDL_GetError());
@@ -405,11 +405,13 @@ bool is_mode_supported(int width, int height, int bpp) {
     int displayIndex = 0;
     //displayIndex = SDL_GetWindowDisplayIndex(win_h);
 
-    SDL_DisplayMode desired = { .format = bpp==16 ? SDL_PIXELFORMAT_RGB565 : SDL_PIXELFORMAT_RGB888, 
-                                .w = width, 
-                                .h = height, 
-                                .refresh_rate = 0, 
-                                .driverdata = 0};
+    SDL_DisplayMode desired;
+	desired.format = bpp==16 ? SDL_PIXELFORMAT_RGB565 : SDL_PIXELFORMAT_RGB888;
+	desired.w = width;
+	desired.h = height;
+	desired.refresh_rate = 0;
+	desired.driverdata = 0;
+
     SDL_DisplayMode returned;
     
     if(NULL == SDL_GetClosestDisplayMode(displayIndex, &desired, &returned)) {
@@ -485,6 +487,15 @@ void get_window_size(RenderWindowHandle rw_handle, int* width, int* height)
     assert(rw && width && height);
     *width = rw->width_;
     *height = rw->height_;
+}
+
+//==============================================================================
+void get_drawable_size(RenderWindowHandle rw_handle, int* width, int* height)
+{
+    RenderWindow* rw = (RenderWindow*)rw_handle;
+    assert(rw && width && height);
+	// TOD: does it make sense to cahce this value? probably not
+	SDL_GL_GetDrawableSize(rw->window_, width, height);
 }
 
 //==============================================================================
