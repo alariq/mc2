@@ -153,7 +153,7 @@ void ComponentListItem::assignAnimation( FitIniFile& file, int whichChild, char 
   		file.readIdString("Animation", tmpAnimName, 31);
 		for ( int i = 0; i < COMP_ANIMATION_COUNT; i++ )
 		{
-			if ( stricmp( animNames[i], tmpAnimName ) == 0 )
+			if ( S_stricmp( animNames[i], tmpAnimName ) == 0 )
 			{
 				s_templateItem->pChildAnims[whichChild] = &s_templateItem->animations[i];
 				break;
@@ -489,7 +489,7 @@ void ComponentIconListBox::addSortedItem( ComponentListItem* pItem )
 			return;
 		}
 		else if ( size == tmpSize && 
-			stricmp( pItem->getComponent()->getName(), pTmp->getName() ) < 0 )
+			S_stricmp( pItem->getComponent()->getName(), pTmp->getName() ) < 0 )
 		{
 			InsertItem( pItem, i );
 			return;

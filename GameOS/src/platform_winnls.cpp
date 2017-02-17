@@ -1,7 +1,9 @@
+#ifndef PLATFORM_WINDOWS
+
 #include <stdlib.h>
 #include <wchar.h>
 #include <ctype.h>
-#include "windows.h"
+#include "platform_windows.h"
 
 #define _In_
 #define _Out_opt_ 
@@ -81,3 +83,5 @@ BOOL IsDBCSLeadByte(BYTE TestChar) {
     // sebi: NB!
     return FALSE;
 }
+
+#endif // PLATFORM_WINDOWS

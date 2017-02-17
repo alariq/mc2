@@ -22,20 +22,21 @@
 #include<stdio.h>
 #include<stdlib.h>
 #include<math.h>
-#include<string.h>
-#include<string_win.h>
+//#include<string.h>
+#include"platform_str.h"
 #include<ctype.h>
 
 #include"err.h"
 
-#ifndef _MBCS
+// sebi:
+//#ifndef _MBCS
 #include<gameos.hpp>
-#else
-#include<assert.h>
-#define gosASSERT assert
-#define gos_Malloc malloc
-#define gos_Free free
-#endif
+//#else
+//#include<assert.h>
+//#define gosASSERT assert
+//#define gos_Malloc malloc
+//#define gos_Free free
+//#endif
 
 //---------------------------------------------------------------------------
 // Static Globals
@@ -820,7 +821,7 @@ long FitIniFile::readIdFloat (const char *varName, float &value)
 	do
 	{
 		readLine((MemoryPtr)line,254);
-		testy = strnicmp(line, searchString, strlen(searchString));
+		testy = S_strnicmp(line, searchString, strlen(searchString));
 		if (testy == 0)
 		{
 		char* tc = &line[strlen(searchString)];
@@ -873,7 +874,7 @@ long FitIniFile::readIdDouble (const char *varName, double &value)
 	do
 	{
 		readLine((MemoryPtr)line,254);
-		testy = strnicmp(line, searchString, strlen(searchString));
+		testy = S_strnicmp(line, searchString, strlen(searchString));
 		if (testy == 0)
 		{
 		char* tc = &line[strlen(searchString)];
@@ -934,7 +935,7 @@ long FitIniFile::readIdLong (const char *varName, long &value)
 	do
 	{
 		readLine((MemoryPtr)line,254);
-		testy = strnicmp(line, searchString, strlen(searchString));
+		testy = S_strnicmp(line, searchString, strlen(searchString));
 		if (testy == 0)
 		{
 		char* tc = &line[strlen(searchString)];
@@ -987,7 +988,7 @@ long FitIniFile::readIdBoolean (const char *varName, bool &value)
 	do
 	{
 		readLine((MemoryPtr)line,254);
-		testy = strnicmp(line, searchString, strlen(searchString));
+		testy = S_strnicmp(line, searchString, strlen(searchString));
 		if (testy == 0)
 		{
 		char* tc = &line[strlen(searchString)];
@@ -1040,7 +1041,7 @@ long FitIniFile::readIdShort (const char *varName, short &value)
 	do
 	{
 		readLine((MemoryPtr)line,254);
-		testy = strnicmp(line, searchString, strlen(searchString));
+		testy = S_strnicmp(line, searchString, strlen(searchString));
 		if (testy == 0)
 		{
 		char* tc = &line[strlen(searchString)];
@@ -1093,7 +1094,7 @@ long FitIniFile::readIdChar (const char *varName, char &value)
 	do
 	{
 		readLine((MemoryPtr)line,254);
-		testy = strnicmp(line, searchString, strlen(searchString));
+		testy = S_strnicmp(line, searchString, strlen(searchString));
 		if (testy == 0)
 		{
 		char* tc = &line[strlen(searchString)];
@@ -1127,15 +1128,14 @@ long FitIniFile::readIdChar (const char *varName, char &value)
 
 long FitIniFile::readIdULong (const char *varName, DWORD &value)
 {
-    unsigned long tmp;
+    uint64_t tmp;
     long rv = readIdULong (varName, tmp);
     value = (DWORD)tmp;
     return rv;
 }
 
-
 //---------------------------------------------------------------------------
-long FitIniFile::readIdULong (const char *varName, unsigned long &value)
+long FitIniFile::readIdULong (const char *varName, uint64_t &value)
 {
 	char line[255];
 	char searchString[255];
@@ -1155,7 +1155,7 @@ long FitIniFile::readIdULong (const char *varName, unsigned long &value)
 	do
 	{
 		readLine((MemoryPtr)line,254);
-		testy = strnicmp(line, searchString, strlen(searchString));
+		testy = S_strnicmp(line, searchString, strlen(searchString));
 		if (testy == 0)
 		{
 			char* tc = &line[strlen(searchString)];
@@ -1210,7 +1210,7 @@ long FitIniFile::readIdUShort (const char *varName, unsigned short &value)
 	do
 	{
 		readLine((MemoryPtr)line,254);
-		testy = strnicmp(line, searchString, strlen(searchString));
+		testy = S_strnicmp(line, searchString, strlen(searchString));
 		if (testy == 0)
 		{
 		char* tc = &line[strlen(searchString)];
@@ -1263,7 +1263,7 @@ long FitIniFile::readIdUChar (const char *varName, unsigned char &value)
 	do
 	{
 		readLine((MemoryPtr)line,254);
-		testy = strnicmp(line, searchString, strlen(searchString));
+		testy = S_strnicmp(line, searchString, strlen(searchString));
 		if (testy == 0)
 		{
 		char* tc = &line[strlen(searchString)];
@@ -1351,7 +1351,7 @@ long FitIniFile::readIdString (const char *varName, char *result, unsigned long 
 	do
 	{
 		readLine((MemoryPtr)line,2047);
-		testy = strnicmp(line, searchString, strlen(searchString));
+		testy = S_strnicmp(line, searchString, strlen(searchString));
 		if (testy == 0)
 		{
 		char* tc = &line[strlen(searchString)];
@@ -1434,7 +1434,7 @@ long FitIniFile::getIdStringLength (const char *varName)
 	do
 	{
 		readLine((MemoryPtr)line,254);
-		testy = strnicmp(line, searchString, strlen(searchString));
+		testy = S_strnicmp(line, searchString, strlen(searchString));
 		if (testy == 0)
 		{
 		char* tc = &line[strlen(searchString)];

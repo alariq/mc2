@@ -3,6 +3,7 @@
 //===========================================================================//
 
 #include"stuffheaders.hpp"
+#include"platform_str.h"
 
 #define MAX_LINE_SIZE 512
 
@@ -701,7 +702,7 @@ void
 	//----------------------------
 	//
 	char *p;
-	if (!strnicmp(buffer, "include", 7))
+	if (!S_strnicmp(buffer, "include", 7))
 	{
 		p = buffer+7;
 

@@ -1168,7 +1168,7 @@ DWORD MC_TextureManager::textureInstanceExists (const char *textureFullPathName,
 	{
 		if (masterTextureNodes[i].nodeName)
 		{
-			if (stricmp(masterTextureNodes[i].nodeName,textureFullPathName) == 0)
+			if (S_stricmp(masterTextureNodes[i].nodeName,textureFullPathName) == 0)
 			{
 				if (uniqueInstance == masterTextureNodes[i].uniqueInstance)
 				{
@@ -1198,7 +1198,7 @@ DWORD MC_TextureManager::loadTexture (const char *textureFullPathName, gos_Textu
 	// Is this texture already Loaded?
 	for (i=0;i<MC_MAXTEXTURES;i++)
 	{
-		if (masterTextureNodes[i].nodeName && (stricmp(masterTextureNodes[i].nodeName,textureFullPathName) == 0))
+		if (masterTextureNodes[i].nodeName && (S_stricmp(masterTextureNodes[i].nodeName,textureFullPathName) == 0))
 		{
 			if (uniqueInstance == masterTextureNodes[i].uniqueInstance)
 			{
@@ -1272,13 +1272,14 @@ DWORD MC_TextureManager::loadTexture (const char *textureFullPathName, gos_Textu
 		lzBuffer2 = (MemoryPtr)textureCacheHeap->Malloc(MAX_LZ_BUFFER_SIZE);
 		gosASSERT(lzBuffer2 != NULL);
 	}
-	
+
 	//Try reading the RAW data out of the fastFile.
 	// If it succeeds, we just saved a complete compress, decompress and two memcpys!!
 	//
 	long result = textureFile.readRAW(masterTextureNodes[i].textureData,textureCacheHeap);
 	if (!result)
 	{
+		gosASSERT(txmSize <= MAX_LZ_BUFFER_SIZE);
 		textureFile.read(lzBuffer1,txmSize);
 
 		textureFile.close();

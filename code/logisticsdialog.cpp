@@ -10,7 +10,7 @@ LogisticsDialog.cpp			: Implementation of the LogisticsDialog component.
 #include"abutton.h"
 #include"inifile.h"
 #include"mclib.h"
-#include"windows.h"
+#include"platform_windows.h"
 #include "../resource.h"
 #include"aedit.h"
 #include"logisticsdata.h"
@@ -1259,7 +1259,7 @@ void LogisticsVariantDialog::initTranscript()
 	{
 		do
 		{
-			if ((findResult.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) == 0 && stricmp( findResult.cFileName, "transcript.txt" ) != 0 )
+			if ((findResult.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) == 0 && S_stricmp( findResult.cFileName, "transcript.txt" ) != 0 )
 			{
 				aAnimTextListItem* pEntry = new aAnimTextListItem(IDS_DIALOG_LIST_FONT);
 				*pEntry = s_instance->templateItem;

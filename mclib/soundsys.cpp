@@ -19,7 +19,7 @@
 #include"camera.h"
 #endif
 
-#include "stdlib_win.h" // _splitpath
+#include "platform_stdlib.h" // _splitpath
 
 //---------------------------------------------------------------------------
 // static globals

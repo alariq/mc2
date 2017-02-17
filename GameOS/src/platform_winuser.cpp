@@ -1,7 +1,9 @@
+#ifndef PLATFORM_WINDOWS
+
 #include<stdio.h>
 #include<wctype.h>
 
-#include"windows.h"
+#include"platform_windows.h"
 #include"string_win.h"
 
 #define _Inout_
@@ -67,3 +69,5 @@ LPWSTR CharUpperW(LPWSTR s)
     return s;
 
 }
+
+#endif // PLATFORM_WINDOWS

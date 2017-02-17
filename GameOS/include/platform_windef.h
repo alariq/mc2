@@ -89,7 +89,7 @@ typedef double DOUBLE; // sebi, actually in wtypes.h
 
 #endif
 
-#include "winnt.h"
+#include "platform_winnt.h"
 
 typedef UINT_PTR WPARAM;
 typedef LONG_PTR LPARAM;

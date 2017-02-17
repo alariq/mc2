@@ -28,8 +28,8 @@
 
 #ifdef LINUX_BUILD
 #include "windows.h"
-#include "string_win.h"
-#include "stdlib_win.h"
+#include "platform_str.h"
+#include "platform_stdlib.h"
 #endif
 
 // ARM
@@ -192,7 +192,7 @@ class TG_TypeMultiShape
 
 			for (int i=0;i<numTG_TypeShapes;i++)
 			{
-				if (stricmp(listOfTypeShapes[i]->getNodeId(),nodeId) == 0)
+				if (S_stricmp(listOfTypeShapes[i]->getNodeId(),nodeId) == 0)
 					result = listOfTypeShapes[i]->GetNodeCenter();
 			}
 			
@@ -512,7 +512,7 @@ class TG_MultiShape
 				// Scan through the list of shapes and dig out the number needed.
 				// DO NOT UPDATE THE HEIRARCHY!!!!
 				// This thing may not have updated itself this turn yet!!!
-				if (stricmp(listOfShapes[i].node->myType->getNodeId(),nodeId) == 0)
+				if (S_stricmp(listOfShapes[i].node->myType->getNodeId(),nodeId) == 0)
 					return i;
 			}
 

@@ -275,14 +275,14 @@ long Logistics::update (void)
 		bool result = bMovie->update();
 		if (result)
 		{
-			if ( LogisticsData::instance->campaignOver() && (strnicmp(bMovie->getMovieName(),"credits",7) == 0) )
+			if ( LogisticsData::instance->campaignOver() && (S_strnicmp(bMovie->getMovieName(),"credits",7) == 0) )
 			{
 				missionBegin->beginSplash();
 			}
 
 			//Check if we are cinema5.  If we are, spool up the credits and play those.
 			// Otherwise, same as before Mr. Sulu.  Stay with him...
-			if (strnicmp(bMovie->getMovieName(),"cinema5",7) == 0)
+			if (S_strnicmp(bMovie->getMovieName(),"cinema5",7) == 0)
 			{
 				//OLD Movie's Over.
 				//Whack it.

@@ -68,7 +68,7 @@ extern bool		useFog;
 extern long 	mechRGBLookup[];
 extern long 	mechRGBLookup2[];
 
-extern int 	ObjectTextureSize;
+extern int		ObjectTextureSize;
 
 extern bool reloadBounds;
 //-----------------------------------------------------------------------------
@@ -295,7 +295,7 @@ void GenericAppearance::init (AppearanceTypePtr tree, GameObjectPtr obj)
 	
 			if (fileExists(textureName))
 			{
-				if (strnicmp(txmName,"a_",2) == 0)
+				if (S_strnicmp(txmName,"a_",2) == 0)
 				{
 					DWORD gosTextureHandle = mcTextureManager->loadTexture(textureName,gos_Texture_Alpha,gosHint_DisableMipmap | gosHint_DontShrink);
 					genShape->SetTextureHandle(i,gosTextureHandle);
@@ -486,7 +486,7 @@ void GenericAppearance::setObjectParameters (const Stuff::Vector3D &pos, float R
 //-----------------------------------------------------------------------------
 void GenericAppearance::changeSkyToSkyNum (char *txmName, char *newName)
 {
-	if (strnicmp(txmName,"sky",3) != 0)
+	if (S_strnicmp(txmName,"sky",3) != 0)
 	{
 		strcpy(newName,txmName);
 	}
@@ -526,7 +526,7 @@ void GenericAppearance::setSkyNumber (long skyNum)
 
 		if (fileExists(textureName))
 		{
-			if (strnicmp(newName,"a_",2) == 0)
+			if (S_strnicmp(newName,"a_",2) == 0)
 			{
 				DWORD gosTextureHandle = mcTextureManager->loadTexture(textureName,gos_Texture_Alpha,gosHint_DisableMipmap | gosHint_DontShrink);
 				genShape->SetTextureHandle(i,gosTextureHandle);

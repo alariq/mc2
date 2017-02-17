@@ -24,7 +24,10 @@
 #include "icecap.h"
 #endif
 
-#ifdef LINUX_BUILD
+#include<inttypes.h>
+#include <cstdarg> // va_list
+
+#ifndef PLATFORM_WINDOWS
 #define __stdcall
 #define _stdcall
 #define __cdecl
@@ -46,7 +49,18 @@ static __inline__ unsigned long long rdtsc(void)
 // or just use clock_gettime(CLOCK_MONOTONIC_RAW);
 // or 
 //clock_gettime(CLOCK_PROCESS_CPUTIME_ID)
-#endif
+#else
+#include <memory.h> // memcmp
+#include<inttypes.h>
+#include <windows.h>
+static inline unsigned long long rdtsc(void)
+{
+    unsigned long x;
+	_asm rdtsc
+	_asm mov x, eax
+    return x;
+}
+#endif // PLATFORM_WINDOWS
 //
 //
 //
@@ -61,7 +75,7 @@ static __inline__ unsigned long long rdtsc(void)
 //
 // Enter the visual C debugger
 //
-#ifdef LINUX_BUILD
+#ifndef PLATFORM_WINDOWS
 #define ENTER_DEBUGGER raise(SIGTRAP); // __builtin_trap(); // GCC
 //asm volatile ("int 3;");
 #else
@@ -121,13 +135,6 @@ static __inline__ unsigned long long rdtsc(void)
 //
 // Types used by GameOS
 //
-// !NB sebi
-//typedef unsigned long DWORD;
-typedef unsigned int DWORD;
-typedef unsigned short WORD;
-typedef unsigned char BYTE;
-#define FALSE 0
-#define TRUE  1
 
 #ifndef GUID_DEFINED
 #define GUID_DEFINED
@@ -187,6 +194,9 @@ typedef struct
 //
 	int		screenWidth;			// 640
 	int		screenHeight;			// 480
+	int		drawableWidth;			// 640
+	int		drawableHeight;			// 480
+
 	int		bitDepth;				// 16 or 32
 	int		FullScreenDevice;		// 0=Primary, 1=2nd video card (ie: 3Dfx) etc...
 	int		Renderer;				// 0=Try hardware, fallback to software, 1=RGB, 2=Refrast, 3=Blade
@@ -3187,7 +3197,7 @@ public:
 
 class GosEventLog
 {
-	static DWORD		*pLogBase;
+	static uint64_t		*pLogBase;
 	static DWORD		LogOffset;		// Offset into log in DWORDS
 	static DWORD		LogMod;			// Mod in DWORDS
 	static DWORD		NullLog[16];
@@ -3203,15 +3213,10 @@ class GosEventLog
 public:
 	static void Log( DWORD id )
 	{
-		unsigned long time;
+		uint64_t time;
 		LogOffset &= LogMod;
 		pLogBase[LogOffset++] = id;
-#ifndef LINUX_BUILD
-		_asm rdtsc
-		_asm mov time,eax
-#else
         time = rdtsc();
-#endif
 		pLogBase[LogOffset++] = time;
 	}
 	static void LogStart();

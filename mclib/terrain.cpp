@@ -58,8 +58,6 @@
 #include"tgainfo.h"
 #endif
 
-#include "stdlib_win.h"
-
 //---------------------------------------------------------------------------
 // Static Globals
 float worldUnitsPerMeter = 5.01f;

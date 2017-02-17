@@ -10,13 +10,14 @@
 #include <cstdarg>
 #endif
 
-#include "stdlib_win.h"
+#include "platform_stdlib.h"
+#include "platform_str.h"
 
 #include "utils/shader_builder.h"
 #include "utils/gl_utils.h"
 #include "utils/Image.h"
 #include "utils/vec.h"
-
+#include "utils/string_utils.h"
 #include "gos_render.h"
 
 class gosRenderer;
@@ -43,8 +44,8 @@ class gosShaderMaterial {
             gosShaderMaterial* pmat = new gosShaderMaterial();
             char vs[256];
             char ps[256];
-            snprintf(vs, 255, "shaders/%s.vert", shader);
-            snprintf(ps, 255, "shaders/%s.frag", shader);
+            StringFormat(vs, 255, "shaders/%s.vert", shader);
+            StringFormat(ps, 255, "shaders/%s.frag", shader);
             pmat->program_ = glsl_program::makeProgram(shader, vs, ps);
             if(!pmat->program_) {
                 SPEW(("SHADERS", "Failed to create %s material\n", shader));
@@ -792,6 +793,8 @@ class gosRenderer {
 
         graphics::RenderContextHandle getRenderContextHandle() { return ctx_h_; }
 
+		void handleEvents();
+
     private:
 
         bool beforeDrawCall();
@@ -815,7 +818,7 @@ class gosRenderer {
         DWORD reqHeight;
         DWORD reqBitDepth;
         DWORD reqAntiAlias;
-        DWORD reqGotoFullscreen;
+        bool reqGotoFullscreen;
         bool pendingRequest;
 
         // states data
@@ -1109,6 +1112,10 @@ void gosRenderer::beginFrame()
 
 void gosRenderer::endFrame()
 {
+}
+
+void gosRenderer::handleEvents()
+{
     if(pendingRequest) {
 
         width_ = reqWidth;
@@ -1122,14 +1129,15 @@ void gosRenderer::endFrame()
                 0, 0, 1.0f, 0.0f,
                 0, 0, 0.0f, 1.0f);
 
-        if(graphics::resize_window(win_h_, width_, height_)) {
-
+        if(graphics::resize_window(win_h_, width_, height_))
+		{
             graphics::set_window_fullscreen(win_h_, reqGotoFullscreen);
-
-            glViewport(0, 0, width_, height_);
 
             Environment.screenWidth = width_;
             Environment.screenHeight = height_;
+
+			graphics::get_drawable_size(win_h_, &Environment.drawableWidth, &Environment.drawableHeight);
+
         }
         pendingRequest = false;
     }
@@ -1371,7 +1379,7 @@ int calcTextHeight(const char* text, const int count, const gosFont* font, int r
     return num_lines;
 }
 
-void addCharacter(gosMesh* text_, const float u, const float v, const float u2, const float v2, const int x, const int y, const int x2, const int y2) {
+void addCharacter(gosMesh* text_, const float u, const float v, const float u2, const float v2, const float x, const float y, const float x2, const float y2) {
 
     gos_VERTEX tr, tl, br, bl;
 
@@ -1433,9 +1441,10 @@ void gosRenderer::drawText(const char* text) {
     
     gosASSERT(text_->getNumVertices() + 6 * count <= text_->getVertexCapacity());
 
-    int x, y;
-    getTextPos(x, y);
-    const int start_x = x;
+    int ix, iy;
+    getTextPos(ix, iy);
+	float x = (float)ix, y = (float)iy;
+    const float start_x = x;
 
     const gosTextAttribs& ta = g_gos_renderer->getTextAttributes();
     const gosFont* font = ta.FontHandle;
@@ -1470,8 +1479,7 @@ void gosRenderer::drawText(const char* text) {
             case 0: break;
             case 1: x += region_width - str_width; break;
             case 2: x += (region_width - str_width) / 2; break;
-            case 3: //ehh... handle later, must know number of lines
-                    // for now only center in X
+            case 3: // see vertical centering above
                     x += (region_width - str_width) / 2;
                     break;
         }
@@ -1496,7 +1504,7 @@ void gosRenderer::drawText(const char* text) {
             float u1 = (float)iu1 * oo_tex_width;
             float v1 = (float)iv1 * oo_tex_height;
 
-            addCharacter(text_, u0, v0, u1, v1, x + char_off_x, y + char_off_y, x + char_off_x + char_w, y + char_off_y + char_h);
+            addCharacter(text_, u0, v0, u1, v1, (float)(x + char_off_x), (float)(y + char_off_y), (float)(x + char_off_x + char_w), (float)(y + char_off_y + char_h));
 
             x += font->getCharAdvance(c);
         }
@@ -1518,10 +1526,10 @@ void gosRenderer::drawText(const char* text) {
 
     //ta.Foreground
     vec4 fg;
-    fg.x = (ta.Foreground & 0xFF0000) >> 16;
-    fg.y = (ta.Foreground & 0xFF00) >> 8;
-    fg.z = ta.Foreground & 0xFF;
-    fg.w = 255;//(ta.Foreground & 0xFF000000) >> 24;
+    fg.x = (float)((ta.Foreground & 0xFF0000) >> 16);
+    fg.y = (float)((ta.Foreground & 0xFF00) >> 8);
+    fg.z = (float)(ta.Foreground & 0xFF);
+    fg.w = 255.0f;//(ta.Foreground & 0xFF000000) >> 24;
     fg = fg / 255.0f; 
     mat->getShader()->setFloat4("Foreground", fg);
     //ta.Size 
@@ -1567,6 +1575,11 @@ void gos_RendererEndFrame() {
     g_gos_renderer->endFrame();
 }
 
+void gos_RendererHandleEvents() {
+    gosASSERT(g_gos_renderer);
+    g_gos_renderer->handleEvents();
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 gosFont* gosFont::load(const char* fontFile) {
 
@@ -1575,14 +1588,20 @@ gosFont* gosFont::load(const char* fontFile) {
     _splitpath(fontFile, NULL, dir, fname, NULL);
     const char* tex_ext = ".bmp";
     const char* glyph_ext = ".glyph";
-
-    const uint32_t textureNameSize = strlen(fname) + sizeof('/') + strlen(dir) + strlen(tex_ext) + 1;
+    
+	const uint32_t textureNameSize = strlen(fname) + sizeof('/') + strlen(dir) + strlen(tex_ext) + 1;
     char* textureName = new char[textureNameSize];
+	memset(textureName, 0, textureNameSize);
 
-    const uint32_t glyphNameSize = strlen(fname) + sizeof('/') + strlen(dir) + strlen(glyph_ext) + 1;
+	const uint32_t glyphNameSize = strlen(fname) + sizeof('/') + strlen(dir) + strlen(glyph_ext) + 1;
     char* glyphName = new char[glyphNameSize];
-    snprintf(textureName, textureNameSize, "%s/%s%s", dir, fname, tex_ext);
-    snprintf(glyphName, glyphNameSize, "%s/%s%s", dir, fname, glyph_ext);
+	memset(glyphName, 0, glyphNameSize);
+
+    uint32_t formatted_len = S_snprintf(textureName, textureNameSize, "%s/%s%s", dir, fname, tex_ext);
+	gosASSERT(formatted_len <= textureNameSize - 1);
+
+    formatted_len = S_snprintf(glyphName, glyphNameSize, "%s/%s%s", dir, fname, glyph_ext);
+	gosASSERT(formatted_len <= glyphNameSize - 1);
 
     gosTexture* ptex = new gosTexture(gos_Texture_Alpha, textureName, 0, NULL, 0, false);
     if(!ptex || !ptex->createHardwareTexture()) {
@@ -1617,7 +1636,7 @@ void gosFont::getCharUV(int c, uint32_t* u, uint32_t* v) const {
 
     gosASSERT(u && v);
 
-    int pos = c - gi_.start_glyph_;
+    uint32_t pos = c - gi_.start_glyph_;
     if(pos < 0 || pos >= gi_.num_glyphs_) {
         *u = *v = 0;
         return;
@@ -1630,7 +1649,7 @@ void gosFont::getCharUV(int c, uint32_t* u, uint32_t* v) const {
 int gosFont::getCharAdvance(int c) const
 {
     int pos = c - gi_.start_glyph_;
-    if(pos < 0 || pos >= gi_.num_glyphs_) {
+    if(pos < 0 || pos >= (int)gi_.num_glyphs_) {
         return getMaxCharWidth();
     }
 
@@ -1639,7 +1658,7 @@ int gosFont::getCharAdvance(int c) const
 
 const gosGlyphMetrics& gosFont::getGlyphMetrics(int c) const {
     int pos = c - gi_.start_glyph_;
-    if(pos < 0 || pos >= gi_.num_glyphs_)
+    if(pos < 0 || pos >= (int)gi_.num_glyphs_)
         pos = 0;
 
     return gi_.glyphs_[pos];
@@ -1847,8 +1866,8 @@ void __stdcall gos_TextDrawBackground( int Left, int Top, int Right, int Bottom,
     //PAUSE((""));
 
     gos_VERTEX v[4];
-    v[0].x = Left;
-    v[0].y = Top;
+    v[0].x = (float)Left;
+    v[0].y = (float)Top;
     v[0].z = 0;
 	v[0].argb = Color;
 	v[0].frgb = 0;
@@ -1857,15 +1876,15 @@ void __stdcall gos_TextDrawBackground( int Left, int Top, int Right, int Bottom,
     memcpy(&v[1], &v[0], sizeof(gos_VERTEX));
     memcpy(&v[2], &v[0], sizeof(gos_VERTEX));
     memcpy(&v[3], &v[0], sizeof(gos_VERTEX));
-    v[1].x = Right;
+    v[1].x = (float)Right;
     v[1].u = 1.0f;
 
-    v[2].x = Right;
-    v[2].y = Bottom;
+    v[2].x = (float)Right;
+    v[2].y = (float)Bottom;
     v[2].u = 1.0f;
     v[2].v = 0.0f;
 
-    v[1].y = Bottom;
+    v[1].y = (float)Bottom;
     v[1].v = 1.0f;
 
     if(g_disable_quads == false )

@@ -11,7 +11,7 @@
 #include<stdlib.h>
 #include<math.h>
 #include<string.h>
-#include<string_win.h>
+#include"platform_str.h"
 #include<time.h>
 
 #ifndef ABLGEN_H

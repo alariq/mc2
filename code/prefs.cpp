@@ -506,7 +506,7 @@ void CPrefs::setNewName( const char* pNewName )
     int i = 0;
 	for ( ; i < 10; i++ )
 	{
-		if ( !stricmp( pNewName, playerName[i] ) )
+		if ( !S_stricmp( pNewName, playerName[i] ) )
 		{
 			// found the same one so now we just shuffle
 			for ( int j = i; j < 9; j++ )
@@ -544,7 +544,7 @@ void CPrefs::setNewIP( const char* pNewIP )
 	// check and see if this name is already in here
 	for ( int i = 0; i < 10; i++ )
 	{
-		if ( !stricmp( pNewIP, ipAddresses[i] ) )
+		if ( !S_stricmp( pNewIP, ipAddresses[i] ) )
 		{
 			// found the same one so now we just shuffle
 			for ( int j = i; j < 9; j++ )
@@ -577,7 +577,7 @@ void CPrefs::setNewUnit( const char* pNewUnit )
     int i = 0;
 	for ( ; i < 10; i++ )
 	{
-		if ( !stricmp( pNewUnit, unitName[i] ) )
+		if ( !S_stricmp( pNewUnit, unitName[i] ) )
 		{
 			// found the same one so now we just shuffle
 			for ( int j = i; j < 9; j++ )

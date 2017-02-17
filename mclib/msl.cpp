@@ -237,9 +237,9 @@ long TG_TypeMultiShape::LoadBinaryCopy (const char *fileName)
 			
 			//--------------------------------------------------------
 			//ONLY use nodes which are not spotlight or _PAB or LOS_
-			if ((strnicmp(listOfTypeShapes[i]->getNodeId(),"_PAB",4) != 0) &&
-				(strnicmp(listOfTypeShapes[i]->getNodeId(),"LOS_",4) != 0) && 
-				(strnicmp(listOfTypeShapes[i]->getNodeId(),"SpotLight",9) != 0))
+			if ((S_strnicmp(listOfTypeShapes[i]->getNodeId(),"_PAB",4) != 0) &&
+				(S_strnicmp(listOfTypeShapes[i]->getNodeId(),"LOS_",4) != 0) && 
+				(S_strnicmp(listOfTypeShapes[i]->getNodeId(),"SpotLight",9) != 0))
 			{
 				//------------------------------------------------------------------
 				// Scan list of vertices and create minBox, maxBox and extentRadius
@@ -492,7 +492,7 @@ long TG_TypeMultiShape::LoadTGMultiShapeFromASE (const char *fileName, bool forc
 	
 		//----------------------------------------
 		// Check for valid ASE Header data.
-		if (strnicmp(ASE_HEADER,(char *)aseContents,strlen(ASE_HEADER)) != 0)
+		if (S_strnicmp(ASE_HEADER,(char *)aseContents,strlen(ASE_HEADER)) != 0)
 			return(-1);
 		
 		//---------------------------------------
@@ -837,9 +837,9 @@ long TG_TypeMultiShape::LoadTGMultiShapeFromASE (const char *fileName, bool forc
 					
 				//--------------------------------------------------------
 				//ONLY use nodes which are not spotlight or _PAB or LOS_
-				if ((strnicmp(listOfTypeShapes[i]->getNodeId(),"_PAB",4) != 0) &&
-					(strnicmp(listOfTypeShapes[i]->getNodeId(),"LOS_",4) != 0) && 
-					(strnicmp(listOfTypeShapes[i]->getNodeId(),"SpotLight",9) != 0))
+				if ((S_strnicmp(listOfTypeShapes[i]->getNodeId(),"_PAB",4) != 0) &&
+					(S_strnicmp(listOfTypeShapes[i]->getNodeId(),"LOS_",4) != 0) && 
+					(S_strnicmp(listOfTypeShapes[i]->getNodeId(),"SpotLight",9) != 0))
 				{
 				
 					//------------------------------------------------------------------
@@ -967,7 +967,7 @@ long TG_MultiShape::SetNodeRotation (const char *nodeName, Stuff::UnitQuaternion
 {
 	for (long i=0;i<numTG_Shapes;i++)
 	{
-		if (stricmp(listOfShapes[i].node->myType->getNodeId(),nodeName) == 0)
+		if (S_stricmp(listOfShapes[i].node->myType->getNodeId(),nodeName) == 0)
 		{
 			//-------------------------------
 			// Found it!
@@ -1092,7 +1092,7 @@ Stuff::Vector3D TG_MultiShape::GetTransformedNodePosition (Stuff::Point3D *pos, 
 		// Scan through the list of shapes and dig out the number needed.
 		// DO NOT UPDATE THE HEIRARCHY!!!!
 		// This thing may not have updated itself this turn yet!!!
-		if (stricmp(listOfShapes[i].node->myType->getNodeId(),nodeId) == 0)
+		if (S_stricmp(listOfShapes[i].node->myType->getNodeId(),nodeId) == 0)
 		{
 			result.x = -listOfShapes[i].shapeToWorld.entries[3];
 			result.z = listOfShapes[i].shapeToWorld.entries[7];
@@ -1607,7 +1607,7 @@ void TG_MultiShape::StopUsing (const char *nodeName)
 		zero.x = zero.y = zero.z = 0.0f;
 		for (long j=curChild;j>=0;j--)
 		{
-			if (stricmp(childChain[j]->node->getNodeName(),nodeName) == 0)
+			if (S_stricmp(childChain[j]->node->getNodeName(),nodeName) == 0)
 			{
 				detachables[curShape] = childChain[0];
 				curShape++;
@@ -1620,7 +1620,7 @@ void TG_MultiShape::StopUsing (const char *nodeName)
 	for (i=0;i<curShape;i++)
 	{
 		//Keep the joint_xUARM so that the shoulder sparks work.
-		if (stricmp(detachables[i]->node->getNodeName(),nodeName) != 0)
+		if (S_stricmp(detachables[i]->node->getNodeName(),nodeName) != 0)
 			detachables[i]->processMe = false;
 	}
 }
@@ -1655,7 +1655,7 @@ TG_MultiShapePtr TG_MultiShape::Detach (const char *nodeName)
 		zero.x = zero.y = zero.z = 0.0f;
 		for (long j=curChild;j>=0;j--)
 		{
-			if (stricmp(childChain[j]->node->getNodeName(),nodeName) == 0)
+			if (S_stricmp(childChain[j]->node->getNodeName(),nodeName) == 0)
 			{
 				detachables[curShape] = childChain[0];
 				curShape++;
@@ -1686,7 +1686,7 @@ TG_MultiShapePtr TG_MultiShape::Detach (const char *nodeName)
 	{
 		resultShape->listOfShapes[i] = *detachables[i];
 		
-		if (stricmp(resultShape->listOfShapes[i].node->getNodeName(),nodeName) == 0)
+		if (S_stricmp(resultShape->listOfShapes[i].node->getNodeName(),nodeName) == 0)
 			resultShape->listOfShapes[i].parentNode = NULL;		//Set new top O heirarchy.
 		
 		for (long j=0;j<numTG_Shapes;j++)
@@ -1790,7 +1790,7 @@ bool TG_MultiShape::isChildOf (const char *nodeName, const char* parentName)
 		zero.x = zero.y = zero.z = 0.0f;
 		for (long j=curChild;j>=0;j--)
 		{
-			if (stricmp(childChain[j]->node->getNodeName(),parentName) == 0)
+			if (S_stricmp(childChain[j]->node->getNodeName(),parentName) == 0)
 			{
 				detachables[curShape] = childChain[0];
 				curShape++;
@@ -1804,7 +1804,7 @@ bool TG_MultiShape::isChildOf (const char *nodeName, const char* parentName)
 		
 	for (i=0;i<curShape;i++)
 	{
-		if (stricmp(detachables[i]->node->getNodeName(), nodeName) == 0)
+		if (S_stricmp(detachables[i]->node->getNodeName(), nodeName) == 0)
 			return true;
 	}
 	
@@ -1828,7 +1828,7 @@ void *TG_AnimateShape::operator new (size_t mySize)
 //-------------------------------------------------------------------------------
 void _TG_Animation::SaveBinaryCopy (File *binFile)
 {
-	if (stricmp(nodeId,"NONE") != 0)
+	if (S_stricmp(nodeId,"NONE") != 0)
 	{
 		binFile->write((MemoryPtr)nodeId,TG_NODE_ID);	
 		binFile->writeInt(-1);			//ShapeIds ALWAYS start with -1.  We will scan on frame 1 please!
@@ -1929,7 +1929,7 @@ void TG_AnimateShape::SaveBinaryCopy (const char *fileName)
 	{
  		for (long i=0;i<count;i++)
 		{
-			if (stricmp(listOfAnimation[i].nodeId,"NONE") != 0)
+			if (S_stricmp(listOfAnimation[i].nodeId,"NONE") != 0)
 				actualCount++;
 		}
 	}
@@ -2069,7 +2069,7 @@ long TG_AnimateShape::LoadTGMultiShapeAnimationFromASE (const char *fileName, TG
 	
 		//----------------------------------------
 		// Check for valid ASE Header data.
-		if (strnicmp(ASE_HEADER,(char *)aseContents,strlen(ASE_HEADER)) != 0)
+		if (S_strnicmp(ASE_HEADER,(char *)aseContents,strlen(ASE_HEADER)) != 0)
 			return(-1);
 	
 		//------------------------------------------
@@ -2381,7 +2381,7 @@ void TG_AnimateShape::SetAnimationState (TG_MultiShapePtr shape)
 			bool foundNode = false;
 			for (i=0;i<shape->GetNumShapes();i++)
 			{
-				if (stricmp(listOfAnimation[j].nodeId,shape->GetNodeId(i)) == 0)
+				if (S_stricmp(listOfAnimation[j].nodeId,shape->GetNodeId(i)) == 0)
 				{
 					shape->SetCurrentAnimation(i,&listOfAnimation[j]);
 					listOfAnimation[j].shapeId = i;

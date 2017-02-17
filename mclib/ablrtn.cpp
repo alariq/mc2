@@ -10,7 +10,7 @@
 #include<stdio.h>
 #include<stdlib.h>
 #include<string.h>
-#include<string_win.h>
+#include"platform_str.h"
 
 #ifndef ABLGEN_H
 #include"ablgen.h"
@@ -112,8 +112,8 @@ extern char*			bufferp;
 extern char*			tokenp;
 extern long				digitCount;
 extern bool				countError;
-extern int 				pageNumber;
-extern int 				lineCount;
+extern int				pageNumber;
+extern int				lineCount;
 
 extern long				CurAlarm;
 
@@ -573,7 +573,7 @@ profile = true;
 long ABLi_preProcess (const char* sourceFileName, long* numErrors, long* numLinesProcessed, long* numFilesProcessed, bool printLines) {
 
     char* source_fn = strdup(sourceFileName);
-    source_fn = strlwr(source_fn);
+    source_fn = S_strlwr(source_fn);
 	//--------------------------------------------------------------------------------
 	// First, check if this module has already been registered into the environment...
 	for (long i = 0; i < NumModulesRegistered; i++)
@@ -626,8 +626,11 @@ long ABLi_preProcess (const char* sourceFileName, long* numErrors, long* numLine
 	//---------------------------------------
 	// Now, let's open the ABL source file...	
 	long openErr = ABL_NO_ERR;
-	if ((openErr = openSourceFile(sourceFileName)) != ABL_NO_ERR)
+	if ((openErr = openSourceFile(source_fn)) != ABL_NO_ERR)
+	{
+		free(source_fn);
 		return(openErr);
+	}
 
 	//------------------------
 	// Set up the code buffer.
@@ -710,13 +713,12 @@ long ABLi_preProcess (const char* sourceFileName, long* numErrors, long* numLine
 
 	//--------------------------------------------------
 	// Register the new module in the ABL environment...
-	ModuleRegistry[NumModulesRegistered].fileName = (char*)ABLStackMallocCallback(strlen(sourceFileName) + 1);
+	ModuleRegistry[NumModulesRegistered].fileName = (char*)ABLStackMallocCallback(strlen(source_fn) + 1);
 	if (!ModuleRegistry[NumModulesRegistered].fileName)
 		ABL_Fatal(0, " ABL: Unable to AblStackHeap->malloc module filename ");
     // sebi
 	//strcpy(ModuleRegistry[NumModulesRegistered].fileName, strlwr(sourceFileName));
-	strcpy(ModuleRegistry[NumModulesRegistered].fileName, sourceFileName);
-    strlwr(ModuleRegistry[NumModulesRegistered].fileName);
+	strcpy(ModuleRegistry[NumModulesRegistered].fileName, source_fn);
 	ModuleRegistry[NumModulesRegistered].moduleIdPtr = moduleIdPtr;
 
 	ModuleRegistry[NumModulesRegistered].numSourceFiles = NumSourceFiles;
@@ -773,6 +775,7 @@ long ABLi_preProcess (const char* sourceFileName, long* numErrors, long* numLine
 	if (numErrors)
 		*numErrors = errorCount;
 
+	free(source_fn);
 	return(NumModulesRegistered - 1);
 }
 

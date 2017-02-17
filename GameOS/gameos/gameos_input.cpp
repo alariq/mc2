@@ -32,8 +32,12 @@ extern input::KeyboardInfo g_keyboard_info;
 ////////////////////////////////////////////////////////////////////////////////
 void __stdcall gos_GetMouseInfo( float* pXPosition, float* pYPosition, int* pXDelta, int* pYDelta, int* pWheelDelta, DWORD* pButtonsPressed )
 {
-    const float w = (float)Environment.screenWidth;
-    const float h = (float)Environment.screenHeight;
+    //const float w = (float)Environment.screenWidth;
+    //const float h = (float)Environment.screenHeight;
+
+    const float w = (float)Environment.drawableWidth;
+    const float h = (float)Environment.drawableHeight;
+
     if(pXPosition)
         *pXPosition = g_mouse_info.x_ / w;
     if(pYPosition)
@@ -302,9 +306,11 @@ DWORD __stdcall gos_GetKey()
 
             // this is all hardcodede crap, mayeb will fix it later
 
-            const bool caps_pressed = g_keyboard_info.last_state_[SDL_SCANCODE_CAPSLOCK];
-            const bool shift_pressed = (g_keyboard_info.last_state_[SDL_SCANCODE_LSHIFT] || g_keyboard_info.last_state_[SDL_SCANCODE_RSHIFT]);
-            const bool register_mod = caps_pressed ^ shift_pressed; 
+			// FIXME: it is incorrect to do so because caps lock is not held constantly but either turned on or off
+            //const bool caps_pressed = !!g_keyboard_info.last_state_[SDL_SCANCODE_CAPSLOCK];
+
+            const bool shift_pressed = !!(g_keyboard_info.last_state_[SDL_SCANCODE_LSHIFT] || g_keyboard_info.last_state_[SDL_SCANCODE_RSHIFT]);
+            const bool register_mod = /*caps_pressed ^ */shift_pressed; 
             if(c >= SDLK_a && c<=SDLK_z && register_mod)
             {
                 c-=32;

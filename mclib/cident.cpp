@@ -18,14 +18,16 @@
 
 #include"windows.h"
 
-#ifndef _MBCS
+// sebi
+//#ifndef _MBCS
 #include<gameos.hpp>
-#else
-#include<assert.h>
-#define gosASSERT assert
-#define gos_Malloc malloc
-#define gos_Free free
-#endif
+//#else
+//#include<assert.h>
+//#define gosASSERT assert
+//#define gos_Malloc malloc
+//#define gos_Free free
+//#endif
+#include "platform_str.h"
 
 //---------------------------------------------------------------------------
 
@@ -66,7 +68,7 @@ void FullPathFileName::init (const char * dir_path, const char * name, const cha
 	strcat(fullName,name);
 
 	// don't append if its already there
-	if (ext && stricmp( fullName + strlen( fullName ) - strlen( ext ), ext ) != 0)
+	if (ext && S_stricmp( fullName + strlen( fullName ) - strlen( ext ), ext ) != 0)
 		strcat(fullName,ext);
 
     if(!do_not_make_lower)

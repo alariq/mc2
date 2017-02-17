@@ -241,7 +241,7 @@ void PauseWindow::update()
 	_splitpath(campaignName,NULL,NULL,campName,NULL);
 	if ( MPlayer || 
 		LogisticsData::instance->isSingleMission() ||
-		(stricmp("tutorial",campName) == 0))
+		(S_stricmp("tutorial",campName) == 0))
 	{
 		buttons[ SAVE ].disable( true );
 		buttons[ LOAD ].disable( true );

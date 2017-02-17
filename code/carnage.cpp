@@ -901,7 +901,7 @@ void Carnage::init (bool create, ObjectTypePtr _type)
 		info.explosion.chunkSize = ((ExplosionType *)_type)->chunkSize;
 		info.explosion.timer = ((ExplosionType *)_type)->delayUntilCollidable; 
 			
-		if (stricmp(weaponEffects->GetEffectName(effectId),"NONE") != 0)
+		if (S_stricmp(weaponEffects->GetEffectName(effectId),"NONE") != 0)
 		{
 			//--------------------------------------------------------------
 			// We need to create the GOSFX we need for this explosion here.

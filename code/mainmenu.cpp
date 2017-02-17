@@ -511,7 +511,7 @@ void MainMenu::update()
 			strcpy( name, savePath );
 			strcat( name, LogisticsSaveDialog::instance()->getFileName() );
 			int index = strlen( name ) - 4;
-			if ( stricmp( &name[index], ".fit" ) !=0 ) 
+			if ( S_stricmp( &name[index], ".fit" ) !=0 ) 
 				strcat( name, ".fit" );
 
 			

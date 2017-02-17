@@ -22,7 +22,7 @@ LogisticsData.cpp			: Implementation of the LogisticsData component.
 #include"prefs.h"
 #include"comndr.h"
 #include"missionresults.h"
-#include"zlib.h"
+#include<zlib/zlib.h>
 
 #ifndef VIEWER
 #include"multplyr.h"
@@ -260,7 +260,7 @@ void LogisticsData::initVariants()
 		if ( retVal != 0 )
 			break;
 
-		if ( stricmp( tmpStr, "VEHICLE" ) == 0 )
+		if ( S_stricmp( tmpStr, "VEHICLE" ) == 0 )
 		{
 			float scale;
 			variantFile.readFloat( i, 11, scale );
@@ -272,7 +272,7 @@ void LogisticsData::initVariants()
 			i++;
 			continue;
 		}
-		if ( stricmp( tmpStr, "MECH" ) != 0 )
+		if ( S_stricmp( tmpStr, "MECH" ) != 0 )
 		{
 		
 			float scale;
@@ -1598,7 +1598,7 @@ long LogisticsData::updateAvailability()
 			EString mechName = (*vIter)->getFileName();
 			char realName[1024];
 			_splitpath( mechName, NULL, NULL, realName, NULL );
-			if ( stricmp( realName, chassisFileName ) == 0 )
+			if ( S_stricmp( realName, chassisFileName ) == 0 )
 			{
 				componentCount = 255;
 				bool bRight = true;
@@ -1740,7 +1740,7 @@ void LogisticsData::appendAvailability(const char* pFileName, bool* availableArr
 			EString mechName = (*vIter)->getFileName();
 			char realName[255];
 			_splitpath( mechName, NULL, NULL, realName, NULL );
-			if ( stricmp( realName, chassisFileName ) == 0 )
+			if ( S_stricmp( realName, chassisFileName ) == 0 )
 			{
 				long componentCount = 255;
 				long componentArray[256];
@@ -2010,7 +2010,7 @@ void decryptFile (char *inputFile, char *outputFile)
 	
 		dataFile.read(LZData,lzSize);
 	
-		size_t testSize = fileSize;
+		unsigned long testSize = fileSize;
 		size_t test2Size = LZDecomp(zlibData, LZData, lzSize);
 		if (test2Size != zlibSize) 
 			STOP(("Didn't Decompress to same size as started with!!"));
@@ -2485,7 +2485,7 @@ LogisticsVehicle*	LogisticsData::getVehicle( const char* pName )
 	for ( VEHICLE_LIST::EIterator vIter = vehicles.Begin(); !vIter.IsDone(); vIter++ )
 	{
 		cLoadString( (*vIter)->getNameID(), tmpStr, 255 );
-		if ( stricmp( tmpStr, pName ) == 0 )
+		if ( S_stricmp( tmpStr, pName ) == 0 )
 		{
 			return *vIter;
 		}

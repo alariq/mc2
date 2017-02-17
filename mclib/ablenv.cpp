@@ -10,7 +10,7 @@
 #include<stdio.h>
 #include<stdlib.h>
 #include<string.h>
-#include<string_win.h>
+#include"platform_str.h"
 
 #ifndef ABLGEN_H
 #include"ablgen.h"
@@ -281,7 +281,7 @@ void UserFile::write (const char* s) {
 	//	s[MAX_USER_FILE_LINELEN - 1] = '\0';
 
 	//sprintf(buffer, "%s\n", s);
-	snprintf(buffer, MAX_USER_FILE_LINELEN - 1, "%s\n", s);
+	S_snprintf(buffer, MAX_USER_FILE_LINELEN - 1, "%s\n", s);
 	
     //sebi 
     if (strlen(s) > (MAX_USER_FILE_LINELEN - 1))
@@ -289,6 +289,8 @@ void UserFile::write (const char* s) {
     //
 
 	strncpy(lines[numLines], buffer, MAX_USER_FILE_LINELEN - 1);
+	lines[numLines][MAX_USER_FILE_LINELEN - 1] = '\0';
+
 	numLines++;
 	totalLines++;
 }
@@ -1065,14 +1067,14 @@ SymTableNodePtr ABLModule::findSymbol (const char* symbolName, SymTableNodePtr c
 
 	if (curFunction) {
         char* sn = strdup(symbolName);
-		SymTableNodePtr symbol = searchSymTable(strlwr(sn), curFunction->defn.info.routine.localSymTable);
+		SymTableNodePtr symbol = searchSymTable(S_strlwr(sn), curFunction->defn.info.routine.localSymTable);
         free(sn);
 		if (symbol)
 			return(symbol);
 	}
 
     char* sn = strdup(symbolName);
-    sn = strlwr(sn);
+    sn = S_strlwr(sn);
 
 	SymTableNodePtr symbol = searchSymTable(sn, ModuleRegistry[handle].moduleIdPtr->defn.info.routine.localSymTable);
 

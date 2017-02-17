@@ -10,7 +10,7 @@
 #include<stdio.h>
 #include<stdlib.h>
 #include<string.h>
-#include<string_win.h>
+#include"platform_str.h"
 #include<math.h>
 #include<time.h>
 

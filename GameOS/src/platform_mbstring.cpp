@@ -1,14 +1,14 @@
-#include<mbstring.h>
-#include "string_win.h"
+#ifndef PLATFORM_WINDOWS
+
+#include "platform_mbstring.h"
+#include "platform_str.h"
 
 unsigned char *_mbslwr(
            unsigned char * str
         )
 {
     // only ok for C locale and single byte character set
-    unsigned char* p = str;
-    while ((*p = tolower( *p ))) p++;
-    return str;
+	return S_tolower(str);
 }
 
 // what a stupid signature
@@ -38,3 +38,4 @@ unsigned char *_mbsinc(
     return const_cast<unsigned char*>(current + 1); // sebi !NB
 }
 
+#endif // PLATFORM_WINDOWS

@@ -12,7 +12,7 @@ set(SOURCES ${SOURCES}
     logisticsscreen.cpp
     )
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O0 -ggdb -Wno-unused-local-typedefs")
+#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O0 -ggdb")
 # -Wno-unused-local-typedefs - to disable "typedef was ignored on this declaration"
 
 add_definitions(-D_DEBUG)

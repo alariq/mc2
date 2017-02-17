@@ -176,7 +176,7 @@ DWORD				Mech3DAppearance::numPaintSchemata = 0;
 
 TG_TypeMultiShapePtr Mech3DAppearanceType::SensorSquareShape = NULL;
 
-extern int 	ObjectTextureSize;
+extern int ObjectTextureSize;
 
 #define FOOTPRINT_SLOP			2
 
@@ -1106,7 +1106,7 @@ void Mech3DAppearance::init (AppearanceTypePtr tree, GameObjectPtr obj)
 	
 			if (fileExists(textureName))
 			{
-				if (strnicmp(txmName,"a_",2) == 0)
+				if (S_strnicmp(txmName,"a_",2) == 0)
 				{
 					DWORD gosTextureHandle = mcTextureManager->loadTexture(textureName,gos_Texture_Alpha,gosHint_DisableMipmap | gosHint_DontShrink);
 					sensorTriangleShape->SetTextureHandle(i,gosTextureHandle);
@@ -1144,7 +1144,7 @@ void Mech3DAppearance::init (AppearanceTypePtr tree, GameObjectPtr obj)
 		
 				if (fileExists(textureName))
 				{
-					if (strnicmp(txmName,"a_",2) == 0)
+					if (S_strnicmp(txmName,"a_",2) == 0)
 					{
 						DWORD gosTextureHandle = mcTextureManager->loadTexture(textureName,gos_Texture_Alpha,gosHint_DisableMipmap | gosHint_DontShrink);
 						sensorSquareShape->SetTextureHandle(i,gosTextureHandle);
@@ -1182,7 +1182,7 @@ void Mech3DAppearance::init (AppearanceTypePtr tree, GameObjectPtr obj)
 		
 				if (fileExists(textureName))
 				{
-					if (strnicmp(txmName,"a_",2) == 0)
+					if (S_strnicmp(txmName,"a_",2) == 0)
 					{
 						DWORD gosTextureHandle = mcTextureManager->loadTexture(textureName,gos_Texture_Alpha,gosHint_DisableMipmap | gosHint_DontShrink);
 						sensorSquareShape->SetTextureHandle(i,gosTextureHandle);
@@ -1359,7 +1359,7 @@ void Mech3DAppearance::init (AppearanceTypePtr tree, GameObjectPtr obj)
 
 			if (fileExists(textureName))
 			{
-				if (strnicmp(txmName,"a_",2) == 0)
+				if (S_strnicmp(txmName,"a_",2) == 0)
 				{
 					DWORD gosTextureHandle = mcTextureManager->loadTexture(textureName,gos_Texture_Alpha,gosHint_DisableMipmap | gosHint_DontShrink);
 					gosASSERT(gosTextureHandle != 0xffffffff);
@@ -2909,7 +2909,7 @@ void Mech3DAppearance::setObjStatus (long oStatus)
 		
 				if (fileExists(textureName))
 				{
-					if (strnicmp(txmName,"a_",2) == 0)
+					if (S_strnicmp(txmName,"a_",2) == 0)
 					{
 						DWORD gosTextureHandle = 0;
 						

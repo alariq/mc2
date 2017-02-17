@@ -74,8 +74,7 @@ extern CPrefs prefs;
 #include<mlr/mlr.hpp>
 #include<gosfx/gosfxheaders.hpp>
 
-//sebi
-#include "strings.h"
+#include "platform_str.h"
 
 //------------------------------------------------------------------------------------------------------------
 // MechCmdr2 Global Instances of Things
@@ -662,7 +661,7 @@ void DEBUGWINS_render (void) {
 
 //***************************************************************************
 
-char* GetGameInformation() 
+char* __stdcall GetGameInformation() 
 {
 	return(ExceptionGameMsg);
 }
@@ -674,7 +673,7 @@ DWORD startTime;
 DWORD endTime;
 
 //---------------------------------------------------------------------------
-void UpdateRenderers()
+void __stdcall UpdateRenderers()
 {
 	if (!SnifferMode)
 	{
@@ -823,13 +822,13 @@ Stuff::MemoryStream *effectStream = NULL;
 extern MidLevelRenderer::MLRClipper * theClipper;
 
 bool gameStarted = false;
-void InitializeGameEngine()
+void __stdcall InitializeGameEngine()
 {
     // sebi WTF? do we ned to do it for InitDW?
 	//__asm push esi;
 
 	// gotta have this no matter what
-#ifndef LINUX_BUILD
+#ifdef PLATFORM_WINDOWS
 	gosResourceHandle = gos_OpenResourceDLL("mc2res.dll", NULL, 0);
 #else
 	gosResourceHandle = gos_OpenResourceDLL("./libmc2res.so", NULL, 0);
@@ -954,7 +953,7 @@ void InitializeGameEngine()
 		float doubleClickThreshold = 0.2f;
         //sebi :????
 		//long dragThreshold = .016667;
-		float dragThreshold = .016667;
+		float dragThreshold = .016667f;
 	
 		Environment.Key_Exit=-1; // so escape doesn't kill your app
 	
@@ -968,7 +967,9 @@ void InitializeGameEngine()
 		//if (!maxPathLength)
 		//	strcpy(CDInstallPath,"..\\");
 		// to find necessary files
-		strcpy(CDInstallPath,"../FinalBuild/");
+		//strcpy(CDInstallPath,"../FinalBuild/");
+		// for my windows layout
+		strcpy(CDInstallPath,"./");
 
 		//--------------------------------------------------------------
 		// Start the SystemHeap and globalHeapList
@@ -1056,11 +1057,11 @@ void InitializeGameEngine()
                 // sebi: get user dependent savegame directory
                 char userDataDir[1024] = {0};
                 if(!gos_GetUserDataDirectory(userDataDir, sizeof(userDataDir))) {
-                SPEW(("PATHS", "Failed to get user data directory"));
-                gos_TerminateApplication();
+				    SPEW(("PATHS", "Failed to get user data directory"));
+                    gos_TerminateApplication();
                 }
     
-                snprintf(savePath, sizeof(savePath), "%s" PATH_SEPARATOR "%s" PATH_SEPARATOR, userDataDir, "savegame" );
+                S_snprintf(savePath, sizeof(savePath), "%s" PATH_SEPARATOR "%s" PATH_SEPARATOR, userDataDir, "savegame" );
 
                 SPEW(("SAVELOAD", savePath));
 
@@ -1788,7 +1789,7 @@ void InitializeGameEngine()
 
 //---------------------------------------------------------------------------
 
-void TerminateGameEngine()
+void __stdcall TerminateGameEngine()
 {
 	if (!gameStarted)
 		return;
@@ -2005,7 +2006,7 @@ long enoughCount = 0;
 // No multi-thread now!
 //
 bool DoneSniffing = false;
-void DoGameLogic()
+void __stdcall DoGameLogic()
 {
 	if (!SnifferMode)
 	{
@@ -2433,7 +2434,7 @@ void ParseCommandLine(const char *command_line)
 	i=0;
 	while (i<n_args)
 	{
-		if (stricmp(argv[i],"-mission") == 0)
+		if (S_stricmp(argv[i],"-mission") == 0)
 		{
 			i++;
 			if (i < n_args)
@@ -2473,7 +2474,7 @@ void ParseCommandLine(const char *command_line)
 					strcpy(missionName,argv[i]);
 			}
 		}
-		else if (stricmp(argv[i],"-viewer") == 0)
+		else if (S_stricmp(argv[i],"-viewer") == 0)
 		{
 			i++;
 			if (i < n_args)
@@ -2484,29 +2485,29 @@ void ParseCommandLine(const char *command_line)
 				strcpy(missionName,"mis0101");
 			}
 		}
-		else if (stricmp(argv[i],"-nodialog") == 0)
+		else if (S_stricmp(argv[i],"-nodialog") == 0)
 		{
 			gNoDialogs = true;
 		}
-		else if (stricmp(argv[i],"-sniffer") == 0)
+		else if (S_stricmp(argv[i],"-sniffer") == 0)
 		{
 			SnifferMode = true;
 		}
-		else if (stricmp(argv[i], "-braindead") == 0) {
+		else if (S_stricmp(argv[i], "-braindead") == 0) {
 			i++;
 			if (i < n_args) {
 				long teamID = textToLong(argv[i]);
 				MechWarrior::brainsEnabled[teamID] = false;
 			}
 		}
-		else if (stricmp(argv[i], "-turrets_off") == 0) {
+		else if (S_stricmp(argv[i], "-turrets_off") == 0) {
 			i++;
 			if (i < n_args) {
 				long teamID = textToLong(argv[i]);
 				Turret::turretsEnabled[teamID] = false;
 			}
 		}
-		else if (stricmp(argv[i], "-debugwins") == 0) {
+		else if (S_stricmp(argv[i], "-debugwins") == 0) {
 			i++;
 			if (i < n_args) {
 				long winState = textToLong(argv[i]);
@@ -2525,7 +2526,7 @@ void ParseCommandLine(const char *command_line)
 				}
 			}
 		}
-		else if (stricmp(argv[i], "-objectwins") == 0) {
+		else if (S_stricmp(argv[i], "-objectwins") == 0) {
 			i++;
 			if (i < n_args) {
 				long partNumber = textToLong(argv[i]);
@@ -2533,7 +2534,7 @@ void ParseCommandLine(const char *command_line)
 					GameObjectWindowList[NumGameObjectsToDisplay++] = partNumber;
 			}
 		}
-		else if (stricmp(argv[i], "-debugcells") == 0) {
+		else if (S_stricmp(argv[i], "-debugcells") == 0) {
 			i++;
 			if (i < n_args) {
 				long setting = textToLong(argv[i]);
@@ -2541,65 +2542,65 @@ void ParseCommandLine(const char *command_line)
 					DrawDebugCells = setting;
 			}
 		}
-		else if (stricmp(argv[i], "-nopain") == 0) {
+		else if (S_stricmp(argv[i], "-nopain") == 0) {
 			i++;
 			if (i < n_args) {
 				long teamID = textToLong(argv[i]);
 				Team::noPain[teamID] = true;
 			}
 		}
-		else if (stricmp(argv[i], "-disable") == 0) {
+		else if (S_stricmp(argv[i], "-disable") == 0) {
 			i++;
 			if (i < n_args) {
 				long partID = textToLong(argv[i]);
 				DisableAtStart[NumDisableAtStart++] = partID;
 			}
 		}
-		else if (stricmp(argv[i], "-log") == 0) {
+		else if (S_stricmp(argv[i], "-log") == 0) {
 			i++;
 			initGameLogs = true;
 			if (i < n_args) {
-				if (stricmp(argv[i], "net") == 0)
+				if (S_stricmp(argv[i], "net") == 0)
 					initNetLog = true;
-				if (stricmp(argv[i], "weaponfire") == 0)
+				if (S_stricmp(argv[i], "weaponfire") == 0)
 					initCombatLog = true;
-				if (stricmp(argv[i], "bugs") == 0)
+				if (S_stricmp(argv[i], "bugs") == 0)
 					initBugLog = true;
-				if (stricmp(argv[i], "lrmove") == 0)
+				if (S_stricmp(argv[i], "lrmove") == 0)
 					initLRMoveLog = true;
 			}
 		}
-		else if (stricmp(argv[i], "-show") == 0) {
+		else if (S_stricmp(argv[i], "-show") == 0) {
 			i++;
 			if (i < n_args) {
-				if (stricmp(argv[i], "movers") == 0)
+				if (S_stricmp(argv[i], "movers") == 0)
 					ShowMovers = true;
 			}
 		}
-		else if (stricmp(argv[i], "-goalplan") == 0) {
+		else if (S_stricmp(argv[i], "-goalplan") == 0) {
 			i++;
 			if (i < n_args) {
-				if (stricmp(argv[i], "enemies") == 0)
+				if (S_stricmp(argv[i], "enemies") == 0)
 					EnemiesGoalPlan = true;
 			}
 		}
-		else if (stricmp(argv[i], "-killambient") == 0) {
+		else if (S_stricmp(argv[i], "-killambient") == 0) {
 			KillAmbientLight = true;
 		}
-		else if (stricmp(argv[i], "-movegoals") == 0) {
+		else if (S_stricmp(argv[i], "-movegoals") == 0) {
 			i++;
 			if (i < n_args)
 				MaxMoveGoalChecks = textToLong(argv[i]);
 		}
-		else if (stricmp(argv[i], "-rps") == 0) {
+		else if (S_stricmp(argv[i], "-rps") == 0) {
 			i++;
 			if (i < n_args)
 				MaxResourcePoints = textToLong(argv[i]);
 		}
-		else if (stricmp(argv[i], "-registerzone") == 0) {
+		else if (S_stricmp(argv[i], "-registerzone") == 0) {
 			MultiPlayer::registerZone = true;
 		}
-		else if (stricmp(argv[i], "-dropzones") == 0) {
+		else if (S_stricmp(argv[i], "-dropzones") == 0) {
 			i++;
 			if (i < n_args) {
 				long numPlayers = strlen(argv[i]);
@@ -2618,7 +2619,7 @@ bool notFirstTime = false;
 //
 // Setup the GameOS structure -- This tells GameOS what I am using
 //
-void GetGameOSEnvironment(const char* CommandLine )
+void __stdcall GetGameOSEnvironment(const char* CommandLine )
 {
 	ParseCommandLine(CommandLine);
 

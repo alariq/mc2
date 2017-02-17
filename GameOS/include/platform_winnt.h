@@ -7,7 +7,7 @@
 extern "C" {
 #endif
 
-#include "winerror.h"
+#include "platform_winerror.h"
 
 #ifndef RC_INVOKED
 #include <string.h>
@@ -157,7 +157,7 @@ typedef WORD FSHORT;
 typedef DWORD FLONG;
 
 #define NTAPI __stdcall
-#include "basetsd.h"
+#include "platform_basetsd.h"
 
 #define FILE_ATTRIBUTE_READONLY			0x00000001
 #define FILE_ATTRIBUTE_HIDDEN			0x00000002

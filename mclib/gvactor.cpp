@@ -78,7 +78,7 @@ extern long 	mechRGBLookup2[];
 
 extern bool 	useShadows;
 
-extern int 	ObjectTextureSize;
+extern int		ObjectTextureSize;
 TG_TypeMultiShapePtr GVAppearanceType::SensorTriangleShape = NULL;
 TG_TypeMultiShapePtr GVAppearanceType::SensorCircleShape = NULL;
 
@@ -756,7 +756,7 @@ void GVAppearance::init (AppearanceTypePtr tree, GameObjectPtr obj)
 
 			if (fileExists(textureName))
 			{
-				if (strnicmp(txmName,"a_",2) == 0)
+				if (S_strnicmp(txmName,"a_",2) == 0)
 				{
 					DWORD gosTextureHandle = 0;
 					
@@ -818,7 +818,7 @@ void GVAppearance::init (AppearanceTypePtr tree, GameObjectPtr obj)
 		
 				if (fileExists(textureName))
 				{
-					if (strnicmp(txmName,"a_",2) == 0)
+					if (S_strnicmp(txmName,"a_",2) == 0)
 					{
 						DWORD gosTextureHandle = mcTextureManager->loadTexture(textureName,gos_Texture_Alpha,gosHint_DisableMipmap | gosHint_DontShrink);
 						gosASSERT(gosTextureHandle != 0xffffffff);
@@ -860,7 +860,7 @@ void GVAppearance::init (AppearanceTypePtr tree, GameObjectPtr obj)
 	
 			if (fileExists(textureName))
 			{
-				if (strnicmp(txmName,"a_",2) == 0)
+				if (S_strnicmp(txmName,"a_",2) == 0)
 				{
 					DWORD gosTextureHandle = mcTextureManager->loadTexture(textureName,gos_Texture_Alpha,gosHint_DisableMipmap | gosHint_DontShrink);
 					sensorTriangleShape->SetTextureHandle(i,gosTextureHandle);
@@ -896,7 +896,7 @@ void GVAppearance::init (AppearanceTypePtr tree, GameObjectPtr obj)
 	
 			if (fileExists(textureName))
 			{
-				if (strnicmp(txmName,"a_",2) == 0)
+				if (S_strnicmp(txmName,"a_",2) == 0)
 				{
 					DWORD gosTextureHandle = mcTextureManager->loadTexture(textureName,gos_Texture_Alpha,gosHint_DisableMipmap | gosHint_DontShrink);
 					sensorCircleShape->SetTextureHandle(i,gosTextureHandle);
@@ -1066,7 +1066,7 @@ void GVAppearance::setObjStatus (long oStatus)
 	
 			if (fileExists(textureName))
 			{
-				if (strnicmp(txmName,"a_",2) == 0)
+				if (S_strnicmp(txmName,"a_",2) == 0)
 				{
 					DWORD gosTextureHandle = 0;
 					
@@ -1291,7 +1291,7 @@ void GVAppearance::resetPaintScheme (DWORD red, DWORD green, DWORD blue)
 	
 	if (fileExists(textureName))
 	{
-		if (strnicmp(txmName,"a_",2) == 0)
+		if (S_strnicmp(txmName,"a_",2) == 0)
 		{
 			DWORD textureInstanceAlreadyExists = mcTextureManager->textureInstanceExists(textureName,gos_Texture_Solid,gosHint_DisableMipmap | gosHint_DontShrink,paintInstance);
 			if (!textureInstanceAlreadyExists)
@@ -1784,7 +1784,7 @@ bool GVAppearance::recalcBounds (void)
 
 								if (fileExists(textureName))
 								{
-									if (strnicmp(txmName,"a_",2) == 0)
+									if (S_strnicmp(txmName,"a_",2) == 0)
 									{
 										DWORD gosTextureHandle = mcTextureManager->loadTexture(textureName,gos_Texture_Alpha,gosHint_DisableMipmap | gosHint_DontShrink);
 										gosASSERT(gosTextureHandle != 0xffffffff);
@@ -1837,7 +1837,7 @@ bool GVAppearance::recalcBounds (void)
 										
 								if (fileExists(textureName))
 								{
-									if (strnicmp(txmName,"a_",2) == 0)
+									if (S_strnicmp(txmName,"a_",2) == 0)
 									{
 										localTextureHandle = mcTextureManager->loadTexture(textureName,gos_Texture_Alpha,gosHint_DisableMipmap | gosHint_DontShrink,true);
 										gosASSERT(localTextureHandle != 0xffffffff);

@@ -369,7 +369,7 @@ void MPGameBrowser::update()
 			{
 
 				aGameListItem* pItem = (aGameListItem*)gameList.GetItem( j );
-				int res = stricmp( pItem->getText( sortOrder ), items[i].getText( sortOrder ) );
+				int res = S_stricmp( pItem->getText( sortOrder ), items[i].getText( sortOrder ) );
 				if ( (bSortUpward && res > 0) || (!bSortUpward && res < 0) )
 				{
 					gameList.InsertItem( &items[i], j );

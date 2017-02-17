@@ -204,9 +204,7 @@
 #include<stdlib.h>
 #include<stddef.h>
 #include<ctype.h>
-#ifdef LINUX_BUILD
-#include"string_win.h"
-#endif
+#include"platform_str.h"
 
 
 //---------------------------------------------------------------------------------------

@@ -398,7 +398,7 @@ void OptionsGraphics::init(long xOffset, long yOffset)
         gos_GetDisplayModeByIndex(displayIndex, i, &resolutionModes[i].xRes, &resolutionModes[i].yRes, &resolutionModes[i].bitDepth);
 
         resolutionModesStr[i] = new char[256];
-        snprintf(resolutionModesStr[i], 256, "%dx%dx%d", resolutionModes[i].xRes, resolutionModes[i].yRes, resolutionModes[i].bitDepth);
+        S_snprintf(resolutionModesStr[i], 256, "%dx%dx%d", resolutionModes[i].xRes, resolutionModes[i].yRes, resolutionModes[i].bitDepth);
         resolutionList.AddItem( resolutionModesStr[i], 0xffffffff );
     }
 

@@ -37,11 +37,18 @@ typedef unsigned char byte;
 #define PI				3.1415926535897932384626433832795
 
 // !NB sebi
-//typedef unsigned long DWORD;
-typedef unsigned int DWORD;
+#ifndef PLATFORM_WINDOWS
+typedef uint32_t DWORD;
+typedef uint32_t UINT;
+typedef uint8_t BYTE;
+typedef void *PVOID;
+#else
+typedef unsigned long DWORD; // sizeof(long) is 32bit on both 32bit and 64 bit Visual C++ compilers 
 typedef unsigned int UINT;
 typedef unsigned char BYTE;
 typedef void *PVOID;
+#endif
+
 //--------------------------------------------------------------------------
 // Macro Definitions
 #define NONE -1

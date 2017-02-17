@@ -8527,7 +8527,7 @@ bool MechWarrior::warriorInUse (char *warriorName)
 {
 	for (long i=0; i < numWarriors;i++)
 	{
-		if (stricmp(MechWarrior::warriorList[i]->name,warriorName) == 0)
+		if (S_stricmp(MechWarrior::warriorList[i]->name,warriorName) == 0)
 			return true;
 	}
 

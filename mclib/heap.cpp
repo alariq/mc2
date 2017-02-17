@@ -30,9 +30,7 @@
 #include<tchar.h>
 #endif
 
-#include<stdio.h>             // For sprintf
-#include<string.h>            // For strchr
-#include"string_win.h" 
+#include"platform_str.h" 
 
 //---------------------------------------------------------------------------
 // Static Globals
@@ -2011,7 +2009,7 @@ long getStringFromMap (File &mapFile, unsigned long addr, char *result)
 	
 	while (strstr(mapFileLine,"0001:") != NULL)
 	{
-		if (strnicmp(currentAddress,actualAddr,8) > 0)
+		if (S_strnicmp(currentAddress,actualAddr,8) > 0)
 		{
 			//-----------------------------------------------
 			// We've found it, print the previous address.

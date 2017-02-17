@@ -23,10 +23,11 @@ set(SOURCES ${SOURCES}
     utils/shader_builder.cpp
     utils/matrix.cpp
     utils/vec.cpp
+    utils/timing.cpp
+    utils/string_utils.cpp
     )
 # add -Wall sometime later
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O0 -ggdb -Wno-unused-local-typedefs -Wunused-variable -std=c++0x -Wno-unknown-warning-option")
-# -Wno-unused-local-typedefs - to disable "typedef was ignored on this declaration"
+#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O0 -ggdb")
 
 add_definitions(-D_DEBUG)
 add_definitions(-D_ARMOR)

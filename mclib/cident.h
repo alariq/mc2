@@ -20,8 +20,9 @@
 #include"dident.h"
 #endif
 
-#include<string.h>
-#include "string_win.h"
+#include "memfunc.h"
+#include <string.h>
+#include"platform_str.h"
 
 //---------------------------------------------------------------------------
 // Externs
@@ -41,7 +42,7 @@ class IDString
 
 		void init (void)
 		{
-			memset(id,0,ID_SIZE);
+			MemSet(id,0);
 		}
 
 		void init (const char *new_id)
@@ -185,7 +186,7 @@ class IDString
 
 		void standardize (void)
 		{
-			strupr(id);
+			S_strupr(id);
 		}
 };
 

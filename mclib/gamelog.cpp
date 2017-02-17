@@ -23,7 +23,7 @@
 #include<malloc.h>
 #include<stdlib.h>
 #include<stdio.h>
-#include<string.h>
+#include"platform_str.h"
 #include<gameos.hpp>
 
 bool isSetup = false;
@@ -108,13 +108,15 @@ void GameLog::write (const char* s) {
 	//	s[MAX_GAMELOG_LINELEN - 1] = '\0';
 
 	//sprintf(buffer, "%s\n", s);
-	snprintf(buffer, MAX_GAMELOG_LINES-1, "%s\n", s);
+	S_snprintf(buffer, MAX_GAMELOG_LINES-1, "%s\n", s);
 
     // sebi
 	if (strlen(s) > (MAX_GAMELOG_LINELEN - 1))
 		buffer[MAX_GAMELOG_LINELEN - 1] = '\0';
     //
 	strncpy(lines[numLines], buffer, MAX_GAMELOG_LINELEN - 1);
+	lines[numLines][MAX_GAMELOG_LINELEN - 1] = '\0';
+
 	numLines++;
 	totalLines++;
 }

@@ -41,19 +41,20 @@
 #include<string.h>
 #include<io.h>
 #include<ctype.h>
+#include<errno.h>
 
-#include<windows.h>
+#include "platform_windows.h"
 
-#ifndef _MBCS
+//#ifndef _MBCS
 #include<gameos.hpp>
-#else
-#include<assert.h>
-#define gosASSERT assert
-#define gos_Malloc malloc
-#define gos_Free free
-#endif
+//#else
+//#include<assert.h>
+//#define gosASSERT assert
+//#define gos_Malloc malloc
+//#define gos_Free free
+//#endif
 
-#include "string_win.h"
+#include "platform_str.h"
 
 //-----------------
 // Static Variables
@@ -226,7 +227,8 @@ long File::open (const char* fName, FileMode _mode, long numChild, bool doNotLow
 
 	if (fileMode == CREATE)
 	{
-		handle = _creat(fileName,_S_IWRITE);
+		// sebi: changed _creat to this, because otherwise non binary file is created which is wrong
+		handle = _open(fileName, _O_CREAT | _O_TRUNC | _O_BINARY | _O_RDWR, _S_IREAD | _S_IWRITE);
 		if (handle == INVALID_HANDLE_VALUE)
 		{
 			lastError = errno;
@@ -235,9 +237,11 @@ long File::open (const char* fName, FileMode _mode, long numChild, bool doNotLow
 	}
 	else
 	{
+		// sebi: add this check because we do not use fileMode and for some reason assume that it is read only
+		gosASSERT(fileMode == READ);
 		//----------------------------------------------------------------
 		//-- First, see if file is in normal place.  Useful for patches!!
-		handle = _open(fileName,_O_RDONLY);
+		handle = _open(fileName,_O_RDONLY | _O_BINARY);
 
 		//------------------------------------------
 		//-- Next, see if file is in fastFile.

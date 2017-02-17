@@ -1,3 +1,5 @@
+#ifndef PLATFORM_WINDOWS
+
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
@@ -15,9 +17,9 @@
 #include <stdlib.h> // free
 #include <stdio.h> // free
 
-#include"windows.h"
-#include"string.h"
-#include"wchar.h"
+#include"platform_windows.h"
+#include"platform_string.h"
+#include"platform_wchar.h"
 
 static int gGetLastError = 0;
 
@@ -371,6 +373,7 @@ BOOL WINAPI FindClose(HANDLE hFindFile)
 }
 
 
+#endif // PLATFORM_WINDOWS
 
 
 
