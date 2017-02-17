@@ -711,9 +711,9 @@ long FitIniFile::byteToTextHex (char *result, byte num, unsigned long bufLen)
 }	
 
 //---------------------------------------------------------------------------
-long FitIniFile::open (const char* fName, FileMode _mode, long numChild)
+long FitIniFile::open (const char* fName, FileMode _mode, long numChild, bool doNotLower)
 {
-	long result = File::open(fName,_mode,numChild);
+	long result = File::open(fName,_mode,numChild, doNotLower);
 	if (result != NO_ERR)
 		return(result);
 		

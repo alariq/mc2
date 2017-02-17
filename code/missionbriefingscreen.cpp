@@ -642,7 +642,10 @@ void MissionBriefingScreen::end()
 {
 //	statics[MAP_INDEX].setTexture( (long)0 );
 // 	statics[MAP_INDEX].setColor( 0 );
+
+	camera.pushContext();
 	camera.setMech( NULL );
+	camera.popContext();
 
 }
 

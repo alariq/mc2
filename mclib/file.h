@@ -145,7 +145,7 @@ class File
 
 			bool eof (void);
 
-			virtual long open ( const char* fName, FileMode _mode = READ, long numChildren = 50);
+			virtual long open ( const char* fName, FileMode _mode = READ, long numChildren = 50, bool doNotLower = false);
 			virtual long open( const char* buffer, int bufferLength ); // for streaming from memory
 
 			virtual long create (const char* fName);

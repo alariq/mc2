@@ -40,13 +40,23 @@ void __stdcall gos_GetMouseInfo( float* pXPosition, float* pYPosition, int* pXDe
         *pYPosition = g_mouse_info.y_ / h;
 
 	// as percentage of screen size
+    
+    // sebi: I do not like this percentage style and it does not work good, so
+    /*
     if(pXDelta)
-        *pXDelta = (int)(100.0f * clamp(g_mouse_info.rel_x_ / w, 0.0f, 1.0f));
+        *pXDelta = (int)(100.0f * clamp(g_mouse_info.rel_x_ / w, -1.0f, 1.0f));
     if(pYDelta)
-        *pYDelta = (int)(100.0f * clamp(g_mouse_info.rel_y_ / h, 0.0f, 1.0f));
+        *pYDelta = (int)(100.0f * clamp(g_mouse_info.rel_y_ / h, -1.0f, 1.0f));
+        */
+    if(pXDelta)
+        *pXDelta = (int)(clamp(g_mouse_info.rel_x_, -w, w));
+    if(pYDelta)
+        *pYDelta = (int)(clamp(g_mouse_info.rel_y_, -h, h));
 
+    //if(pWheelDelta)
+    //  *pWheelDelta = (int)(100.0f * (g_mouse_info.wheel_vert_ / h));
     if(pWheelDelta)
-        *pWheelDelta = (int)(100.0f * (g_mouse_info.wheel_vert_ / h));
+        *pWheelDelta = (int)(g_mouse_info.wheel_vert_);
 
     if(pButtonsPressed) {
         DWORD bs = 0;
@@ -287,11 +297,40 @@ DWORD __stdcall gos_GetKey()
         SDL_Keycode kc = SDL_GetKeyFromScancode(sc);
         unsigned char c = 0;
         // check if it represents a character:
-        if(!(kc & 0x40000000)) {
-            // this is UTF-8 string
-            const char* key_name = SDL_GetKeyName(kc);
-            if(strlen(key_name) == 1) { // additional check
-                c = (unsigned char)key_name[0];
+        if(!(kc & SDLK_SCANCODE_MASK) && isascii(kc)) {
+            c = (unsigned char)kc;
+
+            // this is all hardcodede crap, mayeb will fix it later
+
+            const bool caps_pressed = g_keyboard_info.last_state_[SDL_SCANCODE_CAPSLOCK];
+            const bool shift_pressed = (g_keyboard_info.last_state_[SDL_SCANCODE_LSHIFT] || g_keyboard_info.last_state_[SDL_SCANCODE_RSHIFT]);
+            const bool register_mod = caps_pressed ^ shift_pressed; 
+            if(c >= SDLK_a && c<=SDLK_z && register_mod)
+            {
+                c-=32;
+            }
+            else if(register_mod)
+            {
+                switch(c)
+                {
+                    case SDLK_0:        c = SDLK_RIGHTPAREN; break;
+                    case SDLK_1:        c = SDLK_EXCLAIM; break;
+                    case SDLK_2:        c = SDLK_AT; break;
+                    case SDLK_3:        c = SDLK_HASH; break;
+                    case SDLK_4:        c = SDLK_DOLLAR; break;
+                    case SDLK_5:        c = 37; break; // %
+                    case SDLK_6:        c = SDLK_COLON; break;
+                    case SDLK_7:        c = SDLK_AMPERSAND; break;
+                    case SDLK_8:        c = SDLK_ASTERISK; break;
+                    case SDLK_9:        c = SDLK_LEFTPAREN; break;
+                    case SDLK_EQUALS:   c = SDLK_PLUS; break;
+                    case SDLK_MINUS:    c = SDLK_UNDERSCORE; break;
+                    case SDLK_COMMA:    c = SDLK_LESS; break;
+                    case SDLK_PERIOD:   c = SDLK_GREATER; break;
+                    case SDLK_SLASH:    c = SDLK_QUESTION; break;
+                    case SDLK_BACKSLASH:c = '|'; break;
+                    default: break;
+                }
             }
         }
 

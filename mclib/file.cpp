@@ -208,7 +208,7 @@ bool File::eof (void)
 }
 
 //---------------------------------------------------------------------------
-long File::open (const char* fName, FileMode _mode, long numChild)
+long File::open (const char* fName, FileMode _mode, long numChild, bool doNotLower)
 {
 	gosASSERT( !isOpen() );
 	//-------------------------------------------------------------
@@ -221,7 +221,8 @@ long File::open (const char* fName, FileMode _mode, long numChild)
 	fileMode = _mode;
 	//_fmode = _O_BINARY;
 
-	_strlwr(fileName);
+    if(!doNotLower)
+	    _strlwr(fileName);
 
 	if (fileMode == CREATE)
 	{

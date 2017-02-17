@@ -262,6 +262,9 @@ bool Image::loadBMP(FILE* file)
 		return false;
 	}
 
+    // seek to start of image data
+    fseek(file, header.bfOffBits, SEEK_SET);
+
 	width    = header.biWidth;
 	height   = header.biHeight;
 

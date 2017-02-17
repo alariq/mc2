@@ -190,10 +190,10 @@ class UserInput
 		float mouseXPosition;					//Current Mouse X Position.
 		float mouseYPosition;					//Current Mouse Y position.
 
-		long mouseXDelta;						//Amount mouse has moved in x since last poll
-		long mouseYDelta;						//Amount mouse has moved in y since last poll
+		int mouseXDelta;						//Amount mouse has moved in x since last poll
+		int mouseYDelta;						//Amount mouse has moved in y since last poll
 
-		long mouseWheelDelta;					//Amount Mouse wheel has moved since last poll
+		int mouseWheelDelta;					//Amount Mouse wheel has moved since last poll
 
 		long leftMouseButtonState;				//Mouse Current Left Button State
 		long rightMouseButtonState;				//Mouse Current Right Button State

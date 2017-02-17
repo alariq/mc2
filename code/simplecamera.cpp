@@ -11,6 +11,9 @@ SimpleCamera.cpp	: Implementation of the SimpleCamera component.
 #include"mission.h"
 #include"bdactor.h"
 
+// sebi: !NB remove when assert(0 && "test") is removed below
+#include <cassert>
+
 extern bool useShadows;
 extern bool drawOldWay;
 extern bool useFog;
@@ -54,7 +57,10 @@ SimpleCamera::~SimpleCamera()
 	if ( appearanceTypeList && appearanceTypeList->pointerCanBeDeleted(pObject) )
 		delete pObject;
     */
-    delete pObject;
+
+	// sebi: added this condition ecause  appearanceTypeList used inside destructor
+	if (appearanceTypeList)
+    	delete pObject;
 
 	pObject = NULL;
 
@@ -300,7 +306,9 @@ void SimpleCamera::setMech(const char* fileName, long baseColor, long highlight1
 	if ( appearanceTypeList && appearanceTypeList->pointerCanBeDeleted(pObject) )
 		delete pObject;
         */
-    delete pObject;
+	// sebi: added this conition ecause  appearanceTypeList used inside destructor
+	if (appearanceTypeList)
+		delete pObject;
 
 
 	if ( !appearanceTypeList )
@@ -371,7 +379,10 @@ void SimpleCamera::setVehicle(const char* fileName,long base, long highlight, lo
 	if ( appearanceTypeList && appearanceTypeList->pointerCanBeDeleted(pObject) )
 		delete pObject;
         */
-    delete pObject;
+  
+	// sebi: added this conition ecause  appearanceTypeList used inside destructor
+	if (appearanceTypeList)
+    	delete pObject;
 
 	pObject = NULL;
 
@@ -434,7 +445,10 @@ void SimpleCamera::setComponent(const char* fileName )
 	if ( appearanceTypeList && appearanceTypeList->pointerCanBeDeleted(pObject) )
 		delete pObject;
         */
-    delete pObject;
+
+	// sebi: added this conition ecause  appearanceTypeList used inside destructor
+	if (appearanceTypeList)
+    	delete pObject;
 
 	pObject = NULL;
 
@@ -492,6 +506,7 @@ void SimpleCamera::setObject( const char* pFileName, long type, long base, long 
 {
 	if ( !pFileName || !strlen( pFileName ) )
 	{
+		assert(0 && "SimpleCamera::setObject");// sebi: check if we go here
 		if ( appearanceTypeList && appearanceTypeList->pointerCanBeDeleted(pObject) )
 			delete pObject;
 

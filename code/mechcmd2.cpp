@@ -1050,8 +1050,20 @@ void InitializeGameEngine()
 				result = systemFile->readIdString("fontPath",fontPath,79);
 				gosASSERT(result == NO_ERR);
 	
-				result = systemFile->readIdString("savePath",savePath,79);
-				gosASSERT(result == NO_ERR);
+				//result = systemFile->readIdString("savePath",savePath,79);
+				//gosASSERT(result == NO_ERR);
+
+                // sebi: get user dependent savegame directory
+                char userDataDir[1024] = {0};
+                if(!gos_GetUserDataDirectory(userDataDir, sizeof(userDataDir))) {
+                SPEW(("PATHS", "Failed to get user data directory"));
+                gos_TerminateApplication();
+                }
+    
+                snprintf(savePath, sizeof(savePath), "%s" PATH_SEPARATOR "%s" PATH_SEPARATOR, userDataDir, "savegame" );
+
+                SPEW(("SAVELOAD", savePath));
+
 	
 				result = systemFile->readIdString("spritePath",spritePath,79);
 				gosASSERT(result == NO_ERR);

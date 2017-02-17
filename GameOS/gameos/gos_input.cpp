@@ -64,6 +64,11 @@ void handleMouseWheel(const SDL_Event* event, MouseInfo* mi) {
     */
 }
 
+void beginUpdateMouseState(MouseInfo* mi) {
+    mi->rel_x_ = mi->rel_y_ = 0.0f;
+    mi->wheel_hor_ = mi->wheel_vert_ = 0.0f;
+}
+
 void updateMouseState(MouseInfo* mi) {
     assert(mi);
 
