@@ -44,7 +44,7 @@
 // EXTERNALS
 
 extern int32_t          level;
-extern int32_t 		CallStackLevel;
+extern int32_t          CallStackLevel;
 extern int              execLineNumber;
 extern int              execStatementCount;
 extern char*			codeSegmentPtr;

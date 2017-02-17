@@ -26,6 +26,7 @@ GLuint getNativeBlendMode(BlendMode bm) {
 	switch(bm)
 	{
 		case BM_ADD:
+		default:
 			return GL_FUNC_ADD_EXT;
 		case BM_SUBTRACT:
 			return GL_FUNC_SUBTRACT_EXT;

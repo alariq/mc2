@@ -685,6 +685,11 @@ LONG VFX_line_draw (PANE *panep, LONG x0, LONG y0,
                                  LONG x1, LONG y1, LONG mode, LONG parm)
 
 {
+
+	long	lineResult = 0;
+#ifdef LINUX_BUILD
+	assert(0 && "VFX_line_draw is not implemented");
+#else
 	long _dx, absdx, sgndx;
 	long _dy, absdy, sgndy;
 	long sgndxdy, slope;
@@ -702,10 +707,7 @@ LONG VFX_line_draw (PANE *panep, LONG x0, LONG y0,
 	long		_CX;	//Window x coord. = Pane x coord. + CP_CX
 	long		_CY;	//Window y coord. = Pane x coord. + CP_CY
 
-	long		lineResult;
 
-#ifdef LINUX_BUILD
-#else
 	__asm
 	{
 		cld
@@ -2643,6 +2645,10 @@ exit:
 
 LONG VFX_pixel_write (PANE *panep, LONG x, LONG y, ULONG color)
 {
+		int result = 0;
+#ifdef LINUX_BUILD
+	assert(0 && "VFX_pixel_write is not implemented");
+#else
 		long		_L;	//Leftmost pixel in Window coord.
 		long		_T;	//Top
 		long		_R;	//Right
@@ -2654,10 +2660,7 @@ LONG VFX_pixel_write (PANE *panep, LONG x, LONG y, ULONG color)
 		long		_CX;	//Window x coord. = Pane x coord. + CP_CX
 		long		_CY;	//Window y coord. = Pane x coord. + CP_CY
 
-		int result = 0;
 		
-#ifdef LINUX_BUILD
-#else
 		__asm
 			{
 				cld
@@ -2851,6 +2854,10 @@ ReturnOffPane:
 
 LONG VFX_pixel_read (PANE *panep, LONG x, LONG y)
 {
+		int result = 0;
+#ifdef LINUX_BUILD
+	assert(0 && "VFX_line_draw is not implemented");
+#else
 		long		_L;	//Leftmost pixel in Window coord.
 		long		_T;	//Top
 		long		_R;	//Right
@@ -2862,10 +2869,7 @@ LONG VFX_pixel_read (PANE *panep, LONG x, LONG y)
 		long		_CX;	//Window x coord. = Pane x coord. + CP_CX
 		long		_CY;	//Window y coord. = Pane x coord. + CP_CY
 
-		int result = 0;
 		
-#ifdef LINUX_BUILD
-#else
 		__asm
 			{
 				cld

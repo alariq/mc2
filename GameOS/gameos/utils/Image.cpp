@@ -157,7 +157,7 @@ bool Image::loadTGA(const unsigned char* mem, size_t len)
         len -= header.descLen;
     }
 
-	int pixelSize = header.bpp / 8;
+	unsigned int pixelSize = header.bpp / 8;
 	int size = header.width * header.height * pixelSize;
 
     assert(len >= header.width * header.height * pixelSize);

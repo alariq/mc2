@@ -2168,6 +2168,7 @@ void Mover::set (Mover copy) {
 	velocity = copy.velocity;
 	rotation = copy.rotation;
 	strncpy(name, copy.name, MAXLEN_MOVER_NAME - 1);
+	name[MAXLEN_MOVER_NAME - 1] = '\0'; 
 	chassis = copy.chassis;
 	damageRateTally = copy.damageRateTally;
 	damageRateCheckTime = copy.damageRateCheckTime;

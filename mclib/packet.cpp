@@ -20,16 +20,16 @@
 #include"lz.h"
 #endif
 
-#include"zlib.h"
+#include<zlib/zlib.h>
 
-#ifndef _MBCS
+//#ifndef _MBCS
 #include<gameos.hpp>
-#else
-#include<assert.h>
-#define gosASSERT assert
-#define gos_Malloc malloc
-#define gos_Free free
-#endif
+//#else
+//#include<assert.h>
+//#define gosASSERT assert
+//#define gos_Malloc malloc
+//#define gos_Free free
+//#endif
 
 #include<string.h>
 //---------------------------------------------------------------------------
@@ -307,7 +307,7 @@ int PacketFile::readPacket (int packet, unsigned char *buffer)
 						gosASSERT(LZPacketBuffer);
 					}
 						
-					if ((unsigned int)LZPacketBufferSize < packetSize)
+					if ((int)LZPacketBufferSize < packetSize)
 					{
 						LZPacketBufferSize = packetSize;
 						
@@ -340,7 +340,7 @@ int PacketFile::readPacket (int packet, unsigned char *buffer)
 						gosASSERT(LZPacketBuffer);
 					}
 						
-					if ((unsigned int)LZPacketBufferSize < packetSize)
+					if ((int)LZPacketBufferSize < packetSize)
 					{
 						LZPacketBufferSize = packetSize;
 						
@@ -714,7 +714,7 @@ int PacketFile::insertPacket (int packet, MemoryPtr buffer, unsigned int nbytes,
 	
 	tmpFile.reserve(numPackets);
 		
-	for (unsigned int i=0;i<numPackets;i++)
+	for (int i=0;i<numPackets;i++)
 	{
 		if (i == packet)
 		{

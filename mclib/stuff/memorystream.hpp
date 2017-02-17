@@ -204,18 +204,18 @@ namespace MemoryStreamIO {
 	inline Stuff::MemoryStream&
 		Read(
 			Stuff::MemoryStream* stream,
-			unsigned long *output
+			uint64_t*output
 		);
 
 	inline Stuff::MemoryStream&
 		Read(
 			Stuff::MemoryStream* stream,
-			long *output
+			int64_t *output
 		);
 	inline Stuff::MemoryStream&
 		Read(
 			Stuff::MemoryStream* stream,
-			DWORD *output
+			uint32_t *output
 		);
 	inline Stuff::MemoryStream&
 		Write(
@@ -251,17 +251,17 @@ namespace MemoryStreamIO {
 	inline Stuff::MemoryStream&
 		Write(
 			Stuff::MemoryStream* stream,
-			const unsigned long*input
+			const uint64_t* input
 		);
 	inline Stuff::MemoryStream&
 		Write(
 			Stuff::MemoryStream* stream,
-			const long *input
+			const int64_t *input
 		);
 	inline Stuff::MemoryStream&
 		Write(
 			Stuff::MemoryStream* stream,
-			const DWORD *input
+			const uint32_t *input
 		);
 	inline Stuff::MemoryStream&
 		Write(
@@ -755,7 +755,7 @@ namespace MemoryStreamIO {
 	inline Stuff::MemoryStream&
 		Read(
 			Stuff::MemoryStream* stream,
-			DWORD *output
+			uint32_t *output
 		)
 			{return stream->ReadBytes(output, sizeof(*output));}
 
@@ -815,7 +815,7 @@ namespace MemoryStreamIO {
 	inline Stuff::MemoryStream&
 		Write(
 			Stuff::MemoryStream* stream,
-			const DWORD *input
+			const uint32_t *input
 		)
 			{return stream->WriteBytes(input, sizeof(*input));}
 

@@ -27,14 +27,14 @@
 #include<string.h>
 #include<ctype.h>
 
-#ifndef _MBCS
+//#ifndef _MBCS
 #include<gameos.hpp>
-#else
-#include<assert.h>
-#define gosASSERT assert
-#define gos_Malloc malloc
-#define gos_Free free
-#endif
+//#else
+//#include<assert.h>
+//#define gosASSERT assert
+//#define gos_Malloc malloc
+//#define gos_Free free
+//#endif
 
 //---------------------------------------------------------------------------
 // Static Globals

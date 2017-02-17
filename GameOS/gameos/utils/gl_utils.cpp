@@ -13,10 +13,10 @@
 
 uint32_t vec4_to_uint32(const vec4& v) {
 
-    uint32_t x = clamp(v.x, 0.0f, 1.0f) * 255.0f;
-    uint32_t y = clamp(v.y, 0.0f, 1.0f) * 255.0f;
-    uint32_t z = clamp(v.z, 0.0f, 1.0f) * 255.0f;
-    uint32_t w = clamp(v.w, 0.0f, 1.0f) * 255.0f;
+    uint32_t x = (uint32_t)(clamp(v.x, 0.0f, 1.0f) * 255.0f);
+    uint32_t y = (uint32_t)(clamp(v.y, 0.0f, 1.0f) * 255.0f);
+    uint32_t z = (uint32_t)(clamp(v.z, 0.0f, 1.0f) * 255.0f);
+    uint32_t w = (uint32_t)(clamp(v.w, 0.0f, 1.0f) * 255.0f);
 
     uint32_t res = x | (y<<8) | (z<<16) | (w<<24);
     return res;
@@ -344,7 +344,7 @@ void draw_in_2d(int w, int h, render_func_t prenderfunc, void* puserdata)
 	glMatrixMode(GL_PROJECTION);
 	glPushMatrix();
 	glLoadIdentity();
-    mat4 ortho_proj = orthoMatrix(0, w, h, 0, -1.0f, 1.0f, false);
+    mat4 ortho_proj = orthoMatrix(0, (float)w, (float)h, 0, -1.0f, 1.0f, false);
 	//gluOrtho2D(0, w, 0, h);
     glLoadTransposeMatrixf((const float*)ortho_proj);
 	glMatrixMode(GL_MODELVIEW);
@@ -367,6 +367,7 @@ GLuint makeBuffer(GLenum target, const GLvoid* buffer_data, GLsizei buffer_size,
 	glBindBuffer(target, buffer);
 	glBufferData(target, buffer_size, buffer_data, type);
 	glBindBuffer(target, 0);
+    CHECK_GL_ERROR
 	return buffer;
 }
 

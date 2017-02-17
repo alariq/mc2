@@ -22,14 +22,15 @@
 
 #include<string.h>
 
-#ifndef _MBCS
+// sebi: uncommented on Windows as well, not sure why it is commented, probabaly has something to do with mutibyte stuff
+//#ifndef _MBCS
 #include<gameos.hpp>
-#else
-#include<assert.h>
-#define gosASSERT assert
-#define gos_Malloc malloc
-#define gos_Free free
-#endif
+//#else
+//#include<assert.h>
+//#define gosASSERT assert
+//#define gos_Malloc malloc
+//#define gos_Free free
+//#endif
 
 //***************************************************************************
 

@@ -84,7 +84,7 @@ ForceGroupIcon::AnimationInfo ForceGroupIcon::animationInfos[NUM_DEATH_INFOS] =
 
 };
 
-DWORD ForceGroupIcon::s_textureHandle[5] = { -1u, -1u, -1u, -1u, -1u };
+DWORD ForceGroupIcon::s_textureHandle[5] = { 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff };
 bool ForceGroupIcon::s_slotUsed[240] = { 0 };
 
 gos_VERTEX ForceGroupIcon::	bmpLocation[17][5]  = {0}; // in screen coords

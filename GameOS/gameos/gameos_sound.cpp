@@ -317,7 +317,7 @@ void __stdcall gosAudio_CreateResource( HGOSAUDIO* hgosaudio, enum gosAudio_Reso
         cvt.len = src_datasize;
 
         gosASSERT(cvt.needed);
-        const int tmp_req_buf_size = cvt.len * cvt.len_mult;
+        const uint32_t tmp_req_buf_size = cvt.len * cvt.len_mult;
 
         if(src_datasize >= tmp_req_buf_size) {
             cvt.buf = databuf;
