@@ -1,6 +1,12 @@
 #ifndef MEMFUNC_H
 #define MEMFUNC_H
 
+#ifdef PLATFORM_WINDOWS
+#include<memory.h>
+#else
+#include<string.h>
+#endif
+
 template <typename T, int N>
 void ArrayCopy(T (&dst)[N], T (&src)[N]) {
     for(int i=0;i<N;++i) {
@@ -28,6 +34,18 @@ void* ArraySet(T (&dst)[N], unsigned char val) {
 template <typename T, int N>
 void* MemSet(T (& dst)[N], unsigned char val) {
     return memset(dst, val, sizeof(T) * N);
+}
+
+template <typename T, int N>
+void* MemCpy(T (& dst)[N], const void* src, size_t n) {
+	assert(sizeof(T)*N >= n);
+    return memcpy(dst, src, n);
+}
+
+template <typename T, int N>
+void* MemCpy(void* dst, const T (& src)[N], size_t n) {
+	assert(sizeof(T)*N >= n);
+    return memcpy(dst, src, n);
 }
 
 #endif //MEMFUNC_H
