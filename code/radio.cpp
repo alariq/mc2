@@ -283,7 +283,9 @@ long i, roll, callsign, fragmentNum, dropOut = 0;
 			{
 				radioHeap->Free(msgData->data[j]);
 				msgData->data[j] = NULL;
-				radioHeap->Free(msgData->noise[j]);
+				if(msgData->noise[j] != (MemoryPtr)-1) {
+					radioHeap->Free(msgData->noise[j]);
+				}
 				msgData->noise[j] = NULL;
 			}
 			
