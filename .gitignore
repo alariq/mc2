@@ -60,6 +60,9 @@ tmp/
 # Coverity
 cov-int/
 
+#web site
+site/
+
 # CMake Tools VS Code extension
 CMakeToolsMeta.in.txt
 CMakeToolsMeta.txt
