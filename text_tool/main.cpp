@@ -174,9 +174,16 @@ int main(int argc, char** argv)
     int num_lines = (NUM_GLYPHS + num_chars_in_line - 1) / num_chars_in_line;
     int fontTextureHeight = num_lines * fontLineSkip;
 
+	int finalTextureWidth = 1;
+	int finalTextureHeight = 1;
+	while(finalTextureWidth < fontTextureWidth)
+		finalTextureWidth <<= 1;
+	while(finalTextureHeight < fontTextureHeight)
+		finalTextureHeight <<= 1;
+
     SDL_Surface* fontTexture = SDL_CreateRGBSurface(0, 
-            fontTextureWidth, 
-            fontTextureHeight,
+            finalTextureWidth, 
+            finalTextureHeight,
             32,
             0x00FF0000,
             0x0000FF00,
