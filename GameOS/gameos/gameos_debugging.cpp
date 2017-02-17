@@ -9,6 +9,7 @@
 #include <cstdio>
 #include <cassert>
 #include <cstring>
+#include "utils/string_utils.h"
 
 #ifdef _DEBUG
 static int enter_debugger = 1;
@@ -83,7 +84,7 @@ void __cdecl InternalFunctionSpew( const char* Group, const char* fmt, ... )
 	va_list	ap;
 
     char buf[256];
-    snprintf(buf, sizeof(buf)-1, "SPEW: <%s>", Group ? Group : "");
+    StringFormat(buf, sizeof(buf)-1, "SPEW: <%s>", Group ? Group : "");
 
     va_start(ap, fmt);
     logmsg(buf, fmt, ap);
