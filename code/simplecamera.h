@@ -45,12 +45,16 @@ public:
 	void setColors( long base = 0xffff7e00, long highlight = 0xffff7e00, long h2 = 0xffbcbcbc );
 
     void pushContext() {
+		gosASSERT(bContextNotSet);
         oldCam = eye;
         eye = this;
+        bContextNotSet = false;
     }
     void popContext() {
+		gosASSERT(false == bContextNotSet);
         eye = oldCam;
         oldCam = NULL;
+        bContextNotSet = true;
     }
 
 	float		bounds[4];
@@ -67,6 +71,8 @@ private:
 	bool				bIsComponent;
 	bool				bIsInMission;
 	float				shapeScale;
+
+    bool                bContextNotSet;
 };
 
 

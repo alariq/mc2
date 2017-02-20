@@ -731,7 +731,7 @@ void aText::setText(const EString& str)
 
 void aText::render()
 {
-	if ( showWindow )
+	if ( showWindow && text.Length()>0)
 		font.render( text, location[0].x, location[0].y, location[2].x - location[0].x, 
 		location[2].y - location[0].y, location[0].argb, 0, alignment );
 }

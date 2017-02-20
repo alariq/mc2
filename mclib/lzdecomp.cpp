@@ -20,7 +20,7 @@
 #define NULL			0
 #endif
 
-#include <zlib/zlib.h>
+#include <zlib.h>
 
 typedef unsigned char* MemoryPtr;
 

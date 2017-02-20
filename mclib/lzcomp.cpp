@@ -20,7 +20,7 @@
 #define gos_Free free
 #endif
 
-#include <zlib/zlib.h>
+#include <zlib.h>
 #include "memfunc.h"
 
 // 128K and more cold be faster

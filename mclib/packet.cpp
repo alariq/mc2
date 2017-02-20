@@ -20,7 +20,7 @@
 #include"lz.h"
 #endif
 
-#include<zlib/zlib.h>
+#include<zlib.h>
 
 //#ifndef _MBCS
 #include<gameos.hpp>

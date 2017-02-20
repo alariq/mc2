@@ -165,10 +165,8 @@ void MissionBriefingScreen::update()
 		{
 			if ( objectiveModels[ID].Length() )
 			{
-                camera.pushContext();
 				camera.setObject( objectiveModels[ID], modelTypes[ID], modelColors[ID][0],
 					modelColors[ID][1], modelColors[ID][2] );
-                camera.popContext();
 
 				camera.setScale( modelScales[ID] );
 				soundSystem->playDigitalSample( LOG_VIDEOBUTTONS );
@@ -176,9 +174,7 @@ void MissionBriefingScreen::update()
 			}
 			else
 			{
-                camera.pushContext();
 				camera.setObject( NULL, -1 );
-                camera.popContext();
 
 				statics[35].showGUIWindow( true );
 			}
@@ -237,10 +233,8 @@ void MissionBriefingScreen::update()
 				missionListBox.GetItem( selItem )->setColor( 0xffff0000 );
 				if ( objectiveButtons[ID] )
 					objectiveButtons[ID]->setColor( 0xffff0000 );
-                camera.pushContext();
 				camera.setObject( objectiveModels[ID], modelTypes[ID], modelColors[ID][0], 
 					modelColors[ID][1], modelColors[ID][2]);
-				camera.popContext();
 				camera.setScale( modelScales[ID] );
 				if ( objectiveModels[ID].Length() )
 					statics[35].showGUIWindow( 0 );
@@ -249,9 +243,7 @@ void MissionBriefingScreen::update()
 			}
 			else
 			{
-                camera.pushContext();
 				camera.setObject( NULL, -1 );
-                camera.popContext();
 
 				statics[35].showGUIWindow( 1 );
 			}
@@ -643,9 +635,7 @@ void MissionBriefingScreen::end()
 //	statics[MAP_INDEX].setTexture( (long)0 );
 // 	statics[MAP_INDEX].setColor( 0 );
 
-	camera.pushContext();
 	camera.setMech( NULL );
-	camera.popContext();
 
 }
 
