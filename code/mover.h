@@ -1405,12 +1405,18 @@ class Mover : public GameObject {
 
 		long getSensorMax (void) {
             gosASSERT(sensor < MAX_MOVER_INVENTORY_ITEMS);
-		    return(MasterComponent::masterList[inventory[sensor].masterID].getHealth());
+			if(sensor < MAX_MOVER_INVENTORY_ITEMS)
+		    	return(MasterComponent::masterList[inventory[sensor].masterID].getHealth());
+			else
+				return 0;
 		}
 
 		long getSensorHealth (void) {
             gosASSERT(sensor < MAX_MOVER_INVENTORY_ITEMS);
-            return(inventory[sensor].health);
+			if(sensor < MAX_MOVER_INVENTORY_ITEMS)
+            	return(inventory[sensor].health);
+			else
+				return 0;
 		}
 
 		float getVisualRange (void);
@@ -1786,13 +1792,13 @@ typedef struct _MoverInitData {
 	bool			specialtySkills[NUM_SPECIALTY_SKILLS];
 	char			brainFileName[50];
 	char			csvFileName[50];
-	DWORD           objNumber;
-	DWORD           rosterIndex;
+	int32_t			objNumber;
+	int32_t 		rosterIndex;
 	DWORD           controlType;
 	DWORD           controlDataType;
 	DWORD           variant;
 	Stuff::Vector3D	position;
-	DWORD           rotation;
+	int32_t 		rotation;
 	char			teamID;
 	char			commanderID;
 	DWORD			baseColor;
