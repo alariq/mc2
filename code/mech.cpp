@@ -1497,6 +1497,16 @@ long BattleMech::init (DWORD variantNum)
 	long realItemNum = 0;
     MemSet(ItemLocationToInvLocation, 0xff);
 
+	// sebi: init inventory items to uninitialized. Original mc2 memeory allocator seemed to init all by 0xff which coincidentally
+	// marked all inventory items as not valid, our memory allocation does not do this and so there was garbage (0xcd), leading to
+	// all items in inventory behind last loaded from file to contain garbage. I wonder how many are such things still present.
+	// Before similar issue led to some in-game characters be invisible (salvage aircraft for example)
+	for (long curItem = 0;curItem < MAX_MOVER_INVENTORY_ITEMS;curItem++)
+	{
+		inventory[curItem].masterID = 0xff;
+		inventory[realItemNum].disabled = true;
+	}
+
 	//Read in everything but weapons and AMMO
 	for (long curItem = 0;curItem < MAX_MOVER_INVENTORY_ITEMS;curItem++)
 	{
@@ -2663,6 +2673,7 @@ void BattleMech::resetComponents (long totalComponents, long *componentList)
 	
 	// local variable needs to be set for class
     //sebi: no really...
+	// should set it to zero ?
 	//numJumpJets = numJumpJets;
 }
 
