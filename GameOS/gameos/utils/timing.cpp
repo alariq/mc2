@@ -6,7 +6,28 @@
 #include<time.h>
 #endif
 
+#include <stdint.h>
+#include <cassert>
+
 namespace timing {
+
+#ifdef PLATFORM_WINDOWS
+	static LARGE_INTEGER Frequency;
+#endif
+#ifdef _DEBUG
+	static bool initialized = false;
+#endif
+
+	void init()
+	{
+#ifdef PLATFORM_WINDOWS
+		QueryPerformanceFrequency(&Frequency);
+#endif
+#ifdef _DEBUG
+		initialized = true;
+#endif
+	}
+
 	void sleep(unsigned int nanosec) {
 #ifdef PLATFORM_WINDOWS
 		Sleep(nanosec / 1000000);
@@ -15,6 +36,32 @@ namespace timing {
 		ts.tv_sec = 0;
 		ts.tv_nsec = nanosec;
 		nanosleep(&ts, NULL);
+#endif
+	}
+
+	uint64_t gettickcount()
+	{
+#ifdef PLATFORM_WINDOWS
+		LARGE_INTEGER t;
+		QueryPerformanceCounter(&t);
+		return t.QuadPart;
+#else
+		struct timespec ts;
+		clock_gettime(CLOCK_MONOTONIC_RAW, &ts);
+		size_t milliseconds = ts.tv_sec * 1e+3;
+		milliseconds += ts.tv_nsec / 1e+6;
+		return milliseconds;
+#endif
+	}
+
+	uint64_t ticks2ms(uint64_t ticks)
+	{
+		assert(initialized);
+#ifdef PLATFORM_WINDOWS
+		ticks = (ticks * 1000) / Frequency.QuadPart;
+		return ticks;
+#else
+		return ticks;
 #endif
 	}
 }

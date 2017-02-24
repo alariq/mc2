@@ -164,6 +164,8 @@ static void draw_screen( void )
     //CHECK_GL_ERROR;
 }
 
+extern float frameRate;
+
 int main(int argc, char** argv)
 {
     //signal(SIGTRAP, SIG_IGN);
@@ -217,9 +219,12 @@ int main(int argc, char** argv)
 	g_camera.set_projection(proj_mat);
 	g_camera.set_view(mat4::translation(vec3(0, 0, -16)));
 
+	timing::init();
+
     while( !g_exit ) {
 
-		timing::sleep(10*1000000);
+		uint64_t start_tick = timing::gettickcount();
+		//timing::sleep(10*1000000);
 
         if(g_debug_draw_calls) {
             gos_RenderUpdateDebugInput();
@@ -236,6 +241,10 @@ int main(int argc, char** argv)
         graphics::swap_window(win);
 
         g_exit |= gosExitGameOS();
+
+		uint64_t end_tick = timing::gettickcount();
+		uint64_t dt = timing::ticks2ms(end_tick - start_tick);
+		frameRate = 1000.0f / (float)dt;
     }
     
     Environment.TerminateGameEngine();
