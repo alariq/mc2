@@ -137,11 +137,12 @@ void GenericAppearanceType::init (const char * fileName)
 		genDmgShape = NULL;
 	}
 
-		
 	//--------------------------------------------------------------------
 	// Load Animation Information.
+    // sebi: how this could possible work!!! MAX_BD_ANIMATIONS=10 
+    // but MAX_GEN_ANIMATIONS=5! so 5 times out of bounds array access!!!
 	// We can load up to 10 Animation States.
-	for (long i=0;i<MAX_BD_ANIMATIONS;i++)
+	for (long i=0;i<MAX_GEN_ANIMATIONS;i++)
 	{
 		char blockId[512];
 		sprintf(blockId,"Animation:%d",i);
