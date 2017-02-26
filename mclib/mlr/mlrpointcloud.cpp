@@ -43,7 +43,7 @@ MLRPointCloud::MLRPointCloud(int nr, int _type) :
 	MLREffect(nr, DefaultData), type(_type)
 {
 	Verify(gos_GetCurrentHeap() == Heap);
-	usedNrOfVertices = 0;
+	usedNrOfVertices = NULL;
 
 	Check_Pointer(this);
 	
@@ -129,9 +129,9 @@ int
 	int i;
 	numGOSVertices = 0;
 
-	if(clippingFlags.GetClippingState() == 0 || usedNrOfVertices <= 0)
+	if(clippingFlags.GetClippingState() == 0 || *usedNrOfVertices <= 0)
 	{
-		if(usedNrOfVertices <= 0)
+		if(*usedNrOfVertices <= 0)
 		{
 			visible = 0;
 		}
