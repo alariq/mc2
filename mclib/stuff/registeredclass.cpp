@@ -208,7 +208,7 @@ RegisteredClass__ClassData*
 	RegisteredClass__ClassData::FindClassData(const char* name)
 {
 	Check_Object(this);
-	if (!_stricmp(className, name))
+	if (!S_stricmp(className, name))
 	{
 		return this;
 	}

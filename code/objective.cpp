@@ -49,12 +49,7 @@ Objective.cpp			: Implementation of the Objective component.
 
 #include "../resource.h"
 
-#ifdef LINUX_BUILD
-#include "tchar.h"
-#else
-#include<tchar.h>
-#endif
-
+#include "platform_tchar.h"
 #include<assert.h>
 
 float CObjective::s_blinkLength = .5;

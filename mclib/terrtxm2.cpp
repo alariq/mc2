@@ -10,7 +10,7 @@
 
 //---------------------------------------------------------------------------
 // Include Files
-#include<windows.h> /*only for declaration of DeleteFile() */
+#include"platform_windows.h" /*only for declaration of DeleteFile() */
 
 #ifndef TERRTXM2_H
 #include"terrtxm2.h"
@@ -46,7 +46,7 @@
 
 #include"resizeimage.h"
 
-#include<io.h>
+#include"platform_io.h"
 #include<sys/stat.h>
 
 #define COLOR_MAP_HEAP_SIZE				20480000

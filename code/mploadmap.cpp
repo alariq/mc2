@@ -11,11 +11,7 @@ MPLoadMap.cpp			: Implementation of the MPLoadMap component.
 #include"inifile.h"
 #include"userinput.h"
 #include "../resource.h"
-#ifdef LINUX_BUILD
-#include "windows.h"
-#else
-#include<windows.h>
-#endif
+#include"platform_windows.h"
 #include"missionbriefingscreen.h"
 
 #ifndef GAMESOUND_H

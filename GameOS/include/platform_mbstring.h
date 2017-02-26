@@ -1,9 +1,6 @@
 #ifndef MBSTRIG_H
 #define MBSTRIG_H
 
-char *_strlwr(
-           char * str
-        );
 wchar_t *_wcslwr(
            wchar_t * str
         );

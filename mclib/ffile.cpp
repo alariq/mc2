@@ -18,11 +18,11 @@
 
 #include"lz.h"
 
-#include<zlib/zlib.h>
+#include<zlib.h>
 
 
 
-#include<windows.h>
+#include"platform_windows.h"
 
 #include<string.h>
 #include"platform_str.h"

@@ -38,9 +38,9 @@ typedef unsigned char byte;
 
 // !NB sebi
 #ifndef PLATFORM_WINDOWS
-typedef uint32_t DWORD;
-typedef uint32_t UINT;
-typedef uint8_t BYTE;
+typedef unsigned int DWORD;
+typedef unsigned int UINT;
+typedef unsigned char BYTE;
 typedef void *PVOID;
 #else
 typedef unsigned long DWORD; // sizeof(long) is 32bit on both 32bit and 64 bit Visual C++ compilers 

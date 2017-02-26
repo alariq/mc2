@@ -619,7 +619,7 @@ void languageDirective (void) {
 		getChar();
 	}
 	directive[directiveLength] = '\0';
-	_strlwr(directive);
+	S_strlwr(directive);
 
 	if (strcmp(directive, "include") == 0) {
 		//---------------------
@@ -757,7 +757,7 @@ void languageDirective (void) {
 						getChar();
 					}
 					directive2[directiveLength] = '\0';
-					_strlwr(directive2);
+					S_strlwr(directive2);
 					if (strcmp(directive2, "#debug_start") == 0)
 						nestedLevel++;
 					else if (strcmp(directive2, "#debug_end") == 0) {

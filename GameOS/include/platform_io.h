@@ -20,6 +20,10 @@
 #define _S_IWRITE (S_IWUSR|S_IRUSR|S_IRGRP|S_IROTH)
 #define _S_IREAD S_IREAD
 #define _O_RDONLY O_RDONLY
+#define _O_CREAT O_CREAT
+#define _O_TRUNC O_TRUNC
+#define _O_BINARY  0 // all files are binary on linux
+#define _O_RDWR O_RDWR
 
 long _filelength(int fd);
 

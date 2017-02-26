@@ -98,7 +98,7 @@
 
 #include "../resource.h"
 
-#include"windows.h"
+#include"platform_windows.h"
 
 #include"gvehicl.h" // remove
 

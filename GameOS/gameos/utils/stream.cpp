@@ -3,8 +3,8 @@
 #include <assert.h>
 #ifdef PLATFORM_WINDOWS
 #include <direct.h>
-#include <string.h>
 #else
+#include <string.h>
 #include <wchar.h>
 #endif
 #include <ctime>

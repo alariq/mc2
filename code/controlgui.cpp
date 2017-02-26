@@ -2310,7 +2310,7 @@ void ControlButton::initButtons( FitIniFile& buttonFile, long buttonCount, Contr
 			strcpy( file, artPath );
 			strcat( file, Buttons[i].data->fileName );
 			strcat( file, ".tga" );
-			_strlwr( file );
+			S_strlwr( file );
 			int ID = mcTextureManager->loadTexture( file, gos_Texture_Alpha, 0, 0, 0x2 );
 			int gosID = mcTextureManager->get_gosTextureHandle( ID );
 			TEXTUREPTR textureData;

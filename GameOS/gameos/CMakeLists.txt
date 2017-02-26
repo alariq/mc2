@@ -26,14 +26,12 @@ set(SOURCES ${SOURCES}
     utils/timing.cpp
     utils/string_utils.cpp
     )
-# add -Wall sometime later
-#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O0 -ggdb")
 
-add_definitions(-D_DEBUG)
-add_definitions(-D_ARMOR)
-add_definitions(-DUSE_ASSEMBLER_CODE=0)
-add_definitions(-DLINUX_BUILD)
+find_package(SDL2 REQUIRED PATHS "/opt" NO_DEFAULT_PATH)
 
+find_package(SDL2 REQUIRED PATHS "/opt" NO_DEFAULT_PATH)
+
+include_directories("${SDL2_PREFIX}/include")
 include_directories("../include"  ".")
 
 add_library(gameos ${SOURCES})

@@ -847,7 +847,7 @@ void execStdGetStateHandle (void) {
 
 	char* name = ABLi_popCharPtr();
 
-	long stateHandle = CurFSM->findStateHandle(_strlwr(name));
+	long stateHandle = CurFSM->findStateHandle(S_strlwr(name));
 	ABLi_pushInteger(stateHandle);
 }
 

@@ -2,7 +2,7 @@
 // Copyright (C) Microsoft Corporation. All rights reserved.                 //
 //===========================================================================//
 
-#include<io.h> // for _chmod()
+#include"platform_io.h" // for _chmod()
 
 #include"prefs.h"
 #include"gamesound.h"
@@ -435,9 +435,9 @@ int CPrefs::applyPrefs(bool applyRes) {
 
 
         if (renderer == 3)
-            gos_SetScreenMode(this->resolutionX, this->resolutionY, this->bitDepth,0,0,0,true,localFullScreen,0,localWindow,0,localRenderer);
+            gos_SetScreenMode(this->resolutionX, this->resolutionY, bitDepth,0,0,0,true,localFullScreen,0,localWindow,0,localRenderer);
         else
-            gos_SetScreenMode(this->resolutionX, this->resolutionY, this->bitDepth,renderer,0,0,0,localFullScreen,0,localWindow,0,localRenderer);
+            gos_SetScreenMode(this->resolutionX, this->resolutionY, bitDepth,renderer,0,0,0,localFullScreen,0,localWindow,0,localRenderer);
 
         /*
 		switch (resolution)

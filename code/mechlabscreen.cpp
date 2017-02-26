@@ -11,7 +11,7 @@ MechLabScreen.cpp			: Implementation of the MechLabScreen component.
 #include"logisticsdata.h"
 #include"mechbayscreen.h"
 #include"cmponent.h"
-#include"windows.h"
+#include"platform_windows.h"
 #include "../resource.h"
 #include"logisticsdialog.h"
 #include<malloc.h>

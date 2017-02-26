@@ -10,7 +10,7 @@
 #include<gameos.hpp>
 #include<stdlib.h>
 //sebi
-#include "windows.h"
+#include "platform_windows.h"
 
 void memclear(void *Dest,int Length);
 void memfill(void *Dest,int Length);

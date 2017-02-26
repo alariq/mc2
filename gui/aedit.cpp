@@ -11,8 +11,8 @@ aEdit.cpp			: Implementation of the aEdit component of the GUI library.
 #include"ctype.h"
 #include"inifile.h"
 #include"mclib.h"
-#include<windows.h>
-#include<mbstring.h> // isleadbyte
+#include"platform_windows.h"
+#include"platform_mbstring.h" // isleadbyte
 //#include<winnls.h>
 #include"soundsys.h"
 #include "../resource.h"

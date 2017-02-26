@@ -8,7 +8,7 @@ unsigned char *_mbslwr(
         )
 {
     // only ok for C locale and single byte character set
-	return S_tolower(str);
+	return (unsigned char*)S_strlwr((char*)str);
 }
 
 // what a stupid signature

@@ -27,7 +27,7 @@
 #endif
 
 #ifdef LINUX_BUILD
-#include "windows.h"
+#include "platform_windows.h"
 #include "platform_str.h"
 #include "platform_stdlib.h"
 #endif

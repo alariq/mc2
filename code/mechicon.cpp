@@ -14,7 +14,7 @@ MechIcon.cpp			: Implementation of the MechIcon component.
 #include"gamecam.h"
 #include"controlgui.h"
 #include"gamesound.h"
-#include<windows.h>
+#include"platform_windows.h"
 
 #ifndef MISSION_H
 #include"mission.h"
@@ -444,7 +444,7 @@ bool MechIcon::initTextures()
 		else 
 			strcat( path, "mcui_high7.tga" );
 
-		_strlwr( path );
+		S_strlwr( path );
 
 		if ( NO_ERR != file.open( path ) ) 
 		{

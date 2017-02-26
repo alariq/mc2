@@ -1105,7 +1105,7 @@ SymTableNodePtr ABLModule::findFunction (const char* functionName, bool searchLi
             memset(temp, 0, 1024 );
             strncpy( temp, functionName, (strlen(functionName) > 1020) ? 1020 : strlen(functionName) );
 
-			symbol = searchSymTable(_strlwr(temp), ModuleRegistry[ModuleRegistry[handle].librariesUsed[i]->handle].moduleIdPtr->defn.info.routine.localSymTable);
+			symbol = searchSymTable(S_strlwr(temp), ModuleRegistry[ModuleRegistry[handle].librariesUsed[i]->handle].moduleIdPtr->defn.info.routine.localSymTable);
 
 			if (symbol)
 				break;

@@ -7,7 +7,8 @@
 
 #include"stuffheaders.hpp"
 
-#include<windows.h>
+#include"platform_windows.h"
+#include <ctype.h> // toupper
 //#############################################################################
 //#######################    MStringRepresentation    #########################
 //#############################################################################
@@ -658,7 +659,7 @@ bool
 	Check_Pointer(str2);
 
 	return
-		!_stricmp(str1, str2);
+		!S_stricmp(str1, str2);
 }
 
 		IteratorPosition

@@ -2,9 +2,10 @@
 
 #include<stdio.h>
 #include<wctype.h>
+#include<ctype.h> // tolower...
 
 #include"platform_windows.h"
-#include"string_win.h"
+#include"platform_str.h"
 
 #define _Inout_
 

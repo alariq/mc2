@@ -224,7 +224,7 @@ int main(int argc, char** argv)
     while( !g_exit ) {
 
 		uint64_t start_tick = timing::gettickcount();
-		//timing::sleep(10*1000000);
+		timing::sleep(10*1000000);
 
         if(g_debug_draw_calls) {
             gos_RenderUpdateDebugInput();

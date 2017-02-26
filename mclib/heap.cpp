@@ -19,7 +19,7 @@
 #include"file.h"
 #endif
 
-#include<windows.h>
+#include"platform_windows.h"
 #ifndef USE_GOS_HEAP
 #include<imagehlp.h>
 #endif
@@ -31,11 +31,12 @@
 #endif
 
 #include"platform_str.h" 
+#include <ctype.h> // toupper
 
 //---------------------------------------------------------------------------
 // Static Globals
-static char CorruptMsg[] = "Heap check failed.\n";
-static char pformat[] = "%s %s\n";
+static const char CorruptMsg[] = "Heap check failed.\n";
+static const char pformat[] = "%s %s\n";
 
 GlobalHeapRec HeapList::heapRecords[MAX_HEAPS];
 HeapListPtr globalHeapList = NULL;

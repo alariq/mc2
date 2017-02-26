@@ -2,7 +2,7 @@
 // Copyright (C) Microsoft Corporation. All rights reserved.                 //
 //===========================================================================//
 
-#include<windows.h>
+#include"platform_windows.h"
 #include<stdio.h>
 #include"msodw.h"
 

@@ -38,7 +38,7 @@
 #include<errno.h> // size_t 
 #include<signal.h> // size_t 
 #include<string.h> // memcmp
-#include "windows.h"
+#include "platform_windows.h"
 
 static __inline__ unsigned long long rdtsc(void)
 {

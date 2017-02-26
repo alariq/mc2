@@ -305,7 +305,7 @@ void aListBox::render()
 		// draw black box above this
 		if ( bTop || bBottom )
 		{
-			GUI_RECT rect = { globalX(), globalY() - topHeight, globalX() + width(), globalY() };
+			GUI_RECT rect = { globalX(), globalY() - topHeight, (globalX() + (long)width()), globalY() };
 			if ( bTop )
 				drawRect( rect, 0xff000000 ); 
 			rect.top = globalY() + height()+1;

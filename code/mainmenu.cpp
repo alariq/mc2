@@ -7,7 +7,7 @@ MainMenu.cpp			: Implementation of the MainMenu component.
 \*************************************************************************************************/
 
 #ifdef LINUX_BUILD
-#include "windows.h"
+#include "platform_windows.h"
 struct DDSURFACEDESC2 {
 };
 #else

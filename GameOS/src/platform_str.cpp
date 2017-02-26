@@ -2,6 +2,7 @@
 #include <cstdarg>
 #include <string.h>
 #include <cassert>
+#include <ctype.h>
 
 #include "platform_str.h"
 

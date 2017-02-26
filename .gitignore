@@ -3,6 +3,9 @@ CMakeCache.txt
 out/
 bin/
 build/
+build-rel/
+build-dbg/
+build-reldbginfo/
 *.exe
 *.cmake
 Makefile

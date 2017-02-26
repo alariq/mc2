@@ -114,6 +114,14 @@ double __stdcall gos_GetElapsedTime( int RealTime )
 #endif
 }
 
+double __stdcall gos_GetHiResTime()
+{
+    struct timespec ts;
+    clock_gettime(CLOCK_MONOTONIC_RAW, &ts);
+    double time_sec = ts.tv_sec + ((double)ts.tv_nsec)/10.0e+9;
+    return time_sec;
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 
 static const int g_hepsStackSize = 128;
@@ -571,4 +579,5 @@ bool volatile mc2IsInMouseTimer = false;
 ////////////////////////////////////////////////////////////////////////////////
 
 HGOSHEAP ParentClientHeap = NULL;
-float ProcessorSpeed = 10595.42f; // sebi: put something cool
+float ProcessorSpeed = 10595.42; // sebi: put something cool
+float OneOverProcessorSpeed = 1.0f / ProcessorSpeed; // sebi: put something cool

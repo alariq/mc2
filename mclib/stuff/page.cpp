@@ -64,7 +64,7 @@ Note*
 	while ((note = notes.ReadAndNext()) != NULL)
 	{
 		Check_Object(note);
-		if (!_stricmp(note->m_name, entryname))
+		if (!S_stricmp(note->m_name, entryname))
 			return note;
 	}
 	return NULL;
@@ -97,7 +97,7 @@ ChainOf<Note*>*
 	while ((note = notes.ReadAndNext()) != NULL)
 	{
 		Check_Object(note);
-		if (!_strnicmp(note->GetName(), entryname, len))
+		if (!S_strnicmp(note->GetName(), entryname, len))
 			chain->Add(note);
 	}
 	return chain;

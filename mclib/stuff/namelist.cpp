@@ -284,7 +284,7 @@ NameList::Entry*
 	for (entry = firstEntry; entry; entry = entry->nextEntry)
 	{
 		Check_Pointer(entry);
-		if (!_stricmp(entry->GetName(), name))
+		if (!S_stricmp(entry->GetName(), name))
 		{
 			break;
 		}

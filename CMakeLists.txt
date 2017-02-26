@@ -3,7 +3,7 @@ project(mc2)
 
 include(CMakeToolsHelpers OPTIONAL)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O0 -ggdb -std=c++0x")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
 if(NOT MSVC)
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-local-typedefs -Werror=array-bounds -Wno-switch -Wno-unknown-warning-option -Wunused-variable")
 endif()
@@ -14,6 +14,16 @@ if(MSVC)
 	add_definitions(-D_CRT_SECURE_NO_WARNINGS)
 	message("Compiling on M$ Windows")
 endif()
+
+if(CMAKE_BUILD_TYPE MATCHES Debug)
+    add_definitions(-D_ARMOR)
+    add_definitions(-D_DEBUG)
+    add_definitions(-DBUGLOG)
+    add_definitions(-DLAB_ONLY)
+endif()
+
+add_definitions(-DUSE_ASSEMBLER_CODE=0)
+add_definitions(-DLINUX_BUILD)
 
 find_path(SDL2_INCLUDE "SDL2/SDL.h")
 find_path(GLEW_INCLUDE "gl/glew.h")
@@ -124,15 +134,10 @@ set(SOURCES
     "code/mc2movie.cpp"
     )
 
-add_definitions(-D_ARMOR)
-add_definitions(-D_DEBUG)
-add_definitions(-DBUGLOG)
-add_definitions(-DUSE_ASSEMBLER_CODE=0)
-add_definitions(-DLINUX_BUILD)
-
-find_library(SDL2 NAMES "SDL2")
-find_library(SDL2main NAMES "SDL2main")
+find_package(SDL2 REQUIRED PATHS /opt NO_DEFAULT_PATH)
+find_library(SDL2main NAMES "SDL2main" PATHS /opt)
 find_library(SDL2_mixer NAMES "SDL2_mixer")
+find_library(OPENGL NAMES "opengl32" "GL")
 
 find_library(GLEW NAMES "GLEW" "glew32")
 
@@ -143,9 +148,13 @@ if(WIN32)
 	find_package(OpenGL REQUIRED)
 endif()
 
+message("OPENCL library found in ${OPENCL}")
+message("OPENGL library found in ${OPENGL}")
 message("GLEW library found in ${GLEW}")
 
+include_directories("${SDL2_PREFIX}/include")
 include_directories("./GameOS/include" "./mclib" "./gui" "./code" "./netlib")
+message("sdl2 prefix: ${SDL2_PREFIX}")
 
 #if(NOT ${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
 if(NOT WIN32)
@@ -158,5 +167,8 @@ else()
 	message("OpenGL library include: ${OPENGL_INCLUDE_DIR}")
 endif()
 
+message("sdl2 prefix: ${SDL2_PREFIX}")
+
+
 add_executable(mc2 ${SOURCES})
-target_link_libraries(mc2 mclib gosfx mlr stuff gui gameos windows ${ZLIB} ${SDL2} ${SDL2main} ${GLEW} ${SDL2_mixer} ${ADDITIONAL_LIBS})
+target_link_libraries(mc2 mclib gosfx mlr stuff gui gameos windows ${ZLIB} ${SDL2_LIBRARIES} ${SDL2main} ${GLEW} ${SDL2_mixer} ${ADDITIONAL_LIBS} ${OPENGL})

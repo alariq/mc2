@@ -29,9 +29,12 @@ set(SOURCES
 
 add_definitions(-DLINUX_BUILD)
 
-find_library(SDL2 NAMES "SDL2")
-find_library(SDL2main NAMES "SDL2main")
-find_library(SDL2_ttf NAMES "SDL2_ttf")
+#find_library(SDL2 NAMES "SDL2")
+find_package(SDL2 REQUIRED PATHS /opt NO_DEFAULT_PATH)
+find_library(SDL2main NAMES "SDL2main" PATHS /opt)
+find_library(SDL2_ttf NAMES "SDL2_ttf" PATHS /opt)
+find_library(OPENGL NAMES "opengl32" "GL")
+find_library(GLEW NAMES "GLEW" "glew32")
 
 if(WIN32)
 	find_package(OpenGL REQUIRED)
@@ -41,6 +44,7 @@ find_library(GLEW NAMES "GLEW" "glew32")
 
 message("GLEW library found in ${GLEW}")
 
+include_directories("${SDL2_PREFIX}/include")
 include_directories("./" "../GameOS/gameos/" "../GameOS/include")
 
 if(WIN32)
@@ -51,4 +55,5 @@ endif()
 
 
 add_executable(text_tool ${SOURCES})
-target_link_libraries(text_tool gameos ${SDL2} ${SDL2main} ${SDL2_ttf} ${GLEW} ${ADDITIONAL_LIBS})
+target_link_libraries(text_tool gameos ${SDL2_LIBRARIES} ${SDL2main} ${SDL2_ttf} ${GLEW} ${ADDITIONAL_LIBS})
+>>>>>>> Stashed changes

@@ -5,13 +5,10 @@
 #include <malloc.h>
 #include <string.h>
 #include <ctype.h> // for tolower
-
-#ifdef _DEBUG
-#include <assert.h>
-#endif
-
+#include <cassert>
 #include <cstdarg>
 #include <cstdio>
+#include <wchar.h>
 
 void StringFree(char* s)
 {

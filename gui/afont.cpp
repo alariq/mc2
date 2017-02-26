@@ -4,7 +4,7 @@
 
 #include"afont.h"
 #include"mclib.h"
-#include<mbstring.h>
+#include"platform_mbstring.h"
 
 aFont::aFont()
 {
@@ -31,7 +31,7 @@ long aFont::init( const char* newFontName )
 
 	strcpy( path, "assets" PATH_SEPARATOR "graphics" PATH_SEPARATOR );
 	strcat( path, fontName );
-	_strlwr( path );
+	S_strlwr( path );
 	gosFont = gos_LoadFont( path );
 
 	if ( gosFont )
@@ -296,7 +296,7 @@ HGOSFONT3D aFont::loadFont( long resourceID, long& size )
 	char path[256];
 	strcpy( path, "assets" PATH_SEPARATOR "graphics" PATH_SEPARATOR );
 	strcat( path, buffer );
-	_strlwr( path );
+	S_strlwr( path );
 	HGOSFONT3D retFont = gos_LoadFont( path );
 
 	return retFont;

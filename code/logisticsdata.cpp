@@ -22,7 +22,7 @@ LogisticsData.cpp			: Implementation of the LogisticsData component.
 #include"prefs.h"
 #include"comndr.h"
 #include"missionresults.h"
-#include<zlib/zlib.h>
+#include<zlib.h>
 
 #ifndef VIEWER
 #include"multplyr.h"
@@ -298,7 +298,7 @@ void LogisticsData::initVariants()
 		strcpy( variantFullPath, objectPath );
 		strcat( variantFullPath, variantFileName );
 		strcat(  variantFullPath, ".csv" );
-		_strlwr( variantFullPath );
+		S_strlwr( variantFullPath );
 
 		CSVFile mechFile;
 		if ( NO_ERR != mechFile.open( variantFullPath ) )
@@ -1952,6 +1952,8 @@ int LogisticsData::setMechToModify( LogisticsMech* pMech )
 
 void encryptFile (const char *inputFile, const char* outputFile)
 {
+    PAUSE((""));
+
 	//Now we encrypt this by zlib Compressing the file passed in.
 	// Then LZ Compressing the resulting zlib data.
 	// Since our LZ compression is pretty much non-standard, that should be enough.
@@ -1976,9 +1978,9 @@ void encryptFile (const char *inputFile, const char* outputFile)
 
 	File binFile;
 	binFile.create(outputFile);
-	binFile.writeLong(lzSize);
-	binFile.writeLong(zlibSize);
-	binFile.writeLong(fileSize);
+	binFile.writeInt(lzSize);
+	binFile.writeInt(zlibSize);
+	binFile.writeInt(fileSize);
 	binFile.write(LZData,lzSize);
 	binFile.close();
 
@@ -1989,6 +1991,8 @@ void encryptFile (const char *inputFile, const char* outputFile)
 
 void decryptFile (char *inputFile, char *outputFile)
 {
+    PAUSE((""));
+
 	//Now we decrypt this by lz deCompressing the zlib file created.
 	// Then zlib deCompressing the resulting zlib data into the raw File again.
 	// Since our LZ compression is pretty much non-standard, that should be enough.
@@ -2000,9 +2004,9 @@ void decryptFile (char *inputFile, char *outputFile)
 	long result = dataFile.open(inputFile);
 	if (result == NO_ERR) 
 	{
-		long lzSize = dataFile.readLong();
-		long zlibSize = dataFile.readLong();
-		long fileSize = dataFile.readLong();
+		long lzSize = dataFile.readInt();
+		long zlibSize = dataFile.readInt();
+		long fileSize = dataFile.readInt();
 	
 		rawData = (MemoryPtr)malloc(fileSize);
 		zlibData = (MemoryPtr)malloc(zlibSize);

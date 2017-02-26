@@ -39,7 +39,7 @@
 #endif
 
 #include<string.h>
-#include<io.h>
+#include"platform_io.h"
 #include<ctype.h>
 #include<errno.h>
 
@@ -223,7 +223,7 @@ long File::open (const char* fName, FileMode _mode, long numChild, bool doNotLow
 	//_fmode = _O_BINARY;
 
     if(!doNotLower)
-	    _strlwr(fileName);
+	    S_strlwr(fileName);
 
 	if (fileMode == CREATE)
 	{

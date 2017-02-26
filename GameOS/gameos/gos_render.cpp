@@ -97,6 +97,10 @@ RenderWindow* create_window(const char* pwinname, int width, int height)
 
     SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
 
+    // 4x multisampling :P
+    SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
+    SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 4);
+
 
     // select core profile if needed
     // COMPATIBILITY, ES,...

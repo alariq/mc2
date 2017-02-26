@@ -421,7 +421,7 @@ Parse:
 		// If the line consists of a nested block end, handle it appropriately
 		//--------------------------------------------------------------------
 		//
-		if (!_stricmp(p, "}"))
+		if (!S_stricmp(p, "}"))
 		{
 			if (nested)
 			{
@@ -648,7 +648,7 @@ void
 	Check_Object(notation);
 	if (entry)
 	{
-		if (_stricmp(entry, "{"))
+		if (S_stricmp(entry, "{"))
 			notation->SetEntry(entry);
 
 		//
@@ -818,7 +818,7 @@ Page*
 	{
 		Check_Object(page);
 		const char* name = page->m_name;
-		if (name && !_stricmp(name, pagename))
+		if (name && !S_stricmp(name, pagename))
 			return page;
 	}
 	return NULL;

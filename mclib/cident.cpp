@@ -16,7 +16,7 @@
 #include"heap.h"
 #include<ctype.h>
 
-#include"windows.h"
+#include"platform_windows.h"
 
 // sebi
 //#ifndef _MBCS

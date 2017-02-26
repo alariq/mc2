@@ -1,5 +1,5 @@
 #ifndef PLATFORM_WINDOWS_H
-#define PLATFORM__WINDOWS_H
+#define PLATFORM_WINDOWS_H
 
 #define NOMINMAX
 

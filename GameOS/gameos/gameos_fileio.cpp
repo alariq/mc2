@@ -12,8 +12,11 @@
 //
 
 #include <stdio.h> // fopen
+#include "platform_io.h"
 
 #include <errno.h>
+
+#include "platform_io.h" // will be removed
 
 gosFileStream::gosFileStream( const char *FileName, gosEnum_FileWriteStatus fwstatus )
 {

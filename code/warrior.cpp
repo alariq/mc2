@@ -102,7 +102,7 @@
 
 #define	TESTING_WITH_PLAYER	1
 
-#include"windows.h"
+#include"platform_windows.h"
 
 enum {
 	T_A = 0,
@@ -6023,8 +6023,8 @@ long MechWarrior::orderMoveToPoint (bool unitOrder, bool setTacOrder, long origi
 void MechWarrior::clearMovePath (long pathNum) {
 
 	if (moveOrders.path[pathNum]) {
-		if (moveOrders.path[pathNum]->numStepsWhenNotPaused > 0)
-			long i = 0;
+		//if (moveOrders.path[pathNum]->numStepsWhenNotPaused > 0)
+		//	long i = 0;
 		moveOrders.path[pathNum]->clear();
 	}
 }

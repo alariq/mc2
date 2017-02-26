@@ -93,7 +93,7 @@ void
 	const char *contents = NULL;
 	GetEntry(&contents);
 	Check_Pointer(contents);
-	*value = (!_stricmp(contents, "true") || !_stricmp(contents, "yes") || atoi(contents) != 0);
+	*value = (!S_stricmp(contents, "true") || !S_stricmp(contents, "yes") || atoi(contents) != 0);
 }
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

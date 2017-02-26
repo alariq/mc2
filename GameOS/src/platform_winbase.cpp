@@ -16,10 +16,10 @@
 #include <libgen.h> // dirname
 #include <stdlib.h> // free
 #include <stdio.h> // free
+#include<wchar.h> // wcscpy
 
 #include"platform_windows.h"
-#include"platform_string.h"
-#include"platform_wchar.h"
+#include"platform_str.h"
 
 static int gGetLastError = 0;
 

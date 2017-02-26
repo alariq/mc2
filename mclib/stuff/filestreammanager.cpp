@@ -81,7 +81,7 @@ void
 	{
 		const char* old_name = Cast_Pointer(const char*, scanner.GetPointer());
 		int len = strlen(old_name);
-		if (!_stricmp(new_file, old_name))
+		if (!S_stricmp(new_file, old_name))
 			return;
 		scanner.AdvancePointer(len+1);
 	}
@@ -122,7 +122,7 @@ void
 		{
 			const char* old_name = Cast_Pointer(const char*, scanner.GetPointer());
 			int len = strlen(old_name);
-			if (!_stricmp(old_name, new_name))
+			if (!S_stricmp(old_name, new_name))
 				break;
 			scanner.AdvancePointer(len+1);
 		}
