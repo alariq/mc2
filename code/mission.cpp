@@ -401,7 +401,11 @@ long Mission::update (void)
 		//Save the game in-Mission if requested
 		if (saveInMissionSave)
 		{
-			save("data" PATH_SEPARATOR "savegame" PATH_SEPARATOR "testgame.ims");
+            // sebi:
+			//save("data" PATH_SEPARATOR "savegame" PATH_SEPARATOR "testgame.ims");
+            char savegame_path[1024];
+            snprintf(savegame_path, sizeof(savegame_path)/sizeof(savegame_path[0]), "%s" PATH_SEPARATOR "testgame.ims", savePath);
+			save(savegame_path);
 			saveInMissionSave = false;
 		}
 

@@ -967,9 +967,12 @@ void __stdcall InitializeGameEngine()
 		//if (!maxPathLength)
 		//	strcpy(CDInstallPath,"..\\");
 		// to find necessary files
-		//strcpy(CDInstallPath,"../FinalBuild/");
+#ifdef PLATFORM_WINDOWS
 		// for my windows layout
 		strcpy(CDInstallPath,"./");
+#else
+		strcpy(CDInstallPath,"../FinalBuild/");
+#endif        
 
 		//--------------------------------------------------------------
 		// Start the SystemHeap and globalHeapList
@@ -2233,7 +2236,11 @@ void __stdcall DoGameLogic()
 
 		if (loadInMissionSave)
 		{
-			mission->load("data" PATH_SEPARATOR "savegame" PATH_SEPARATOR "testgame.ims");
+			//sebi:
+            //mission->load("data" PATH_SEPARATOR "savegame" PATH_SEPARATOR "testgame.ims");
+            char savegame_path[1024];
+            snprintf(savegame_path, sizeof(savegame_path)/sizeof(savegame_path[0]), "%s" PATH_SEPARATOR "testgame.ims", savePath);
+            mission->load(savegame_path);
 			loadInMissionSave = false;
 		}
 	}
