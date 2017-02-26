@@ -452,8 +452,8 @@ void ControlGui::render( bool bPaused )
 			{
 				float scaleX = Environment.screenWidth <= 1024 ? Environment.screenWidth : 1024;
 				float scaleY = Environment.screenHeight <= 768 ? Environment.screenHeight : 768;
-				GUI_RECT rect = { 51 * scaleX/640.f + ControlGui::hiResOffsetX, 317 * scaleY/480.f + ControlGui::hiResOffsetY,
-								74 *scaleX/640.f + ControlGui::hiResOffsetX, 337 * scaleY/480.f  + ControlGui::hiResOffsetY};
+				GUI_RECT rect = { (long)(51 * scaleX/640.f + ControlGui::hiResOffsetX), (long)(317 * scaleY/480.f + ControlGui::hiResOffsetY),
+								(long)(74 *scaleX/640.f + ControlGui::hiResOffsetX), (long)(337 * scaleY/480.f  + ControlGui::hiResOffsetY)};
 				drawRect( rect, 0xff000000 );
 			}
 		}
@@ -779,8 +779,8 @@ void ControlGui::renderPlayerStatus(float xDelta)
 			mpStats[i].showGUIWindow( 0 );
 	}
 
-	GUI_RECT rect = { mpStats[0].left()-5+xDelta, mpStats[0].top()-5, 
-		mpStats[0].right()+5+xDelta, mpStats[0].bottom()+5};
+	GUI_RECT rect = { (long)(mpStats[0].left()-5+xDelta), (long)(mpStats[0].top()-5), 
+		(long)(mpStats[0].right()+5+xDelta), (long)(mpStats[0].bottom()+5)};
 	
 	for (int i = 1; i < 9; i++ )
 	{
@@ -1886,8 +1886,8 @@ void ControlGui::renderVehicleTab()
 		{
 			ControlButton::makeUVs( vehicleButtons[i].location, ControlButton::ENABLED, *vehicleButtons[i].data );	
 			cost = vehicleCosts[i];
-			GUI_RECT rect = { vehicleButtons[i].location[0].x, vehicleButtons[i].location[0].y,
-				vehicleButtons[i].location[2].x, vehicleButtons[i].location[2].y };
+			GUI_RECT rect = { (long)vehicleButtons[i].location[0].x, (long)vehicleButtons[i].location[0].y,
+				(long)vehicleButtons[i].location[2].x, (long)vehicleButtons[i].location[2].y };
 			vehicleButtons[i].render();
 			drawEmptyRect( rect, 0xffffffff, 0xffffffff );
 			color = 0xffffffff;

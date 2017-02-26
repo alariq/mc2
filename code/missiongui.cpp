@@ -608,7 +608,7 @@ void MissionInterfaceManager::update (void)
 	#define MC2_DAMAGE_RRTORSO		9	
 	#define MC2_DAMAGE_RCTORSO		10	
 			
-	DWORD CheatCommand = -1;
+	DWORD CheatCommand = 0xffffffff;
 	if (userInput->getKeyDown(KEY_1) && shiftDn && ctrlDn && altDn)
 		CheatCommand = MC2_DAMAGE_HEAD;
 	if (userInput->getKeyDown(KEY_2) && shiftDn && ctrlDn && altDn)
@@ -636,7 +636,7 @@ void MissionInterfaceManager::update (void)
 
 	switch (CheatCommand)
 	{
-		case -1:
+		case 0xffffffff:
 			break;
 			
 		case MC2_DAMAGE_HEAD:

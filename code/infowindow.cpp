@@ -806,7 +806,7 @@ void InfoWindow::drawScrollingStuff()
 			{
 				if ( pWarrior->active() )
 					icon->renderPilotIcon( PILOTLEFT, curY, PILOTRIGHT, curY + PILOTHEIGHT );
-				GUI_RECT tmpRect = { PILOTLEFT, curY, PILOTRIGHT + 1, curY + PILOTHEIGHT + 1 }; 
+				GUI_RECT tmpRect = { (long)PILOTLEFT, (long)curY, (long)(PILOTRIGHT + 1), (long)(curY + PILOTHEIGHT + 1) }; 
 				drawEmptyRect( tmpRect, SCROLLCOLOR, SCROLLCOLOR  );
 			
 				float right = SCROLLLEFT;
@@ -858,7 +858,7 @@ void InfoWindow::drawScrollingStuff()
 			
 			if ( curY > NAMETOP )
 			{
-				GUI_RECT tmpRect = { v[0].x - .5, v[0].y - .5, v[2].x + 1.5, v[2].y + 1.5 };
+				GUI_RECT tmpRect = { (long)(v[0].x - .5), (long)(v[0].y - .5), (long)(v[2].x + 1.5), (long)(v[2].y + 1.5) };
 				drawEmptyRect( tmpRect, 0xff002f55, 0xff002f55  );
 
 
@@ -964,10 +964,10 @@ void InfoWindow::drawSkillBar( int skill, float yVal, float height )
 
 	unsigned long color = 0xff005392;
 
-	GUI_RECT outSideRect = { left - SKILLSKIP + .5, yVal - .5, right + SKILLSKIP + .5, yVal + height + 1.5};
+	GUI_RECT outSideRect = { (long)(left - SKILLSKIP + .5f), (long)(yVal - .5f), (long)(right + SKILLSKIP + .5f), (long)(yVal + height + 1.5f)};
 	drawRect( outSideRect, 0xff000000 );
-	GUI_RECT rect = { left  + InfoWindow::SKILLSKIP, yVal + InfoWindow::SKILLSKIP + .5,
-		left  + InfoWindow::SKILLSKIP + SKILLUNITWIDTH, yVal + height - InfoWindow::SKILLSKIP + .5 };
+	GUI_RECT rect = { (long)(left  + InfoWindow::SKILLSKIP), (long)(yVal + InfoWindow::SKILLSKIP + .5f),
+		(long)(left  + InfoWindow::SKILLSKIP + SKILLUNITWIDTH), (long)(yVal + height - InfoWindow::SKILLSKIP + .5f) };
 
 	drawEmptyRect( outSideRect, 0xff002f55, 0xff002f55 );
 
