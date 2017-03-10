@@ -296,8 +296,9 @@ void TerrainQuad::setupTextures (void)
 						terrainDetailHandle = 0xffffffff;		//Cement has NO detail!!
 						overlayHandle = 0xffffffff;
 						
-						mcTextureManager->addTriangle(terrainHandle,MC2_ISTERRAIN | MC2_DRAWALPHA | MC2_ISCRATERS);
-						mcTextureManager->addTriangle(terrainHandle,MC2_ISTERRAIN | MC2_DRAWALPHA | MC2_ISCRATERS);
+						// sebi (*) make it solid, soother objects will not draw-through, special section added in txmmgr.cpp
+						mcTextureManager->addTriangle(terrainHandle,MC2_ISTERRAIN/* | MC2_DRAWALPHA*/ | MC2_ISCRATERS);
+						mcTextureManager->addTriangle(terrainHandle,MC2_ISTERRAIN/* | MC2_DRAWALPHA*/ | MC2_ISCRATERS);
 					}
 				}
 				
@@ -392,8 +393,9 @@ void TerrainQuad::setupTextures (void)
 						terrainDetailHandle = 0xffffffff;		//Cement has NO detail!!
 						overlayHandle = 0xffffffff;
 							
-						mcTextureManager->addTriangle(terrainHandle,MC2_ISTERRAIN | MC2_DRAWALPHA | MC2_ISCRATERS);
-						mcTextureManager->addTriangle(terrainHandle,MC2_ISTERRAIN | MC2_DRAWALPHA | MC2_ISCRATERS);
+						// sebi: (*) make it solid, soother objects will not draw-through, special section added in txmmgr.cpp
+						mcTextureManager->addTriangle(terrainHandle,MC2_ISTERRAIN /*| MC2_DRAWALPHA*/ | MC2_ISCRATERS);
+						mcTextureManager->addTriangle(terrainHandle,MC2_ISTERRAIN /*| MC2_DRAWALPHA*/ | MC2_ISCRATERS);
 					}
 				}
 				
@@ -1436,8 +1438,10 @@ void TerrainQuad::draw (void)
 			DWORD lightRGB0 = vertices[0]->lightRGB; 
 			DWORD lightRGB1 = vertices[1]->lightRGB; 
 			DWORD lightRGB2 = vertices[2]->lightRGB; 
-			if (Terrain::terrainTextures2 && (!Terrain::terrainTextures->isCement(vertices[0]->pVertex->textureData & 0x0000ffff)
-											|| Terrain::terrainTextures->isAlpha(vertices[0]->pVertex->textureData & 0x0000ffff)))
+			bool isCement = Terrain::terrainTextures->isCement(vertices[0]->pVertex->textureData & 0x0000ffff);
+			bool isAlpha = Terrain::terrainTextures->isAlpha(vertices[0]->pVertex->textureData & 0x0000ffff);
+
+			if (Terrain::terrainTextures2 && (!isCement || isAlpha))
 				lightRGB0 = lightRGB1 = lightRGB2 = 0xffffffff;
 
 			lightRGB0 = vertices[0]->pVertex->selected ? SELECTION_COLOR : lightRGB0;
@@ -1479,12 +1483,13 @@ void TerrainQuad::draw (void)
 				(gVertex[2].z < 1.0f))
 			{
 				{
-					// sebi: beware this will be drawn with alpha blending, so need to make sure that alpha is not zero, because thi is a base terrain layer!
+					// sebi: beware this will be drawn with alpha blending, so need to make sure that alpha is not zero, because this is a base terrain layer!
+					DWORD flags = isAlpha ? MC2_DRAWALPHA : 0;
 					if ((terrainDetailHandle == 0xffffffff) && (overlayHandle == 0xffffffff) && isCement)
-						mcTextureManager->addVertices(terrainHandle,gVertex,MC2_ISTERRAIN | MC2_DRAWALPHA | MC2_ISCRATERS);
-					else
+						mcTextureManager->addVertices(terrainHandle,gVertex,MC2_ISTERRAIN | flags | MC2_ISCRATERS);
+					else 
 						mcTextureManager->addVertices(terrainHandle,gVertex,MC2_ISTERRAIN | MC2_DRAWSOLID);
-																										 
+																								 
 					//--------------------------------------------------------------
 					// Draw the Overlay Texture if it exists.
 					if (useOverlayTexture && (overlayHandle != 0xffffffff))
@@ -1573,8 +1578,7 @@ void TerrainQuad::draw (void)
 			// gVertex[1] is same as above gVertex[2].
 			// gVertex[2] is calced from vertex[3].
 			DWORD lightRGB3 = vertices[3]->lightRGB;
-			if (Terrain::terrainTextures2 && (!Terrain::terrainTextures->isCement(vertices[0]->pVertex->textureData & 0x0000ffff)
-											|| Terrain::terrainTextures->isAlpha(vertices[0]->pVertex->textureData & 0x0000ffff)))
+			if (Terrain::terrainTextures2 && (!isCement || isAlpha))
 				lightRGB3 = 0xffffffff;
 
 			lightRGB3 = vertices[3]->pVertex->selected ? SELECTION_COLOR : lightRGB3;
@@ -1605,11 +1609,12 @@ void TerrainQuad::draw (void)
 				(gVertex[2].z < 1.0f))
 			{
 				{
+					DWORD flags = isAlpha ? MC2_DRAWALPHA : 0;
 					if ((terrainDetailHandle == 0xffffffff) && (overlayHandle == 0xffffffff) && isCement)
-						mcTextureManager->addVertices(terrainHandle,gVertex,MC2_ISTERRAIN | MC2_DRAWALPHA | MC2_ISCRATERS);
+						mcTextureManager->addVertices(terrainHandle,gVertex,MC2_ISTERRAIN | flags | MC2_ISCRATERS);
 					else
 						mcTextureManager->addVertices(terrainHandle,gVertex,MC2_ISTERRAIN | MC2_DRAWSOLID);
- 
+					
 					//--------------------------------------------------------------
 					// Draw the Overlay Texture if it exists.
 					if (useOverlayTexture && (overlayHandle != 0xffffffff))
@@ -1700,8 +1705,9 @@ void TerrainQuad::draw (void)
 			DWORD lightRGB0 = vertices[0]->lightRGB;
 			DWORD lightRGB1 = vertices[1]->lightRGB;
 			DWORD lightRGB3 = vertices[3]->lightRGB;
-			if (Terrain::terrainTextures2 && (!Terrain::terrainTextures->isCement(vertices[0]->pVertex->textureData & 0x0000ffff)
-											|| Terrain::terrainTextures->isAlpha(vertices[0]->pVertex->textureData & 0x0000ffff)))
+			bool isCement = Terrain::terrainTextures->isCement(vertices[0]->pVertex->textureData & 0x0000ffff);
+			bool isAlpha = Terrain::terrainTextures->isAlpha(vertices[0]->pVertex->textureData & 0x0000ffff);
+			if (Terrain::terrainTextures2 && (!isCement || isAlpha))
 				lightRGB0 = lightRGB1 = lightRGB3 = 0xffffffff;
 
 			lightRGB0 = vertices[0]->pVertex->selected ? SELECTION_COLOR : lightRGB0;
@@ -1743,8 +1749,9 @@ void TerrainQuad::draw (void)
 				(gVertex[2].z < 1.0f))
 			{
 				{
+					DWORD flags = isAlpha ? MC2_DRAWALPHA : 0;
 					if ((terrainDetailHandle == 0xffffffff) && (overlayHandle == 0xffffffff) && isCement)
-						mcTextureManager->addVertices(terrainHandle,gVertex,MC2_ISTERRAIN | MC2_DRAWALPHA | MC2_ISCRATERS);
+						mcTextureManager->addVertices(terrainHandle,gVertex,MC2_ISTERRAIN | flags | MC2_ISCRATERS);
 					else
 						mcTextureManager->addVertices(terrainHandle,gVertex,MC2_ISTERRAIN | MC2_DRAWSOLID);
  
@@ -1834,8 +1841,7 @@ void TerrainQuad::draw (void)
 			// gVertex[1] is new and calced from vertex[2].
 			// gVertex[2] is same as above.
 			DWORD lightRGB2 = vertices[2]->lightRGB;
-			if (Terrain::terrainTextures2 && (!Terrain::terrainTextures->isCement(vertices[0]->pVertex->textureData & 0x0000ffff)
-											|| Terrain::terrainTextures->isAlpha(vertices[0]->pVertex->textureData & 0x0000ffff)))
+			if (Terrain::terrainTextures2 && (!isCement || isAlpha))
 				lightRGB2 = 0xffffffff;
 
 			lightRGB2 = vertices[2]->pVertex->selected ? SELECTION_COLOR : lightRGB2;
@@ -1866,8 +1872,9 @@ void TerrainQuad::draw (void)
 				(gVertex[2].z < 1.0f))
 			{
 				{
+					DWORD flags = isAlpha ? MC2_DRAWALPHA : 0;
 					if ((terrainDetailHandle == 0xffffffff) && (overlayHandle == 0xffffffff) && isCement)
-						mcTextureManager->addVertices(terrainHandle,gVertex,MC2_ISTERRAIN | MC2_DRAWALPHA | MC2_ISCRATERS);
+						mcTextureManager->addVertices(terrainHandle,gVertex,MC2_ISTERRAIN | flags | MC2_ISCRATERS);
 					else
 						mcTextureManager->addVertices(terrainHandle,gVertex,MC2_ISTERRAIN | MC2_DRAWSOLID);
  
