@@ -2239,7 +2239,7 @@ void __stdcall DoGameLogic()
 			//sebi:
             //mission->load("data" PATH_SEPARATOR "savegame" PATH_SEPARATOR "testgame.ims");
             char savegame_path[1024];
-            snprintf(savegame_path, sizeof(savegame_path)/sizeof(savegame_path[0]), "%s" PATH_SEPARATOR "testgame.ims", savePath);
+            S_snprintf(savegame_path, sizeof(savegame_path)/sizeof(savegame_path[0]), "%s" PATH_SEPARATOR "testgame.ims", savePath);
             mission->load(savegame_path);
 			loadInMissionSave = false;
 		}
