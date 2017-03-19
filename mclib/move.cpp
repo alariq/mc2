@@ -86,7 +86,7 @@ char rowShift[NUM_DIRECTIONS] = {-1, -1, 0, 1, 1, 1, 0, -1};
 char colShift[NUM_DIRECTIONS] = {0, 1, 1, 1, 0, -1, -1, -1};
 
 #define	NUM_CELL_OFFSETS 128
-long cellShift[NUM_CELL_OFFSETS * 2] = {
+static int cellShift[NUM_CELL_OFFSETS * 2] = {
 	-1, 0,
 	-1, 1,
 	0, 1,
@@ -277,9 +277,9 @@ bool IsDiagonalStep[NUM_CELL_OFFSETS] = {
 	false, false, false, false, false, false, false, false
 };
 
-long StepAdjDir[9] = {-1, 0, 2, 2, 4, 4, 6, 6, 0};
+static int StepAdjDir[9] = {-1, 0, 2, 2, 4, 4, 6, 6, 0};
 
-long adjTile[4][2] = {
+static int adjTile[4][2] = {
 	{-1, 0},
 	{0, 1},
 	{1, 0},
@@ -351,7 +351,7 @@ inline void calcAdjNode (long& r, long& c, long direction) {
 
 //---------------------------------------------------------------------------
 
-inline bool inMapBounds (long r, long c, long mapHeight, long mapWidth) {
+inline bool inMapBounds (int r, int c, int mapHeight, int mapWidth) {
 
 	return((r >= 0) && (r < mapHeight) && (c >= 0) && (c < mapWidth));
 }
@@ -2530,7 +2530,7 @@ long GlobalMap::calcLinkCost (long startDoor, long thruArea, long goalDoor) {
 					   8,
 					   MOVEPARAM_NONE);
 #endif
-		long goalCell[2];
+		int goalCell[2];
 		PathFindMap[SECTOR_PATHMAP]->calcPath(&newPath, NULL, goalCell);
 		ClearBridgeTiles = false;
 	}
@@ -4800,7 +4800,7 @@ inline bool MoveMap::adjacentCellOpenJUMP (long r, long c, long dir) {
 
 //---------------------------------------------------------------------------
 
-inline long MoveMap::calcHPrime (long r, long c) {
+inline int MoveMap::calcHPrime (int r, int c) {
 	__int64 startTime = GetCycles();
 	long sum = 0;
 	if (r > goalR)
@@ -4981,7 +4981,7 @@ inline void MoveMap::propogateCostJUMP (long r, long c, long cost, long g) {
 //#define TIME_PATH
 //#define DEBUG_MOVE_MAP
 
-long MoveMap::calcPath (MovePathPtr path, Stuff::Vector3D* goalWorldPos, long* goalCell) {
+long MoveMap::calcPath (MovePathPtr path, Stuff::Vector3D* goalWorldPos, int* goalCell) {
 
 	#ifdef TIME_PATH
 		L_INTEGER calcStart, calcStop;
@@ -5012,8 +5012,8 @@ long MoveMap::calcPath (MovePathPtr path, Stuff::Vector3D* goalWorldPos, long* g
 		openList->init(5000);
 	}
 		
-	long curCol = startC;
-	long curRow = startR;
+	int curCol = startC;
+	int curRow = startR;
 	
 	MoveMapNodePtr curMapNode = &map[mapRowStartTable[curRow] + curCol];
 	curMapNode->g = 0;
@@ -5030,15 +5030,15 @@ long MoveMap::calcPath (MovePathPtr path, Stuff::Vector3D* goalWorldPos, long* g
 	initialVertex.col = curCol;
 	openList->clear();
 #ifdef _DEBUG
-	long insertErr = 
+	int insertErr = 
 #endif
 		openList->insert(initialVertex);
 	gosASSERT(insertErr == NO_ERR);
 	curMapNode->setFlag(MOVEFLAG_OPEN);
 
 	bool goalFound = false;
-	long bestRow = -1;
-	long bestCol = -1;
+	int bestRow = -1;
+	int bestCol = -1;
 
 	#ifdef DEBUG_PATH
 		topOpenNodes = 1;
@@ -5072,7 +5072,7 @@ long MoveMap::calcPath (MovePathPtr path, Stuff::Vector3D* goalWorldPos, long* g
 		MoveMapNodePtr bestMapNode = &map[bestPQNode.id];
 		bestMapNode->clearFlag(MOVEFLAG_OPEN);
 		
-		long bestNodeG = bestMapNode->g;
+		int bestNodeG = bestMapNode->g;
 
 		//----------------------------
 		// Now, close the best node...
@@ -5085,7 +5085,7 @@ long MoveMap::calcPath (MovePathPtr path, Stuff::Vector3D* goalWorldPos, long* g
 			break;
 		}
 		
-		for (long dir = 0; dir < 8; dir++) {
+		for (int dir = 0; dir < 8; dir++) {
 			//------------------------------------------------------------
 			// First, make sure this is a legit direction to go. We do NOT
 			// want to clip corners, so we'll check that here...
@@ -5094,7 +5094,7 @@ long MoveMap::calcPath (MovePathPtr path, Stuff::Vector3D* goalWorldPos, long* g
 			
 				// MINE CHECK should go in these adj tests...
 				bool adj1Open = false;
-				long adjCellIndex = map[bestPQNode.id].adjCells[StepAdjDir[dir]];
+				int adjCellIndex = map[bestPQNode.id].adjCells[StepAdjDir[dir]];
 				if (adjCellIndex > -1)
 					if ((map[adjCellIndex].flags & MOVEFLAG_MOVER_HERE) == 0)
 						adj1Open = (map[adjCellIndex].cost < COST_BLOCKED);
@@ -5114,7 +5114,7 @@ long MoveMap::calcPath (MovePathPtr path, Stuff::Vector3D* goalWorldPos, long* g
 
 			//-------------------------------
 			// Now, process this direction...
-			long succCellIndex = bestMapNode->adjCells[dir];
+			int succCellIndex = bestMapNode->adjCells[dir];
 
 			//-----------------------------------------------------------------------------------
 			// If we're doing offMapTravel, make sure we aren't going back into an offMap cell...
@@ -5149,7 +5149,7 @@ long MoveMap::calcPath (MovePathPtr path, Stuff::Vector3D* goalWorldPos, long* g
 
 						//----------------------------------------------------
 						// What's our cost to go from START to this SUCCESSOR?
-						long cost = succMapNode->cost;
+						int cost = succMapNode->cost;
 						//------------------------------------
 						// Diagonal movement is more costly...
 						gosASSERT(cost > 0);
@@ -5157,7 +5157,7 @@ long MoveMap::calcPath (MovePathPtr path, Stuff::Vector3D* goalWorldPos, long* g
 							cost += (cost / 2);
 						gosASSERT(cost > 0);
 						
-						long succNodeG = bestNodeG + cost;
+						int succNodeG = bestNodeG + cost;
 
 						if (succMapNode->flags & MOVEFLAG_OPEN) {
 							//----------------------------------------------
@@ -5170,7 +5170,7 @@ long MoveMap::calcPath (MovePathPtr path, Stuff::Vector3D* goalWorldPos, long* g
 								succMapNode->parent = dirToParent;
 								succMapNode->g = succNodeG;
 								succMapNode->fPrime = succNodeG + succMapNode->hPrime;
-								long openIndex = openList->find(succCellIndex);
+								int openIndex = openList->find(succCellIndex);
 								if (!openIndex) {
 									char s[128];
 									sprintf(s, "MoveMap.calcPath: Cannot find movemap node [%d, %d] for change\n", succCellIndex, dir);
@@ -5210,7 +5210,7 @@ long MoveMap::calcPath (MovePathPtr path, Stuff::Vector3D* goalWorldPos, long* g
 							succPQNode.row = mapRowTable[succCellIndex];
 							succPQNode.col = mapColTable[succCellIndex];
 #ifdef _DEBUG
-							long insertErr = 
+							int insertErr = 
 #endif
 								openList->insert(succPQNode);
 							gosASSERT(insertErr == NO_ERR);
@@ -5237,12 +5237,12 @@ long MoveMap::calcPath (MovePathPtr path, Stuff::Vector3D* goalWorldPos, long* g
 	if (goalFound) {
 		//-------------------------------------------
 		// First, let's count how long the path is...
-		long curRow = goalCell[0] = (long)bestRow;
-		long curCol = goalCell[1] = (long)bestCol;
-		long numCells = 0;
+		int curRow = goalCell[0] = bestRow;
+		int curCol = goalCell[1] = bestCol;
+		int numCells = 0;
 		while ((curRow != startR) || (curCol != startC)) {
 			numCells += 1;
-			long cellOffsetIndex = (map[mapRowStartTable[curRow] + curCol].parent << 1);
+			int cellOffsetIndex = (map[mapRowStartTable[curRow] + curCol].parent << 1);
 			//if ((cellOffsetIndex < 0) || (cellOffsetIndex > 14))
 			//	OutputDebugString("PathFinder: whoops\n");
 			curRow += cellShift[cellOffsetIndex++];
@@ -5278,7 +5278,7 @@ long MoveMap::calcPath (MovePathPtr path, Stuff::Vector3D* goalWorldPos, long* g
 		path->init();
 		if (numCells) {
 			#ifdef _DEBUG			
-			long maxSteps = 
+			int maxSteps = 
 			#endif
 
 			path->init(numCells);
@@ -5299,14 +5299,14 @@ long MoveMap::calcPath (MovePathPtr path, Stuff::Vector3D* goalWorldPos, long* g
 
 			path->target = target;
 			path->cost = map[mapRowStartTable[bestRow] + bestCol].g;
-			curRow = (long)bestRow;
-			curCol = (long)bestCol;
-			long curCell = numCells;
+			curRow = bestRow;
+			curCol = bestCol;
+			int curCell = numCells;
 			if (doorDirection == -1) {
 				if (goalWorldPos) {
 					goalWorldPos->x = (float)(ULc + bestCol) * Terrain::worldUnitsPerCell + Terrain::worldUnitsPerCell / 2 - Terrain::worldUnitsMapSide / 2;
 					goalWorldPos->y = (Terrain::worldUnitsMapSide / 2) - ((float)(ULr + bestRow) * Terrain::worldUnitsPerCell) - Terrain::worldUnitsPerCell / 2;
-					goalWorldPos->z = (float)0; // How do we get the elevation for this point? Do we care?
+					goalWorldPos->z = 0.0f; // How do we get the elevation for this point? Do we care?
 					path->goal = *goalWorldPos;
 					}
 				else
@@ -5317,8 +5317,8 @@ long MoveMap::calcPath (MovePathPtr path, Stuff::Vector3D* goalWorldPos, long* g
 				// It's a door, so it's the last on the path list...
 				curCell--;
 				path->setDirection(curCell, /*reverseShift[*/doorDirection * 2/*]*/);
-				long doorR = bestRow + adjTile[doorDirection][0];
-				long doorC = bestCol + adjTile[doorDirection][1];
+				int doorR = bestRow + adjTile[doorDirection][0];
+				int doorC = bestCol + adjTile[doorDirection][1];
 
 				goalCell[0] = ULr + doorR;
 				goalCell[1] = ULc + doorC;
@@ -5343,7 +5343,7 @@ long MoveMap::calcPath (MovePathPtr path, Stuff::Vector3D* goalWorldPos, long* g
 			static bool setTable = false;
 			if (!setTable) {
 				float cellLength = Terrain::worldUnitsPerCell * metersPerWorldUnit;
-				for (long i = 0; i < NUM_CELL_OFFSETS; i++) {
+				for (int i = 0; i < NUM_CELL_OFFSETS; i++) {
 					float distance = agsqrt( cellShift[i * 2], cellShift[i * 2 + 1] ) * cellLength;
 					cellShiftDistance[i] = distance;
 				}
@@ -5359,25 +5359,25 @@ long MoveMap::calcPath (MovePathPtr path, Stuff::Vector3D* goalWorldPos, long* g
 					path->setDirection(curCell, parent);
 
 				Stuff::Vector3D stepDest;
-				long cell[2];
-				cell[0] = ULr + curRow;
-				cell[1] = ULc + curCol;
-				stepDest.x = (float)(cell[1]) * Terrain::worldUnitsPerCell + Terrain::worldUnitsPerCell / 2 - Terrain::worldUnitsMapSide / 2;
-				stepDest.y = (Terrain::worldUnitsMapSide / 2) - ((float)(cell[0]) * Terrain::worldUnitsPerCell) - Terrain::worldUnitsPerCell / 2;
-				stepDest.z = (float)0; // How do we get the elevation for this point? Do we care?
+				int cell_r, cell_c;
+				cell_r = ULr + curRow;
+				cell_c = ULc + curCol;
+				stepDest.x = (float)(cell_c) * Terrain::worldUnitsPerCell + Terrain::worldUnitsPerCell / 2 - Terrain::worldUnitsMapSide / 2;
+				stepDest.y = (Terrain::worldUnitsMapSide / 2) - ((float)(cell_r) * Terrain::worldUnitsPerCell) - Terrain::worldUnitsPerCell / 2;
+				stepDest.z = 0.0f; // How do we get the elevation for this point? Do we care?
 				if (curCell == (numCells - 1))
 					path->setDistanceToGoal(curCell, 0.0);
 				else {
-					long tempDir = path->getDirection(curCell + 1);
+					int tempDir = path->getDirection(curCell + 1);
 					float tempDist = path->getDistanceToGoal(curCell + 1);
 					path->setDistanceToGoal(curCell, cellShiftDistance[tempDir] + tempDist);
 				}
 				path->setDestination(curCell, stepDest);
-				path->setCell(curCell, cell[0], cell[1]);
-				path->stepList[curCell].area = GlobalMoveMap[moveLevel]->calcArea(cell[0], cell[1]);
+				path->setCell(curCell, cell_r, cell_c);
+				path->stepList[curCell].area = GlobalMoveMap[moveLevel]->calcArea(cell_r, cell_c);
 
 				map[curRow * maxWidth + curCol].setFlag(MOVEFLAG_STEP);
-				long cellOffsetIndex = map[mapRowStartTable[curRow] + curCol].parent << 1;
+				int cellOffsetIndex = map[mapRowStartTable[curRow] + curCol].parent << 1;
 				curRow += cellShift[cellOffsetIndex++];
 				curCol += cellShift[cellOffsetIndex];
 				//calcAdjNode(curRow, curCol, map[curRow * maxCellWidth + curCol].parent);
@@ -5385,7 +5385,7 @@ long MoveMap::calcPath (MovePathPtr path, Stuff::Vector3D* goalWorldPos, long* g
 
 			if (thruAreas[1] != -1)
 				if (thruAreas[1] != path->stepList[path->numSteps - 1].area) {
-					for (long i = 0; i < path->numSteps; i++) {
+					for (int i = 0; i < path->numSteps; i++) {
 						if (path->stepList[i].area == thruAreas[1]) {
 							path->numStepsWhenNotPaused = path->numSteps = i + 1;
 							goalCell[0] = path->stepList[i].cell[0];
@@ -5399,8 +5399,8 @@ long MoveMap::calcPath (MovePathPtr path, Stuff::Vector3D* goalWorldPos, long* g
 			#ifdef BLOCKED_PATH_TEST
 				//---------------------------------------------------------------------
 				// Let's test every path point to make sure it is not a blocked cell...
-				for (long i = 0; i < path->numSteps; i++) {
-					long tile[2], cell[2];
+				for (int i = 0; i < path->numSteps; i++) {
+					int tile[2], cell[2];
 					GameMap->worldToMapPos(path->stepList[i].destination, tile[0], tile[1], cell[0], cell[1]);
 					bool cellPassable = GameMap->cellPassable(tile[0], tile[0], cell[0], cell[1]);
 					if (!cellPassable)
@@ -5445,7 +5445,7 @@ long MoveMap::calcPath (MovePathPtr path, Stuff::Vector3D* goalWorldPos, long* g
 
 //---------------------------------------------------------------------------
 
-long MoveMap::calcPathJUMP (MovePathPtr path, Stuff::Vector3D* goalWorldPos, long* goalCell) {
+long MoveMap::calcPathJUMP (MovePathPtr path, Stuff::Vector3D* goalWorldPos, int* goalCell) {
 
 	#ifdef TIME_PATH
 		L_INTEGER calcStart, calcStop;
@@ -5521,8 +5521,8 @@ long MoveMap::calcPathJUMP (MovePathPtr path, Stuff::Vector3D* goalWorldPos, lon
 	curMapNode->setFlag(MOVEFLAG_OPEN);
 
 	bool goalFound = false;
-	long bestRow = -1;
-	long bestCol = -1;
+	int bestRow = -1;
+	int bestCol = -1;
 
 	#ifdef DEBUG_PATH
 		topOpenNodes = 1;
@@ -5556,7 +5556,7 @@ long MoveMap::calcPathJUMP (MovePathPtr path, Stuff::Vector3D* goalWorldPos, lon
 		MoveMapNodePtr bestMapNode = &map[bestRow * maxWidth + bestCol];
 		bestMapNode->clearFlag(MOVEFLAG_OPEN);
 		
-		long bestNodeG = bestMapNode->g;
+		int bestNodeG = bestMapNode->g;
 
 		//----------------------------
 		// Now, close the best node...
@@ -5569,27 +5569,28 @@ long MoveMap::calcPathJUMP (MovePathPtr path, Stuff::Vector3D* goalWorldPos, lon
 			break;
 		}
 		
-		long cellOffsetIndex = 0;
-		for (long dir = 0; dir < numOffsets; dir++) {
+		int cellOffsetIndex = 0;
+		for (int dir = 0; dir < numOffsets; dir++) {
 			//------------------------------------------------------------
 			// First, make sure this is a legit direction to go. We do NOT
 			// want to clip corners, so we'll check that here...
 			bool isDiagonalWalk = IsDiagonalStep[dir];
-				if (isDiagonalWalk) {
-					if (!adjacentCellOpenJUMP(bestRow, bestCol, StepAdjDir[dir]) && !adjacentCellOpenJUMP(bestRow, bestCol, StepAdjDir[dir + 1])) {
-						cellOffsetIndex += 2;
-						continue;
-					}
-				}
+            if (isDiagonalWalk) {
+                if (!adjacentCellOpenJUMP(bestRow, bestCol, StepAdjDir[dir]) && !adjacentCellOpenJUMP(bestRow, bestCol, StepAdjDir[dir + 1])) {
+                    cellOffsetIndex += 2;
+                    continue;
+                }
+            }
 
 			//------------------------------------------------------------
 			// Now, process this direction. First, calc the cell to check,
 			// offset from the current cell...
-			long succRow = bestRow + cellShift[cellOffsetIndex++];
-			long succCol = bestCol + cellShift[cellOffsetIndex++];
+			int succRow = bestRow + cellShift[cellOffsetIndex++];
+			int succCol = bestCol + cellShift[cellOffsetIndex++];
 			//--------------------------------
 			// If it's on the map, check it...
-			if (inMapBounds(succRow, succCol, height, width)) {
+			if (succRow > 0 && succRow < height && succCol > 0 && succCol < width) {
+			//if (inMapBounds(succRow, succCol, height, width)) {
 
 				MoveMapNodePtr succMapNode = &map[succRow * maxWidth + succCol];
 				if (succMapNode->cost < COST_BLOCKED) {
@@ -5609,7 +5610,7 @@ long MoveMap::calcPathJUMP (MovePathPtr path, Stuff::Vector3D* goalWorldPos, lon
 						//----------------------------------------------------
 						// What's our cost to go from START to this SUCCESSOR?
 						bool jumping = false;
-						long cost = succMapNode->cost;
+						int cost = succMapNode->cost;
 						//------------------------------------
 						// Diagonal movement is more costly...
 						gosASSERT(cost > 0);
@@ -5626,7 +5627,7 @@ long MoveMap::calcPathJUMP (MovePathPtr path, Stuff::Vector3D* goalWorldPos, lon
 						}
 						gosASSERT(cost > 0);
 						
-						long succNodeG = bestNodeG + cost;
+						int succNodeG = bestNodeG + cost;
 
 						if (succMapNode->flags & MOVEFLAG_OPEN) {
 							//----------------------------------------------
@@ -5639,7 +5640,7 @@ long MoveMap::calcPathJUMP (MovePathPtr path, Stuff::Vector3D* goalWorldPos, lon
 								succMapNode->parent = dirToParent;
 								succMapNode->g = succNodeG;
 								succMapNode->fPrime = succNodeG + succMapNode->hPrime;
-								long openIndex = openList->find(succRow * MAX_MAPWIDTH + succCol);
+								int openIndex = openList->find(succRow * MAX_MAPWIDTH + succCol);
 								if (!openIndex) {
 									char s[128];
 									sprintf(s, "MoveMap.calcPath: Cannot find movemap node [%d, %d, %d, %d] for change\n", succRow, succCol, succRow * MAX_MAPWIDTH + succCol, dir);
@@ -5679,7 +5680,7 @@ long MoveMap::calcPathJUMP (MovePathPtr path, Stuff::Vector3D* goalWorldPos, lon
 							succPQNode.row = succRow;
 							succPQNode.col = succCol;
 #ifdef _DEBUG
-							long insertErr = 
+							int insertErr = 
 #endif
 								openList->insert(succPQNode);
 							gosASSERT(insertErr == NO_ERR);
@@ -5723,12 +5724,12 @@ long MoveMap::calcPathJUMP (MovePathPtr path, Stuff::Vector3D* goalWorldPos, lon
 	if (goalFound) {
 		//-------------------------------------------
 		// First, let's count how long the path is...
-		long curRow = goalCell[0] = (long)bestRow;
-		long curCol = goalCell[1] = (long)bestCol;
-		long numCells = 0;
+		int curRow = goalCell[0] = bestRow;
+		int curCol = goalCell[1] = bestCol;
+		int numCells = 0;
 		while ((curRow != startR) || (curCol != startC)) {
 			numCells += 1;
-			long cellOffsetIndex = map[curRow * maxWidth + curCol].parent * 2;
+			int cellOffsetIndex = map[curRow * maxWidth + curCol].parent * 2;
 			//if ((cellOffsetIndex < 0) || (cellOffsetIndex > 14))
 			//	OutputDebugString("PathFinder: whoops\n");
 			curRow += cellShift[cellOffsetIndex++];
@@ -5763,7 +5764,7 @@ long MoveMap::calcPathJUMP (MovePathPtr path, Stuff::Vector3D* goalWorldPos, lon
 		path->init();
 		if (numCells) {
 #ifdef _DEBUG			
-			long maxSteps = 
+			int maxSteps = 
 #endif
 
 			path->init(numCells);
@@ -5783,14 +5784,14 @@ long MoveMap::calcPathJUMP (MovePathPtr path, Stuff::Vector3D* goalWorldPos, lon
 #endif
 			path->target = target;
 			path->cost = map[bestRow * maxWidth + bestCol].g;
-			curRow = (long)bestRow;
-			curCol = (long)bestCol;
-			long curCell = numCells;
+			curRow = bestRow;
+			curCol = bestCol;
+			int curCell = numCells;
 			if (doorDirection == -1) {
 				if (goalWorldPos) {
 					goalWorldPos->x = (float)(ULc + bestCol) * Terrain::worldUnitsPerCell + Terrain::worldUnitsPerCell / 2 - Terrain::worldUnitsMapSide / 2;
 					goalWorldPos->y = (Terrain::worldUnitsMapSide / 2) - ((float)(ULr + bestRow) * Terrain::worldUnitsPerCell) - Terrain::worldUnitsPerCell / 2;
-					goalWorldPos->z = (float)0; // How do we get the elevation for this point? Do we care?
+					goalWorldPos->z = 0.0f; // How do we get the elevation for this point? Do we care?
 					path->goal = *goalWorldPos;
 					}
 				else
@@ -5801,15 +5802,15 @@ long MoveMap::calcPathJUMP (MovePathPtr path, Stuff::Vector3D* goalWorldPos, lon
 				// It's a door, so it's the last on the path list...
 				curCell--;
 				path->setDirection(curCell, /*reverseShift[*/doorDirection * 2/*]*/);
-				long doorR = bestRow + adjTile[doorDirection][0];
-				long doorC = bestCol + adjTile[doorDirection][1];
+				int doorR = bestRow + adjTile[doorDirection][0];
+				int doorC = bestCol + adjTile[doorDirection][1];
 
 				goalCell[0] = ULr + doorR;
 				goalCell[1] = ULc + doorC;
 				Stuff::Vector3D stepDest;
 				stepDest.x = (float)(ULc + doorC) * Terrain::worldUnitsPerCell + Terrain::worldUnitsPerCell / 2 - Terrain::worldUnitsMapSide / 2;
 				stepDest.y = (Terrain::worldUnitsMapSide / 2) - ((float)(ULr + doorR) * Terrain::worldUnitsPerCell) - Terrain::worldUnitsPerCell / 2;
-				stepDest.z = (float)0; // How do we get the elevation for this point? Do we care?
+				stepDest.z = 0.0f; // How do we get the elevation for this point? Do we care?
 				path->setDestination(curCell, stepDest);
 				path->setDistanceToGoal(curCell, 0.0);
 				path->setCell(curCell, goalCell[0], goalCell[1]);
@@ -5827,7 +5828,7 @@ long MoveMap::calcPathJUMP (MovePathPtr path, Stuff::Vector3D* goalWorldPos, lon
 			static bool setTable = false;
 			if (!setTable) {
 				float cellLength = Terrain::worldUnitsPerCell * metersPerWorldUnit;
-				for (long i = 0; i < NUM_CELL_OFFSETS; i++) {
+				for (int i = 0; i < NUM_CELL_OFFSETS; i++) {
 					float distance = agsqrt( cellShift[i * 2], cellShift[i * 2 + 1] ) * cellLength;
 					cellShiftDistance[i] = distance;
 				}
@@ -5836,31 +5837,31 @@ long MoveMap::calcPathJUMP (MovePathPtr path, Stuff::Vector3D* goalWorldPos, lon
 			
 			while ((curRow != startR) || (curCol != startC)) {
 				curCell--;
-				long parent = reverseShift[map[curRow * maxWidth + curCol].parent];
+				int parent = reverseShift[map[curRow * maxWidth + curCol].parent];
 				if (parent > 7)
 					path->setDirection(curCell, parent);
 				else
 					path->setDirection(curCell, parent);
 
 				Stuff::Vector3D stepDest;
-				long cell[2];
-				cell[0] = ULr + curRow;
-				cell[1] = ULc + curCol;
-				stepDest.x = (float)(cell[1]) * Terrain::worldUnitsPerCell + Terrain::worldUnitsPerCell / 2 - Terrain::worldUnitsMapSide / 2;
-				stepDest.y = (Terrain::worldUnitsMapSide / 2) - ((float)(cell[0]) * Terrain::worldUnitsPerCell) - Terrain::worldUnitsPerCell / 2;
-				stepDest.z = (float)0; // How do we get the elevation for this point? Do we care?
+				int cell_r, cell_c;
+				cell_r = ULr + curRow;
+				cell_c = ULc + curCol;
+				stepDest.x = (float)(cell_c) * Terrain::worldUnitsPerCell + Terrain::worldUnitsPerCell / 2 - Terrain::worldUnitsMapSide / 2;
+				stepDest.y = (Terrain::worldUnitsMapSide / 2) - ((float)(cell_r) * Terrain::worldUnitsPerCell) - Terrain::worldUnitsPerCell / 2;
+				stepDest.z = 0.0f; // How do we get the elevation for this point? Do we care?
 				if (curCell == (numCells - 1))
 					path->setDistanceToGoal(curCell, 0.0);
 				else {
-					long tempDir = path->getDirection(curCell + 1);
+					int tempDir = path->getDirection(curCell + 1);
 					float tempDist = path->getDistanceToGoal(curCell + 1);
 					path->setDistanceToGoal(curCell, cellShiftDistance[tempDir] + tempDist);
 				}
 				path->setDestination(curCell, stepDest);
-				path->setCell(curCell, cell[0], cell[1]);
+				path->setCell(curCell, cell_r, cell_c);
 
 				map[curRow * maxWidth + curCol].setFlag(MOVEFLAG_STEP);
-				long cellOffsetIndex = map[curRow * maxWidth + curCol].parent << 1;
+				int cellOffsetIndex = map[curRow * maxWidth + curCol].parent << 1;
 				curRow += cellShift[cellOffsetIndex++];
 				curCol += cellShift[cellOffsetIndex];
 				//calcAdjNode(curRow, curCol, map[curRow * maxCellWidth + curCol].parent);
@@ -6054,7 +6055,8 @@ long MoveMap::calcEscapePath (MovePathPtr path, Stuff::Vector3D* goalWorldPos, l
 			long succCol = bestCol + cellShift[cellOffsetIndex++];
 			//--------------------------------
 			// If it's on the map, check it...
-			if (inMapBounds(succRow, succCol, height, width)) {
+			//if (inMapBounds(succRow, succCol, height, width)) {
+			if (succRow > 0 && succRow < height && succCol > 0 && succCol < width) {
 
 				MoveMapNodePtr succMapNode = &map[succRow * maxWidth + succCol];
 				if (succMapNode->cost < COST_BLOCKED) {

@@ -1471,27 +1471,27 @@ class Mover : public GameObject {
 						  unsigned long moveParams);
 								   
 
-		virtual long calcMovePath (MovePathPtr path,
+		virtual int calcMovePath (MovePathPtr path,
 								   long pathType,
 								   Stuff::Vector3D start,
 								   Stuff::Vector3D goal,
-								   long* goalCell,
+								   int* goalCell,
 								   unsigned long moveParams = MOVEPARAM_NONE);
 
-		virtual long calcEscapePath (MovePathPtr path,
+		virtual int calcEscapePath (MovePathPtr path,
 									 Stuff::Vector3D start,
 									 Stuff::Vector3D goal,
-									 long* goalCell,
+									 int* goalCell,
 									 unsigned long moveParams,
 									 Stuff::Vector3D& escapeGoal);
 
-		virtual long calcMovePath (MovePathPtr path,
+		virtual int calcMovePath (MovePathPtr path,
 								   Stuff::Vector3D start,
 								   long thruArea[2],
 								   long goalDoor,
 								   Stuff::Vector3D finalGoal,
 								   Stuff::Vector3D* goalWorldPos,
-								   long* goalCell,
+								   int* goalCell,
 								   unsigned long moveParams = MOVEPARAM_NONE);
 
 		virtual float weaponLocked (long weaponIndex, Stuff::Vector3D targetPosition);

@@ -4959,11 +4959,11 @@ long Mover::calcMoveGoal (GameObjectPtr target,
 
 //---------------------------------------------------------------------------
 
-long Mover::calcMovePath (MovePathPtr path,
+int Mover::calcMovePath (MovePathPtr path,
 						  long pathType,
 						  Stuff::Vector3D start,
 						  Stuff::Vector3D goal,
-						  long* goalCell,
+						  int* goalCell,
 						  unsigned long moveParams) {
 
 	//-------------------------------------------------------------------------
@@ -5039,7 +5039,7 @@ long Mover::calcMovePath (MovePathPtr path,
 			// Set up debug info...
 			DebugMovePathType = pathType;
 
-			long goalCell[2];
+			int goalCell[2];
 			if (numOffsets > 8)
 				result = PathFindMap[SIMPLE_PATHMAP]->calcPathJUMP(path, NULL, goalCell);
 			else
@@ -5139,10 +5139,10 @@ long Mover::calcMovePath (MovePathPtr path,
 
 //---------------------------------------------------------------------------
 
-long Mover::calcEscapePath (MovePathPtr path,
+int Mover::calcEscapePath (MovePathPtr path,
 							Stuff::Vector3D start,
 							Stuff::Vector3D goal,
-							long* goalCell,
+							int* goalCell,
 							unsigned long moveParams,
 							Stuff::Vector3D& escapeGoal) {
 
@@ -5407,13 +5407,13 @@ long Mover::bounceToAdjCell (void) {
 
 //---------------------------------------------------------------------------
 
-long Mover::calcMovePath (MovePathPtr path,
+int Mover::calcMovePath (MovePathPtr path,
 						  Stuff::Vector3D start,
 						  long thruArea[2],
 						  long goalDoor,
 						  Stuff::Vector3D finalGoal,
 						  Stuff::Vector3D* goal,
-						  long* goalCell,
+						  int* goalCell,
 						  unsigned long moveParams) {
 
 	//-------------------------------------------------------------------------

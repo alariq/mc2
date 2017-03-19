@@ -28,7 +28,7 @@
 // Class PriorityQueue
 //***************************************************************************
 
-long PriorityQueue::init (long max, long keyMinValue) {
+int PriorityQueue::init (int max, int keyMinValue) {
 
 	//-------------------------
 	// Create the queue list...
@@ -46,7 +46,7 @@ long PriorityQueue::init (long max, long keyMinValue) {
 
 //---------------------------------------------------------------------------
 
-void PriorityQueue::upHeap (long curIndex) {
+void PriorityQueue::upHeap (int curIndex) {
 
 	PQNode startNode = pqList[curIndex];
 	long stopKey = startNode.key;
@@ -64,7 +64,7 @@ void PriorityQueue::upHeap (long curIndex) {
 
 //---------------------------------------------------------------------------
 
-long PriorityQueue::insert (PQNode& item) {
+int PriorityQueue::insert (PQNode& item) {
 
 	if (numItems == maxItems)
 		return(1);
@@ -76,17 +76,17 @@ long PriorityQueue::insert (PQNode& item) {
 
 //---------------------------------------------------------------------------
 
-void PriorityQueue::downHeap (long curIndex) {
+void PriorityQueue::downHeap (int curIndex) {
 
 	//----------------------------------
 	// Start at the top from curIndex...
 	PQNode startNode = pqList[curIndex];
-	long stopKey = startNode.key;
+	int stopKey = startNode.key;
 
 	//----------------------
 	// Sort down the heap...
 	while (curIndex <= numItems/2) {
-		long nextIndex = curIndex << 1;
+		int nextIndex = curIndex << 1;
 		if ((nextIndex < numItems) && (pqList[nextIndex].key > pqList[nextIndex + 1].key))
 			nextIndex++;
 		if (stopKey <= pqList[nextIndex].key)
@@ -108,12 +108,12 @@ void PriorityQueue::remove (PQNode& item) {
 
 //---------------------------------------------------------------------------
 
-void PriorityQueue::change (long itemIndex, long newValue) {
+void PriorityQueue::change (int itemIndex, int newValue) {
 
 	if (newValue > pqList[itemIndex].key) {
 		pqList[itemIndex].key = newValue;
 		downHeap(itemIndex);
-		}
+    }
 	else if (newValue < pqList[itemIndex].key) {
 		pqList[itemIndex].key = newValue;
 		upHeap(itemIndex);
@@ -122,10 +122,10 @@ void PriorityQueue::change (long itemIndex, long newValue) {
 
 //---------------------------------------------------------------------------
 
-long PriorityQueue::find (long id) {
+int PriorityQueue::find (unsigned int id) {
 
-	for (long index = 0; index <= numItems; index++)
-		if (pqList[index].id == (unsigned long)id)
+	for (int index = 0; index <= numItems; index++)
+		if (pqList[index].id == id)
 			return(index);
 	return(0);
 }

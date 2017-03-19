@@ -3187,11 +3187,8 @@ long MechWarrior::calcMovePath (long selectionIndex, unsigned long moveParams) {
 				thruArea[1] = moveOrders.globalPath[curGlobalStep+1].thruArea;
 				goalDoor = moveOrders.globalPath[curGlobalStep+1].goalDoor;
 			}
-            //sebi: temp
-            long tmp[] = {globalStep->goalCell[0],globalStep->goalCell[1]};
-			numSteps = myVehicle->calcMovePath(moveOrders.path[pathNum], start, thruArea, goalDoor, moveOrders.globalGoalLocation, &goal, tmp, moveParams | MOVEPARAM_STATIONARY_MOVERS);
-			globalStep->goalCell[0] = tmp[0];
-			globalStep->goalCell[1] = tmp[1];
+			numSteps = myVehicle->calcMovePath(
+                    moveOrders.path[pathNum], start, thruArea, goalDoor, moveOrders.globalGoalLocation, &goal, globalStep->goalCell, moveParams | MOVEPARAM_STATIONARY_MOVERS);
 #ifdef LAB_ONLY
 			MCTimePath4Update += (GetCycles() - startTime);
 #endif
@@ -3214,11 +3211,7 @@ long MechWarrior::calcMovePath (long selectionIndex, unsigned long moveParams) {
 			if (myVehicle->getObjectClass() != ELEMENTAL)
 				moveParams |= MOVEPARAM_AVOID_PATHLOCKS;
 			startTime = GetCycles();
-            //sebi: temp
-            long tmp[] = {globalStep->goalCell[0],globalStep->goalCell[1]};
-			numSteps = myVehicle->calcMovePath(moveOrders.path[pathNum], MOVEPATH_COMPLEX, start, goal, tmp, moveParams | MOVEPARAM_STATIONARY_MOVERS);
-			globalStep->goalCell[0] = tmp[0];
-			globalStep->goalCell[1] = tmp[1];
+			numSteps = myVehicle->calcMovePath(moveOrders.path[pathNum], MOVEPATH_COMPLEX, start, goal, globalStep->goalCell, moveParams | MOVEPARAM_STATIONARY_MOVERS);
 #ifdef LAB_ONLY
 			MCTimePath5Update += (GetCycles() - startTime);
 #endif

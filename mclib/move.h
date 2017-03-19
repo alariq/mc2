@@ -1398,12 +1398,13 @@ typedef struct _MoveMapNode {
     // sebi moved 'cost' field up for less data cache misses (I hope)
     // maybe will have to move adjCells in a separate array
 	int				cost;								// normal cost to travel here, based upon terrain
-	short		    adjCells[NUM_ADJ_CELLS];
 	int				parent;								// where we came from (parent cell)
 	unsigned int    flags;								// CLOSED, OPEN, STEP flags
 	int				g;									// known cost from START to this node
 	int				hPrime;								// estimated cost from this node to GOAL
 	int				fPrime;								// = g + hPrime
+
+	short		    adjCells[NUM_ADJ_CELLS];
 
 	void setFlag (unsigned int flag) {
 		flags |= flag;
@@ -1473,7 +1474,7 @@ class MoveMap {
 		bool adjacentCellOpenJUMP (long r, long c, long dir);
 		void propogateCost (long mapCellIndex, long cost, long g);
 		void propogateCostJUMP (long r, long c, long cost, long g);
-		long calcHPrime (long r, long c);
+		int calcHPrime (int r, int c);
 		
 	public:
 
@@ -1615,9 +1616,9 @@ class MoveMap {
 			moverWithdrawing = withdrawing;
 		}
 
-		long calcPath (MovePathPtr path, Stuff::Vector3D* goalWorldPos, long* goalCell);
+		long calcPath (MovePathPtr path, Stuff::Vector3D* goalWorldPos, int* goalCell);
 
-		long calcPathJUMP (MovePathPtr path, Stuff::Vector3D* goalWorldPos, long* goalCell);
+		long calcPathJUMP (MovePathPtr path, Stuff::Vector3D* goalWorldPos, int* goalCell);
 
 		long calcEscapePath (MovePathPtr path, Stuff::Vector3D* goalWorldPos, long* goalCell);
 
