@@ -13,6 +13,7 @@ typedef struct {
 } gosGlyphMetrics;
 
 struct gosGlyphInfo {
+    gosGlyphInfo():num_glyphs_(0), glyphs_(0) {}
     uint32_t num_glyphs_;
     uint32_t start_glyph_;
     gosGlyphMetrics* glyphs_;

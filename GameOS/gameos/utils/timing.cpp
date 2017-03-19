@@ -56,7 +56,9 @@ namespace timing {
 
 	uint64_t ticks2ms(uint64_t ticks)
 	{
+#ifdef _DEBUG
 		assert(initialized);
+#endif
 #ifdef PLATFORM_WINDOWS
 		ticks = (ticks * 1000) / Frequency.QuadPart;
 		return ticks;

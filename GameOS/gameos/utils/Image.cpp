@@ -335,7 +335,7 @@ bool Image::flip(){
 		memcpy(newPixels + i * lineWidth, pixels + (height - 1 - i) * lineWidth, lineWidth);
 	}
 
-	delete pixels;
+	delete[] pixels;
 	pixels = newPixels;
 
 	return true;
