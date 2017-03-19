@@ -1308,6 +1308,7 @@ void Mech3DAppearance::init (AppearanceTypePtr tree, GameObjectPtr obj)
 
 	currentStateGoal = -1;		//Always start ready to change gestures
 	currentGestureId = 2;		//Always start in Stand Mode
+    inCombatMode = false;       // sebi: init, so will not contain garbage
 
 	transitionState = 0;
 	oldStateGoal = 1;			//Always start in Stand Mode
@@ -4213,6 +4214,11 @@ long Mech3DAppearance::update (bool animate)
 		
 		qRotation = Stuff::EulerAngles(dRot[1].x * DEGREES_TO_RADS, dRot[1].y * DEGREES_TO_RADS, dRot[1].z * DEGREES_TO_RADS);
 
+        // sebi: update texture handle, it will not be updated it updateGeometry 
+        // is not caaled which is not correct and leads to 
+        // "Flags do not match either set of vertex Data" (see txmmgr.h)
+		leftArm->SetTextureHandle(0,localTextureHandle);
+
 		leftArm->SetFogRGB(0xffffffff);
 		leftArm->SetLightList(eye->getWorldLights(),eye->getNumLights());
 		leftArm->TransformMultiShape(&xlatPosition,&qRotation);
@@ -4291,6 +4297,11 @@ long Mech3DAppearance::update (bool animate)
 		xlatPosition.z = rightArmPos.y;
 		
 		qRotation = Stuff::EulerAngles(dRot[0].x * DEGREES_TO_RADS, dRot[0].y * DEGREES_TO_RADS, dRot[0].z * DEGREES_TO_RADS);
+
+        // sebi: update texture handle, it will not be updated it updateGeometry 
+        // is not caaled which is not correct and leads to 
+        // "Flags do not match either set of vertex Data" (see txmmgr.h)
+		rightArm->SetTextureHandle(0,localTextureHandle);
 
 		rightArm->SetFogRGB(0xffffffff);
 		rightArm->SetLightList(eye->getWorldLights(),eye->getNumLights());
