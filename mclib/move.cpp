@@ -1493,7 +1493,7 @@ long GlobalMap::init (PacketFilePtr packetFile, long whichPacket) {
 
 	long startPacket = whichPacket;
 
-	unsigned long version = 0;
+	unsigned int version = 0;
 	long result = packetFile->readPacket(whichPacket++, (unsigned char*)&version);
 	if (result == 0)
 		Fatal(result, " GlobalMap.init: unable to read version packet ");
@@ -5118,10 +5118,14 @@ long MoveMap::calcPath (MovePathPtr path, Stuff::Vector3D* goalWorldPos, long* g
 
 			//-----------------------------------------------------------------------------------
 			// If we're doing offMapTravel, make sure we aren't going back into an offMap cell...
-			if (map[succCellIndex].flags & MOVEFLAG_OFFMAP)
-				if (cannotEnterOffMap)
-					if ((map[bestPQNode.id].flags & MOVEFLAG_OFFMAP) == 0)
-						continue;
+            
+            // sebi: we do not want to address by negative offset
+            if(succCellIndex > -1) {
+    			if (map[succCellIndex].flags & MOVEFLAG_OFFMAP)
+	    			if (cannotEnterOffMap)
+		    			if ((map[bestPQNode.id].flags & MOVEFLAG_OFFMAP) == 0)
+			    			continue;
+            }
 			
 			//--------------------------------
 			// If it's on the map, check it...

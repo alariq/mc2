@@ -518,9 +518,10 @@ class MissionMap {
 	public:
 
 		MapCellPtr			map;
-		long				height;
-		long				width;
-		long				planet;
+        // those are read from packet file so cannot be longs on 64bit by definition
+		int32_t             height;
+		int32_t             width;
+		int32_t             planet;
 		bool				preserveCells;
 		long				numPreservedCells;
 		PreservedCell		preservedCells[MAX_MOVERS];
@@ -538,6 +539,7 @@ class MissionMap {
 			map = NULL;
 			height = 0;
 			width = 0;
+            planet = 0;
 			preserveCells = false;
 			numPreservedCells = 0;
 			placeMoversCallback = NULL;
@@ -1393,8 +1395,10 @@ typedef GlobalMap* GlobalMapPtr;
 #define	NUM_ADJ_CELLS	8
 
 typedef struct _MoveMapNode {
-	short		    adjCells[NUM_ADJ_CELLS];
+    // sebi moved 'cost' field up for less data cache misses (I hope)
+    // maybe will have to move adjCells in a separate array
 	int				cost;								// normal cost to travel here, based upon terrain
+	short		    adjCells[NUM_ADJ_CELLS];
 	int				parent;								// where we came from (parent cell)
 	unsigned int    flags;								// CLOSED, OPEN, STEP flags
 	int				g;									// known cost from START to this node
