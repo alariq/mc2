@@ -2287,6 +2287,9 @@ void ControlButton::initButtons( FitIniFile& buttonFile, long buttonCount, Contr
 
 
 		Buttons[i].data = &Data[i];
+
+        // sebi: initialize state so it is not garbage
+		Buttons[i].state = ENABLED;
 		
 		Buttons[i].location[0].x = Buttons[i].location[1].x = x;
 		Buttons[i].location[0].y = Buttons[i].location[3].y = y;
@@ -2587,7 +2590,7 @@ void ControlGui::initStatics( FitIniFile& file )
 void ControlGui::initRects( FitIniFile& file )
 {
 	if ( rectInfos )
-		delete rectInfos;
+		delete[] rectInfos;
 
 	rectInfos = 0;
 	rectCount = 0;

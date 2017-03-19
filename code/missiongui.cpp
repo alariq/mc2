@@ -3087,7 +3087,7 @@ void MissionInterfaceManager::initTacMap( PacketFile* file, int packet )
 	file->readPacket( packet, mem );
 
 	controlGui.initTacMapBuildings( mem, size );
-	delete mem;
+	delete[] mem;
 
 	file->seekPacket(packet + 1);
 	size = file->getPacketSize( );
@@ -3096,7 +3096,7 @@ void MissionInterfaceManager::initTacMap( PacketFile* file, int packet )
 	file->readPacket( packet + 1, mem );
 
 	controlGui.initTacMap( mem, size );
-	delete mem;
+	delete[] mem;
 
 	swapTime = 0.f;
 

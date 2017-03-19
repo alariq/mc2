@@ -1266,6 +1266,7 @@ aTextListItem::aTextListItem(long newFontResID)
 	aListItem::init( width, 0, Environment.screenWidth, ((float)height*1.25) );
 	state = ENABLED;
 	alignment = 0;
+	bForceToTop = 0;
 }
 
 void aTextListItem::init(long newFontResID)

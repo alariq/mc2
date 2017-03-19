@@ -851,7 +851,7 @@ void GameObjectManager::countTerrainObjects (PacketFile* terrainFile, long first
 	}
 
 	delete terrainObjectFile;
-	delete pBuffer;
+	delete[] pBuffer;
 
 }
 
@@ -958,7 +958,7 @@ void GameObjectManager::loadTerrainObjects (PacketFile* terrainFile,
 		progress += increment;
 	}
 
-	delete handles;
+	delete[] handles;
 	handles = NULL;
 	
 	//Done loading the objects, free the memory holding them!!

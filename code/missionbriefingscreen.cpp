@@ -316,7 +316,7 @@ long	MissionBriefingScreen::getMissionTGA( const char* missionName )
 			// set up the texture
 			long tmpMapTextureHandle = mcTextureManager->textureFromMemory( (DWORD*)(pHeader+1), gos_Texture_Solid, 0, bmpWidth );
 
-			delete mem;
+			delete[] mem;
 
 			return tmpMapTextureHandle;
 		}
