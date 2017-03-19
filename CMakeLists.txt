@@ -3,7 +3,7 @@ project(mc2)
 
 include(CMakeToolsHelpers OPTIONAL)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x -g")
 if(NOT MSVC)
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-local-typedefs -Werror=array-bounds -Wno-switch -Wno-unknown-warning-option -Wunused-variable")
 endif()
@@ -15,7 +15,7 @@ if(MSVC)
 	message("Compiling on M$ Windows")
 endif()
 
-if(CMAKE_BUILD_TYPE MATCHES Debug)
+if(CMAKE_BUILD_TYPE MATCHES "Debug")
     add_definitions(-D_ARMOR)
     add_definitions(-D_DEBUG)
     add_definitions(-DBUGLOG)
