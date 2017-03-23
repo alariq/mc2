@@ -86,6 +86,7 @@ class FitIniFile : public File
 		double textToDouble (const char *num);
 		
 		long textToLong (const char *num);
+		int textToInt(const char *num);
 		unsigned long textToULong (const char *num);
 		
 		short textToShort (const char *num);
@@ -162,6 +163,8 @@ class FitIniFile : public File
 		
 		long readIdFloatArray (const char *varName, float *result, unsigned long numElements);
 		
+		long readIdIntArray (const char *varName, int *result, unsigned int numElements);
+
 		long readIdLongArray (const char *varName, long *result, unsigned long numElements);
 		long readIdULongArray (const char *varName, unsigned long *result, unsigned long numElements);
 		
