@@ -507,7 +507,7 @@ TypePtr enumerationType (void) {
 	long constantValue = -1;
 
 	typePtr->form = FRM_ENUM;
-	typePtr->size = sizeof(long);
+	typePtr->size = sizeof(int);
 	typePtr->typeIdPtr = NULL;
 
 	getToken();

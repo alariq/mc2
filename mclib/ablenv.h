@@ -159,7 +159,7 @@ class ABLModule {
 
 		int                     id;
 		char					name[MAX_ABLMODULE_NAME];
-		long					handle;
+		int32_t                 handle;
 		StackItemPtr			staticData;
 		unsigned long*			orderCallFlags;
 		StackItem				returnVal;
@@ -202,7 +202,7 @@ class ABLModule {
 			init();
 		}
 
-		long init (long moduleHandle);
+		long init (int moduleHandle);
 		
 		void write (ABLFile* moduleFile);
 		
@@ -214,7 +214,7 @@ class ABLModule {
 
 		long getRealId (void);
 
-		long getHandle (void) {
+		int getHandle (void) {
 			return(handle);
 		}
 
@@ -250,7 +250,7 @@ class ABLModule {
 			return(prevState);
 		}
 
-		long getPrevStateHandle (void);
+		int getPrevStateHandle (void);
 
 		void setState (SymTableNodePtr stateSym) {
 			state = stateSym;
@@ -260,7 +260,7 @@ class ABLModule {
 			return(state);
 		}
 
-		long getStateHandle (void);
+		int getStateHandle (void);
 
 		bool isLibrary (void);
 
@@ -309,11 +309,11 @@ class ABLModule {
 
 		SymTableNodePtr findState (const char* stateName);
 
-		long findStateHandle (const char* stateName);
+		int findStateHandle (const char* stateName);
 
-		char* getSourceFile (long fileNumber);
+		char* getSourceFile (int fileNumber);
 
-		char* getSourceDirectory (long fileNumber, char* directory);
+		char* getSourceDirectory (int fileNumber, char* directory);
 
 		void getInfo (ModuleInfo* moduleInfo);
 
@@ -321,25 +321,25 @@ class ABLModule {
 			return(returnVal.real);
 		}
 		
-		long getInteger (void) {
+		int getInteger (void) {
 			return(returnVal.integer);
 		}
 
-		long setStaticInteger (char* name, long value);
+		int setStaticInteger (char* name, int value);
 
-		long getStaticInteger (char* name);
+		int getStaticInteger (char* name);
 
-		long setStaticReal (char* name, float value);
+		int setStaticReal (char* name, float value);
 		
 		float getStaticReal (char* name);
 
-		long setStaticIntegerArray (char* name, long size, long* values);
+		int setStaticIntegerArray (char* name, int size, int* values);
 
-		long getStaticIntegerArray (char* name, long size, long* values);
+		int getStaticIntegerArray (char* name, int size, int* values);
 		
-		long setStaticRealArray (char* name, long size, float* values);
+		int setStaticRealArray (char* name, int size, float* values);
 
-		long getStaticRealArray (char* name, long size, float* values);
+		int getStaticRealArray (char* name, int size, float* values);
 
 		void destroy (void);
 

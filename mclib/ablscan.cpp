@@ -1052,7 +1052,7 @@ void getNumber (void) {
 //			curToken = TKN_ERROR;
 //			return;
 //		}
-		curLiteral.value.integer = (long)numberValue;
+		curLiteral.value.integer = (int)numberValue;
 		}
 	else
 		curLiteral.value.real = numberValue;

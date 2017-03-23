@@ -10,6 +10,7 @@
 #include<stdio.h>
 #include<stdlib.h>
 #include<string.h>
+#include<cassert>
 #include"platform_str.h"
 #include<math.h>
 #include<time.h>
@@ -124,7 +125,7 @@ bool ABLi_popBoolean (void) {
 
 	getCodeToken();
 	execExpression();
-	long val = tos->integer;
+	int val = tos->integer;
 	pop();
 	
 	return(val == 1);
@@ -215,7 +216,7 @@ long ABLi_popAnything (ABLStackItem* value) {
 			}
 		else if (paramTypePtr->info.array.elementTypePtr == IntegerTypePtr) {
 			value->type = type = ABL_STACKITEM_INTEGER_PTR;
-			value->data.integerPtr = (long*)tos->address;
+			value->data.integerPtr = (int*)tos->address;
 			}
 		else if (paramTypePtr->info.array.elementTypePtr == RealTypePtr) {
 			value->type = type = ABL_STACKITEM_REAL_PTR;
@@ -243,7 +244,7 @@ void ABLi_pushBoolean (bool value) {
 
 //---------------------------------------------------------------------------
 
-void ABLi_pushInteger (long value) {
+void ABLi_pushInteger (int value) {
 
 	StackItemPtr valuePtr = ++tos;
 
@@ -276,7 +277,7 @@ void ABLi_pushChar (char value) {
 
 //---------------------------------------------------------------------------
 
-long ABLi_peekInteger (void) {
+int ABLi_peekInteger (void) {
 
 	getCodeToken();
 	execExpression();
@@ -312,12 +313,12 @@ char* ABLi_peekCharPtr (void) {
 
 //---------------------------------------------------------------------------
 
-long* ABLi_peekIntegerPtr (void) {
+int* ABLi_peekIntegerPtr (void) {
 
 	getCodeToken();
 	SymTableNodePtr idPtr = getCodeSymTableNodePtr();
 	execVariable(idPtr, USE_REFPARAM);
-	return((long*)(&((StackItemPtr)tos->address)->integer));
+	return((int*)(&((StackItemPtr)tos->address)->integer));
 }
 
 //---------------------------------------------------------------------------
@@ -332,14 +333,14 @@ float* ABLi_peekRealPtr (void) {
 
 //---------------------------------------------------------------------------
 
-void ABLi_pokeChar (long val) {
+void ABLi_pokeChar (int val) {
 
 	tos->integer = val;
 }
 
 //---------------------------------------------------------------------------
 
-void ABLi_pokeInteger (long val) {
+void ABLi_pokeInteger (int val) {
 
 	tos->integer = val;
 }
@@ -610,9 +611,9 @@ void execStdRound (void) {
 	float val = ABLi_popReal();
 
 	if (val > 0.0)
-		ABLi_pushInteger((long)(val + 0.5));
+		ABLi_pushInteger((int)(val + 0.5));
 	else
-		ABLi_pushInteger((long)(val - 0.5));
+		ABLi_pushInteger((int)(val - 0.5));
 }
 
 //***************************************************************************
@@ -632,7 +633,7 @@ void execStdSqrt (void) {
 void execStdTrunc (void) {
 
 	float val = ABLi_popReal();
-	ABLi_pushInteger((long)val);
+	ABLi_pushInteger((int)val);
 }
 
 //***************************************************************************
@@ -801,7 +802,7 @@ void execStdAssert (void) {
 
 void execStdRandom (void) {
 
-	long n = ABLi_peekInteger();
+	int n = ABLi_peekInteger();
 	//---------------------------------------------------------------------
 	// This is, like, a really bad number generator. But, you get the idea.
 	// Once we know which pseudo-random number algorithm we want to use, we
@@ -814,7 +815,7 @@ void execStdRandom (void) {
 
 void execStdSeedRandom (void) {
 
-	long seed  = ABLi_popInteger();
+	int seed  = ABLi_popInteger();
 
 	if (seed == -1)
 		ABLSeedRandomCallback((unsigned int)time(NULL));
@@ -826,7 +827,7 @@ void execStdSeedRandom (void) {
 
 void execStdResetOrders (void) {
 
-	long scope = ABLi_popInteger();
+	int scope = ABLi_popInteger();
 
 	if (scope == 0)
 		CurModule->resetOrderCallFlags();
@@ -847,7 +848,7 @@ void execStdGetStateHandle (void) {
 
 	char* name = ABLi_popCharPtr();
 
-	long stateHandle = CurFSM->findStateHandle(S_strlwr(name));
+    int stateHandle = CurFSM->findStateHandle(S_strlwr(name));
 	ABLi_pushInteger(stateHandle);
 }
 
@@ -855,7 +856,7 @@ void execStdGetStateHandle (void) {
 
 void execStdGetCurrentStateHandle (void) {
 
-	long stateHandle = CurFSM->getStateHandle();
+	int stateHandle = CurFSM->getStateHandle();
 	ABLi_pushInteger(stateHandle);
 }
 
@@ -867,7 +868,7 @@ extern char	SetStateDebugStr[256];
 
 void execStdSetState (void) {
 
-	unsigned long stateHandle = ABLi_popInteger();
+	unsigned int stateHandle = ABLi_popInteger();
 
 	if (stateHandle > 0) {
 		SymTableNodePtr stateFunction = ModuleRegistry[CurFSM->getHandle()].stateHandles[stateHandle].state;
@@ -882,11 +883,13 @@ void execStdSetState (void) {
 
 void execStdGetFunctionHandle (void) {
 
+    assert(0 && "function handle is pointer cannot pass through int");
+
 	char* name = ABLi_popCharPtr();
 
 	SymTableNodePtr function = CurModule->findFunction(name, false);
 	if (function)
-		ABLi_pushInteger((unsigned long)function);
+		ABLi_pushInteger((unsigned int)reinterpret_cast<size_t>(function));
 	else
 		ABLi_pushInteger(0);
 }
@@ -895,8 +898,8 @@ void execStdGetFunctionHandle (void) {
 
 void execStdSetFlag (void) {
 
-	unsigned long bits = (unsigned long)ABLi_popInteger();
-	unsigned long flag = (unsigned long)ABLi_popInteger();
+	unsigned int bits = (unsigned int)ABLi_popInteger();
+	unsigned int flag = (unsigned int)ABLi_popInteger();
 	bool set = ABLi_popBoolean();
 
 	bits &= (flag ^ 0xFFFFFFFF);
@@ -910,8 +913,8 @@ void execStdSetFlag (void) {
 
 void execStdGetFlag (void) {
 
-	unsigned long bits = (unsigned long)ABLi_popInteger();
-	unsigned long flag = (unsigned long)ABLi_popInteger();
+	unsigned int bits = (unsigned int)ABLi_popInteger();
+	unsigned int flag = (unsigned int)ABLi_popInteger();
 
 	bool set = ((bits & flag) != 0);
 
@@ -922,7 +925,9 @@ void execStdGetFlag (void) {
 
 void execStdCallFunction (void) {
 
-	unsigned long address = ABLi_popInteger();
+    assert(0 && "function handle is pointer cannot pass through int, pass as address?");
+
+	unsigned int address = ABLi_popInteger();
 
 	if (address) {
 //GLENN: Not functional, yet...

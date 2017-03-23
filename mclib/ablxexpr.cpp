@@ -83,7 +83,7 @@ TypePtr execSubscripts (TypePtr typePtr) {
 			getCodeToken();
 			execExpression();
 			
-			long subscriptValue = tos->integer;
+			int subscriptValue = tos->integer;
 			pop();
 
 			//-------------------------
@@ -204,7 +204,7 @@ TypePtr execVariable (SymTableNodePtr idPtr, UseType use) {
 	// Otherwise, replace the address with the value it points to.
 	if ((use != USE_TARGET) && (use != USE_REFPARAM) &&	(typePtr->form != FRM_ARRAY)) {
 		if ((typePtr == IntegerTypePtr) || (typePtr->form == FRM_ENUM)) {
-			tos->integer = *((long*)tos->address);
+			tos->integer = *((int*)tos->address);
 			}
 		else if (typePtr == CharTypePtr)
 			tos->byte = *((char*)tos->address);

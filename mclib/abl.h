@@ -68,13 +68,13 @@ void ABLi_init (unsigned long runtimeStackSize, // = 20480,
 
 ABLParamPtr ABLi_createParamList (long numParameters);
 
-void ABLi_setIntegerParam (ABLParamPtr paramList, long index, long value);
+void ABLi_setIntegerParam (ABLParamPtr paramList, int index, int value);
 
-void ABLi_setRealParam (ABLParamPtr paramList, long index, float value);
+void ABLi_setRealParam (ABLParamPtr paramList, int index, float value);
 
 void ABLi_deleteParamList (ABLParamPtr paramList);
 
-long ABLi_preProcess (const char* sourceFileName,
+int32_t ABLi_preProcess (const char* sourceFileName,
 					  long* numErrors = NULL,
 					  long* numLinesProcessed = NULL,
 					  long* numFilesProcessed = NULL,
@@ -131,25 +131,25 @@ int* ABLi_popIntegerPtr (void);
 float* ABLi_popRealPtr (void);
 char* ABLi_popBooleanPtr (void);
 
-void ABLi_pushInteger (long value);
+void ABLi_pushInteger (int value);
 void ABLi_pushReal (float value);
 void ABLi_pushBoolean (bool value);
 
-long ABLi_peekInteger (void);
+int ABLi_peekInteger (void);
 float ABLi_peekReal (void);
 bool ABLi_peekBoolean (void);
 
 char* ABLi_peekCharPtr (void);
-long* ABLi_peekIntegerPtr (void);
+int* ABLi_peekIntegerPtr (void);
 float* ABLi_peekRealPtr (void);
 
-void ABLi_pokeChar (long val);
-void ABLi_pokeInteger (long val);
+void ABLi_pokeChar (int val);
+void ABLi_pokeInteger (int val);
 void ABLi_pokeReal (float val);
 void ABLi_pokeBoolean (bool val);
 
-long ABLi_registerInteger (char* name, long* address, long numElements = 0);
-long ABLi_registerReal (char* name, float* address, long numElements = 0);
+int ABLi_registerInteger (char* name, int* address, int numElements = 0);
+int ABLi_registerReal (char* name, float* address, int numElements = 0);
 
 bool ABLi_getSkipOrder (void);
 void ABLi_resetOrders (void);
