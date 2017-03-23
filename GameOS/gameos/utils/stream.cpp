@@ -4,7 +4,6 @@
 #ifdef PLATFORM_WINDOWS
 #include <direct.h>
 #else
-#include <string.h>
 #include <wchar.h>
 #endif
 #include <ctime>
@@ -12,6 +11,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <ctime>
+#include <string.h> // strlen needed for linux and windows
 
 
 #include "string_utils.h"

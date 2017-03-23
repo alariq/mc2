@@ -1,5 +1,7 @@
-#ifndef MBSTRIG_H
-#define MBSTRIG_H
+#ifndef PLATFORM_MBSTRIG_H
+#define PLATFORM_MBSTRIG_H
+
+#ifndef PLATFORM_WINDOWS
 
 wchar_t *_wcslwr(
            wchar_t * str
@@ -18,4 +20,8 @@ unsigned char *_mbsinc(
 
 unsigned char *_mbsdec(const unsigned char* start, const unsigned char* current);
 
-#endif // MBSTRIG_H
+#else
+#include <mbstring.h>
+#endif
+
+#endif // PLATFORM_MBSTRIG_H

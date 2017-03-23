@@ -1,11 +1,13 @@
-#ifndef IO_H
-#define IO_H
+
+#ifndef PLATFORM_IO_H
+#define PLATFORM_IO_H
 
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
 #include <stdio.h> // fseek ftell etc...
 
+#ifndef PLATFORM_WINDOWS
 #define _stat ::stat
 #define _fstat ::fstat
 #define _creat ::creat
@@ -27,5 +29,7 @@
 
 long _filelength(int fd);
 
+#endif // PLATFORM_WINDOWS
 
-#endif // IO_H
+#endif // PLATFORM_IO_H
+
