@@ -9,6 +9,7 @@
 #include"heap.h"
 #include"fastfile.h"
 #include<ctype.h>
+#include"platform_str.h"
 
 long ffLastError = 0;
 
