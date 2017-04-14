@@ -311,7 +311,7 @@ typedef enum {
 typedef struct {
 	char			code;
 	unsigned char	numTriggers;			
-	long			trigger[MAX_ALARM_TRIGGERS];
+	int32_t         trigger[MAX_ALARM_TRIGGERS];
 } PilotAlarm;
 
 //---------------------------------------------------------------------------
@@ -356,8 +356,8 @@ typedef enum {
 } TargetPriorityType;
 
 typedef struct _TargetPriority {
-	long				type;
-	long				params[3];
+	int32_t				type;
+	int32_t				params[3];
 } TargetPriority;
 
 typedef TargetPriority* TargetPriorityPtr;
@@ -366,7 +366,7 @@ class TargetPriorityList {
 
 	public:
 
-		long				size;
+		int32_t				size;
 		TargetPriority		list[MAX_TARGET_PRIORITIES];
 
 	public:
@@ -387,13 +387,13 @@ class TargetPriorityList {
 			destroy();
 		}
 
-		long insert (long index, TargetPriorityPtr priority);
+		int32_t insert (int32_t index, TargetPriorityPtr priority);
 
-		void remove (long index);
+		void remove (int32_t index);
 
-		long calcAction (MechWarriorPtr pilot, GameObjectPtr target);
+		int32_t calcAction (MechWarriorPtr pilot, GameObjectPtr target);
 
-		long calcTarget (MechWarriorPtr pilot, Stuff::Vector3D location, long contactCriteria, long& action);
+		int32_t calcTarget (MechWarriorPtr pilot, Stuff::Vector3D location, int32_t contactCriteria, int32_t& action);
 };
 
 //---------------------------------------------------------------------------
@@ -678,9 +678,9 @@ typedef struct _MechWarriorData
 	char					videoStr[MAXLEN_PILOT_VIDEO];
 	char					audioStr[MAXLEN_PILOT_AUDIO];
 	char					brainStr[MAXLEN_PILOT_BRAIN];
-	long					index;
-	long					paintScheme;
-	long					photoIndex;
+	int32_t					index;
+	int32_t					paintScheme;
+	int32_t					photoIndex;
 
 	char					rank;
 	char					skills[NUM_SKILLS];				//Current
@@ -694,12 +694,12 @@ typedef struct _MechWarriorData
 
 	float					wounds;
 	float					health;
-	long					status;
+	int32_t					status;
 	bool					escapesThruEjection;
 	RadioLog				radioLog;
 	bool					notMineYet;						// Pilot must EARNED through logistics!!!
 
-	long					teamId;
+	int32_t					teamId;
 	GameObjectWatchID		vehicleWID;						// Must point to a Mover
 
 	int					    numSkillUses[NUM_SKILLS][NUM_COMBAT_STATS];
@@ -712,14 +712,14 @@ typedef struct _MechWarriorData
 	char					startingSkills[NUM_SKILLS];
 	bool					specialtySkills[NUM_SPECIALTY_SKILLS];
 	GameObjectWatchID		killed[MAX_MOVERS / 3];
-	long					numKilled;
+	int32_t					numKilled;
 
-	long					descID;							//Used by Logistics to Desc.
-	long					nameIndex;						//Used by Logistics to Desc.		
+	int32_t					descID;							//Used by Logistics to Desc.
+	int32_t					nameIndex;						//Used by Logistics to Desc.		
 
 	float					timeOfLastOrders;				// when I ask for orders
 	AttackerRec				attackers[MAX_ATTACKERS];		// should never have more than 12 attackers...
-	long					numAttackers;
+	int32_t					numAttackers;
 	float					attackRadius;
 
 	MemoryCell				memory[NUM_MEMORY_CELLS];
@@ -728,11 +728,11 @@ typedef struct _MechWarriorData
 	float					brainUpdate;
 	float					combatUpdate;
 	float					movementUpdate;
-	int                     weaponsStatus[MAX_WEAPONS_PER_MOVER];
-	long					weaponsStatusResult;
+	int32_t                 weaponsStatus[MAX_WEAPONS_PER_MOVER];
+	int32_t					weaponsStatusResult;
 
 	bool					useGoalPlan;
-	long					mainGoalAction;
+	int32_t					mainGoalAction;
 	GameObjectWatchID		mainGoalObjectWID;
 	Stuff::Vector3D			mainGoalLocation;
 	float					mainGoalControlRadius;
@@ -745,22 +745,22 @@ typedef struct _MechWarriorData
 	TacticalOrder			curTacOrder;
 	PilotAlarm				alarm[NUM_PILOT_ALARMS];
 	PilotAlarm				alarmHistory[NUM_PILOT_ALARMS];	// used by brain update in ABL
-	long					alarmPriority;
+	int32_t					alarmPriority;
 	bool					curPlayerOrderFromQueue;
 	bool					tacOrderQueueLocked;
 	bool					tacOrderQueueExecuting;
 	bool					tacOrderQueueLooping;
 	char					numTacOrdersQueued;	// Currently, only player orders may be queued...
 	QueuedTacOrder			tacOrderQueue[MAX_QUEUED_TACORDERS_PER_WARRIOR];
-	long					tacOrderQueueIndex;
-	long					nextTacOrderId;
-	long					lastTacOrderId;
+	int32_t					tacOrderQueueIndex;
+	int32_t					nextTacOrderId;
+	int32_t					lastTacOrderId;
 
-	long					coreScanTargetWID;
-	long					coreAttackTargetWID;
-	long					coreMoveTargetWID;
+	int32_t					coreScanTargetWID;
+	int32_t					coreAttackTargetWID;
+	int32_t					coreMoveTargetWID;
 	TargetPriorityList		targetPriorityList;
-	long					brainState;
+	int32_t					brainState;
 	bool					willHelp;
 
 	SaveableMoveOrders		moveOrders;
@@ -775,24 +775,24 @@ typedef struct _MechWarriorData
 
 	char					orderState;
 
-	unsigned long			debugFlags;
+	uint32_t                debugFlags;
 
 	unsigned char			oldPilot;
 
-	long					warriorBrainHandle;
+	int32_t                 warriorBrainHandle;
 } MechWarriorData;
 
 typedef struct _StaticMechWarriorData
 {
-	long				numWarriors;
-	long				numWarriorsInCombat;
+	int32_t				numWarriors;
+	int32_t				numWarriorsInCombat;
 	bool				brainsEnabled[MAX_TEAMS];
 	float				minSkill;
 	float				maxSkill;
-	long				increaseCap;
+	int32_t				increaseCap;
 	float				maxVisualRadius;
-	long				curEventID;
-	long				curEventTrigger;
+	int32_t				curEventID;
+	int32_t				curEventTrigger;
 } StaticMechWarriorData;
 
 class MechWarrior {
@@ -806,9 +806,9 @@ class MechWarrior {
 		char					videoStr[MAXLEN_PILOT_VIDEO];
 		char					audioStr[MAXLEN_PILOT_AUDIO];
 		char					brainStr[MAXLEN_PILOT_BRAIN];
-		long					index;
-		long					paintScheme;
-		long					photoIndex;
+		int32_t					index;
+		int32_t					paintScheme;
+		int32_t					photoIndex;
 
 		// Skills and Traits
 		char					rank;
@@ -823,21 +823,21 @@ class MechWarrior {
 		// Status
 		float					wounds;
 		float					health;
-		long					status;
+		int32_t					status;
 		bool					escapesThruEjection;
 		RadioLog				radioLog;
 		bool					notMineYet;				// Pilot must EARNED through logistics!!!
 
 		// Unit
-		long					teamId;
+		int32_t					teamId;
 		GameObjectWatchID		vehicleWID;			// Must point to a Mover
 
 	public:
 		// Combat Stats and History
-		int					numSkillUses[NUM_SKILLS][NUM_COMBAT_STATS];
-		int					numSkillSuccesses[NUM_SKILLS][NUM_COMBAT_STATS];
-		int					numMechKills[NUM_VEHICLE_CLASSES][NUM_COMBAT_STATS];
-		int					numPhysicalAttacks[NUM_PHYSICAL_ATTACKS][NUM_COMBAT_STATS];
+		int32_t                 numSkillUses[NUM_SKILLS][NUM_COMBAT_STATS];
+		int32_t					numSkillSuccesses[NUM_SKILLS][NUM_COMBAT_STATS];
+		int32_t					numMechKills[NUM_VEHICLE_CLASSES][NUM_COMBAT_STATS];
+		int32_t					numPhysicalAttacks[NUM_PHYSICAL_ATTACKS][NUM_COMBAT_STATS];
 		char					skills[NUM_SKILLS];				//Current
 		float					skillRank[NUM_SKILLS];
 		float					skillPoints[NUM_SKILLS];
@@ -845,24 +845,24 @@ class MechWarrior {
 		char					startingSkills[NUM_SKILLS];		//How I arrived in the mission
 		bool					specialtySkills[NUM_SPECIALTY_SKILLS];
 		GameObjectWatchID		killed[MAX_MOVERS / 3];
-		long					numKilled;
+		int32_t					numKilled;
 
-		long					descID;							//Used by Logistics to Desc.
-		long					nameIndex;						//Used by Logistics to Desc.		
+		int32_t					descID;							//Used by Logistics to Desc.
+		int32_t					nameIndex;						//Used by Logistics to Desc.		
 		static	SpecialtySkillType	skillTypes[NUM_SPECIALTY_SKILLS];
 	protected:
 
 		// AI
 		float					timeOfLastOrders;		// when I ask for orders
 		AttackerRec				attackers[MAX_ATTACKERS];			// should never have more than 12 attackers...
-		long					numAttackers;
+		int32_t					numAttackers;
 		float					attackRadius;
 		static SortListPtr		sortList;
 
 		// ABL Brain and Memory
 		MemoryCell				memory[NUM_MEMORY_CELLS];
 		ABLModulePtr			brain;
-		long					warriorBrainHandle;
+		int32_t                 warriorBrainHandle;
 		SymTableNodePtr			brainAlarmCallback[NUM_PILOT_ALARMS];
 		char					debugStrings[NUM_PILOT_DEBUG_STRINGS][MAXLEN_PILOT_DEBUG_STRING];
 
@@ -870,11 +870,11 @@ class MechWarrior {
 		float					brainUpdate;
 		float					combatUpdate;
 		float					movementUpdate;
-		int					weaponsStatus[MAX_WEAPONS_PER_MOVER];
-		int					weaponsStatusResult;
+		int32_t                 weaponsStatus[MAX_WEAPONS_PER_MOVER];
+		int32_t	                weaponsStatusResult;
 
 		bool					useGoalPlan;
-		long					mainGoalAction;
+		int32_t					mainGoalAction;
 		GameObjectWatchID		mainGoalObjectWID;
 		Stuff::Vector3D			mainGoalLocation;
 		float					mainGoalControlRadius;
@@ -887,22 +887,22 @@ class MechWarrior {
 		TacticalOrder			curTacOrder;
 		PilotAlarm				alarm[NUM_PILOT_ALARMS];
 		PilotAlarm				alarmHistory[NUM_PILOT_ALARMS];	// used by brain update in ABL
-		long					alarmPriority;
+		int32_t					alarmPriority;
 		bool					curPlayerOrderFromQueue;
 		bool					tacOrderQueueLocked;
 		bool					tacOrderQueueExecuting;
 		bool					tacOrderQueueLooping;
 		char					numTacOrdersQueued;	// Currently, only player orders may be queued...
 		QueuedTacOrderPtr		tacOrderQueue;
-		long					tacOrderQueueIndex;
-		long					nextTacOrderId;
-		long					lastTacOrderId;
+		int32_t					tacOrderQueueIndex;
+		int32_t					nextTacOrderId;
+		int32_t					lastTacOrderId;
 
-		long					coreScanTargetWID;
-		long					coreAttackTargetWID;
-		long					coreMoveTargetWID;
+		int32_t					coreScanTargetWID;
+		int32_t					coreAttackTargetWID;
+		int32_t					coreMoveTargetWID;
 		TargetPriorityList		targetPriorityList;
-		long					brainState;
+		int32_t					brainState;
 		bool					willHelp;
 
 		MoveOrders				moveOrders;
@@ -920,7 +920,7 @@ class MechWarrior {
 
 		PathQueueRecPtr			movePathRequest;
 
-		unsigned long			debugFlags;
+		uint32_t                debugFlags;
 
 		RadioPtr				radio;
 		bool					isPlayingMsg;		//Always false unless I'm playing a message!
@@ -930,15 +930,15 @@ class MechWarrior {
 
 	public:
 
-		static long				numWarriors;
-		static long				numWarriorsInCombat;
+		static int32_t			numWarriors;
+		static int32_t			numWarriorsInCombat;
 		static bool				brainsEnabled[MAX_TEAMS];
 		static float			minSkill;
 		static float			maxSkill;
-		static long				increaseCap;
+		static int32_t			increaseCap;
 		static float			maxVisualRadius;
-		static long				curEventID;
-		static long				curEventTrigger;
+		static int32_t			curEventID;
+		static int32_t			curEventTrigger;
 
 		static MechWarrior*		warriorList[MAX_WARRIORS];
 		static GoalManager*		goalManager;
@@ -987,7 +987,7 @@ class MechWarrior {
 			return(name);
 		}
 
-		long getPhoto (void) {
+		int32_t getPhoto (void) {
 			return(photoIndex);
 		}
 
@@ -1374,7 +1374,7 @@ class MechWarrior {
 			return brainStr;
 		}
 		
-		long getPilotPhoto (void)
+		int32_t getPilotPhoto (void)
 		{
 			return photoIndex;
 		}
@@ -1390,7 +1390,7 @@ class MechWarrior {
 		long getVehicleStatus (void);
 
 		long getWeaponsStatus (int* list) {
-			memcpy(list, weaponsStatus, MAX_WEAPONS_PER_MOVER * sizeof(int));
+            MemCpy(list, weaponsStatus);
 			return(weaponsStatusResult);
 		}
 
@@ -1886,9 +1886,9 @@ class MechWarrior {
 
 		long handleAlarm (long alarmCode, unsigned long triggerId = 0);
 
-		long getAlarmTriggers (long alarmCode, unsigned long* triggerList);
+		int32_t getAlarmTriggers (int32_t alarmCode, int32_t* triggerList);
 
-		long getAlarmTriggersHistory (long alarmCode, unsigned long* triggerList);
+		int32_t getAlarmTriggersHistory (int32_t alarmCode, int32_t* triggerList);
 
 		void clearAlarm (long alarmCode);
 

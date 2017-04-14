@@ -275,15 +275,15 @@ const char *SpecialtySkillsTable[NUM_SPECIALTY_SKILLS] = {
 
 
 SortListPtr		MechWarrior::sortList = NULL;
-long			MechWarrior::numWarriors = 0;
-long			MechWarrior::numWarriorsInCombat = 0;
+int32_t			MechWarrior::numWarriors = 0;
+int32_t			MechWarrior::numWarriorsInCombat = 0;
 bool			MechWarrior::brainsEnabled[MAX_TEAMS] = {true, true, true, true, true, true, true, true};
 float			MechWarrior::minSkill = 1;
 float			MechWarrior::maxSkill = 100;
-long			MechWarrior::increaseCap = 100;
+int32_t			MechWarrior::increaseCap = 100;
 float			MechWarrior::maxVisualRadius = 100.0;
-long			MechWarrior::curEventID = 0;
-long			MechWarrior::curEventTrigger = 0;
+int32_t			MechWarrior::curEventID = 0;
+int32_t			MechWarrior::curEventTrigger = 0;
 MechWarrior*	MechWarrior::warriorList[MAX_WARRIORS];
 
 long LastMoveCalcErr = 0;
@@ -416,7 +416,7 @@ void TargetPriorityList::destroy (void) {
 
 //---------------------------------------------------------------------------
 
-long TargetPriorityList::insert (long index, TargetPriorityPtr priority) {
+int32_t TargetPriorityList::insert (int32_t index, TargetPriorityPtr priority) {
 
 	if (size == MAX_TARGET_PRIORITIES)
 		return(1);
@@ -437,7 +437,7 @@ long TargetPriorityList::insert (long index, TargetPriorityPtr priority) {
 
 //---------------------------------------------------------------------------
 
-void TargetPriorityList::remove (long index) {
+void TargetPriorityList::remove (int32_t index) {
 
 	if ((index > -1) && (index < size)) {
 		if (index < (size - 1)) {
@@ -451,7 +451,7 @@ void TargetPriorityList::remove (long index) {
 
 //---------------------------------------------------------------------------
 
-long TargetPriorityList::calcAction (MechWarriorPtr pilot, GameObjectPtr target) {
+int32_t TargetPriorityList::calcAction (MechWarriorPtr pilot, GameObjectPtr target) {
 
 	if (target->isMover()) {
 		if (!pilot->getTeam() || pilot->getTeam()->isEnemy(target->getTeam())) {
@@ -480,7 +480,7 @@ long TargetPriorityList::calcAction (MechWarriorPtr pilot, GameObjectPtr target)
 
 //---------------------------------------------------------------------------
 
-long TargetPriorityList::calcTarget (MechWarriorPtr pilot, Stuff::Vector3D location, long contactCriteria, long& action) {
+int32_t TargetPriorityList::calcTarget (MechWarriorPtr pilot, Stuff::Vector3D location, int32_t contactCriteria, int32_t& action) {
 
 	if (!pilot->getTeam())
 		return(0);
@@ -859,7 +859,7 @@ void MechWarrior::init (bool create) {
 		}
 		skillRank[i] = 0.0;
 		skillPoints[i] = 0.0;
-        //sebi: WTF???
+        //sebi: WTF??? ORIG BUG FIX
 		//originalSkills[NUM_SKILLS] = 0;
 		//startingSkills[NUM_SKILLS] = 0;
         // maybe like this
@@ -997,6 +997,8 @@ void MechWarrior::init (bool create) {
 	isPlayingMsg = false;
 	oldPilot = 0;
 
+    lastTargetConserveAmmo = false; // sebi: int to not contain garbage
+
 	//------------
 	// Static vars
 	if (!sortList) {
@@ -1027,13 +1029,13 @@ long MechWarrior::init (FitIniFile* warriorFile) {
 	if (result != NO_ERR)
 		return(result);
 	
-	result = warriorFile->readIdLong("DescIndex", descID);
+	result = warriorFile->readIdInt("DescIndex", descID);
 	if (result != NO_ERR)
 		descID = -1;
 
 	cLoadString( descID, name, MAXLEN_PILOT_NAME - 1);
 		
-	result = warriorFile->readIdLong("NameIndex", nameIndex);
+	result = warriorFile->readIdInt("NameIndex", nameIndex);
 	if (result != NO_ERR)
 		nameIndex = -1;
 
@@ -1041,12 +1043,13 @@ long MechWarrior::init (FitIniFile* warriorFile) {
 	if (result != NO_ERR)
 		notMineYet = false;
 		
-	result = warriorFile->readIdLong("PictureIndex", photoIndex);
+	result = warriorFile->readIdInt("PictureIndex", photoIndex);
 	if (result != NO_ERR)
 		photoIndex = 0;
 
 	strcpy( callsign, name );
-	for ( long i = 0; i < strlen( callsign ); i ++ )
+    const int len = strlen( callsign );
+	for ( int i = 0; i < len; i ++ )
 		CharUpper( callsign );
 		
 	result = warriorFile->readIdUChar("OldPilot",oldPilot);
@@ -1075,7 +1078,7 @@ long MechWarrior::init (FitIniFile* warriorFile) {
 		}
 	}
 	
-	result = warriorFile->readIdLong("PaintScheme", paintScheme);
+	result = warriorFile->readIdInt("PaintScheme", paintScheme);
 	if (result != NO_ERR)
 		paintScheme = -1;		//This means mech is its normal color.
 	
@@ -2723,7 +2726,8 @@ void MechWarrior::setMoveGlobalPath (GlobalPathStepPtr path, long numSteps) {
 	if (numSteps > MAX_GLOBAL_PATH)
 		Fatal(0, " Global Path Too Long ");
 
-	memcpy(moveOrders.globalPath, path, sizeof(GlobalPathStep) * numSteps);
+    ArrayCopy(moveOrders.globalPath, path, numSteps);
+	//memcpy(moveOrders.globalPath, path, sizeof(GlobalPathStep) * numSteps);
 	moveOrders.numGlobalSteps = numSteps;
 	moveOrders.curGlobalStep = 0;
 }
@@ -4686,17 +4690,17 @@ long MechWarrior::handleAlarm (long alarmCode, unsigned long triggerId) {
 
 //---------------------------------------------------------------------------
 
-long MechWarrior::getAlarmTriggers (long alarmCode, unsigned long* triggerList) {
+int32_t MechWarrior::getAlarmTriggers (int alarmCode, int32_t* triggerList) {
 
-	memcpy(triggerList, alarm[alarmCode].trigger, sizeof(unsigned long) * alarm[alarmCode].numTriggers);
+    ArrayCopy(triggerList, alarm[alarmCode].trigger, alarm[alarmCode].numTriggers);
 	return(alarm[alarmCode].numTriggers);
 }
 
 //---------------------------------------------------------------------------
 
-long MechWarrior::getAlarmTriggersHistory (long alarmCode, unsigned long* triggerList) {
+int32_t MechWarrior::getAlarmTriggersHistory (int32_t alarmCode, int32_t* triggerList) {
 
-	memcpy(triggerList, alarmHistory[alarmCode].trigger, sizeof(unsigned long) * alarmHistory[alarmCode].numTriggers);
+    ArrayCopy(triggerList, alarmHistory[alarmCode].trigger, alarmHistory[alarmCode].numTriggers);
 	return(alarmHistory[alarmCode].numTriggers);
 }
 
@@ -5818,7 +5822,7 @@ long MechWarrior::coreScan (GameObjectPtr object, unsigned long params) {
 		//-------------------------------------------
 		// Scan for anything matching the criteria...
 		Stuff::Vector3D myPosition = getVehicle()->getPosition();
-		long action = -1;
+		int32_t action = -1;
 		coreScanTargetWID = targetPriorityList.calcTarget(this, myPosition, params, action);
 		return(coreScanTargetWID);
 	}
@@ -6207,7 +6211,8 @@ long MechWarrior::orderTraversePath (bool unitOrder, bool setTacOrder, long orig
 
 	TacticalOrder tacOrder;
 	tacOrder.init((OrderOriginType)origin, TACTICAL_ORDER_TRAVERSE_PATH, unitOrder);
-	memcpy(&tacOrder.moveParams.wayPath, wayPath, sizeof(WayPath));
+    tacOrder.moveParams.wayPath = *wayPath;
+	//memcpy(&tacOrder.moveParams.wayPath, wayPath, sizeof(WayPath));
 	tacOrder.moveParams.mode = (layMines ? MOVE_MODE_MINELAYING : MOVE_MODE_NORMAL);
 
 	long result = tacOrder.status(this);
@@ -6239,7 +6244,8 @@ long MechWarrior::orderPatrolPath (bool unitOrder, bool setTacOrder, long origin
 
 	TacticalOrder tacOrder;
 	tacOrder.init((OrderOriginType)origin, TACTICAL_ORDER_PATROL_PATH, unitOrder);
-	memcpy(&tacOrder.moveParams.wayPath, wayPath, sizeof(WayPath));
+    tacOrder.moveParams.wayPath = *wayPath;
+	//memcpy(&tacOrder.moveParams.wayPath, wayPath, sizeof(WayPath));
 	
 	long result = tacOrder.status(this);
 	if (result == TACORDER_SUCCESS)
@@ -7362,8 +7368,8 @@ long MechWarrior::loadBrainParameters (FitIniFile* brainFile, long warriorId) {
 				if (result != NO_ERR)
 					return(result);
 
-				long values[1024];
-				result = brainFile->readIdLongArray("Values", values, numValues);
+				int values[1024];
+				result = brainFile->readIdIntArray("Values", values, numValues);
 				if (result != NO_ERR)
 					return(result);
 
@@ -8131,7 +8137,7 @@ void MechWarrior::copyToData (MechWarriorData &data)
 	data.photoIndex = photoIndex;
 	
 	data.rank = rank;
-	memcpy(data.skills,skills,sizeof(char)*NUM_SKILLS);
+    MemCpy(data.skills,skills);
 	data.professionalism = professionalism;
 	data.professionalismModifier = professionalismModifier;
 	data.decorum = decorum;
@@ -8150,33 +8156,33 @@ void MechWarrior::copyToData (MechWarriorData &data)
 	data.teamId = teamId;
 	data.vehicleWID = vehicleWID;
 	
-	memcpy(data.numSkillUses,numSkillUses,sizeof(long) * NUM_SKILLS * NUM_COMBAT_STATS);
-	memcpy(data.numSkillSuccesses,numSkillSuccesses, sizeof(long) * NUM_SKILLS *NUM_COMBAT_STATS);
-	memcpy(data.numMechKills,numMechKills,sizeof(long) * NUM_VEHICLE_CLASSES * NUM_COMBAT_STATS);
-	memcpy(data.numPhysicalAttacks,numPhysicalAttacks,sizeof(long) * NUM_PHYSICAL_ATTACKS * NUM_COMBAT_STATS);
-	memcpy(data.skillRank,skillRank,sizeof(float) * NUM_SKILLS);
-	memcpy(data.skillPoints,skillPoints,sizeof(float) * NUM_SKILLS);
-	memcpy(data.originalSkills,originalSkills,sizeof(char) * NUM_SKILLS);
-	memcpy(data.startingSkills,startingSkills,sizeof(char) * NUM_SKILLS);
-	memcpy(data.specialtySkills,specialtySkills,sizeof(bool) * NUM_SPECIALTY_SKILLS);
-	memcpy(data.killed,killed,sizeof(GameObjectWatchID) * (MAX_MOVERS / 3));
+	MemCpy(data.numSkillUses,numSkillUses);
+	MemCpy(data.numSkillSuccesses,numSkillSuccesses);
+	MemCpy(data.numMechKills,numMechKills);
+	MemCpy(data.numPhysicalAttacks,numPhysicalAttacks);
+	MemCpy(data.skillRank,skillRank);
+	MemCpy(data.skillPoints,skillPoints);
+	MemCpy(data.originalSkills,originalSkills);
+	MemCpy(data.startingSkills,startingSkills);
+	MemCpy(data.specialtySkills,specialtySkills);
+	MemCpy(data.killed,killed);
 	data.numKilled = numKilled;
 	
 	data.descID = descID;
 	data.nameIndex = nameIndex;
 	
 	data.timeOfLastOrders = timeOfLastOrders;
-	memcpy(data.attackers,attackers,sizeof(AttackerRec) * MAX_ATTACKERS);
+	MemCpy(data.attackers,attackers);
 	data.numAttackers = numAttackers;
 	data.attackRadius = attackRadius;
 	
-	memcpy(data.memory,memory,sizeof(MemoryCell) * NUM_MEMORY_CELLS);
-	memcpy(data.debugStrings,debugStrings,sizeof(char) * NUM_PILOT_DEBUG_STRINGS * MAXLEN_PILOT_DEBUG_STRING);
+	MemCpy(data.memory,memory);
+    MemCpy(data.debugStrings,debugStrings);
 	
 	data.brainUpdate = brainUpdate;
 	data.combatUpdate = combatUpdate;
 	data.movementUpdate = movementUpdate;
-	memcpy(data.weaponsStatus,weaponsStatus,sizeof(long) * MAX_WEAPONS_PER_MOVER);
+	MemCpy(data.weaponsStatus,weaponsStatus);
 	data.weaponsStatusResult = weaponsStatusResult;
 	
 	data.useGoalPlan = useGoalPlan;
@@ -8185,14 +8191,14 @@ void MechWarrior::copyToData (MechWarriorData &data)
 	data.mainGoalLocation = mainGoalLocation;
 	data.mainGoalControlRadius = mainGoalControlRadius;
 	data.lastGoalPathSize = lastGoalPathSize;
-	memcpy(data.lastGoalPath,lastGoalPath,sizeof(short) * MAX_GLOBAL_PATH);
+	MemCpy(data.lastGoalPath,lastGoalPath);
 	
-	memcpy(data.newTacOrderReceived,newTacOrderReceived, sizeof(bool) * NUM_ORDERSTATES);
-	memcpy(data.tacOrder,tacOrder, sizeof(TacticalOrder) * NUM_ORDERSTATES);
+	MemCpy(data.newTacOrderReceived,newTacOrderReceived);
+	MemCpy(data.tacOrder,tacOrder);
 	data.lastTacOrder = lastTacOrder;
 	data.curTacOrder = curTacOrder;
-	memcpy(data.alarm,alarm,sizeof(PilotAlarm) * NUM_PILOT_ALARMS);
-	memcpy(data.alarmHistory,alarmHistory, sizeof(PilotAlarm) * NUM_PILOT_ALARMS);	// used by brain update in ABL
+	MemCpy(data.alarm,alarm);
+	MemCpy(data.alarmHistory,alarmHistory);	// used by brain update in ABL
 	data.alarmPriority = alarmPriority;
 	data.curPlayerOrderFromQueue = curPlayerOrderFromQueue;
 	data.tacOrderQueueLocked = tacOrderQueueLocked;
@@ -8201,8 +8207,9 @@ void MechWarrior::copyToData (MechWarriorData &data)
 	data.numTacOrdersQueued = numTacOrdersQueued;	
 
 	//Pilots which are not used may not have this assigned.
-	if (tacOrderQueue)
-		memcpy(data.tacOrderQueue,tacOrderQueue,sizeof(QueuedTacOrder) * MAX_QUEUED_TACORDERS_PER_WARRIOR);
+	if (tacOrderQueue) {
+		MemCpy(data.tacOrderQueue,tacOrderQueue);
+    }
 
 	data.tacOrderQueueIndex = tacOrderQueueIndex;
 	data.nextTacOrderId = nextTacOrderId;
@@ -8253,7 +8260,7 @@ void MechWarrior::copyFromData (MechWarriorData &data)
 	photoIndex = data.photoIndex;
 	
 	rank = data.rank;
-	memcpy(skills,data.skills,sizeof(char)*NUM_SKILLS);
+	MemCpy(skills,data.skills);
 
 	professionalism = data.professionalism;
 	professionalismModifier = data.professionalismModifier;
@@ -8273,33 +8280,33 @@ void MechWarrior::copyFromData (MechWarriorData &data)
 	teamId = data.teamId;
 	vehicleWID = data.vehicleWID;
 	
-	memcpy(numSkillUses,data.numSkillUses,sizeof(long) * NUM_SKILLS * NUM_COMBAT_STATS);
-	memcpy(numSkillSuccesses,data.numSkillSuccesses,sizeof(long) * NUM_SKILLS *NUM_COMBAT_STATS);
-	memcpy(numMechKills,data.numMechKills,sizeof(long) * NUM_VEHICLE_CLASSES * NUM_COMBAT_STATS);
-	memcpy(numPhysicalAttacks,data.numPhysicalAttacks,sizeof(long) * NUM_PHYSICAL_ATTACKS * NUM_COMBAT_STATS);
-	memcpy(skillRank,data.skillRank,sizeof(float) * NUM_SKILLS);
-	memcpy(skillPoints,data.skillPoints,sizeof(float) * NUM_SKILLS);
-	memcpy(originalSkills,data.originalSkills,sizeof(char) * NUM_SKILLS);
-	memcpy(startingSkills,data.startingSkills,sizeof(char) * NUM_SKILLS);
-	memcpy(specialtySkills,data.specialtySkills,sizeof(bool) * NUM_SPECIALTY_SKILLS);
-	memcpy(killed,data.killed,sizeof(GameObjectWatchID) * (MAX_MOVERS / 3));
+	MemCpy(numSkillUses,data.numSkillUses);
+	MemCpy(numSkillSuccesses,data.numSkillSuccesses);
+	MemCpy(numMechKills,data.numMechKills);
+	MemCpy(numPhysicalAttacks,data.numPhysicalAttacks);
+	MemCpy(skillRank,data.skillRank);
+	MemCpy(skillPoints,data.skillPoints);
+	MemCpy(originalSkills,data.originalSkills);
+	MemCpy(startingSkills,data.startingSkills);
+	MemCpy(specialtySkills,data.specialtySkills);
+	MemCpy(killed,data.killed);
 	numKilled = data.numKilled;
 	
 	descID = data.descID;
 	nameIndex = data.nameIndex;
 	
 	timeOfLastOrders = data.timeOfLastOrders;
-	memcpy(attackers,data.attackers,sizeof(AttackerRec) * MAX_ATTACKERS);
+	MemCpy(attackers,data.attackers);
 	numAttackers = data.numAttackers;
 	attackRadius = data.attackRadius;
 	
-	memcpy(memory,data.memory,sizeof(MemoryCell) * NUM_MEMORY_CELLS);
-	memcpy(debugStrings,data.debugStrings,sizeof(char) * NUM_PILOT_DEBUG_STRINGS * MAXLEN_PILOT_DEBUG_STRING);
+	MemCpy(memory,data.memory);
+	MemCpy(debugStrings,data.debugStrings);
 	
 	brainUpdate = data.brainUpdate;
 	combatUpdate = data.combatUpdate;
 	movementUpdate = data.movementUpdate;
-	memcpy(weaponsStatus,data.weaponsStatus,sizeof(long) * MAX_WEAPONS_PER_MOVER);
+	MemCpy(weaponsStatus,data.weaponsStatus);
 	weaponsStatusResult = data.weaponsStatusResult;
 	
 	useGoalPlan = data.useGoalPlan;
@@ -8308,21 +8315,21 @@ void MechWarrior::copyFromData (MechWarriorData &data)
 	mainGoalLocation = data.mainGoalLocation;
 	mainGoalControlRadius = data.mainGoalControlRadius;
 	lastGoalPathSize = data.lastGoalPathSize;
-	memcpy(lastGoalPath,data.lastGoalPath,sizeof(short) * MAX_GLOBAL_PATH);
+	MemCpy(lastGoalPath,data.lastGoalPath);
 	
-	memcpy(newTacOrderReceived, data.newTacOrderReceived,sizeof(bool) * NUM_ORDERSTATES);
-	memcpy(tacOrder, data.tacOrder,sizeof(TacticalOrder) * NUM_ORDERSTATES);
+	MemCpy(newTacOrderReceived, data.newTacOrderReceived);
+	MemCpy(tacOrder, data.tacOrder);
 	lastTacOrder = data.lastTacOrder;
 	curTacOrder = data.curTacOrder;
-	memcpy(alarm,data.alarm,sizeof(PilotAlarm) * NUM_PILOT_ALARMS);
-	memcpy(alarmHistory,data.alarmHistory, sizeof(PilotAlarm) * NUM_PILOT_ALARMS);	// used by brain update in ABL
+	MemCpy(alarm,data.alarm);
+	MemCpy(alarmHistory,data.alarmHistory);	// used by brain update in ABL
 	alarmPriority = data.alarmPriority;
 	curPlayerOrderFromQueue = data.curPlayerOrderFromQueue;
 	tacOrderQueueLocked = data.tacOrderQueueLocked;
 	tacOrderQueueExecuting = data.tacOrderQueueExecuting;
 	tacOrderQueueLooping = data.tacOrderQueueLooping;
 	numTacOrdersQueued = data.numTacOrdersQueued;
-	memcpy(tacOrderQueue,data.tacOrderQueue,sizeof(QueuedTacOrder) * MAX_QUEUED_TACORDERS_PER_WARRIOR);
+	MemCpy(tacOrderQueue,data.tacOrderQueue);
 	for (long i=0;i<MAX_QUEUED_TACORDERS_PER_WARRIOR;i++)
 	{
 		//Set the Marker pointers to NULL and then recreate them from the movemode data.
@@ -8443,7 +8450,7 @@ long MechWarrior::Save (PacketFilePtr file, long packetNum)
 	StaticMechWarriorData staticData;
 	staticData.numWarriors 					= numWarriors;
 	staticData.numWarriorsInCombat			= numWarriorsInCombat;
-	memcpy(staticData.brainsEnabled,brainsEnabled,sizeof(bool) * MAX_TEAMS);
+	MemCpy(staticData.brainsEnabled,brainsEnabled);
 	staticData.minSkill						= minSkill;
 	staticData.maxSkill						= maxSkill;
 	staticData.increaseCap					= increaseCap;
@@ -8481,7 +8488,7 @@ long MechWarrior::Load (PacketFilePtr file, long packetNum)
 	numWarriors 			= staticData.numWarriors;
 	numWarriorsInCombat		= staticData.numWarriorsInCombat;
 
-	memcpy(brainsEnabled,staticData.brainsEnabled,sizeof(bool) * MAX_TEAMS);
+	MemCpy(brainsEnabled,staticData.brainsEnabled);
 
 	minSkill				= staticData.minSkill;
 	maxSkill				= staticData.maxSkill;
