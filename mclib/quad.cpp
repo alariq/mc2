@@ -262,12 +262,14 @@ void TerrainQuad::setupTextures (void)
 					terrainDetailHandle = Terrain::terrainTextures2->getDetailHandle();
 					overlayHandle = 0xffffffff;
 						
-					mcTextureManager->addTriangle(terrainHandle,MC2_ISTERRAIN | MC2_DRAWSOLID);
-					mcTextureManager->addTriangle(terrainHandle,MC2_ISTERRAIN | MC2_DRAWSOLID);
-					if (terrainDetailHandle != 0xffffffff)
-					{
-						mcTextureManager->addTriangle(terrainDetailHandle,MC2_ISTERRAIN | MC2_DRAWALPHA);
-						mcTextureManager->addTriangle(terrainDetailHandle,MC2_ISTERRAIN | MC2_DRAWALPHA);
+					if(terrainHandle!=0) {
+						mcTextureManager->addTriangle(terrainHandle,MC2_ISTERRAIN | MC2_DRAWSOLID);
+						mcTextureManager->addTriangle(terrainHandle,MC2_ISTERRAIN | MC2_DRAWSOLID);
+						if (terrainDetailHandle != 0xffffffff)
+						{
+							mcTextureManager->addTriangle(terrainDetailHandle,MC2_ISTERRAIN | MC2_DRAWALPHA);
+							mcTextureManager->addTriangle(terrainDetailHandle,MC2_ISTERRAIN | MC2_DRAWALPHA);
+						}
 					}
 				}
 				else		//This cement in the old Universe, pull the old texture and display it
@@ -278,8 +280,10 @@ void TerrainQuad::setupTextures (void)
 						terrainHandle = Terrain::terrainTextures2->getTextureHandle(vertices[1],vertices[3],&uvData);
 						terrainDetailHandle = Terrain::terrainTextures2->getDetailHandle();
 						
-						mcTextureManager->addTriangle(terrainHandle,MC2_ISTERRAIN | MC2_DRAWSOLID);
-						mcTextureManager->addTriangle(terrainHandle,MC2_ISTERRAIN | MC2_DRAWSOLID);
+						if(terrainHandle!=0) {
+							mcTextureManager->addTriangle(terrainHandle,MC2_ISTERRAIN | MC2_DRAWSOLID);
+							mcTextureManager->addTriangle(terrainHandle,MC2_ISTERRAIN | MC2_DRAWSOLID);
+						}
 						
 						if (terrainDetailHandle != 0xffffffff)
 						{
@@ -287,8 +291,10 @@ void TerrainQuad::setupTextures (void)
 							mcTextureManager->addTriangle(terrainDetailHandle,MC2_ISTERRAIN | MC2_DRAWALPHA);
 						}
 						
-						mcTextureManager->addTriangle(overlayHandle,MC2_ISTERRAIN | MC2_DRAWALPHA | MC2_ISCRATERS);
-						mcTextureManager->addTriangle(overlayHandle,MC2_ISTERRAIN | MC2_DRAWALPHA | MC2_ISCRATERS);
+						if(overlayHandle!=0) {
+							mcTextureManager->addTriangle(overlayHandle,MC2_ISTERRAIN | MC2_DRAWALPHA | MC2_ISCRATERS);
+							mcTextureManager->addTriangle(overlayHandle,MC2_ISTERRAIN | MC2_DRAWALPHA | MC2_ISCRATERS);
+						}
 					}
 					else	//Otherwise, its solid cement.  Save some draw cycles!!
 					{
@@ -297,8 +303,10 @@ void TerrainQuad::setupTextures (void)
 						overlayHandle = 0xffffffff;
 						
 						// sebi (*) make it solid, soother objects will not draw-through, special section added in txmmgr.cpp
-						mcTextureManager->addTriangle(terrainHandle,MC2_ISTERRAIN/* | MC2_DRAWALPHA*/ | MC2_ISCRATERS);
-						mcTextureManager->addTriangle(terrainHandle,MC2_ISTERRAIN/* | MC2_DRAWALPHA*/ | MC2_ISCRATERS);
+						if(terrainHandle!=0) {		// consider adding this check in add vertices as well!
+							mcTextureManager->addTriangle(terrainHandle,MC2_ISTERRAIN/* | MC2_DRAWALPHA*/ | MC2_ISCRATERS);
+							mcTextureManager->addTriangle(terrainHandle,MC2_ISTERRAIN/* | MC2_DRAWALPHA*/ | MC2_ISCRATERS);
+						}
 					}
 				}
 				
@@ -366,11 +374,12 @@ void TerrainQuad::setupTextures (void)
 					terrainHandle = Terrain::terrainTextures2->getTextureHandle(vertices[1],vertices[3],&uvData); 
 					terrainDetailHandle = Terrain::terrainTextures2->getDetailHandle();
 					overlayHandle = 0xffffffff;
-					
+					if(terrainHandle!=0) {
 					mcTextureManager->addTriangle(terrainHandle,MC2_ISTERRAIN | MC2_DRAWSOLID);
 					mcTextureManager->addTriangle(terrainHandle,MC2_ISTERRAIN | MC2_DRAWSOLID);
 					mcTextureManager->addTriangle(terrainDetailHandle,MC2_ISTERRAIN | MC2_DRAWALPHA);
 					mcTextureManager->addTriangle(terrainDetailHandle,MC2_ISTERRAIN | MC2_DRAWALPHA);
+					}
 				}
 				else		//This cement in the old Universe, pull the old texture and display it
 				{
@@ -380,12 +389,18 @@ void TerrainQuad::setupTextures (void)
 						terrainHandle = Terrain::terrainTextures2->getTextureHandle(vertices[1],vertices[3],&uvData);
 						terrainDetailHandle = Terrain::terrainTextures2->getDetailHandle();
 						
+						if(terrainHandle!=0) {
 						mcTextureManager->addTriangle(terrainHandle,MC2_ISTERRAIN | MC2_DRAWSOLID);
 						mcTextureManager->addTriangle(terrainHandle,MC2_ISTERRAIN | MC2_DRAWSOLID);
+						}
+						if(terrainDetailHandle!=0) {
 						mcTextureManager->addTriangle(terrainDetailHandle,MC2_ISTERRAIN | MC2_DRAWALPHA);
 						mcTextureManager->addTriangle(terrainDetailHandle,MC2_ISTERRAIN | MC2_DRAWALPHA);
+						}
+						if(overlayHandle!=0) {
 						mcTextureManager->addTriangle(overlayHandle,MC2_ISTERRAIN | MC2_DRAWALPHA | MC2_ISCRATERS);
 						mcTextureManager->addTriangle(overlayHandle,MC2_ISTERRAIN | MC2_DRAWALPHA | MC2_ISCRATERS);
+						}
 					}
 					else	//Otherwise, its solid cement.  Save some draw cycles!!
 					{
@@ -394,8 +409,10 @@ void TerrainQuad::setupTextures (void)
 						overlayHandle = 0xffffffff;
 							
 						// sebi: (*) make it solid, soother objects will not draw-through, special section added in txmmgr.cpp
-						mcTextureManager->addTriangle(terrainHandle,MC2_ISTERRAIN /*| MC2_DRAWALPHA*/ | MC2_ISCRATERS);
-						mcTextureManager->addTriangle(terrainHandle,MC2_ISTERRAIN /*| MC2_DRAWALPHA*/ | MC2_ISCRATERS);
+						if(terrainHandle!=0) {	// consider adding this check to addVertices as well!
+							mcTextureManager->addTriangle(terrainHandle,MC2_ISTERRAIN /*| MC2_DRAWALPHA*/ | MC2_ISCRATERS);
+							mcTextureManager->addTriangle(terrainHandle,MC2_ISTERRAIN /*| MC2_DRAWALPHA*/ | MC2_ISCRATERS);
+						}
 					}
 				}
 				
@@ -1408,10 +1425,11 @@ void TerrainQuad::draw (void)
 
 		gos_VERTEX gVertex[3];
 
-		float minU = 0.5f / TERRAIN_TXM_SIZE; 0.00f;
+        // sebi half pixel, hope this is correct :-)
+		float minU = 0.5f / TERRAIN_TXM_SIZE; //0.00f;
 		float maxU = 1.0f - 0.5f / TERRAIN_TXM_SIZE;//0.9999f;
 								
-		float minV = 0.5f / TERRAIN_TXM_SIZE; 0.00f;
+		float minV = 0.5f / TERRAIN_TXM_SIZE; //0.00f;
 		float maxV = 1.0f - 0.5f / TERRAIN_TXM_SIZE; //0.9999f;
 		
 		float oldminU = 0.0078125f;
@@ -1487,9 +1505,11 @@ void TerrainQuad::draw (void)
 					DWORD flags = isAlpha ? MC2_DRAWALPHA : 0;
 					if ((terrainDetailHandle == 0xffffffff) && (overlayHandle == 0xffffffff) && isCement)
 						mcTextureManager->addVertices(terrainHandle,gVertex,MC2_ISTERRAIN | flags | MC2_ISCRATERS);
-					else 
-						mcTextureManager->addVertices(terrainHandle,gVertex,MC2_ISTERRAIN | MC2_DRAWSOLID);
-																								 
+					else {
+						if(terrainHandle!=0)
+							mcTextureManager->addVertices(terrainHandle,gVertex,MC2_ISTERRAIN | MC2_DRAWSOLID);
+					}
+																										 
 					//--------------------------------------------------------------
 					// Draw the Overlay Texture if it exists.
 					if (useOverlayTexture && (overlayHandle != 0xffffffff))
@@ -1612,9 +1632,11 @@ void TerrainQuad::draw (void)
 					DWORD flags = isAlpha ? MC2_DRAWALPHA : 0;
 					if ((terrainDetailHandle == 0xffffffff) && (overlayHandle == 0xffffffff) && isCement)
 						mcTextureManager->addVertices(terrainHandle,gVertex,MC2_ISTERRAIN | flags | MC2_ISCRATERS);
-					else
-						mcTextureManager->addVertices(terrainHandle,gVertex,MC2_ISTERRAIN | MC2_DRAWSOLID);
-					
+					else {
+						if(terrainHandle!=0)		
+							mcTextureManager->addVertices(terrainHandle,gVertex,MC2_ISTERRAIN | MC2_DRAWSOLID);
+					}
+ 
 					//--------------------------------------------------------------
 					// Draw the Overlay Texture if it exists.
 					if (useOverlayTexture && (overlayHandle != 0xffffffff))
@@ -1752,8 +1774,10 @@ void TerrainQuad::draw (void)
 					DWORD flags = isAlpha ? MC2_DRAWALPHA : 0;
 					if ((terrainDetailHandle == 0xffffffff) && (overlayHandle == 0xffffffff) && isCement)
 						mcTextureManager->addVertices(terrainHandle,gVertex,MC2_ISTERRAIN | flags | MC2_ISCRATERS);
-					else
-						mcTextureManager->addVertices(terrainHandle,gVertex,MC2_ISTERRAIN | MC2_DRAWSOLID);
+					else {
+						if(terrainHandle!=0)
+							mcTextureManager->addVertices(terrainHandle,gVertex,MC2_ISTERRAIN | MC2_DRAWSOLID);
+					}
  
 					//----------------------------------------------------
 					// Draw the detail Texture
@@ -1875,8 +1899,10 @@ void TerrainQuad::draw (void)
 					DWORD flags = isAlpha ? MC2_DRAWALPHA : 0;
 					if ((terrainDetailHandle == 0xffffffff) && (overlayHandle == 0xffffffff) && isCement)
 						mcTextureManager->addVertices(terrainHandle,gVertex,MC2_ISTERRAIN | flags | MC2_ISCRATERS);
-					else
-						mcTextureManager->addVertices(terrainHandle,gVertex,MC2_ISTERRAIN | MC2_DRAWSOLID);
+					else {
+						if(terrainHandle!=0)
+							mcTextureManager->addVertices(terrainHandle,gVertex,MC2_ISTERRAIN | MC2_DRAWSOLID);
+					}
  
 					//----------------------------------------------------
 					// Draw the detail Texture
