@@ -86,7 +86,7 @@ char rowShift[NUM_DIRECTIONS] = {-1, -1, 0, 1, 1, 1, 0, -1};
 char colShift[NUM_DIRECTIONS] = {0, 1, 1, 1, 0, -1, -1, -1};
 
 #define	NUM_CELL_OFFSETS 128
-static int cellShift[NUM_CELL_OFFSETS * 2] = {
+static signed char cellShift[NUM_CELL_OFFSETS * 2] = {
 	-1, 0,
 	-1, 1,
 	0, 1,
@@ -5495,9 +5495,9 @@ long MoveMap::calcPathJUMP (MovePathPtr path, Stuff::Vector3D* goalWorldPos, int
 		gosASSERT(openList != NULL);
 		openList->init(5000);
 	}
-		
-	long curCol = startC;
-	long curRow = startR;
+
+    int curCol = startC;
+	int curRow = startR;
 	
 	MoveMapNodePtr curMapNode = &map[curRow * maxWidth + curCol];
 	curMapNode->g = 0;
@@ -5514,7 +5514,7 @@ long MoveMap::calcPathJUMP (MovePathPtr path, Stuff::Vector3D* goalWorldPos, int
 	initialVertex.col = curCol;
 	openList->clear();
 #ifdef _DEBUG
-	long insertErr = 
+	int insertErr = 
 #endif
 		openList->insert(initialVertex);
 	gosASSERT(insertErr == NO_ERR);
@@ -5528,6 +5528,13 @@ long MoveMap::calcPathJUMP (MovePathPtr path, Stuff::Vector3D* goalWorldPos, int
 		topOpenNodes = 1;
 		numNodesVisited = 1;
 	#endif
+
+    const int height_loc = height;
+    const int width_loc = width;
+    const int max_width_loc = maxWidth;
+
+    const int num_offsets_loc = numOffsets;
+    const int jump_cost_loc = jumpCost;
 
 	while (!openList->isEmpty()) {
 
@@ -5570,11 +5577,12 @@ long MoveMap::calcPathJUMP (MovePathPtr path, Stuff::Vector3D* goalWorldPos, int
 		}
 		
 		int cellOffsetIndex = 0;
-		for (int dir = 0; dir < numOffsets; dir++) {
+		for (int dir = 0; dir < num_offsets_loc; dir++) {
 			//------------------------------------------------------------
 			// First, make sure this is a legit direction to go. We do NOT
 			// want to clip corners, so we'll check that here...
-			bool isDiagonalWalk = IsDiagonalStep[dir];
+			//bool isDiagonalWalk = IsDiagonalStep[dir];
+			bool isDiagonalWalk = (dir&1) && (dir<8); 
             if (isDiagonalWalk) {
                 if (!adjacentCellOpenJUMP(bestRow, bestCol, StepAdjDir[dir]) && !adjacentCellOpenJUMP(bestRow, bestCol, StepAdjDir[dir + 1])) {
                     cellOffsetIndex += 2;
@@ -5589,11 +5597,12 @@ long MoveMap::calcPathJUMP (MovePathPtr path, Stuff::Vector3D* goalWorldPos, int
 			int succCol = bestCol + cellShift[cellOffsetIndex++];
 			//--------------------------------
 			// If it's on the map, check it...
-			if (succRow > 0 && succRow < height && succCol > 0 && succCol < width) {
+			if (succRow > 0 && succRow < height_loc && succCol > 0 && succCol < width_loc) {
 			//if (inMapBounds(succRow, succCol, height, width)) {
 
-				MoveMapNodePtr succMapNode = &map[succRow * maxWidth + succCol];
-				if (succMapNode->cost < COST_BLOCKED) {
+				MoveMapNodePtr succMapNode = &map[succRow * max_width_loc + succCol];
+                int cost = succMapNode->cost;
+				if (cost < COST_BLOCKED) {
 					if (succMapNode->hPrime == HPRIME_NOT_CALCED)
 						succMapNode->hPrime = calcHPrime(succRow, succCol);
 
@@ -5610,16 +5619,15 @@ long MoveMap::calcPathJUMP (MovePathPtr path, Stuff::Vector3D* goalWorldPos, int
 						//----------------------------------------------------
 						// What's our cost to go from START to this SUCCESSOR?
 						bool jumping = false;
-						int cost = succMapNode->cost;
 						//------------------------------------
 						// Diagonal movement is more costly...
 						gosASSERT(cost > 0);
 						if (dir > 7) {
 							jumping = true;
 							if (JumpOnBlocked)
-								cost = jumpCost;
+								cost = jump_cost_loc;
 							else
-								cost += jumpCost;
+								cost += jump_cost_loc;
 							}
 						else {
 							if (isDiagonalWalk)
