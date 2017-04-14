@@ -4651,7 +4651,7 @@ bool MissionInterfaceManager::isPausedWithoutMenu()
 
 void	MissionInterfaceManager::swapResolutions()
 {
-	controlGui.swapResolutions( Environment.screenWidth );
+	controlGui.swapResolutions( Environment.screenWidth, Environment.screenHeight );
 	resolution = Environment.screenWidth;
 	keyboardRef->init();
 }
