@@ -192,7 +192,7 @@ int main(int argc, char** argv)
     }
 
     SPEW(("GRAPHICS", "Status: Using GLEW %s\n", glewGetString(GLEW_VERSION)));
-    if (!GLEW_ARB_vertex_program || !GLEW_ARB_vertex_program)
+    if (!GLEW_ARB_vertex_program || !GLEW_ARB_fragment_program)
     {
         SPEW(("GRAPHICS", "No shader program support\n"));
         return 1;
