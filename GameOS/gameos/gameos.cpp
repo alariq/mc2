@@ -509,7 +509,7 @@ bool __stdcall gos_GetUserDataDirectory(char* user_dir, const int len)
     struct stat st;
 
 #ifdef PLATFORM_WINDOWS
-	PWSTR homeDir;
+	PWSTR homeDir = 0;
 	SHGetKnownFolderPath(FOLDERID_Profile, 0, NULL, &homeDir);
 	wcstombs(cfg_dir, homeDir, cfg_dir_size-1);
 	cfg_dir[cfg_dir_size-1] = '\0';

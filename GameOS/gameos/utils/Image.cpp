@@ -296,7 +296,7 @@ bool Image::loadBMP(FILE* file)
 				} while (--len);
 				tmp -= width;
 			}
-			delete tmp;
+			delete[] tmp;
 			break;
 		case 24:
 		case 32:
