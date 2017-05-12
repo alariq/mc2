@@ -133,9 +133,11 @@ bool
 	file_name += image->imageName;
 	file_name += ".tga";
 
-	char *fFileName = file_name;
-	if (((fFileName[0] != 'F') || (fFileName[0] != 'f')) &&
-		((fFileName[1] != 'X') || (fFileName[1] != 'x')))
+	// sebi: ORIG BUG FIX: I really suspect that also fFileName should be changed to image->imageName!
+	// but who cares about correct code in this game... not original developers for sure
+	char *fFileName = image->imageName;
+	if (((fFileName[0] != 'F') && (fFileName[0] != 'f')) ||
+		((fFileName[1] != 'X') && (fFileName[1] != 'x')))
 		hint |= gosHint_DisableMipmap;
 
 	DWORD nodeIndex = mcTextureManager->loadTexture(file_name,gos_Texture_Detect, hint);

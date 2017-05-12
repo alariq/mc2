@@ -6807,7 +6807,7 @@ bool BattleMech::hitInventoryItem (long itemIndex, bool setupOnly) {
 		case COMPONENT_FORM_SENSOR:
 			break;
 		case COMPONENT_FORM_ACTUATOR:
-			if ((bodyLocation == MECH_BODY_LOCATION_LLEG) || (MECH_BODY_LOCATION_RLEG))
+			if ((bodyLocation == MECH_BODY_LOCATION_LLEG) || (bodyLocation == MECH_BODY_LOCATION_RLEG))
 				pilotingCheck(0); //pilotCheckModifier += PilotCheckModifierTable[0];
 			break;
 		case COMPONENT_FORM_ENGINE:
@@ -7070,8 +7070,12 @@ void BattleMech::calcCriticalHit (long hitLocation) {
 			for (hitSpace = 0; hitSpace < numBodySpaces; hitSpace++) 
 			{
 				numSpaces = 0;
-				if (body[bodyLocation].criticalSpaces[hitSpace].inventoryID < 255)
-					numSpaces = MasterComponent::masterList[inventory[body[bodyLocation].criticalSpaces[hitSpace].inventoryID].masterID].getSize();
+				unsigned char inv_id = body[bodyLocation].criticalSpaces[hitSpace].inventoryID;
+				if (inv_id < 255)
+				{
+					gosASSERT(inv_id < MAX_MOVER_INVENTORY_ITEMS);
+					numSpaces = MasterComponent::masterList[inventory[inv_id].masterID].getSize();
+				}
 
 				if (critHitRoll < numSpaces)
 					break;

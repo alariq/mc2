@@ -276,7 +276,9 @@ GameObjectPtr calcBestTarget (MoverPtr attacker, long numAttackers, MoverPtr* at
 		GameObjectPtr target = attackers[a]->getPilot()->getCurrentTarget();
 		for (int d = 0; d < numDefenders; d++)
 			if (defenders[d] == target) {
-				attackTotal[i] += attackers[a]->getThreatRating();
+				// sebi: ORIG BUG FIX found with help of VisualStudio Analysis
+				// how could game work with this broken? this influences gameplay greatly, no?
+				attackTotal[d] += attackers[a]->getThreatRating();
 				break;
 			}
 	}
