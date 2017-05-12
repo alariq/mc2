@@ -270,7 +270,7 @@ bool
 	}
 
 	Check_Pointer(map);
-	delete map;
+	delete[] map;
 
 	return false;
 }

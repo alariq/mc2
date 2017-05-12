@@ -169,7 +169,7 @@ class ControlGui
 
 		const char* getVehicleName( long& ID );
 		const char* getVehicleNameFromID (long ID);
-		void swapResolutions( int newResolution );
+		void swapResolutions( int newResolutionX, int resolutionY );
 
 		GameTacMap						tacMap;
 		ForceGroupBar					forceGroupBar;

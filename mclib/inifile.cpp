@@ -275,6 +275,58 @@ double FitIniFile::textToDouble (const char *num)
 	return(result);
 }
 
+// sebi: this is baaaad I know just dumb copy paste, maybe later do template version
+//---------------------------------------------------------------------------
+int FitIniFile::textToInt (const char *num)
+{
+	int result = 0;
+	
+	//------------------------------------
+	// Check if Hex Number
+	char *hexOffset = (char *)strstr(num,"0x");
+	if (hexOffset == NULL)
+	{
+		result = atoi(num);
+	}
+	else
+	{
+		hexOffset += 2;
+		int numDigits = strlen(hexOffset)-1;
+		for (int i=0; i<=numDigits; i++)
+		{
+			if (!isalnum(hexOffset[i]) || (isalpha(hexOffset[i]) && toupper(hexOffset[i]) > 'F'))
+			{
+				hexOffset[i] = 0;	// we've reach a "wrong" character. Either start of a comment or something illegal. Either way, stop evaluation here.
+				break;
+			}
+		}
+		numDigits = strlen(hexOffset)-1;
+		int power = 0;
+		for (int count = numDigits;count >= 0;count--,power++)
+		{
+			unsigned char currentDigit = toupper(hexOffset[count]);
+			
+			if (currentDigit >= 'A' && currentDigit <= 'F')
+			{
+				result += (currentDigit - 'A' + 10)<<(4*power);
+			}
+			else if (currentDigit >= '0' && currentDigit <= '9')
+			{
+				result += (currentDigit - '0')<<(4*power);
+			}
+			else
+			{
+				//---------------------------------------------------------
+				// There is a digit in here I don't understand.  Return 0.
+				result = 0;
+				break;
+			}
+		}
+	}
+
+	
+	return(result);
+}
 //---------------------------------------------------------------------------
 long FitIniFile::textToLong (const char *num)
 {
@@ -290,7 +342,7 @@ long FitIniFile::textToLong (const char *num)
 	else
 	{
 		hexOffset += 2;
-		long numDigits = strlen(hexOffset)-1;
+		int numDigits = strlen(hexOffset)-1;
 		for (int i=0; i<=numDigits; i++)
 		{
 			if (!isalnum(hexOffset[i]) || (isalpha(hexOffset[i]) && toupper(hexOffset[i]) > 'F'))
@@ -300,8 +352,8 @@ long FitIniFile::textToLong (const char *num)
 			}
 		}
 		numDigits = strlen(hexOffset)-1;
-		long power = 0;
-		for (long count = numDigits;count >= 0;count--,power++)
+		int power = 0;
+		for (int count = numDigits;count >= 0;count--,power++)
 		{
 			unsigned char currentDigit = toupper(hexOffset[count]);
 			
@@ -908,7 +960,7 @@ long FitIniFile::readIdDouble (const char *varName, double &value)
 
 long FitIniFile::readIdInt(const char *varName, int &value)
 {
-    long tmp;
+    long tmp = 0;
     long rv = readIdLong (varName, tmp);
     value = tmp;
     return rv;
@@ -1128,7 +1180,7 @@ long FitIniFile::readIdChar (const char *varName, char &value)
 
 long FitIniFile::readIdULong (const char *varName, DWORD &value)
 {
-    uint64_t tmp;
+    uint64_t tmp = 0;
     long rv = readIdULong (varName, tmp);
     value = (DWORD)tmp;
     return rv;
@@ -1548,6 +1600,102 @@ long FitIniFile::readIdFloatArray (const char *varName, float *result, unsigned 
 			}
 			
 			result[elementsRead] = textToFloat(elementString);
+			elementsRead++;
+		}
+		
+		if (logicalPosition >= endOfBlock && elementsRead < actualElements)
+			return(NOT_ENOUGH_ELEMENTS_FOR_ARRAY);
+	}
+	else
+	{
+		return(SYNTAX_ERROR);
+	}
+		
+	return(NO_ERR);
+}
+
+// sebi: this is baaaad I know just dumb copy paste, maybe later do template version
+//---------------------------------------------------------------------------
+long FitIniFile::readIdIntArray (const char *varName, int *result, unsigned int numElements)
+{
+	char line[255];
+	char frontSearch[10];
+	char searchString[255];
+	
+	//--------------------------------
+	// Always read from top of Block.
+	seek(currentBlockOffset);
+	unsigned long endOfBlock = currentBlockOffset+currentBlockSize;
+	
+	//------------------------------------------------------------------
+	// Create two search strings so that we can match any number in []
+	sprintf(frontSearch,"l[");
+	sprintf(searchString,"] %s",varName);
+	
+	//--------------------------------
+	// Search line by line for varName
+	char *fSearch = NULL;
+	char *bSearch = NULL;
+	
+	do
+	{
+		readLine((MemoryPtr)line,254);
+		
+		fSearch = strstr(line,frontSearch);
+		bSearch = strstr(line,searchString);
+	}
+	while(((fSearch == NULL) || (bSearch == NULL)) && (logicalPosition < endOfBlock));
+	
+	if (logicalPosition >= endOfBlock)
+	{
+		return(VARIABLE_NOT_FOUND);
+	}
+
+	//--------------------------------------
+	// Get number of elements in array.
+	char elementString[10];
+	unsigned long actualElements;
+	
+	fSearch += 2;												//Move pointer to first number in brackets.
+	long numDigits = bSearch - fSearch;
+
+	if (numDigits > 9)
+		return(TOO_MANY_ELEMENTS);
+
+	strncpy(elementString,fSearch,numDigits);
+	elementString[numDigits] = '\0';
+	
+	actualElements = textToULong(elementString);	
+
+	if (actualElements > numElements)
+		return(USER_ARRAY_TOO_SMALL);
+		
+	//------------------------------
+	// Parse out the elements here.
+	char *equalSign = strstr(line, "=");
+	unsigned long elementsRead = 0;
+	if (equalSign)
+	{
+		equalSign++; //Move to char past equal sign.
+
+		//--------------------------------------------------------------------------------
+		// Now, loop until we reach the end of block or we've read in all of the elements
+		while ((logicalPosition < endOfBlock) && (elementsRead < actualElements))
+		{
+			long errorCode = getNextWord(equalSign,elementString,9);
+			if (errorCode == GET_NEXT_LINE)
+			{
+				readLine((MemoryPtr)line,254);
+				equalSign = line;
+				continue;
+			}
+
+			if (errorCode != NO_ERR)
+			{
+				return(errorCode);
+			}
+			
+			result[elementsRead] = textToLong(elementString);
 			elementsRead++;
 		}
 		

@@ -1882,7 +1882,11 @@ void __stdcall TerminateGameEngine()
 		// shutdown the MC Texture Manager.
 		if (mcTextureManager)
 		{
-			mcTextureManager->destroy();
+            // sebi: destroy is called from destructor anyway, and
+            // by calling it here before destructor, we a are causing memory leak:
+            // lzBuffer1 & lzBuffer2 will not be freed because
+            // textureCacheHeap will be NULL
+			//mcTextureManager->destroy();
 
 			delete mcTextureManager;
 			mcTextureManager = NULL;

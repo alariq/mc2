@@ -142,7 +142,7 @@ void GenericAppearanceType::init (const char * fileName)
     // sebi: how this could possible work!!! MAX_BD_ANIMATIONS=10 
     // but MAX_GEN_ANIMATIONS=5! so 5 times out of bounds array access!!!
 	// We can load up to 10 Animation States.
-	for (long i=0;i<MAX_GEN_ANIMATIONS;i++)
+	for (int i=0;i<MAX_GEN_ANIMATIONS;i++)
 	{
 		char blockId[512];
 		sprintf(blockId,"Animation:%d",i);
@@ -271,6 +271,8 @@ void GenericAppearance::init (AppearanceTypePtr tree, GameObjectPtr obj)
 	teamId = -1;
 	homeTeamRelationship = 0;
 	actualRotation = rotation;
+
+    status = OBJECT_STATUS_NORMAL; // sebi: init to not contain garbage
 
 	OBBRadius = -1.0f;
 	

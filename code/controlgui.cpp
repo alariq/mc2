@@ -189,7 +189,7 @@ ControlGui::ControlGui()
 
 	objectiveInfos = 0;
 
-	swapResolutions( Environment.screenWidth );
+	swapResolutions( Environment.screenWidth, Environment.screenHeight );
 	resultsTime = 0;
 
 	twoMinWarningPlayed = false;
@@ -2287,6 +2287,9 @@ void ControlButton::initButtons( FitIniFile& buttonFile, long buttonCount, Contr
 
 
 		Buttons[i].data = &Data[i];
+
+        // sebi: initialize state so it is not garbage
+		Buttons[i].state = ENABLED;
 		
 		Buttons[i].location[0].x = Buttons[i].location[1].x = x;
 		Buttons[i].location[0].y = Buttons[i].location[3].y = y;
@@ -2587,7 +2590,7 @@ void ControlGui::initStatics( FitIniFile& file )
 void ControlGui::initRects( FitIniFile& file )
 {
 	if ( rectInfos )
-		delete rectInfos;
+		delete[] rectInfos;
 
 	rectInfos = 0;
 	rectCount = 0;
@@ -2627,25 +2630,30 @@ void ControlGui::initRects( FitIniFile& file )
 	}
 }
 
-void ControlGui::swapResolutions( int resolution )
+void ControlGui::swapResolutions( int resolutionX, int resolutionY )
 {
 	FitIniFile buttonFile;
 	char path[256];
 	strcpy( path, artPath );
 	
 	char fileName[32];
+
+    int y_correction = 0;
 	
-	if ( resolution == 1920)
-		strcpy( fileName, "buttonlayout1920.fit" ); 
-	else if ( resolution == 1600)
+	if ( resolutionX == 1920)
+    {
+		strcpy( fileName, "buttonlayout1920.fit" ); // 1920x1200
+        y_correction = resolutionY - 1200;
+    }
+	else if ( resolutionX == 1600)
 		strcpy( fileName, "buttonlayout1600.fit" ); 
-	else if ( resolution == 1280)
+	else if ( resolutionX == 1280)
 		strcpy( fileName, "buttonlayout1280.fit" ); 
-	else if ( resolution == 1024)
+	else if ( resolutionX == 1024)
 		strcpy( fileName, "buttonlayout1024.fit" ); 
-	else if ( resolution == 800 )
+	else if ( resolutionX == 800 )
 		strcpy( fileName, "buttonlayout800.fit" );
-	else if ( resolution == 640 )
+	else if ( resolutionX == 640 )
 		strcpy( fileName, "buttonlayout640.fit" );
 	else 
 		strcpy( fileName, "buttonlayout1024.fit" );
@@ -2670,6 +2678,8 @@ void ControlGui::swapResolutions( int resolution )
 		result = buttonFile.readIdLong("yOffset",hiResOffsetY);
 		if (result != NO_ERR)
 			hiResOffsetY = 0;
+        else
+            hiResOffsetY += y_correction;
 	}
 	else
 	{

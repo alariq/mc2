@@ -613,8 +613,9 @@ int PacketFile::writePacket (int packet, MemoryPtr buffer, unsigned int nbytes, 
 		unsigned int compressedResult = compress2(workBuffer,&workBufferSize,buffer,nbytes,Z_DEFAULT_COMPRESSION);
 		if (compressedResult != Z_OK)
 			STOP(("Unable to write packet %d to file %s.  Error %d",packet,fileName,compressedResult));
-			
-		compressedResult = uncompress(buffer,&oldBufferSize,workBuffer,nbytes);
+		//sebi:	
+		compressedResult = uncompress(buffer,&oldBufferSize,workBuffer,workBufferSize);
+		//compressedResult = uncompress(buffer,&oldBufferSize,workBuffer,nbytes);
 		if (oldBufferSize != nbytes)
 			STOP(("Packet size changed after compression.  Was %d is now %d",nbytes,oldBufferSize));
 

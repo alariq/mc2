@@ -474,7 +474,7 @@ void __stdcall gos_LoadDataFromRegistry( const char* keyName, void* pData, DWORD
             int last_err = errno;
             SPEW(("stat: %s\n", strerror(last_err)));
             *szData = 0;
-            delete mc2_conf_dir;
+            delete[] mc2_conf_dir;
             return;
         }
     }

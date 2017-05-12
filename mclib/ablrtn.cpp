@@ -570,13 +570,13 @@ profile = true;
 
 //***************************************************************************
 
-long ABLi_preProcess (const char* sourceFileName, long* numErrors, long* numLinesProcessed, long* numFilesProcessed, bool printLines) {
+int32_t ABLi_preProcess (const char* sourceFileName, long* numErrors, long* numLinesProcessed, long* numFilesProcessed, bool printLines) {
 
     char* source_fn = strdup(sourceFileName);
     source_fn = S_strlwr(source_fn);
 	//--------------------------------------------------------------------------------
 	// First, check if this module has already been registered into the environment...
-	for (long i = 0; i < NumModulesRegistered; i++)
+	for (int i = 0; i < NumModulesRegistered; i++)
     {
 		if (strcmp(source_fn, ModuleRegistry[i].fileName) == 0)
         {
@@ -980,7 +980,7 @@ ABLModulePtr ABLi_loadLibrary (const char* sourceFileName, long* numErrors, long
 	//-------------------------------------------------------------
 	// Preprocess the library. Note that a library should be loaded
 	// just once.
-	long libraryHandle = ABLi_preProcess(sourceFileName, numErrors, numLinesProcessed, numFilesProcessed, printLines);
+	int libraryHandle = ABLi_preProcess(sourceFileName, numErrors, numLinesProcessed, numFilesProcessed, printLines);
 	if (libraryHandle < (NumModulesRegistered - 1)) {
 		//------------------
 		// Already loaded...
@@ -1024,7 +1024,7 @@ ABLParamPtr ABLi_createParamList (long numParameters) {
 
 //***************************************************************************
 
-void ABLi_setIntegerParam (ABLParamPtr paramList, long index, long value) {
+void ABLi_setIntegerParam (ABLParamPtr paramList, int index, int value) {
 
 	if (paramList) {
 		paramList[index].type = ABL_PARAM_INTEGER;
@@ -1034,7 +1034,7 @@ void ABLi_setIntegerParam (ABLParamPtr paramList, long index, long value) {
 
 //***************************************************************************
 
-void ABLi_setRealParam (ABLParamPtr paramList, long index, float value) {
+void ABLi_setRealParam (ABLParamPtr paramList, int index, float value) {
 
 	if (paramList) {
 		paramList[index].type = ABL_PARAM_REAL;
@@ -1079,7 +1079,7 @@ void ABLi_addFunction (const char* name,
 
 //***************************************************************************
 
-long ABLi_registerInteger (char* name, long* address, long numElements) {
+int ABLi_registerInteger (char* name, int* address, int numElements) {
 
 	if (strlen(name) >= MAXLEN_TOKENSTRING)
 		ABL_Fatal(0, " ABLi_registerInteger: variable name too long ");
@@ -1102,7 +1102,7 @@ long ABLi_registerInteger (char* name, long* address, long numElements) {
 
 //***************************************************************************
 
-long ABLi_registerReal (char* name, float* address, long numElements) {
+int ABLi_registerReal (char* name, float* address, int numElements) {
 
 	if (strlen(name) >= MAXLEN_TOKENSTRING)
 		ABL_Fatal(0, " ABLi_registerInteger: variable name too long ");

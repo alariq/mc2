@@ -22,7 +22,6 @@ class gosAudio {
         }
 
         static void destroyAudio(gosAudio* paudio) {
-            delete[] paudio->pdata_;
             delete paudio;
         }
 
@@ -37,7 +36,9 @@ class gosAudio {
             {
             }
 
-        ~gosAudio() {}
+        ~gosAudio() {
+            delete[] pdata_;
+        }
 
         SDL_AudioFormat fmt_;
         int channels_;
@@ -176,6 +177,16 @@ bool SoundEngine::init(int frequency, bool b_fmt_16_bit, bool b_fmt_signed, bool
 }
 
 void SoundEngine::destroy() {
+
+    for(int i=0; i<NUM_CHANNELS;++i) {
+        Mix_HaltChannel(i);
+    }
+
+    std::vector<gosAudio*>::iterator it = audioList_.begin();
+    for(;it!=audioList_.end();++it) {
+            gosAudio::destroyAudio(*it);
+    }
+    audioList_.clear();
 
     Mix_CloseAudio();
     Mix_Quit();
@@ -391,6 +402,7 @@ void __stdcall gosAudio_DestroyResource( HGOSAUDIO* hgosaudio )
             pci[i].ePlayMode = gosAudio_Stop;
 
             g_sound_engine->deleteAudio(audio);
+            break;
         }
     }
 }

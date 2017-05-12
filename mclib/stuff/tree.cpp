@@ -142,6 +142,7 @@ Tree::~Tree()
 	{
 		Unregister_Object(root);
 		delete root;
+        root = NULL;
 	}
 }
 

@@ -439,7 +439,7 @@ void GameTacMap::initBuildings( unsigned char* data, int size )
 {
 	if ( data )
 	{
-		long* pData = (long*)data;
+		int32_t* pData = (int32_t*)data;
 		buildingCount = *pData++;
 
 		if (buildingCount)

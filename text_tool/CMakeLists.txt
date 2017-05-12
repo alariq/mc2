@@ -6,12 +6,6 @@ if(NOT MSVC)
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-local-typedefs -Werror=array-bounds -Wno-switch -Wno-unknown-warning-option -Wunused-variable")
 endif()
 
-if(MSVC)
-	add_definitions(-DPLATFORM_WINDOWS)
-	add_definitions(-D_CRT_SECURE_NO_WARNINGS)
-	message("Compiling on M$ Windows")
-endif()
-
 find_path(SDL2_INCLUDE "SDL2/SDL.h")
 find_path(GLEW_INCLUDE "gl/glew.h")
 
@@ -19,15 +13,21 @@ find_path(GLEW_INCLUDE "gl/glew.h")
 if(WIN32)
 	include_directories(${SDL2_INCLUDE} ${GLEW_INCLUDE})
 endif()
+add_definitions(-DLINUX_BUILD)
+
+if(MSVC)
+	add_definitions(-DPLATFORM_WINDOWS)
+	add_definitions(-D_CRT_SECURE_NO_WARNINGS)
+	message("Compiling on M$ Windows")
+endif()
 
 add_subdirectory("../GameOS/gameos" "./out/GameOS/gameos")
+
 
 # must be after all add_subdirectory(ies) because we use same array name (SOURCES) for all projects
 set(SOURCES 
     "main.cpp"
     )
-
-add_definitions(-DLINUX_BUILD)
 
 #find_library(SDL2 NAMES "SDL2")
 find_package(SDL2 REQUIRED PATHS /opt NO_DEFAULT_PATH)
@@ -55,5 +55,4 @@ endif()
 
 
 add_executable(text_tool ${SOURCES})
-target_link_libraries(text_tool gameos ${SDL2_LIBRARIES} ${SDL2main} ${SDL2_ttf} ${GLEW} ${ADDITIONAL_LIBS})
->>>>>>> Stashed changes
+target_link_libraries(text_tool gameos ${SDL2_LIBRARIES} ${SDL2main} ${SDL2_ttf} ${GLEW} ${ADDITIONAL_LIBS} ${OPENGL})

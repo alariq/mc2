@@ -4734,7 +4734,7 @@ void execSendMessage (void) {
 
 void execGetMessage (void) {
 
-	long* messageParam = ABLi_peekIntegerPtr();
+	int* messageParam = ABLi_peekIntegerPtr();
 
 	*messageParam = CurMultiplayParam;
 	ABLi_pokeInteger(CurMultiplayCode);

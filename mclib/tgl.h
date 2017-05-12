@@ -747,6 +747,16 @@ class TG_Shape
 
 			for (long i=0;i<MAX_SHADOWS;i++)
 				shadowsVisible[i] = false;
+
+            // sebi: init to not contain garbage
+            fogRGB = 0xFFFFFFFF;
+            myType = NULL;
+            numVisibleShadows = 0;
+            listOfColors = NULL;
+            listOfShadowTVertices = NULL;
+            lastTurnTransformed = 0;
+            //
+
 		}
 		
 		TG_Shape (void)

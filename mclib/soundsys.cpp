@@ -54,6 +54,14 @@ void SoundSystem::destroy (void)
 		delete soundHeap;
 		soundHeap = NULL;
 	}
+
+    delete soundDataFile;
+    soundDataFile = NULL;
+    delete bettyDataFile;
+    bettyDataFile = NULL;
+    delete supportDataFile;
+    supportDataFile = NULL;
+
 }
 
 //---------------------------------------------------------------------------

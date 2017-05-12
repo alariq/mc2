@@ -93,11 +93,27 @@ class BldgAppearanceType : public AppearanceType
 			bldgDmgShadowShape = NULL;
 			
 			for (i=0;i<MAX_BD_ANIMATIONS;i++)
+            {
 				bdAnimData[i] = NULL;
+
+                //sebi: init so will not contain garbage
+                bdAnimLoop[i] = false;
+                bdReverse[i] = false;
+                bdRandom[i] = false;
+                bdStartF[i] = 0;
+                //
+            }
 				
 			destructEffect[0] = 0;
 			
 			spinMe = false;
+
+            //sebi: init so will not contain garbage
+            nodeData = NULL;
+            numWeaponNodes = 0;
+            isForestClump = false;
+            MemSet(rotationalNodeId, 0);//sebi
+            //
 		}
 	
 		BldgAppearanceType (void)

@@ -57,7 +57,7 @@ void LogisticsMissionInfo::clear()
 	for ( FILE_LIST::EIterator iter = additionalPurchaseFiles.Begin();
 	!iter.IsDone(); iter++ )
 	{
-		delete *iter;
+		delete[] *iter;
 	}
 
 	additionalPurchaseFiles.Clear();

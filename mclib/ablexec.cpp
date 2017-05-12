@@ -152,8 +152,8 @@ void crunchStatementMarker (void) {
 		if (IncludeDebugInfo) {
 			*((unsigned char*)codeBufferPtr) = (unsigned char)FileNumber;
 			codeBufferPtr += sizeof(unsigned char);
-			*((long*)codeBufferPtr) = lineNumber;
-			codeBufferPtr += sizeof(long);
+			*((int*)codeBufferPtr) = lineNumber;
+			codeBufferPtr += sizeof(int);
 		}
 		*codeBufferPtr = saveCode;
 		codeBufferPtr++;
@@ -170,7 +170,7 @@ void uncrunchStatementMarker (void) {
 	//-------------------------------
 	// Pull debug info off the buffer
 	if (IncludeDebugInfo)
-		codeBufferPtr -= (sizeof(unsigned char) + sizeof(long));
+		codeBufferPtr -= (sizeof(unsigned char) + sizeof(int));
 	//-------------------------------------
 	// Pull statement marker off the buffer
 	codeBufferPtr--;
@@ -210,13 +210,13 @@ char* fixupAddressMarker (Address address) {
 
 	char* oldAddress = *((Address*)address);
 
-	*((long*)address) = codeBufferPtr - address;
+	*((size_t*)address) = codeBufferPtr - address;
 	return(oldAddress);
 }
 
 //***************************************************************************
 
-void crunchInteger (long value) {
+void crunchInteger (int value) {
 
 	if (!Crunch)
 		return;
@@ -224,8 +224,8 @@ void crunchInteger (long value) {
 	if (codeBufferPtr >= (codeBuffer + MaxCodeBufferSize - 100))
 		syntaxError(ABL_ERR_SYNTAX_CODE_SEGMENT_OVERFLOW);
 	else {
-		*((long*)codeBufferPtr) = value;
-		codeBufferPtr += sizeof(long);
+		*((int*)codeBufferPtr) = value;
+		codeBufferPtr += sizeof(int);
 	}
 }
 
@@ -254,8 +254,8 @@ void crunchOffset (Address address) {
 	if (codeBufferPtr >= (codeBuffer + MaxCodeBufferSize - 100))
 		syntaxError(ABL_ERR_SYNTAX_CODE_SEGMENT_OVERFLOW);
 	else {
-		*((long*)codeBufferPtr) = address - codeBufferPtr;
-		codeBufferPtr += sizeof(long);
+		*((size_t*)codeBufferPtr) = address - codeBufferPtr;
+		codeBufferPtr += sizeof(size_t);
 	}
 }
 
@@ -288,18 +288,18 @@ SymTableNodePtr getCodeSymTableNodePtr (void) {
 
 //***************************************************************************
 
-long getCodeStatementMarker (void) {
+int getCodeStatementMarker (void) {
 
 	//------------------------------------------
 	// NOTE: If there's a problem, we return -1.
 
-	long lineNum = -1;
+	int lineNum = -1;
 	if (codeToken == TKN_STATEMENT_MARKER) {
 		if (IncludeDebugInfo) {
 			FileNumber = *((unsigned char*)codeSegmentPtr);
 			codeSegmentPtr += sizeof(unsigned char);
-			lineNum = *((long*)codeSegmentPtr);
-			codeSegmentPtr += sizeof(long);
+			lineNum = *((int*)codeSegmentPtr);
+			codeSegmentPtr += sizeof(int);
 		}
 	}
 	return(lineNum);
@@ -312,7 +312,7 @@ char* getCodeAddressMarker (void) {
 	Address address = NULL;
 
 	if (codeToken == TKN_ADDRESS_MARKER) {
-		address = *((long*)codeSegmentPtr) + codeSegmentPtr - 1;
+		address = *((size_t*)codeSegmentPtr) + codeSegmentPtr - 1;
 		codeSegmentPtr += sizeof(Address);
 	}
 	return(address);
@@ -320,10 +320,10 @@ char* getCodeAddressMarker (void) {
 
 //***************************************************************************
 
-long getCodeInteger (void) {
+int getCodeInteger (void) {
 
-	long value = *((long*)codeSegmentPtr);
-	codeSegmentPtr += sizeof(long);
+	int value = *((int*)codeSegmentPtr);
+	codeSegmentPtr += sizeof(int);
 	return(value);
 }
 
@@ -340,8 +340,8 @@ unsigned char getCodeByte (void) {
 
 char* getCodeAddress (void) {
 
-	Address address = *((long*)codeSegmentPtr) + codeSegmentPtr - 1;
-	codeSegmentPtr += sizeof(long);
+	Address address = *((size_t*)codeSegmentPtr) + codeSegmentPtr - 1;
+	codeSegmentPtr += sizeof(size_t);
 	return(address);
 }
 
@@ -364,7 +364,7 @@ void getCodeToken (void) {
 
 //***************************************************************************
 
-void pushInteger (long value) {
+void pushInteger (int value) {
 
 	StackItemPtr valuePtr = ++tos;
 

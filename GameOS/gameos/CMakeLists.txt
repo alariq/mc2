@@ -27,11 +27,9 @@ set(SOURCES ${SOURCES}
     utils/string_utils.cpp
     )
 
-find_package(SDL2 REQUIRED PATHS "/opt" NO_DEFAULT_PATH)
+#find_package(SDL2 REQUIRED PATHS "/opt" NO_DEFAULT_PATH)
+#include_directories("${SDL2_PREFIX}/include")
 
-find_package(SDL2 REQUIRED PATHS "/opt" NO_DEFAULT_PATH)
-
-include_directories("${SDL2_PREFIX}/include")
 include_directories("../include"  ".")
 
 add_library(gameos ${SOURCES})

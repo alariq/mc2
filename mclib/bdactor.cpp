@@ -543,6 +543,8 @@ void BldgAppearance::init (AppearanceTypePtr tree, GameObjectPtr obj)
 	shapeMin.x = shapeMin.y = -25;
 	shapeMax.x = shapeMax.y = 50;
 
+    status = OBJECT_STATUS_NORMAL; // sebi: init so will not be garbage
+
 	bdAnimationState =-1;
 	currentFrame = 0.0f;
 	bdFrameRate = 0.0f;
@@ -3207,6 +3209,12 @@ void TreeAppearance::init (AppearanceTypePtr tree, GameObjectPtr obj)
 	
 	fogLightSet = false;
 	lightRGB = fogRGB = 0xffffffff;
+
+    // sebi: init so will not be garbage
+    status = OBJECT_STATUS_NORMAL; 
+    forceLightsOut = false;
+    treeShape = NULL;
+    //
 
 	if (appearType)
 	{

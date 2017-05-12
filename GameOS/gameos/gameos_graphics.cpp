@@ -558,7 +558,6 @@ bool gosTexture::createHardwareTexture() {
     if(!is_from_memory_) {
 
         gosASSERT(filename_);
-        SPEW(("DBG", "creating texture: %s\n", filename_));
 
         Image img;
         if(!img.loadFromFile(filename_)) {
@@ -617,9 +616,9 @@ bool gosTexture::createHardwareTexture() {
 
 ////////////////////////////////////////////////////////////////////////////////
 class gosFont {
+        friend class gosRenderer;
     public:
         static gosFont* load(const char* fontFile);
-        static void destroy(gosFont* font);
 
         int getMaxCharWidth() const { return gi_.max_advance_; }
         int getMaxCharHeight() const { return gi_.font_line_skip_; }
@@ -633,15 +632,22 @@ class gosFont {
 
         DWORD getTextureId() const { return tex_id_; }
         const char* getName() const { return font_name_; }
+        const char* getId() const { return font_id_; }
+
+        uint32_t getRefCount() { return ref_count_; }
+        uint32_t addRef() { return ++ref_count_; }
+        uint32_t decRef() { gosASSERT(ref_count_>0); return --ref_count_; }
 
     private:
-        gosFont(){};
-        // TODO: free texture and other stuff
-        ~gosFont(){};
+        static uint32_t destroy(gosFont* font);
+        gosFont():font_name_(0), font_id_(0), tex_id_(0), ref_count_(1) {};
+        ~gosFont();
 
         char* font_name_;
+        char* font_id_;
         gosGlyphInfo gi_;
         DWORD tex_id_;
+        uint32_t ref_count_;
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -689,9 +695,28 @@ class gosRenderer {
             if(it != fontList_.end())
             {
                 gosFont* font = *it;
-                fontList_.erase(it);
-                gosFont::destroy(font);
+                if(0 == gosFont::destroy(font))
+                    fontList_.erase(it);
             }
+        }
+
+        gosFont* findFont(const char* font_id) {
+            
+            struct equals_to {
+                const char* font_id_;
+                bool operator()(const gosFont* fnt) {
+                    return strcmp(fnt->getId(), font_id_)==0;
+                }
+            };
+
+            equals_to eq;
+            eq.font_id_ = font_id;
+
+            std::vector<gosFont*>::iterator it = 
+                std::find_if(fontList_.begin(), fontList_.end(), eq);
+            if(it != fontList_.end())
+                return *it;
+            return NULL;
         }
 
         gosTexture* getTexture(DWORD texture_id) {
@@ -916,6 +941,7 @@ void gosRenderer::init() {
 
     // add fake texture so that no one will get 0 index, as it is invalid in this game
     DWORD tex_id = gos_NewEmptyTexture( gos_Texture_Solid, "DEBUG_this_is_not_a_real_texture_debug_it!", 1);
+    (void)tex_id;
     gosASSERT(tex_id == INVALID_TEXTURE_ID);
 }
 
@@ -932,15 +958,17 @@ void gosRenderer::destroy() {
     gosShaderMaterial::destroy(basic_tex_material_);
     gosShaderMaterial::destroy(text_material_);
 
+    // delete fonts before textures, because they refer them
+    for(size_t i=0; i<fontList_.size(); i++) {
+        while(gosFont::destroy(fontList_[i])) {};
+    }
+    fontList_.clear();
+
     for(size_t i=0; i<textureList_.size(); i++) {
         delete textureList_[i];
     }
     textureList_.clear();
 
-    for(size_t i=0; i<textureList_.size(); i++) {
-        gosFont::destroy(fontList_[i]);
-    }
-    fontList_.clear();
 }
 
 void gosRenderer::initRenderStates() {
@@ -1580,6 +1608,17 @@ void gos_RendererHandleEvents() {
     g_gos_renderer->handleEvents();
 }
 
+
+gosFont::~gosFont()
+{
+    if(tex_id_ != INVALID_TEXTURE_ID)
+        getGosRenderer()->deleteTexture(tex_id_);
+
+    delete[] gi_.glyphs_;
+    delete[] font_name_;
+    delete[] font_id_;
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 gosFont* gosFont::load(const char* fontFile) {
 
@@ -1619,6 +1658,10 @@ gosFont* gosFont::load(const char* fontFile) {
 
     font->font_name_ = new char[strlen(fname) + 1];
     strcpy(font->font_name_, fname);
+
+    font->font_id_ = new char[strlen(fontFile) + 1];
+    strcpy(font->font_id_, fontFile);
+
     font->tex_id_ = tex_id;
 
     delete[] textureName;
@@ -1628,15 +1671,20 @@ gosFont* gosFont::load(const char* fontFile) {
 
 }
 
-void gosFont::destroy(gosFont* font) {
-    delete font;
+uint32_t gosFont::destroy(gosFont* font) {
+    uint32_t rc = font->decRef();
+    if(0 == rc) {
+        delete font;
+    }
+
+    return rc;
 }
 
 void gosFont::getCharUV(int c, uint32_t* u, uint32_t* v) const {
 
     gosASSERT(u && v);
 
-    uint32_t pos = c - gi_.start_glyph_;
+    int32_t pos = c - gi_.start_glyph_;
     if(pos < 0 || pos >= gi_.num_glyphs_) {
         *u = *v = 0;
         return;
@@ -1700,8 +1748,15 @@ void __stdcall gos_GetViewport( float* pViewportMulX, float* pViewportMulY, floa
 
 HGOSFONT3D __stdcall gos_LoadFont( const char* FontFile, DWORD StartLine/* = 0*/, int CharCount/* = 256*/, DWORD TextureHandle/*=0*/)
 {
-    gosFont* font = gosFont::load(FontFile);
-    getGosRenderer()->addFont(font);
+
+    gosFont* font = getGosRenderer()->findFont(FontFile);
+    if(!font) {
+        font = gosFont::load(FontFile);
+        getGosRenderer()->addFont(font);
+    } else {
+        font->addRef();
+    }
+
     return font;
 }
 

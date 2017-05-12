@@ -150,7 +150,8 @@ bool	MechListBoxItem::pointInside(long xPos, long yPos) const
 MechListBoxItem::MechListBoxItem( LogisticsMech* pRefMech, long count )
 {
 	
-	
+	state = ENABLED; // sebi: init so will not be garbage
+
 	bIncludeForceGroup = 0;
 	bOrange = 0;
 	if ( s_templateItem )

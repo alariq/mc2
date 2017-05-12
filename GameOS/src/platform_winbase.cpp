@@ -321,13 +321,17 @@ HANDLE WINAPI FindFirstFileA( LPCTSTR lpFileName, LPWIN32_FIND_DATAA lpFindFileD
         ffd->entries = new dirent[n];
         for(int i=0;i<n;++i) {
             memcpy(ffd->entries+i, entries[i], sizeof(struct dirent));
+            free(entries[i]);
         }
+        free(entries);
+        entries = NULL;
         ffd->last_retrieved_entry = 0;
         ffd->num_entries = n;
         ffd->initialized = true;
         ffd->dir_name = strdup(dir_name);
 
         FillFindData(ffd->dir_name, ffd->entries[0].d_name, lpFindFileData);
+
     }
 
     free(dn);

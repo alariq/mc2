@@ -70,10 +70,10 @@ LogisticsComponent::~LogisticsComponent()
 		delete[] name;
 
 	if ( iconFileName )
-		delete iconFileName;
+		delete[] iconFileName;
 
 	if ( pictureFileName )
-		delete pictureFileName;
+		delete[] pictureFileName;
 }
 
 int LogisticsComponent::init( char* dataLine )

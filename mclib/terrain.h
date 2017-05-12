@@ -285,7 +285,7 @@ class Terrain
 
 		float getClipRange()
 		{
-			return 0.5 * worldUnitsPerVertex * (float)(visibleVerticesPerSide);
+			return 0.5 * worldUnitsPerVertex * static_cast<float>(visibleVerticesPerSide);
 		}
 
 		void setClipRange(float clipRange)
@@ -337,16 +337,16 @@ inline void Terrain::worldToTile( const Stuff::Vector3D& pos, int& tileR, int& t
 	float tmpX = pos.x - land->mapTopLeft3d.x;
 	float tmpY = land->mapTopLeft3d.y - pos.y;
 
-	tileC = (int)(tmpX * oneOverWorldUnitsPerVertex);
-	tileR =	(int)(tmpY * oneOverWorldUnitsPerVertex);
+	tileC = static_cast<int>(tmpX * oneOverWorldUnitsPerVertex);
+	tileR =	static_cast<int>(tmpY * oneOverWorldUnitsPerVertex);
 }
 
 //---------------------------------------------------------------------------
 
 inline void Terrain::worldToCell( const Stuff::Vector3D& pos, int& cellR, int& cellC )
 {
-	cellC = (int)(( pos.x - land->mapTopLeft3d.x ) * (oneOverWorldUnitsPerVertex*3.0f));
-	cellR = (int)(( land->mapTopLeft3d.y - pos.y ) * (oneOverWorldUnitsPerVertex*3.0f));
+	cellC = static_cast<int>(( pos.x - land->mapTopLeft3d.x ) * (oneOverWorldUnitsPerVertex*3.0f));
+	cellR = static_cast<int>(( land->mapTopLeft3d.y - pos.y ) * (oneOverWorldUnitsPerVertex*3.0f));
 }
 
 //---------------------------------------------------------------------------
@@ -396,7 +396,7 @@ inline void Terrain::tileCellToWorld (int tileR, int tileC, int cellR, int cellC
 	{
 		worldPos.x = tileColToWorldCoord[tileC] + cellToWorldCoord[cellC] + halfWorldUnitsPerCell;
 		worldPos.y = tileRowToWorldCoord[tileR] - cellToWorldCoord[cellR] - halfWorldUnitsPerCell;
-		worldPos.z = (float)0.0;
+		worldPos.z = 0.0f;
 	}
 }
 
@@ -410,6 +410,7 @@ inline void Terrain::cellToWorld (int cellR, int cellC, Stuff::Vector3D& worldPo
 		(cellC >= (Terrain::realVerticesMapSide * MAPCELL_DIM)))
 	{
 	#ifdef _DEBUG
+		// sebi: !NB temporarily
 		//PAUSE(("called cellToWorld with cell out of bounds. CellR:%d   CellC:%d",cellR,cellC));
 	#endif
 		worldPos.x = worldPos.y = worldPos.z = 0.0f;		
@@ -418,7 +419,7 @@ inline void Terrain::cellToWorld (int cellR, int cellC, Stuff::Vector3D& worldPo
 	{
 		worldPos.x = cellColToWorldCoord[cellC] + halfWorldUnitsPerCell;
 		worldPos.y = cellRowToWorldCoord[cellR] - halfWorldUnitsPerCell;
-		worldPos.z = (float)0.0;
+		worldPos.z = 0.0f;
 	}
 }
 

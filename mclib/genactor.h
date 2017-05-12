@@ -29,6 +29,8 @@
 #include"objectappearance.h"
 #endif
 
+#include"memfunc.h"
+
 //**************************************************************************************
 #ifndef NO_ERR
 #define NO_ERR						0
@@ -64,8 +66,23 @@ class GenericAppearanceType : public AppearanceType
 		{
 			genShape = NULL;
 
+            //sebi: init so will not contain garbage
+            genDmgShape = NULL; 
+            MemSet(rotationalNodeId, 0);
+            //
+
 			for (long i=0;i<MAX_GEN_ANIMATIONS;i++)
+            {
 				genAnimData[i] = NULL;
+
+                //sebi: init so will not contain garbage
+		        genAnimLoop[i] = false;
+		        genReverse[i] = false;
+		        genRandom[i] = false;
+		        genStartF[i] = 0;
+                //
+            }
+
 
 			textureName[0] = 0;
 			dotRGB = 0x00ffffff;

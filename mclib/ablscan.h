@@ -142,7 +142,7 @@ typedef enum {
 typedef struct {
 	LiteralType		type;
 	struct {
-		long		integer;
+		int         integer;
 		float		real;
 		char		string[MAXLEN_TOKENSTRING];
 	} value;
