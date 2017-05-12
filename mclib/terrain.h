@@ -410,7 +410,7 @@ inline void Terrain::cellToWorld (int cellR, int cellC, Stuff::Vector3D& worldPo
 		(cellC >= (Terrain::realVerticesMapSide * MAPCELL_DIM)))
 	{
 	#ifdef _DEBUG
-		PAUSE(("called cellToWorld with cell out of bounds. CellR:%d   CellC:%d",cellR,cellC));
+		//PAUSE(("called cellToWorld with cell out of bounds. CellR:%d   CellC:%d",cellR,cellC));
 	#endif
 		worldPos.x = worldPos.y = worldPos.z = 0.0f;		
 	}
