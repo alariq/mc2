@@ -259,7 +259,7 @@ void gosMesh::draw(gosShaderMaterial* material) const
     if(num_vertices_ == 0)
         return;
 
-    updateBuffer(vb_, GL_ARRAY_BUFFER, pvertex_data_, num_vertices_*sizeof(gos_VERTEX), GL_DYNAMIC_DRAW);
+    updateBuffer(vb_, GL_ARRAY_BUFFER, pvertex_data_, num_vertices_*sizeof(gos_VERTEX));
 
     material->apply();
 

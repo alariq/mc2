@@ -3653,7 +3653,7 @@ void Mover::printHandleWeaponHitDebugInfo (WeaponShotInfo* shotInfo) {
 	if (attacker)
 		sprintf(s, "     attacker = (%05d)%s", attacker->getPartId(), attacker->getName());
 	else
-		sprintf(s, "     attacker = (%05)<unknown WID>", shotInfo->attackerWID);
+		sprintf(s, "     attacker = (%05d)<unknown WID>", shotInfo->attackerWID);
 	CombatLog->write(s);
 	sprintf(s, "     weapon = (%03d)%s, hitLocation = (%d)%s, damage = %.2f, angle = %.2f",
 		shotInfo->masterId, MasterComponent::masterList[shotInfo->masterId].getName(),

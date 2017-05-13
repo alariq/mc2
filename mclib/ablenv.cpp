@@ -38,7 +38,7 @@
 #endif
 
 //***************************************************************************
-long ABLi_preProcess (const char* sourceFileName,
+int32_t ABLi_preProcess (const char* sourceFileName,
 					  long* numErrors = NULL,
 					  long* numLinesProcessed = NULL,
 					  long* numFilesProcessed = NULL,
