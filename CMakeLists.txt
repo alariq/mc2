@@ -33,7 +33,7 @@ endif()
 add_definitions(-DUSE_ASSEMBLER_CODE=0)
 add_definitions(-DLINUX_BUILD)
 
-find_path(GLEW_INCLUDE "gl/glew.h")
+find_path(GLEW_INCLUDE "GL/glew.h")
 
 if(WIN32)
 	find_library(SDL2 NAMES "SDL2")
@@ -156,23 +156,20 @@ set(SOURCES
     )
 
 find_library(SDL2_mixer NAMES "SDL2_mixer")
-#find_library(OPENGL NAMES "opengl32" "GL")
-
 find_library(GLEW NAMES "GLEW" "glew32")
-
 find_library(ZLIB NAMES "z" "zlib")
 
+# TODO: get rid of gl library by not using old style opengl
+find_package(OpenGL REQUIRED)
 
-if(WIN32)
-	find_package(OpenGL REQUIRED)
-endif()
-
-message("OPENCL library found in ${OPENCL}")
 message("OPENGL library found in ${OPENGL}")
 message("GLEW library found in ${GLEW}")
 
 include_directories("./GameOS/include" "./mclib" "./gui" "./code" "./netlib")
 message("sdl2 prefix: ${SDL2_PREFIX}")
+
+message("OpenGL library linking: ${OPENGL_gl_LIBRARY}")
+message("OpenGL library include: ${OPENGL_INCLUDE_DIR}")
 
 #if(NOT ${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
 if(NOT WIN32)
@@ -180,13 +177,11 @@ if(NOT WIN32)
 	message("Not win32 system")
 else()
 	# winmm for timeGetTime, maybe switch to GetTickCount to remove this dependency
-	set(ADDITIONAL_LIBS ${OPENGL_gl_LIBRARY} winmm)
-	message("OpenGL library linking: ${OPENGL_gl_LIBRARY}")
-	message("OpenGL library include: ${OPENGL_INCLUDE_DIR}")
+	set(ADDITIONAL_LIBS winmm)
 endif()
 
 message("sdl2 prefix: ${SDL2_PREFIX}")
 
 
 add_executable(mc2 ${SOURCES})
-target_link_libraries(mc2 mclib gosfx mlr stuff gui gameos windows ${ZLIB} ${SDL_LIBS} ${GLEW} ${SDL2_mixer} ${ADDITIONAL_LIBS} ${OPENGL})
+target_link_libraries(mc2 mclib gosfx mlr stuff gui gameos windows ${ZLIB} ${SDL_LIBS} ${GLEW} ${SDL2_mixer} ${ADDITIONAL_LIBS} ${OPENGL_gl_LIBRARY})
