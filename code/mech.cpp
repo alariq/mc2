@@ -1146,6 +1146,9 @@ void BattleMech::init (bool create) {
 	cBills = 0;
 	playedHeloDestruct = false;
 
+    control.reset();
+    control.settings.mech.throttle = 100; // sebiL init to not cause garbage
+
 	numBodyLocations = NUM_MECH_BODY_LOCATIONS;
 	for (long i = 0; i < numBodyLocations; i++) {
 		body[i].CASE = false;

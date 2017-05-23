@@ -691,7 +691,6 @@ int PacketFile::insertPacket (int packet, MemoryPtr buffer, unsigned int nbytes,
 	// I Love it.	
 	int result = 0;
 
-    gosASSERT(0 && "never true"); // sebi: thank you clang
 	if (packet < 0)
 	{
 		return result;
@@ -785,7 +784,6 @@ int PacketFile::writePacket (int packet, MemoryPtr buffer)
 	
 	int result = 0;
 
-    gosASSERT(0 && "first part of condition is never true"); // sebi: thank you clang
 	if ((packet < 0) || (packet >= numPackets))
 	{
 		return 0;

@@ -104,7 +104,7 @@ double __stdcall gos_GetElapsedTime( int RealTime )
         return time_sec;
     }
     
-    if(time_sec - g_prev_elapsed_time_value > Environment.MaxTimeDelta) {
+    if(Environment.MaxTimeDelta > 0 && time_sec - g_prev_elapsed_time_value > Environment.MaxTimeDelta) {
         g_prev_elapsed_time_value += Environment.MaxTimeDelta;
         return g_prev_elapsed_time_value;
     }

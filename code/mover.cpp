@@ -1679,10 +1679,14 @@ void MoverDynamics::init (FitIniFilePtr dynamicsFile)
 
 void MoverControl::reset (void) {
 
+    //PAUSE(("sebi: see where it gets called from to see why throttle should not be reset\n"));
+
 	switch (dataType) {
 		case CONTROL_DATA_BASE:
 			break;
 		case CONTROL_DATA_MECH:
+            // sebi: thi s icommented, but causes valgrind complain because it is not initialized...
+            // for now just initialize it in init() but need to check why it is commented and do something about it
 			//settings.mech.throttle = 100;
 			settings.mech.rotate = 0.0;
 			settings.mech.facingRotate = 0.0f;
@@ -5265,6 +5269,8 @@ bool Mover::getPathRangeLock (long range, bool* reachedEnd) {
 	MovePathPtr path = pilot->getMovePath();
 	if (path)
 		return(path->isLocked((moveLevel == 2), -1, range, reachedEnd));
+    if(reachedEnd)
+       *reachedEnd = true; // sebi: !NB false ? need to init to something, to not leave garbage there
 	return(false);
 }
 
@@ -5334,6 +5340,8 @@ bool Mover::getPathRangeBlocked (long range, bool* reachedEnd) {
 	MovePathPtr path = pilot->getMovePath();
 	if (path)
 		return(path->isBlocked(-1, range, reachedEnd));
+    if(reachedEnd)
+        *reachedEnd = true; // sebi: !NB set to soemthing to not leave garbage
 	return(false);
 }
 
