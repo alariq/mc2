@@ -298,8 +298,8 @@ namespace Stuff {
 					}
 
 				#else
-					cosine = cos(radian);
-					sine = sin(radian);
+					cosine = cosf(radian);
+					sine = sinf(radian);
 				#endif
 					
 					Check_Object(this);

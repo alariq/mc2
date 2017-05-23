@@ -2060,7 +2060,7 @@ void HeapList::dumpLog (void)
 		
 		if (currentHeap)
 		{
-			sprintf(msg,"ListNo: %d     Heap: %d     Type: %d     Made by: %08X",i,heapNumber,currentHeap->heapType(),currentHeap->owner());
+			sprintf(msg,"ListNo: %d     Heap: %d     Type: %d     Made by: %08p",i,heapNumber,currentHeap->heapType(),currentHeap->owner());
 			logFile.writeLine(msg);
 
 			if (mapResult == NO_ERR)

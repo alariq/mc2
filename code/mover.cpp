@@ -2620,7 +2620,7 @@ void Mover::updateDebugWindow (GameDebugWindow* debugWindow) {
 				debugWindow->print(s);
 			}
 			for (int i = numArmorLocations; i < numArmorLocations; i++) {
-				sprintf(s, "%s AR:%02d(%02d) %s",
+				sprintf(s, "%s AR:%.3f(%02d) %s",
 					locationStrings[i],
 					armor[i].curArmor,
 					armor[i].maxArmor);

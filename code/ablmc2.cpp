@@ -211,7 +211,7 @@ long getMoversWithinRadius (MoverPtr* moverList, Stuff::Vector3D center, float r
 
 void calcAttackPlan (long numAttackers, GameObjectPtr* attackers, long numDefenders, GameObjectPtr* defenders) {
 
-	if ((numDefenders == 0) || (numAttackers == 0))
+	if ((numDefenders <= 0) || (numAttackers <= 0))
 		return;
 
 	//------------------------------------------------------------------
