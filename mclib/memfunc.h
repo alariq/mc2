@@ -41,7 +41,7 @@ void ArrayCopy(T (&dst)[N], const T* src, size_t n) {
 }
 
 template <typename T, int N, int M>
-void ArrayCopy(T (&dst)[N][M], const T (&src)[N][M]) {
+void ArrayCopy2(T (&dst)[N][M], const T (&src)[N][M]) {
     for(int i=0;i<N;++i) {
         for(int j=0;j<M;++j) {
             dst[i][j] = src[i][j];
@@ -96,12 +96,12 @@ void* MemCpy(T (& dst)[N], const T (& src)[N], size_t n) {
 }
 
 template <typename T, int N, int M>
-void* MemCpy(T (& dst)[N][M], const T (& src)[N][M]) {
+void* MemCpy2(T (& dst)[N][M], const T (& src)[N][M]) {
     return memcpy(dst, src, sizeof(T) * N * M);
 }
 
 template <typename T, int N, int M>
-void* MemCpy(T (& dst)[N][M], const T (& src)[N][M], size_t n) {
+void* MemCpy2(T (& dst)[N][M], const T (& src)[N][M], size_t n) {
 	assert(sizeof(T) * N * M >= n);
     return memcpy(dst, src, n);
 }

@@ -173,7 +173,7 @@ inline float mc2_atan2 (float f1, float f2)
 			fstp result
 		}
 #else
-        result = atan2(f1, f2);
+        result = atan2f(f1, f2);
 #endif
 	}
 	

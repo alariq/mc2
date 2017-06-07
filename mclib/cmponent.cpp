@@ -449,7 +449,7 @@ long MasterComponent::saveEXCEL (FilePtr componentFile, unsigned char masterId, 
 			break;
 
 		case COMPONENT_FORM_HEATSINK:
-			sprintf(piece,"%4.1f",stats.heatsink.dissipation);
+			sprintf(piece,"%d",stats.heatsink.dissipation);
 			strcat(dataLine,piece);
 			strcat(dataLine,comma);
 			sprintf(piece,"na,na,na,na,na,na,na,na,,,,,");
@@ -589,7 +589,7 @@ long MasterComponent::saveEXCEL (FilePtr componentFile, unsigned char masterId, 
 			break;
 
 		case COMPONENT_FORM_JUMPJET:
-			sprintf(piece,"%6.2f",stats.jumpjet.rangeMod);
+			sprintf(piece,"%d",stats.jumpjet.rangeMod);
 			strcat(dataLine,piece);
 			strcat(dataLine,comma);
 			sprintf(piece,"na,na,na,na,na,na,na,na,,,,,");
@@ -704,10 +704,14 @@ long MasterComponent::saveMasterList (const char* fileName, long listSize, float
 	sprintf(dataLine,"MasterLegActuatorID = %d,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,",legActuatorID);
 	componentFile.writeLine(dataLine);
 
-	sprintf(dataLine,"MasterClanAntiMissileSystemID = 115,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,",clanAntiMissileSystemID);
+	//sebi: what is more correct here? always pass155 or actual clanAntiMissileSystemID ?
+	//sprintf(dataLine,"MasterClanAntiMissileSystemID = 115,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,",clanAntiMissileSystemID);
+	sprintf(dataLine,"MasterClanAntiMissileSystemID = 115,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,");
 	componentFile.writeLine(dataLine);
 
-	sprintf(dataLine,"MasterInnerSphereAntiMissileSystemID = 106,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,",innerSphereAntiMissileSystemID);
+	//sebi: same here
+	//sprintf(dataLine,"MasterInnerSphereAntiMissileSystemID = 106,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,",innerSphereAntiMissileSystemID);
+	sprintf(dataLine,"MasterInnerSphereAntiMissileSystemID = 106,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,");
 	componentFile.writeLine(dataLine);
 	
 	sprintf(dataLine,"//,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,Weapon,Effect,Ammo,Flag,1 = streak 2 = inferno");

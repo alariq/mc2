@@ -14,7 +14,7 @@ Utilities.cpp			: Implementation of the Utilities component.
 
 #pragma warning(disable:4514)
 
-void drawRect( const GUI_RECT& area, unsigned long color )
+void drawRect( const GUI_RECT& area, DWORD color )
 {
 	if ( color & 0xff000000 )
 	{

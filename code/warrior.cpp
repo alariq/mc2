@@ -8156,10 +8156,10 @@ void MechWarrior::copyToData (MechWarriorData &data)
 	data.teamId = teamId;
 	data.vehicleWID = vehicleWID;
 	
-	MemCpy(data.numSkillUses,numSkillUses);
-	MemCpy(data.numSkillSuccesses,numSkillSuccesses);
-	MemCpy(data.numMechKills,numMechKills);
-	MemCpy(data.numPhysicalAttacks,numPhysicalAttacks);
+	MemCpy2(data.numSkillUses,numSkillUses);
+	MemCpy2(data.numSkillSuccesses,numSkillSuccesses);
+	MemCpy2(data.numMechKills,numMechKills);
+	MemCpy2(data.numPhysicalAttacks,numPhysicalAttacks);
 	MemCpy(data.skillRank,skillRank);
 	MemCpy(data.skillPoints,skillPoints);
 	MemCpy(data.originalSkills,originalSkills);
@@ -8177,7 +8177,7 @@ void MechWarrior::copyToData (MechWarriorData &data)
 	data.attackRadius = attackRadius;
 	
 	MemCpy(data.memory,memory);
-    MemCpy(data.debugStrings,debugStrings);
+    MemCpy2(data.debugStrings,debugStrings);
 	
 	data.brainUpdate = brainUpdate;
 	data.combatUpdate = combatUpdate;
@@ -8280,10 +8280,10 @@ void MechWarrior::copyFromData (MechWarriorData &data)
 	teamId = data.teamId;
 	vehicleWID = data.vehicleWID;
 	
-	MemCpy(numSkillUses,data.numSkillUses);
-	MemCpy(numSkillSuccesses,data.numSkillSuccesses);
-	MemCpy(numMechKills,data.numMechKills);
-	MemCpy(numPhysicalAttacks,data.numPhysicalAttacks);
+	MemCpy2(numSkillUses,data.numSkillUses);
+	MemCpy2(numSkillSuccesses,data.numSkillSuccesses);
+	MemCpy2(numMechKills,data.numMechKills);
+	MemCpy2(numPhysicalAttacks,data.numPhysicalAttacks);
 	MemCpy(skillRank,data.skillRank);
 	MemCpy(skillPoints,data.skillPoints);
 	MemCpy(originalSkills,data.originalSkills);
@@ -8301,7 +8301,7 @@ void MechWarrior::copyFromData (MechWarriorData &data)
 	attackRadius = data.attackRadius;
 	
 	MemCpy(memory,data.memory);
-	MemCpy(debugStrings,data.debugStrings);
+	MemCpy2(debugStrings,data.debugStrings);
 	
 	brainUpdate = data.brainUpdate;
 	combatUpdate = data.combatUpdate;

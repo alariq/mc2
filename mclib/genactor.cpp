@@ -763,11 +763,11 @@ long GenericAppearance::render (long depthFixup)
 {
 	if (inView)
 	{
-		long color = SD_BLUE;
+		uint32_t color = SD_BLUE;
 		unsigned long highLight = 0x007f7f7f;
 		if ((teamId > -1) && (teamId < 8)) {
-			static unsigned long highLightTable[3] = {0x00007f00, 0x0000007f, 0x007f0000};
-			static long colorTable[3] = {SB_GREEN | 0xff000000, SB_BLUE | 0xff000000, SB_RED | 0xff000000};
+			static uint32_t highLightTable[3] = {0x00007f00, 0x0000007f, 0x007f0000};
+			static uint32_t colorTable[3] = {SB_GREEN | 0xff000000, SB_BLUE | 0xff000000, SB_RED | 0xff000000};
 			color = colorTable[homeTeamRelationship];
 			highLight = highLightTable[homeTeamRelationship];
 		}

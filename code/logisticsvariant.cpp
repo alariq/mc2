@@ -936,11 +936,11 @@ int	LogisticsVariant::getComponentLocation( LogisticsComponent* pComp, long& x, 
 
 }
 
-int			LogisticsVariant::getOptimalRangeString( long& color ) const
+int			LogisticsVariant::getOptimalRangeString( uint32_t& color ) const
 {
 	float rangeDamage[3];
 
-	long rangeColors[3] = {0xff6e7c00, 0xff005392,0xffa21600  };
+	uint32_t rangeColors[3] = {0xff6e7c00, 0xff005392,0xffa21600  };
 
 
 	memset( rangeDamage, 0, sizeof ( float ) * 3 );

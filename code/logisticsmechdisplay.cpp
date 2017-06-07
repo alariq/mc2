@@ -122,7 +122,7 @@ void LogisticsMechDisplay::setMech( LogisticsMech* pMech, bool bFromLB )
 				sprintf( text, tmpStr, pCurMech->getMaxWeight(), (const char*)pCurMech->getMechClass() );
 				textObjects[3].setText( text );
 				
-				long tmpColor;
+				uint32_t tmpColor;
 				textObjects[2].setText( pCurMech->getVariant()->getOptimalRangeString( tmpColor ) );
 				textObjects[2].setColor( tmpColor );
 

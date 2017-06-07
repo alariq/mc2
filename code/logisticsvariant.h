@@ -180,7 +180,7 @@ protected:
 		LogisticsComponent*	getCompAtLocation( int i, int j, long& realI, long& realJ );
 		int			getComponentLocation( LogisticsComponent* pComp, long& i, long& j );
 
-		int			getOptimalRangeString( long& color ) const;
+		int			getOptimalRangeString( uint32_t& color ) const;
 		long		getHouseID(){ return chassis->houseID; }
 		long		getMaxArmor() const { return chassis->maxArmor; }
 		int			getSensorID() const { return chassis->getSensorID(); }
