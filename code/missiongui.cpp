@@ -5647,7 +5647,9 @@ long MissionInterfaceManager::calcRotation()
 
 	long counter = 0;
 	long rotation = 0;
-	while (slope > slopeTest[counter] && counter < 8)
+	//while (slope > slopeTest[counter] && counter < 8)
+    // sebi: ORIG BUG FIX: thanks AddressSanitizer
+	while (counter < 8 && slope > slopeTest[counter])
 		counter++;
 	if (screenPosGoal.y < screenPosMover.y)
 	{

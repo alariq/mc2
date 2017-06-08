@@ -4826,10 +4826,14 @@ long Mover::calcMoveGoal (GameObjectPtr target,
 		ObjectManager->useMoverLineOfSightTable = false;
 		while (noLOF && (i < MaxMoveGoalChecks)) {
 			long index = goalList[i][0];
+            long weight =  goalList[i][1];
 			curGoalCell[0] = mapCellUL[0] + goalMapRowCol[index][0];
 			curGoalCell[1] = mapCellUL[1] + goalMapRowCol[index][1];
 			i++;
-			if (goalList[i][1] > -900000) {
+            // sebi: ORIG BUG FIX because we increased i here, we will get weight from one iteration after we took index, and to make situation worse
+            // we'll also read from behind goalList array at last iteration (when i == MaxMoveGoalChecks)
+			//if (goalList[i][1] > -900000) {
+			if (weight > -900000) {
 				Stuff::Vector3D start;
 				land->cellToWorld(curGoalCell[0], curGoalCell[1], start);
 				//start.x = (float)(mapCellUL[1] + curGoalCell[1]) * Terrain::worldUnitsPerCell + Terrain::worldUnitsPerCell / 2 - Terrain::worldUnitsMapSide / 2;
@@ -4839,7 +4843,9 @@ long Mover::calcMoveGoal (GameObjectPtr target,
 				cellPositionRow = curGoalCell[0];
 				cellPositionCol = curGoalCell[1];
 				__int64 lstartTime = GetCycles();
-				if (goalList[i][1] > -10000) {
+                // sebi
+				//if (goalList[i][1] > -10000) {
+				if (weight > -10000) {
 					if (movingToCapture)
 						noLOF = false;
 					else if (target)

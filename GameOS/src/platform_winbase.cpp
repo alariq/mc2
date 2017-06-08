@@ -320,7 +320,11 @@ HANDLE WINAPI FindFirstFileA( LPCTSTR lpFileName, LPWIN32_FIND_DATAA lpFindFileD
         ffd = new FindFileData();
         ffd->entries = new dirent[n];
         for(int i=0;i<n;++i) {
-            memcpy(ffd->entries+i, entries[i], sizeof(struct dirent));
+            //memcpy(ffd->entries+i, entries[i], sizeof(struct dirent));
+            // sebi: for some reason AddressSanitizer and valgrind complain about memcpy :-/
+            const int len = sizeof(ffd->entries[i].d_name);
+            strncpy(ffd->entries[i].d_name, entries[i]->d_name, len - 1);
+            ffd->entries[i].d_name[len - 1] = '\0';
             free(entries[i]);
         }
         free(entries);
