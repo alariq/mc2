@@ -100,6 +100,7 @@ class TerrainQuad
 			terrainDetailHandle = 0xffffffff;
 			waterHandle = 0xffffffff;
 			waterDetailHandle = 0xffffffff;
+			overlayHandle = 0xffffffff;
 
 			uvMode = 0;
 			

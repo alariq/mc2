@@ -145,7 +145,7 @@ protected:
 		struct AnimationInfo
 		{
 			float	time;
-			long	color;
+			uint32_t color;
 		};
 
 		static AnimationInfo animationInfos[NUM_DEATH_INFOS];

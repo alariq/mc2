@@ -2453,7 +2453,7 @@ void Mover::updateDebugWindow (GameDebugWindow* debugWindow) {
 		if (getPilot()->getNumTacOrdersQueued()) {
 			if (getPilot()->getExecutingTacOrderQueue()) {
 				char ts[40];
-				sprintf(ts, "[%d%c] ", getPilot()->getNumTacOrdersQueued(), getPilot()->getTacOrderQueueLooping() ? "@" : ".");
+				sprintf(ts, "[%d%c] ", getPilot()->getNumTacOrdersQueued(), getPilot()->getTacOrderQueueLooping() ? '@' : '.');
 				strcat(s, ts);
 			}
 			else {
@@ -2624,7 +2624,7 @@ void Mover::updateDebugWindow (GameDebugWindow* debugWindow) {
 				debugWindow->print(s);
 			}
 			for (int i = numArmorLocations; i < numArmorLocations; i++) {
-				sprintf(s, "%s AR:%02d(%02d) %s",
+				sprintf(s, "%s AR:%.3f(%02d)",
 					locationStrings[i],
 					armor[i].curArmor,
 					armor[i].maxArmor);
@@ -7334,7 +7334,7 @@ void Mover::CopyTo (MoverData *data)
 	data->crashYieldTime                        = crashYieldTime;                             
 	data->pathLockLength                        = pathLockLength;                             
 
-    ArrayCopy(data->pathLockList,pathLockList);
+    ArrayCopy2(data->pathLockList,pathLockList);
 
 	data->moveCenter                            = moveCenter;                                 
 	data->moveRadius                            = moveRadius;                                 

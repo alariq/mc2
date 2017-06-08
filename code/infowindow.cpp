@@ -613,7 +613,7 @@ void InfoWindow::drawScrollingStuff()
 
 	}
 
-	long textColors[4] = { 0xff6E7C00, 0xff005392, 0xffA21600 };
+	uint32_t textColors[4] = { 0xff6E7C00, 0xff005392, 0xffA21600 };
 	
 
 	char disabledCount[60][2];

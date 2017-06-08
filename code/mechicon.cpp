@@ -1452,24 +1452,24 @@ void ForceGroupIcon::drawDeathEffect()
 			float percent = currentTime/totalTime;
 			
 			// since I know we're going from white to black, I'm only going to much with the alpha separately
-			long alphaMin = (animationInfos[i].color >> 24) & 0xff;
-			long alphaMax = (animationInfos[i+1].color >> 24)& 0xff;
+			uint32_t alphaMin = (animationInfos[i].color >> 24) & 0xff;
+			uint32_t alphaMax = (animationInfos[i+1].color >> 24)& 0xff;
 
-			long newAlpha = (float)alphaMin + ((float)(alphaMax - alphaMin))*percent;
+			uint32_t newAlpha = (float)alphaMin + ((float)(alphaMax - alphaMin))*percent;
 			
-			long redMin = (animationInfos[i].color & 0x00ff0000)>>16;
-			long redMax = (animationInfos[i+1].color & 0x00ff0000)>>16;
-			long newRed = (float)redMin + ((float)(redMax - redMin))*percent;
+			uint32_t redMin = (animationInfos[i].color & 0x00ff0000)>>16;
+			uint32_t redMax = (animationInfos[i+1].color & 0x00ff0000)>>16;
+			uint32_t newRed = (float)redMin + ((float)(redMax - redMin))*percent;
 			
-			long greenMin = (animationInfos[i].color & 0x0000ff00)>>8;
-			long greenMax = (animationInfos[i+1].color & 0x0000ff00)>>8;
-			long newGreen = (float)greenMin + ((float)(greenMax - greenMin))*percent;
+			uint32_t greenMin = (animationInfos[i].color & 0x0000ff00)>>8;
+			uint32_t greenMax = (animationInfos[i+1].color & 0x0000ff00)>>8;
+			uint32_t newGreen = (float)greenMin + ((float)(greenMax - greenMin))*percent;
 			
-			long blueMin = animationInfos[i].color & 0x000000ff;
-			long blueMax = animationInfos[i+1].color & 0x000000ff;
-			long newBlue = (float)blueMin + ((float)(blueMax - blueMin))*percent;
+			uint32_t blueMin = animationInfos[i].color & 0x000000ff;
+			uint32_t blueMax = animationInfos[i+1].color & 0x000000ff;
+			uint32_t newBlue = (float)blueMin + ((float)(blueMax - blueMin))*percent;
 
-			long newColor = newBlue + (newGreen << 8) + (newRed << 16) + (newAlpha <<24);
+			uint32_t newColor = newBlue + (newGreen << 8) + (newRed << 16) + (newAlpha <<24);
 							
 			drawRect( selectionRect[locationIndex], newColor );
 			bFinished = false;

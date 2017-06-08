@@ -110,7 +110,7 @@ public:
 	void		setTexture( const char* fileName );
 	void		setTexture(unsigned long newHandle );
 	void		setUVs( float u1, float v1, float u2, float v2 );
-	void		setColor(unsigned long color, bool bRecurse = 0); // color the vertices
+	void		setColor(uint32_t color, bool bRecurse = 0); // color the vertices
 
 	void		init( FitIniFile* file, const char* block, DWORD neverFlush = 0 ); // for statics
 	

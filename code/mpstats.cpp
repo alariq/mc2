@@ -455,6 +455,8 @@ void MPStatsResultsEntry::init()
 
 void MPStatsResultsEntry::setData(const MC2Player* data, unsigned long laurelColor, bool bShowScore )
 {
+	gosASSERT(data); // sebi
+
 	rects[4].setColor( MPlayer->colors[data->baseColor[BASECOLOR_TEAM]] );
 	rects[2].setColor( MPlayer->colors[data->stripeColor] );
 

@@ -1276,7 +1276,7 @@ void	MechLabScreen::setComponent( LogisticsComponent* pComponent, bool bMessageF
 		}
 		else
 		{
-			long rangeColors[3] = {0xff6e7c00, 0xff005392,0xffa21600  };
+			uint32_t rangeColors[3] = {0xff6e7c00, 0xff005392,0xffa21600  };
 
 			showJumpJetItems( 0 );
 			textObjects[7].setText( pCurComponent->getRangeType() + IDS_SHORT_RANGE );

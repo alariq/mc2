@@ -86,15 +86,15 @@ void ComponentListBox::setComponents( long componentCount, LogisticsComponent** 
 		LogisticsComponent* finalList[64];
 
 
-		long finalListCount[64];
+		uint32_t finalListCount[64];
 //		long stringIDs[4] = { IDS_SHORT, IDS_MEDIUM, IDS_LONG, IDS_COMPONENT};
-		long colors[4] = { 0xff6E7C00, 0xff005392, 0xffA21600, 0xffc29b00};
+		uint32_t colors[4] = { 0xff6E7C00, 0xff005392, 0xffA21600, 0xffc29b00};
 //		long headerColors[4] = { 0xFFC8E100, 0xff0091FF, 0xFFFF0000, 0xffFF8A00 };
 
 		for ( int i = 0; i < 4; i++ ) // do short, medium long
 		{
-			memset( finalList, 0, sizeof( long ) * 64 );
-			memset( finalListCount, 0, sizeof( long ) * 64 );
+			MemSet(finalList, 0);
+			MemSet(finalListCount, 0);
 			for ( int j = 0; j < componentCount; j++ )
 			{
 				if ( components[j]->getRangeType() == (LogisticsComponent::WEAPON_RANGE)i ) // short, med, long

@@ -296,7 +296,8 @@ MLR_I_DT_PMesh*
 	texCoords[13] = Vector2DScalar(0.0f, 0.0f);
 	texCoords[14] = Vector2DScalar(0.0f, 0.0f);
 	texCoords[15] = Vector2DScalar(0.0f, 0.0f);
-	texCoords[16] = Vector2DScalar(0.0f, 0.0f);
+	// sebi: ORIG BUG FIX
+	//texCoords[16] = Vector2DScalar(0.0f, 0.0f);
 
 	if(state != NULL)
 	{

@@ -2060,7 +2060,7 @@ void HeapList::dumpLog (void)
 		
 		if (currentHeap)
 		{
-			sprintf(msg,"ListNo: %d     Heap: %d     Type: %d     Made by: %08X",i,heapNumber,currentHeap->heapType(),currentHeap->owner());
+			sprintf(msg,"ListNo: %d     Heap: %d     Type: %d     Made by: %08ld",i,heapNumber,currentHeap->heapType(),currentHeap->owner());
 			logFile.writeLine(msg);
 
 			if (mapResult == NO_ERR)
@@ -2073,7 +2073,7 @@ void HeapList::dumpLog (void)
 				}
 			}
 			
-			sprintf(msg,"HeapSize: %d     HeapStart: %08X",currentHeap->tSize(),currentHeap->getHeapPtr());
+			sprintf(msg,"HeapSize: %d     HeapStart: %08p",currentHeap->tSize(),currentHeap->getHeapPtr());
 			logFile.writeLine(msg);
 
 			totalCommit += currentHeap->tSize();

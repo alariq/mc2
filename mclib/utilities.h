@@ -61,7 +61,7 @@ void drawEmptyRect( const GUI_RECT& rect, unsigned long leftBorderColor = 0xffff
 	 unsigned long rightBorderColor = 0xff000000 );
 
 
-void drawRect( const GUI_RECT& rect, unsigned long color );
+void drawRect( const GUI_RECT& rect, DWORD color );
 
 void drawShadowText( long colorTop, long colorShadow, HGOSFONT3D font, 
 					long left, long top, bool proportional, const char* text, bool bBold, float scale );

@@ -798,7 +798,7 @@ void MechBayScreen::setMech( LogisticsMech* pMech,  bool bCommandFromLB )
 		textObjects[7].setText( str );
 
 		// firing range
-		long tmpColor;
+		uint32_t tmpColor;
 		textObjects[14].setText( pCurMech->getVariant()->getOptimalRangeString( tmpColor ) );
 		textObjects[14].setColor( tmpColor );
 

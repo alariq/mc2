@@ -651,7 +651,7 @@ void SalvageMechArea::setMech( LogisticsVariant* pMech, long red, long green, lo
 
 		textObjects[NAME_TEXTID].setText( pMech->getName() );
 		char text[256];
-		sprintf( text, "%ld", pMech->getMaxWeight() );
+		sprintf( text, "%f", pMech->getMaxWeight() );
 		textObjects[WEIGHT_TEXTID].setText( text );
 		sprintf( text, "%ld", pMech->getArmor() );
 		textObjects[ARMOR_TEXTID].setText( text );
@@ -659,7 +659,7 @@ void SalvageMechArea::setMech( LogisticsVariant* pMech, long red, long green, lo
 		textObjects[SPEED_TEXTID].setText( text );
 		sprintf( text, "%ld", pMech->getJumpRange() * 25 );
 		textObjects[JUMP_TEXTID].setText( text );
-		long tmpColor;
+		uint32_t tmpColor;
 		textObjects[RANGE_TEXTID].setText( pMech->getOptimalRangeString( tmpColor ) );
 		textObjects[RANGE_TEXTID].setColor( ( tmpColor ) );
 
