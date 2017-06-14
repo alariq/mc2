@@ -880,10 +880,14 @@ void MechWarrior::init (bool create) {
 	status = WARRIOR_STATUS_NORMAL;
 	escapesThruEjection = false;
 	radioLog.lastMessage = -1;
-	radioLog.lastUnderFire = -1000.0;
+	radioLog.lastUnderFire = -1000.0f;
 	radioLog.weaponsIneffective = false;
 	radioLog.weaponsOut = false;
-	radioLog.lastContact = -1000.0;
+	radioLog.lastContact = -1000.0f;
+    //sebi init those 2
+	radioLog.lastMessageType = RADIO_MESSAGE_COUNT;
+	radioLog.lastMessageTime = -1000.0f;
+        
 	notMineYet = false;
 
 	teamId = 0;

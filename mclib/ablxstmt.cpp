@@ -242,9 +242,15 @@ void execAssignmentStatement (SymTableNodePtr idPtr) {
 		// Copy the array/record...
 		char* dest = (char*)targetPtr;
 		char* src = tos->address;
-		int len = strlen(src) + 1;
+        // sebi: ORIG BUG FIX
+        // in arr[25];
+        // ...
+        // arr = "aaa";
+        // this will copy size bytes (25) from "aaa", which is effectively only 4 bytes!
+        // so this fixes it
+        const int srclen = strlen(src) + 1;
 		long size = targetTypePtr->size;
-		memcpy(dest, src, len);
+		memcpy(dest, src, /*size*/srclen<size?srclen:size);
 		}
 	else if ((targetTypePtr == IntegerTypePtr) || (targetTypePtr->form == FRM_ENUM)) {
 		//------------------------------------------------------
