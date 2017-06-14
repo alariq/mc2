@@ -188,6 +188,7 @@ void aObject::destroy()
 		int gosID = mcTextureManager->get_gosTextureHandle( textureHandle );
 		if ( gosID && gosID != -1 )
 			mcTextureManager->removeTexture( gosID );
+		textureHandle = 0;
 	}
 
 
@@ -490,7 +491,7 @@ void	aObject::setTexture(unsigned long newHandle )
 }
 
 
-void aObject::setColor( unsigned long newColor, bool bRecurse )
+void aObject::setColor( uint32_t newColor, bool bRecurse )
 {
 	for ( int i = 0; i < 4; i++ )
 	{
