@@ -242,8 +242,9 @@ void execAssignmentStatement (SymTableNodePtr idPtr) {
 		// Copy the array/record...
 		char* dest = (char*)targetPtr;
 		char* src = tos->address;
+		int len = strlen(src) + 1;
 		long size = targetTypePtr->size;
-		memcpy(dest, src, size);
+		memcpy(dest, src, len);
 		}
 	else if ((targetTypePtr == IntegerTypePtr) || (targetTypePtr->form == FRM_ENUM)) {
 		//------------------------------------------------------
