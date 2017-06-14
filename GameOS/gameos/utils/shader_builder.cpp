@@ -578,8 +578,8 @@ bool glsl_program::setFloat3(const char* name, const float v[3])
 	log_error("Type mismatch: %s\n", name);
     return false;
 }
-// TODO: need to change interface so that float* instead of float[4] is passed
-bool glsl_program::setFloat4(const char* name, const float v[4])
+
+bool glsl_program::setFloat4(const std::string& name, const float v[4])
 {
     UniArr_t::iterator it = uniforms_.find(name);
     if(it!=uniforms_.end() && it->second->type_ == CONSTANT_VEC4)
@@ -590,6 +590,12 @@ bool glsl_program::setFloat4(const char* name, const float v[4])
     }
 	log_error("Type mismatch: %s\n", name);
     return false;
+}
+
+// TODO: need to change interface so that float* instead of float[4] is passed
+bool glsl_program::setFloat4(const char* name, const float v[4])
+{
+	return setFloat4(std::string(name), v);
 }
 
 bool glsl_program::setInt(const char* name, const int v)
@@ -666,6 +672,19 @@ bool glsl_program::setMat3(const char* name, const float v[9])
     return false;
 }
 bool glsl_program::setMat4(const char* name, const float v[16])
+{
+    UniArr_t::iterator it = uniforms_.find(name);
+    if(it!=uniforms_.end() && it->second->type_ == CONSTANT_MAT4)
+    {
+        memcpy(it->second->data_, v, constantSizes[it->second->type_] * it->second->num_el_);
+        it->second->is_dirty_ = true;
+        return true;
+    }
+	log_error("Type mismatch: %s\n", name);
+    return false;
+}
+
+bool glsl_program::setMat4(const std::string& name , const float v[16])
 {
     UniArr_t::iterator it = uniforms_.find(name);
     if(it!=uniforms_.end() && it->second->type_ == CONSTANT_MAT4)

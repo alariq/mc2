@@ -93,6 +93,7 @@ struct glsl_program {
     bool setFloat2(const char* name, const float v[2]);
     bool setFloat3(const char* name, const float v[3]);
     bool setFloat4(const char* name, const float v[4]);
+	bool setFloat4(const std::string& name, const float v[4]);
 	bool setInt(const char* name, const int v);
     bool setInt2(const char* name, const int v[2]);
     bool setInt3(const char* name, const int v[3]);
@@ -100,6 +101,7 @@ struct glsl_program {
     bool setMat2(const char* name, const float v[4]);
     bool setMat3(const char* name, const float v[9]);
     bool setMat4(const char* name, const float v[16]);
+    bool setMat4(const std::string& name , const float v[16]);
    
     bool is_valid();
 
