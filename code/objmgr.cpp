@@ -130,8 +130,8 @@ char WEAPON_LIST_ID[] = "WEAPON";
 #endif
 //long ObjectQueue::objectsInList = 0;
 
-extern long usedBlockList[];			//Trust ME~~!!!!!!!!!!!!!!!!!!!!!!!!
-extern long moverBlockList[];			//Trust ME~~!!!!!!!!!!!!!!!!!!!!!!!!  AGAIN 
+extern long* usedBlockList;			//Trust ME~~!!!!!!!!!!!!!!!!!!!!!!!!
+extern long* moverBlockList;			//Trust ME~~!!!!!!!!!!!!!!!!!!!!!!!!  AGAIN 
 extern bool updateTerrainObjects;
 extern bool	updateObjects;
 extern bool	renderTerrainObjects;
