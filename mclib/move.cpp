@@ -1493,7 +1493,7 @@ long GlobalMap::init (PacketFilePtr packetFile, long whichPacket) {
 
 	long startPacket = whichPacket;
 
-	unsigned int version = 0;
+	uint32_t version = 0;
 	long result = packetFile->readPacket(whichPacket++, (unsigned char*)&version);
 	if (result == 0)
 		Fatal(result, " GlobalMap.init: unable to read version packet ");
@@ -1689,7 +1689,7 @@ long GlobalMap::write (PacketFilePtr packetFile, long whichPacket) {
 	if (!packetFile)
 		return(numPackets);
 
-	unsigned long version = GLOBALMAP_VERSION_NUMBER;
+	uint32_t version = GLOBALMAP_VERSION_NUMBER;
 	long result = packetFile->writePacket(whichPacket++, version);
 	if (result <= 0)
 		Fatal(result, " GlobalMap.write: Unable to write version packet ");
@@ -1699,7 +1699,7 @@ long GlobalMap::write (PacketFilePtr packetFile, long whichPacket) {
 	result = packetFile->writePacket(whichPacket++, width);
 	if (result <= 0)
 		Fatal(result, " GlobalMap.write: Unable to write width packet ");
-	long sectorDim = SECTOR_DIM;
+	uint32_t sectorDim = SECTOR_DIM;
 	result = packetFile->writePacket(whichPacket++, sectorDim);
 	if (result <= 0)
 		Fatal(result, " GlobalMap.write: Unable to write sectorDim packet ");
