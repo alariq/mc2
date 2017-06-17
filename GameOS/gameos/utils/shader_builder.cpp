@@ -588,7 +588,7 @@ bool glsl_program::setFloat4(const std::string& name, const float v[4])
         it->second->is_dirty_ = true;
         return true;
     }
-	log_error("Type mismatch: %s\n", name);
+	log_error("Type mismatch: %s\n", name.c_str());
     return false;
 }
 
@@ -693,7 +693,7 @@ bool glsl_program::setMat4(const std::string& name , const float v[16])
         it->second->is_dirty_ = true;
         return true;
     }
-	log_error("Type mismatch: %s\n", name);
+	log_error("Type mismatch: %s\n", name.c_str());
     return false;
 }
 
