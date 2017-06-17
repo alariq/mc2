@@ -38,6 +38,8 @@ struct gosTextureInfo {
 };
 
 class gosShaderMaterial {
+
+		static const std::string s_mvp;
     public:
         static gosShaderMaterial* load(const char* shader) {
             gosASSERT(shader);
@@ -103,8 +105,8 @@ class gosShaderMaterial {
             }
         }
 
-        bool setSamplerUnit(const char* sampler_name, uint32_t unit) {
-            gosASSERT(sampler_name);
+        bool setSamplerUnit(const std::string& sampler_name, uint32_t unit) {
+            gosASSERT(!sampler_name.empty());
             // TODO: may also check that current program is equal to our program
             if(program_->samplers_.count(sampler_name)) {
                 glUniform1i(program_->samplers_[sampler_name]->index_, unit);
@@ -114,7 +116,7 @@ class gosShaderMaterial {
         }
 
         bool setTransform(const mat4& m) {
-            program_->setMat4("mvp", m);
+            program_->setMat4(s_mvp, m);
             return true;
         }
 
@@ -157,6 +159,8 @@ class gosShaderMaterial {
         GLint color_loc;
         GLint texcoord_loc;
 };
+
+const std::string gosShaderMaterial::s_mvp = std::string("mvp");
 
 class gosMesh {
     public:
@@ -225,6 +229,8 @@ class gosMesh {
         void draw(gosShaderMaterial* material) const;
         void drawIndexed(gosShaderMaterial* material) const;
 
+		static const std::string s_tex1;
+
     private:
 
         gosMesh(gosPRIMITIVETYPE prim_type, int vertex_capacity, int index_capacity)
@@ -252,6 +258,8 @@ class gosMesh {
         GLuint ib_;
 };
 
+const std::string gosMesh::s_tex1 = std::string("tex1");
+
 void gosMesh::draw(gosShaderMaterial* material) const
 {
     gosASSERT(material);
@@ -263,7 +271,7 @@ void gosMesh::draw(gosShaderMaterial* material) const
 
     material->apply();
 
-    material->setSamplerUnit("tex1", 0);
+    material->setSamplerUnit(s_tex1, 0);
 
 	glBindBuffer(GL_ARRAY_BUFFER, vb_);
 
@@ -305,7 +313,7 @@ void gosMesh::drawIndexed(gosShaderMaterial* material) const
 
     material->apply();
 
-    material->setSamplerUnit("tex1", 0);
+    material->setSamplerUnit(s_tex1, 0);
 
 	glBindBuffer(GL_ARRAY_BUFFER, vb_);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ib_);
@@ -654,6 +662,7 @@ class gosFont {
 class gosRenderer {
 
     typedef unsigned int RenderState[gos_MaxState];
+	static const std::string s_Foreground;
 
     public:
         gosRenderer(graphics::RenderContextHandle ctx_h, graphics::RenderWindowHandle win_h, int w, int h) {
@@ -897,6 +906,8 @@ class gosRenderer {
         uint32_t break_draw_call_num_;
 
 };
+
+const std::string gosRenderer::s_Foreground = std::string("Foreground");
 
 void gosRenderer::init() {
     initRenderStates();
@@ -1558,8 +1569,8 @@ void gosRenderer::drawText(const char* text) {
     fg.y = (float)((ta.Foreground & 0xFF00) >> 8);
     fg.z = (float)(ta.Foreground & 0xFF);
     fg.w = 255.0f;//(ta.Foreground & 0xFF000000) >> 24;
-    fg = fg / 255.0f; 
-    mat->getShader()->setFloat4("Foreground", fg);
+    fg = fg / 255.0f;
+    mat->getShader()->setFloat4(s_Foreground, fg);
     //ta.Size 
     //ta.WordWrap 
     //ta.Proportional
@@ -1685,7 +1696,7 @@ void gosFont::getCharUV(int c, uint32_t* u, uint32_t* v) const {
     gosASSERT(u && v);
 
     int32_t pos = c - gi_.start_glyph_;
-    if(pos < 0 || pos >= gi_.num_glyphs_) {
+    if(pos < 0 || pos >= (int)gi_.num_glyphs_) {
         *u = *v = 0;
         return;
     }

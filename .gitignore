@@ -3,6 +3,8 @@ CMakeCache.txt
 out/
 bin/
 build/
+build64/
+build2013/
 build-rel/
 build-dbg/
 build-reldbginfo/

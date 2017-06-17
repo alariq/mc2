@@ -9,6 +9,13 @@ include(CMakeToolsHelpers OPTIONAL)
 #   SET(CMAKE_BUILD_TYPE RelWithDebInfo)
 #ENDIF(NOT CMAKE_CONFIGURATION_TYPES AND NOT CMAKE_BUILD_TYPE)
 
+if("${CMAKE_SIZEOF_VOID_P}" EQUAL "8")
+	message(STATUS "Target is 64 bits")
+	set_property(GLOBAL PROPERTY FIND_LIBRARY_USE_LIB64_PATHS TRUE)
+else("${CMAKE_SIZEOF_VOID_P}" EQUAL "8")
+	message(STATUS "Target is 32 bits")
+endif("${CMAKE_SIZEOF_VOID_P}" EQUAL "8")
+
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x -g")
 
 if(NOT MSVC)

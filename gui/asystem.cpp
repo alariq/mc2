@@ -188,6 +188,7 @@ void aObject::destroy()
 		int gosID = mcTextureManager->get_gosTextureHandle( textureHandle );
 		if ( gosID && gosID != -1 )
 			mcTextureManager->removeTexture( gosID );
+		textureHandle = 0;
 	}
 
 

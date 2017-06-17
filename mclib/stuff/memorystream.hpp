@@ -194,29 +194,30 @@ namespace MemoryStreamIO {
 	inline Stuff::MemoryStream&
 		Read(
 			Stuff::MemoryStream* stream,
-			int *output
-		);
-	inline Stuff::MemoryStream&
-		Read(
-			Stuff::MemoryStream* stream,
 			bool *output
-		);
-	inline Stuff::MemoryStream&
-		Read(
-			Stuff::MemoryStream* stream,
-			uint64_t*output
-		);
-
-	inline Stuff::MemoryStream&
-		Read(
-			Stuff::MemoryStream* stream,
-			int64_t *output
 		);
 	inline Stuff::MemoryStream&
 		Read(
 			Stuff::MemoryStream* stream,
 			uint32_t *output
 		);
+	inline Stuff::MemoryStream&
+		Read(
+			Stuff::MemoryStream* stream,
+			int32_t *output
+		);
+	inline Stuff::MemoryStream&
+		Read(
+			Stuff::MemoryStream* stream,
+			uint64_t*output
+		);
+	inline Stuff::MemoryStream&
+		Read(
+			Stuff::MemoryStream* stream,
+			int64_t *output
+		);
+
+////////////////////////////////////////////////////////////////////////////////
 	inline Stuff::MemoryStream&
 		Write(
 			Stuff::MemoryStream* stream,
@@ -237,16 +238,20 @@ namespace MemoryStreamIO {
 			Stuff::MemoryStream* stream,
 			const WORD *input
 		);
-
-	inline Stuff::MemoryStream&
-		Write(
-			Stuff::MemoryStream* stream,
-			const int *input
-		);
 	inline Stuff::MemoryStream&
 		Write(
 			Stuff::MemoryStream* stream,
 			const bool *input
+		);
+	inline Stuff::MemoryStream&
+		Write(
+			Stuff::MemoryStream* stream,
+			const uint32_t *input
+		);
+	inline Stuff::MemoryStream&
+		Write(
+			Stuff::MemoryStream* stream,
+			const int32_t *input
 		);
 	inline Stuff::MemoryStream&
 		Write(
@@ -257,11 +262,6 @@ namespace MemoryStreamIO {
 		Write(
 			Stuff::MemoryStream* stream,
 			const int64_t *input
-		);
-	inline Stuff::MemoryStream&
-		Write(
-			Stuff::MemoryStream* stream,
-			const uint32_t *input
 		);
 	inline Stuff::MemoryStream&
 		Write(
@@ -724,32 +724,16 @@ namespace MemoryStreamIO {
 			WORD *output
 		)
 			{return stream->ReadBytes(output, sizeof(*output));}
-
-	inline Stuff::MemoryStream&
-		Read(
-			Stuff::MemoryStream* stream,
-			int *output
-		)
-			{return stream->ReadBytes(output, sizeof(*output));}
 	inline Stuff::MemoryStream&
 		Read(
 			Stuff::MemoryStream* stream,
 			bool *output
 		)
 			{return stream->ReadBytes(output, sizeof(*output));}
-    // sebi: now DWORD is same as unsigned int
-    // so change unsigned int to unsigned long
 	inline Stuff::MemoryStream&
 		Read(
 			Stuff::MemoryStream* stream,
-			unsigned long *output
-		)
-			{return stream->ReadBytes(output, sizeof(*output));}
-    
-	inline Stuff::MemoryStream&
-		Read(
-			Stuff::MemoryStream* stream,
-			long *output
+			int32_t*output
 		)
 			{return stream->ReadBytes(output, sizeof(*output));}
 	inline Stuff::MemoryStream&
@@ -758,7 +742,20 @@ namespace MemoryStreamIO {
 			uint32_t *output
 		)
 			{return stream->ReadBytes(output, sizeof(*output));}
+	inline Stuff::MemoryStream&
+		Read(
+			Stuff::MemoryStream* stream,
+			uint64_t *output
+		)
+			{return stream->ReadBytes(output, sizeof(*output));}
+	inline Stuff::MemoryStream&
+		Read(
+			Stuff::MemoryStream* stream,
+			int64_t *output
+		)
+			{return stream->ReadBytes(output, sizeof(*output));}
 
+////////////////////////////////////////////////////////////////////////////////
 	inline Stuff::MemoryStream&
 		Write(
 			Stuff::MemoryStream* stream,
@@ -784,38 +781,34 @@ namespace MemoryStreamIO {
 			const WORD *input
 		)
 			{return stream->WriteBytes(input, sizeof(*input));}
-
-	inline Stuff::MemoryStream&
-		Write(
-			Stuff::MemoryStream* stream,
-			const int *input
-		)
-			{return stream->WriteBytes(input, sizeof(*input));}
 	inline Stuff::MemoryStream&
 		Write(
 			Stuff::MemoryStream* stream,
 			const bool *input
 		)
 			{return stream->WriteBytes(input, sizeof(*input));}
-    // sebi: now DWORD same as unsigned int
-    // so change this to unsigned long
-    // !NB debug this!!! esecially test cases with Read() function, we should not read long from data, game did not have 64bit types!!! I think
-	inline Stuff::MemoryStream&
-		Write(
-			Stuff::MemoryStream* stream,
-			const unsigned long*input
-		)
-			{return stream->WriteBytes(input, sizeof(*input));}
-	inline Stuff::MemoryStream&
-		Write(
-			Stuff::MemoryStream* stream,
-			const long *input
-		)
-			{return stream->WriteBytes(input, sizeof(*input));}
 	inline Stuff::MemoryStream&
 		Write(
 			Stuff::MemoryStream* stream,
 			const uint32_t *input
+		)
+			{return stream->WriteBytes(input, sizeof(*input));}
+	inline Stuff::MemoryStream&
+		Write(
+			Stuff::MemoryStream* stream,
+			const int32_t *input
+		)
+			{return stream->WriteBytes(input, sizeof(*input));}
+	inline Stuff::MemoryStream&
+		Write(
+			Stuff::MemoryStream* stream,
+			const uint64_t*input
+		)
+			{return stream->WriteBytes(input, sizeof(*input));}
+	inline Stuff::MemoryStream&
+		Write(
+			Stuff::MemoryStream* stream,
+			const int64_t* input
 		)
 			{return stream->WriteBytes(input, sizeof(*input));}
 
