@@ -12,7 +12,7 @@ include(CMakeToolsHelpers OPTIONAL)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x -g")
 
 if(NOT MSVC)
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-local-typedefs -Werror=array-bounds -Wno-switch -Wno-unknown-warning-option -Wunused-variable")
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-local-typedefs -Werror=array-bounds -Wno-switch -Wno-unknown-warning-option -Wunused-variable -fsanitize=address -fno-omit-frame-pointer")
 endif()
 # -Wno-unused-local-typedefs - to disable "typedef was ignored on this declaration"
 
