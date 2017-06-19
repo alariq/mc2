@@ -109,9 +109,7 @@ int LogisticsPilotListBoxItem::init( FitIniFile* file )
 	if ( !s_templateItem )
 		s_templateItem = new LogisticsPilotListBoxItem( NULL );
 
-	memset( s_templateItem->pChildAnimations, 0, sizeof( aAnimGroup* ) * PILOT_LIST_BOX_CHILD_COUNT );
-
-
+	MemSet(s_templateItem->pChildAnimations, 0);
 
 	s_templateItem->nameText.init( file, "Text0" );
 	setAnimation( *file, 0 );
@@ -169,7 +167,7 @@ void LogisticsPilotListBoxItem::render()
 
 	for ( int i = 0; i < this->pNumberOfChildren; i++ )
 	{
-		long newColor = 0xffffffff;
+		uint32_t newColor = 0xffffffff;
 		if ( pChildAnimations[i] != -1 )
 			newColor = animations[pChildAnimations[i]].getCurrentColor((aAnimGroup::STATE)state );
 		pChildren[i]->setColor( newColor, 1 );

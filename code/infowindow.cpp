@@ -619,9 +619,13 @@ void InfoWindow::drawScrollingStuff()
 	char disabledCount[60][2];
 	long ammo[60];
 	char ranges[60];
-	long names[60];
+	char names[60];// sebi: changed long to char
 	memset( disabledCount, 0, sizeof( char ) * 60 * 2);
-	memset( names, 0, sizeof( char* ) * 60 );
+
+	// sebi: ORIG BUG FIX memory owerwrite fix fow win64 build: sizeof(long) < sizeof(char*)!
+	//memset( names, 0, sizeof( char* ) * 60 );
+	MemSet(names, 0);
+
 	memset( ranges, 0, sizeof( char ) * 60 );
 	memset( ammo, 0, sizeof( long ) * 60 );
 
@@ -634,7 +638,7 @@ void InfoWindow::drawScrollingStuff()
 
 	for (long curWeapon = pUnit->numOther; curWeapon < (pUnit->numOther + pUnit->numWeapons); curWeapon++) 
 	{
-			long nName = pUnit->inventory[curWeapon].masterID;
+			char nName = pUnit->inventory[curWeapon].masterID;
 			bool bFound = 0;
 			for ( int j = 0; j < i; j++ )
 			{
@@ -747,8 +751,11 @@ void InfoWindow::drawScrollingStuff()
 
 	}
 
-	memset( names, 0, sizeof( char* ) * 60 );
-	long count[4];
+	//sebi: ORIG BUG FIX memory owerwrite fix
+	//memset( names, 0, sizeof( char* ) * 60 );
+	MemSet(names, 0);
+
+	char count[4];
 	count[0] = pUnit->ecm;
 	count[1] = pUnit->probe;
 	count[2] = pUnit->jumpJets;
@@ -771,7 +778,7 @@ void InfoWindow::drawScrollingStuff()
 	{
 		if ( count[curWeapon] != 255)
 		{
-			long color = 0xffc29b00;
+			uint32_t color = 0xffc29b00;
 			//Neither the ecm, probe, sensors or JumpJets can ever REALLY be disabled. No matter what the setting is!!
 //			if (pUnit->inventory[count[curWeapon]].disabled) 
 //				color = 0xff7f7f7f;
