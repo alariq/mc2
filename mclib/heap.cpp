@@ -121,7 +121,7 @@ void HeapManager::destroy (void)
 	}
 
 	if (totalSize && memReserved && heap)
-	{
+	{                 
 		result = VirtualFree(heap, totalSize, MEM_RELEASE);
 		if (result == FALSE)
 			result = GetLastError();
@@ -218,12 +218,16 @@ long HeapManager::commitHeap (unsigned long commitSize)
 		// If this was a UserHeap,
 		// the UserHeap class will
 		// do its own unwind.
-		unsigned long currentEbp;
-		unsigned long prevEbp;
-		unsigned long retAddr;
+		unsigned long currentEbp = 0;
+		unsigned long prevEbp = 0;
+		unsigned long retAddr = 0;
 
 #ifdef PLATFORM_WINDOWS
+#ifndef _WIN64
 		__asm { mov currentEbp,esp }
+#else	
+		return NO_ERR;
+#endif
 #else
 		// only correct for 64bit?
         // currentEbp = esp;
@@ -2005,7 +2009,7 @@ long getStringFromMap (File &mapFile, unsigned long addr, char *result)
 	// the current address is greater than the address asked for.
 	// The previous function name is the function in question.
 	char *currentAddress = &(mapFileLine[6]);
-	char previousAddress[511];
+	char previousAddress[511] = { 0 };
 	strncpy(previousAddress,&(mapFileLine[6]),510);
 	
 	while (strstr(mapFileLine,"0001:") != NULL)

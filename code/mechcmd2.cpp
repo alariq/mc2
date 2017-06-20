@@ -829,7 +829,11 @@ void __stdcall InitializeGameEngine()
 
 	// gotta have this no matter what
 #ifdef PLATFORM_WINDOWS
-	gosResourceHandle = gos_OpenResourceDLL("mc2res.dll", NULL, 0);
+	#ifdef _WIN64
+		gosResourceHandle = gos_OpenResourceDLL("mc2res_64.dll", NULL, 0);
+	#else
+		gosResourceHandle = gos_OpenResourceDLL("mc2res_32.dll", NULL, 0);
+	#endif
 #else
 	gosResourceHandle = gos_OpenResourceDLL("./libmc2res.so", NULL, 0);
 #endif
