@@ -141,7 +141,7 @@ void ComponentListBox::setComponents( long componentCount, LogisticsComponent** 
 					aTextListItem* textItem = new aTextListItem( IDS_SALVAGE_AREA_COMPONENTS );
 					if ( finalList[j]->getType() != COMPONENT_FORM_JUMPJET )
 					{
-						str.Format( "%ld/%ld %s", finalListCount[j],  finalListCount[j], finalList[j]->getName() );
+						str.Format( "%d/%d %s", finalListCount[j],  finalListCount[j], finalList[j]->getName() );
 						textItem->setText( str );
 					}
 					else

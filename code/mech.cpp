@@ -3522,10 +3522,15 @@ void BattleMech::pilotingCheck (unsigned long situation, float modifier) {
 
 	//---------------------------
 	// Leg actuator(s) destroyed?
-	if (inventory[actuator[ACTUATOR_LHIP]].health == 0)
-		pilotRoll += 10.0;
-	if (inventory[actuator[ACTUATOR_RHIP]].health == 0)
-		pilotRoll += 10.0;
+	//sebi: to not read uninitialized memory
+	if(actuator[ACTUATOR_LHIP] < MAX_MOVER_INVENTORY_ITEMS)
+		if (inventory[actuator[ACTUATOR_LHIP]].health == 0)
+			pilotRoll += 10.0;
+
+	//sebi: ORIG BUG FIX to not read uninitialized memory (ApplicatioVerifier)
+	if(actuator[ACTUATOR_RHIP] < MAX_MOVER_INVENTORY_ITEMS)
+		if (inventory[actuator[ACTUATOR_RHIP]].health == 0)
+			pilotRoll += 10.0;
 	
 	//----------------
 	// Terrain type...

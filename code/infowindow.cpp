@@ -117,7 +117,10 @@ void InfoWindow::init( FitIniFile& file )
     // sebi: WTF??? thank you clang
 	//memset( skillInfos, 0, sizeof( skillInfos ));
 	memset( skillInfos, 0, sizeof( skillInfos ) * 7);
-	memset( buttonData, 0, sizeof( buttonData ) );
+
+	//sebi: ORIG BUG FIX what a reason to clear this and then iterate over it?
+	// obviously clear shoul dbe done after!
+	//memset( buttonData, 0, sizeof( buttonData ) );
 
 
 	for (int i = 0; i < 2; i++ )
@@ -128,6 +131,8 @@ void InfoWindow::init( FitIniFile& file )
 			mcTextureManager->removeTexture( gosID );
 		}
 	}
+
+	memset( buttonData, 0, sizeof( buttonData )); // sebi
 
 
 	long fontID;
