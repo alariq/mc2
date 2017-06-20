@@ -2502,8 +2502,10 @@ void BattleMech::resetComponents (long totalComponents, long *componentList)
 				}
 			}
 			
+            if(spaceData == 0xff)
+                continue;
+
 			spaceData = ItemLocationToInvLocation[spaceData];
-			gosASSERT(spaceData != 0xff);
 			
 			body[curLocation].criticalSpaces[curSpace].inventoryID = spaceData;
 			body[curLocation].criticalSpaces[curSpace].hit = false;				//Everything always repaired now.
