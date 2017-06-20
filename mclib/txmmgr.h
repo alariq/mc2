@@ -250,6 +250,7 @@ class MC_TextureManager
 		MC_VertexArrayNode				*vertexData2;				//This holds the vertex draw data for UNTEXTURED triangles!
 		MC_VertexArrayNode 				*vertexData3;				//This holds the vertex draw data for UNTEXTURED triangles!
 		MC_VertexArrayNode				*vertexData4;				//This holds the vertex draw data for UNTEXTURED triangles!
+		MC_VertexArrayNode				*vertexData5;				//This holds the vertex draw data for UNTEXTURED triangles!
 		
 	//Member Functions
 	//-----------------
@@ -269,7 +270,7 @@ class MC_TextureManager
 			masterVertexNodes = NULL;
 			nextAvailableVertexNode = 0;
 			
-			vertexData = vertexData2 = vertexData3 = vertexData4 = NULL;
+			vertexData = vertexData2 = vertexData3 = vertexData4 = vertexData5 = NULL;
 		}
 
 		MC_TextureManager (void)
@@ -442,6 +443,20 @@ class MC_TextureManager
 					vertexData4->flags = flags;
 					vertexData4->textureIndex = 0;
 				}
+				else if (vertexData && (vertexData->flags != flags) &&
+					vertexData2 && (vertexData2->flags != flags) &&
+					vertexData3 && (vertexData3->flags != flags) &&
+					vertexData4 && (vertexData4->flags != flags) &&
+					!vertexData5)
+				{
+					vertexData5 = &(masterVertexNodes[nextAvailableVertexNode]);
+					gosASSERT(vertexData5->numVertices == 0);
+					gosASSERT(vertexData5->vertices == NULL);
+
+					nextAvailableVertexNode++;
+					vertexData5->flags = flags;
+					vertexData5->textureIndex = 0;
+				}
 				
  				if (vertexData->flags == flags)
 					vertexData->numVertices += 3;
@@ -451,6 +466,8 @@ class MC_TextureManager
 					vertexData3->numVertices += 3;
 				else if (vertexData4 && vertexData4->flags == flags)
 					vertexData4->numVertices += 3;
+				else if (vertexData5 && vertexData5->flags == flags)
+					vertexData5->numVertices += 3;
 #ifdef _DEBUG
 				else
 					PAUSE(("Could not AddTriangles.  Too many untextured triangle types"));
@@ -690,6 +707,25 @@ class MC_TextureManager
 					
 					vertexData4->currentVertex = vertices;
 				}
+				else if (vertexData5 && vertexData5->flags == flags)
+				{
+					gos_VERTEX * vertices = vertexData5->currentVertex;
+					if (!vertices && !vertexData5->vertices)
+					{
+						vertexData5->currentVertex =
+							vertices =
+							vertexData5->vertices =
+							gvManager->getVertexBlock(vertexData5->numVertices);
+					}
+
+					if (vertices <= (vertexData5->vertices + vertexData5->numVertices))
+					{
+						memcpy(vertices, data, sizeof(gos_VERTEX) * 3);
+						vertices += 3;
+					}
+
+					vertexData5->currentVertex = vertices;
+				}
 				else	//If we got here, something is really wrong
 				{
 #ifdef _DEBUG
@@ -708,7 +744,7 @@ class MC_TextureManager
 				masterTextureNodes[i].vertexData3 = NULL;
 			}
 
-			vertexData = vertexData2 = vertexData3 = vertexData4 = NULL;
+			vertexData = vertexData2 = vertexData3 = vertexData4 = vertexData5 = NULL;
 			
 			memset(masterVertexNodes,0,sizeof(MC_VertexArrayNode)*MC_MAXTEXTURES);
 			

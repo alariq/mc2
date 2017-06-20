@@ -46,7 +46,7 @@ private:
 	aRect	pilotOutline;
 
 	aAnimGroup	animations[3];
-	long	pChildAnimations[PILOT_LIST_BOX_CHILD_COUNT];
+	int32_t	pChildAnimations[PILOT_LIST_BOX_CHILD_COUNT];
 
 	LogisticsPilot* pPilot;
 	static LogisticsPilotListBoxItem* s_templateItem;

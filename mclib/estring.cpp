@@ -319,6 +319,7 @@ EString::EString( const EChar Char )
 ///////////////////////////////////////////////////////////////
 EString::~EString()
 {
+	gosASSERT(m_pBuffer);
 	m_pBuffer->Release();
 }
 

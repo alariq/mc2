@@ -1657,7 +1657,7 @@ long BldgAppearance::render (long depthFixup)
 			*/
 
 			drawInfo.m_parentToWorld = &shapeOrigin;
-			if (!MLRVertexLimitReached)
+			if (!MLRVertexLimitReached && activity)
 				activity->Draw(&drawInfo);
 			
 			if (activity1)
@@ -2193,7 +2193,18 @@ long BldgAppearance::update (bool animate)
 			Stuff::OBB boundingBox;
 			gosFX::Effect::ExecuteInfo info((Stuff::Time)scenarioTime,&shapeOrigin,&boundingBox);
 			
-			activity->Execute(&info);
+			// sebi: make as all other do with Execute(), otherwise ther is constanrt assert in Execute() function (at line Verify(IsExecuted()) )
+			if (activity && activity->IsExecuted())
+			{
+				bool result = activity->Execute(&info);
+				if (!result)
+				{
+					activity->Kill();		//Effect is over.  Otherwise, wait until hit!
+					delete activity;
+					activity = NULL;
+				}
+
+			}
 			
 			if (activity1)
 			{
@@ -2230,7 +2241,19 @@ long BldgAppearance::update (bool animate)
 				Stuff::OBB boundingBox;
 				gosFX::Effect::ExecuteInfo info((Stuff::Time)scenarioTime,&shapeOrigin,&boundingBox);
 				
-				activity1->Execute(&info);
+				//sebi:
+				if (activity1 && activity1->IsExecuted())
+				{
+					bool result = activity1->Execute(&info);
+					if (!result)
+					{
+						activity1->Kill();		//Effect is over.  Otherwise, wait until hit!
+						delete activity1;
+						activity1 = NULL;
+					}
+				}
+				//
+
 			}
 		}
 	}
@@ -2267,7 +2290,7 @@ void BldgAppearance::startActivity (long effectId, bool loop)
 				if (testPos != position)
 				{
 					activity1 = gosFX::EffectLibrary::Instance->MakeEffect(gosEffectSpec->m_effectID, flags);
-					gosASSERT(activity != NULL);
+					gosASSERT(activity1 != NULL);
 				}
 
   				MidLevelRenderer::MLRTexturePool::Instance->LoadImages();
@@ -2361,7 +2384,8 @@ void BldgAppearance::stopActivity (void)
 {
 	if (isActivitying)		//Stop the effect if we are running it!!
 	{
-		activity->Kill();
+		if(activity) //sebi
+			activity->Kill();
 		if (activity1)
 			activity1->Kill();
 	}
@@ -2410,6 +2434,20 @@ void BldgAppearance::destroy (void)
 
 		free(pointLight);
 		pointLight = NULL;
+	}
+
+	if (activity)
+	{
+		activity->Kill();
+		delete activity;
+		activity = NULL;
+	}
+
+	if (activity1)
+	{
+		activity1->Kill();
+		delete activity1;
+		activity1 = NULL;
 	}
 
 	appearanceTypeList->removeAppearance(appearType);

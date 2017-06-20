@@ -53,6 +53,12 @@ static __inline__ unsigned long long rdtsc(void)
 #include <memory.h> // memcmp
 #include<inttypes.h>
 #include <windows.h>
+#ifdef _WIN64
+static inline unsigned long long rdtsc(void)
+{
+	return __rdtsc();
+}
+#else
 static inline unsigned long long rdtsc(void)
 {
     unsigned long x;
@@ -60,6 +66,7 @@ static inline unsigned long long rdtsc(void)
 	_asm mov x, eax
     return x;
 }
+#endif //!_WIN64
 #endif // PLATFORM_WINDOWS
 //
 //
@@ -76,10 +83,14 @@ static inline unsigned long long rdtsc(void)
 // Enter the visual C debugger
 //
 #ifndef PLATFORM_WINDOWS
-#define ENTER_DEBUGGER raise(SIGTRAP); // __builtin_trap(); // GCC
-//asm volatile ("int 3;");
+	#define ENTER_DEBUGGER raise(SIGTRAP); // __builtin_trap(); // GCC
+	//asm volatile ("int 3;");
 #else
-#define ENTER_DEBUGGER _asm int 3
+	#ifdef _WIN64
+		#define ENTER_DEBUGGER DebugBreak();
+	#else
+		#define ENTER_DEBUGGER _asm int 3
+	#endif //!_WIN64
 #endif
 //
 // Check !=0 only in debug builds (can be continued)
