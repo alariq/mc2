@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <time.h>
 #include <stdlib.h> // rand
+#include "utils/timing.h"
 
 #ifndef PLATFORM_WINDOWS
 #include <sys/statvfs.h> // statvfs
@@ -93,8 +94,8 @@ double __stdcall gos_GetElapsedTime( int RealTime )
     (void)RealTime;
 
 #ifdef PLATFORM_WINDOWS
-	STOP(("implement me"));
-	return 0.0;
+	uint64_t ticks = timing::gettickcount();
+	return (double)timing::ticks2ms(ticks) / 1000.0;
 #else
     struct timespec ts;
     clock_gettime(CLOCK_MONOTONIC_RAW, &ts);
