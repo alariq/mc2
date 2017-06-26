@@ -2501,9 +2501,17 @@ void BattleMech::resetComponents (long totalComponents, long *componentList)
 					break;
 				}
 			}
+
+			gosASSERT(spaceData < MAX_MOVER_INVENTORY_ITEMS || spaceData == 0xff);
+			//sebi:
+			if (spaceData >= MAX_MOVER_INVENTORY_ITEMS)
+			{
+				body[curLocation].criticalSpaces[curSpace].inventoryID = 0xff;
+				body[curLocation].criticalSpaces[curSpace].hit = false;				//Everything always repaired now.
+				continue;
+			}
 			
 			spaceData = ItemLocationToInvLocation[spaceData];
-			gosASSERT(spaceData != 0xff);
 			
 			body[curLocation].criticalSpaces[curSpace].inventoryID = spaceData;
 			body[curLocation].criticalSpaces[curSpace].hit = false;				//Everything always repaired now.
