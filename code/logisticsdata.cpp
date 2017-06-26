@@ -2673,8 +2673,8 @@ void	LogisticsData::setSingleMission( const char* pName )
 {
 	missionInfo->setSingleMission( pName );
 	clearVariants();
-	initPilots(); // reset pilotsb
 	clearInventory();
+	initPilots(); // reset pilotsb
 	updateAvailability();
 }
 
