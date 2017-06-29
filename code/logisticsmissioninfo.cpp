@@ -890,6 +890,8 @@ long LogisticsMissionInfo::getCurrentDropWeight() const
 
 const char* LogisticsMissionInfo::getCurrentOperationFile() const
 {
+	gosASSERT(currentStage < groupCount);
+
 	MissionGroup* pGroup = &groups[currentStage];
 
 	if ( pGroup )
@@ -919,6 +921,10 @@ const char* LogisticsMissionInfo::getCurrentVideo() const
 
 long LogisticsMissionInfo::getCurrentLogisticsTuneId()
 {
+	//sebi: ORIG BUG FIX: when campaign is finished currentStage is increased and finally reaches groupCount
+	if (currentStage >= groupCount)
+		return -1;
+
 	MissionGroup* pGroup = &groups[currentStage];
 
 	if ( pGroup )
@@ -929,6 +935,9 @@ long LogisticsMissionInfo::getCurrentLogisticsTuneId()
 
 const char*	LogisticsMissionInfo::getCurrentMissionDescription() const
 {
+	//sebi
+	gosASSERT(currentStage < groupCount);
+
 	MissionGroup* pGroup = &groups[currentStage];
 
 	if ( pGroup )
