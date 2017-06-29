@@ -68,6 +68,9 @@ enum Axes {
 //---------------------------------------------------------------------------
 class Camera
 {
+    //sebi
+    void updateLights();
+
 	//Data Members
 	//-------------
 
@@ -544,6 +547,10 @@ class Camera
 			if ((lightNum < MAX_LIGHTS_IN_WORLD) && (worldLights[lightNum] == light))
 			{
 				worldLights[lightNum] = NULL;			//Up to class that created light to free it!!!!!!
+
+                // sebi: ORG BUG FIX because worldLights are copied to activeLights and terrainLights in eye->update() and then later this function can be called, this means that activeLights and terrainLights may point to freed memory, so call this to fox it
+                updateLights();
+
 				return;
 			}
 
@@ -554,7 +561,11 @@ class Camera
 				if (worldLights[i] == light)
 					worldLights[i] = NULL;
 			}
+
+            // sebi: ORG BUG FIX because worldLights are copied to activeLights and terrainLights in eye->update() and then later this function can be called, this means that activeLights and terrainLights may point to freed memory, so call this to fox it
+            updateLights();
 		}
+
 
 		Stuff::Vector3D getScreenRes (void)
 		{

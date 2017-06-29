@@ -1646,52 +1646,7 @@ long Camera::update (void)
 	setLightColor(1,lightRGB);
 	setLightIntensity(1,1.0);
 
-	//---------------------------------------------------------------------------------
-	// Check which lights are on screen and deactivate those which are NOT on screen!
-	numActiveLights = numTerrainLights = 0;
-	for (long i=0;i<MAX_LIGHTS_IN_WORLD;i++)
-	{
-		if (worldLights[i])
-		{
-			TG_LightPtr light = worldLights[i];
-			
-			// IF we are a terrain Light, we are ONLY active when day changes to Night or vice/versa.
-			// On screen matters not.
-			if (light->lightType == TG_LIGHT_TERRAIN)
-			{
-				Stuff::Vector4D dummy;
-				light->active = projectZ(light->position,dummy);
-				if (light->active)
-				{
-					if (terrainLightCalc)
-						activeLights[numActiveLights++] = light;
-					terrainLights[numTerrainLights++] = light;
-				}
-				continue;			
-			}
-				
-			//If we are infinite or Ambient, we MUST be active
-			if ((light->lightType == TG_LIGHT_AMBIENT)  ||
-				(light->lightType == TG_LIGHT_INFINITE))
-			{
-				light->active = true;
-				activeLights[numActiveLights++] = light;
-				terrainLights[numTerrainLights++] = light;
-				continue;			   
-			}
-			
-			// IF we are a Spot or Point light, we must know if we are onscreen.
-			// This is complicated because these lights have a radius!
-			// For now, simple position check.  Make complicated later!
-			if (light->lightType >= TG_LIGHT_POINT && light->lightType < TG_LIGHT_TERRAIN)
-			{
-				Stuff::Vector4D dummy;
-				light->active = projectZ(light->position,dummy);
-				activeLights[numActiveLights++] = light;
-				terrainLights[numTerrainLights++] = light;
-			}
-		}
-	}
+    updateLights();
  
 	TG_Shape::SetCameraMatrices(&cameraOrigin,&cameraToClip);
 	TG_Shape::SetFog(fogColor,fogStart,fogFull);
@@ -1763,6 +1718,57 @@ void Camera::render (void)
 	}
 
 	//-----------------------------------------------------
+}
+
+//---------------------------------------------------------------------------
+void Camera::updateLights()
+{
+	//---------------------------------------------------------------------------------
+	// Check which lights are on screen and deactivate those which are NOT on screen!
+	numActiveLights = numTerrainLights = 0;
+	for (long i=0;i<MAX_LIGHTS_IN_WORLD;i++)
+	{
+		if (worldLights[i])
+		{
+			TG_LightPtr light = worldLights[i];
+			
+			// IF we are a terrain Light, we are ONLY active when day changes to Night or vice/versa.
+			// On screen matters not.
+			if (light->lightType == TG_LIGHT_TERRAIN)
+			{
+				Stuff::Vector4D dummy;
+				light->active = projectZ(light->position,dummy);
+				if (light->active)
+				{
+					if (terrainLightCalc)
+						activeLights[numActiveLights++] = light;
+					terrainLights[numTerrainLights++] = light;
+				}
+				continue;			
+			}
+				
+			//If we are infinite or Ambient, we MUST be active
+			if ((light->lightType == TG_LIGHT_AMBIENT)  ||
+				(light->lightType == TG_LIGHT_INFINITE))
+			{
+				light->active = true;
+				activeLights[numActiveLights++] = light;
+				terrainLights[numTerrainLights++] = light;
+				continue;			   
+			}
+			
+			// IF we are a Spot or Point light, we must know if we are onscreen.
+			// This is complicated because these lights have a radius!
+			// For now, simple position check.  Make complicated later!
+			if (light->lightType >= TG_LIGHT_POINT && light->lightType < TG_LIGHT_TERRAIN)
+			{
+				Stuff::Vector4D dummy;
+				light->active = projectZ(light->position,dummy);
+				activeLights[numActiveLights++] = light;
+				terrainLights[numTerrainLights++] = light;
+			}
+		}
+	}
 }
 
 //---------------------------------------------------------------------------
