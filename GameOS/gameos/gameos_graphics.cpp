@@ -40,6 +40,7 @@ struct gosTextureInfo {
 class gosShaderMaterial {
 
 		static const std::string s_mvp;
+		static const std::string s_fog_color;
     public:
         static gosShaderMaterial* load(const char* shader) {
             gosASSERT(shader);
@@ -60,6 +61,7 @@ class gosShaderMaterial {
 
             pmat->pos_loc = pmat->program_->getAttribLocation("pos");
             pmat->color_loc = pmat->program_->getAttribLocation("color");
+            pmat->spec_color_and_fog_loc = pmat->program_->getAttribLocation("fog");
             pmat->texcoord_loc = pmat->program_->getAttribLocation("texcoord");
 
             return pmat;
@@ -98,6 +100,12 @@ class gosShaderMaterial {
                         BUFFER_OFFSET(4*sizeof(float)));
             }
 
+            if(spec_color_and_fog_loc != -1) {
+                glEnableVertexAttribArray(spec_color_and_fog_loc);
+                glVertexAttribPointer(spec_color_and_fog_loc, 4, GL_UNSIGNED_BYTE, GL_TRUE, stride,
+                        BUFFER_OFFSET(4*sizeof(float) + sizeof(uint32_t)));
+            }
+
             if(texcoord_loc != -1) {
                 glEnableVertexAttribArray(texcoord_loc);
                 glVertexAttribPointer(texcoord_loc, 2, GL_FLOAT, GL_FALSE, stride, 
@@ -120,6 +128,11 @@ class gosShaderMaterial {
             return true;
         }
 
+		bool setFogColor(const vec4& fog_color) {
+            program_->setFloat4(s_fog_color, fog_color);
+            return true;
+		}
+
         void apply() {
             gosASSERT(program_);
             program_->apply();
@@ -136,6 +149,10 @@ class gosShaderMaterial {
                 glDisableVertexAttribArray(color_loc);
             }
 
+            if(spec_color_and_fog_loc != -1) {
+                glDisableVertexAttribArray(spec_color_and_fog_loc);
+            }
+
             if(texcoord_loc != -1) {
                 glDisableVertexAttribArray(texcoord_loc);
             }
@@ -149,6 +166,7 @@ class gosShaderMaterial {
             , name_(NULL)
             , pos_loc(-1)
             , color_loc(-1)
+            , spec_color_and_fog_loc(-1)
             , texcoord_loc(-1)
         {
         }
@@ -157,10 +175,12 @@ class gosShaderMaterial {
         char* name_;
         GLint pos_loc;
         GLint color_loc;
+        GLint spec_color_and_fog_loc;
         GLint texcoord_loc;
 };
 
 const std::string gosShaderMaterial::s_mvp = std::string("mvp");
+const std::string gosShaderMaterial::s_fog_color = std::string("fog_color");
 
 class gosMesh {
     public:
@@ -661,7 +681,7 @@ class gosFont {
 ////////////////////////////////////////////////////////////////////////////////
 class gosRenderer {
 
-    typedef unsigned int RenderState[gos_MaxState];
+    typedef uint32_t RenderState[gos_MaxState];
 	static const std::string s_Foreground;
 
     public:
@@ -672,16 +692,16 @@ class gosRenderer {
             win_h_ = win_h;
         }
 
-        DWORD addTexture(gosTexture* texture) {
+        uint32_t addTexture(gosTexture* texture) {
             gosASSERT(texture);
             textureList_.push_back(texture);
-            return textureList_.size()-1;
+            return (uint32_t)(textureList_.size()-1);
         }
 
-        DWORD addFont(gosFont* font) {
+        uint32_t addFont(gosFont* font) {
             gosASSERT(font);
             fontList_.push_back(font);
-            return fontList_.size()-1;
+            return (uint32_t)(fontList_.size()-1);
         }
 
         // TODO: do sae as with texture?
@@ -843,6 +863,8 @@ class gosRenderer {
         // fits vertices into viewport
         mat4 projection_;
 
+		vec4 fog_color_;
+
         void initRenderStates();
 
         std::vector<gosTexture*> textureList_;
@@ -954,6 +976,8 @@ void gosRenderer::init() {
     DWORD tex_id = gos_NewEmptyTexture( gos_Texture_Solid, "DEBUG_this_is_not_a_real_texture_debug_it!", 1);
     (void)tex_id;
     gosASSERT(tex_id == INVALID_TEXTURE_ID);
+
+	fog_color_ = vec4(1.0f, 1.0f, 1.0f, 1.0f);
 }
 
 void gosRenderer::destroy() {
@@ -1045,6 +1069,10 @@ void gosRenderer::popRenderStates()
 }
 
 void gosRenderer::applyRenderStates() {
+
+	////////////////////////////////////////////////////////////////////////////////
+	fog_color_ = uint32_to_vec4(renderStates_[gos_State_Fog]);
+	curStates_[gos_State_Fog] = renderStates_[gos_State_Fog];
 
    ////////////////////////////////////////////////////////////////////////////////
    switch(renderStates_[gos_State_ZWrite]) {
@@ -1210,6 +1238,7 @@ void gosRenderer::drawQuads(gos_VERTEX* vertices, int count) {
             curStates_[gos_State_Texture]!=0 ? basic_tex_material_ : basic_material_;
 
         mat->setTransform(projection_);
+        mat->setFogColor(fog_color_);
         quads_->draw(mat);
         quads_->rewind();
     } 
@@ -1232,6 +1261,7 @@ void gosRenderer::drawQuads(gos_VERTEX* vertices, int count) {
     gosShaderMaterial* mat = 
         curStates_[gos_State_Texture]!=0 ? basic_tex_material_ : basic_material_;
     mat->setTransform(projection_);
+    mat->setFogColor(fog_color_);
     quads_->draw(mat);
     quads_->rewind();
 
@@ -1246,6 +1276,7 @@ void gosRenderer::drawLines(gos_VERTEX* vertices, int count) {
     if(lines_->getNumVertices() + count > lines_->getVertexCapacity()) {
         applyRenderStates();
         basic_material_->setTransform(projection_);
+        basic_material_->setFogColor(fog_color_);
         lines_->draw(basic_material_);
         lines_->rewind();
     }
@@ -1256,6 +1287,7 @@ void gosRenderer::drawLines(gos_VERTEX* vertices, int count) {
     // for now draw anyway because no render state saved for draw calls
     applyRenderStates();
     basic_material_->setTransform(projection_);
+    basic_material_->setFogColor(fog_color_);
     lines_->draw(basic_material_);
     lines_->rewind();
 
@@ -1270,6 +1302,7 @@ void gosRenderer::drawPoints(gos_VERTEX* vertices, int count) {
     if(points_->getNumVertices() + count > points_->getVertexCapacity()) {
         applyRenderStates();
         basic_material_->setTransform(projection_);
+		basic_material_->setFogColor(fog_color_);
         points_->draw(basic_material_);
         points_->rewind();
     } 
@@ -1297,6 +1330,7 @@ void gosRenderer::drawTris(gos_VERTEX* vertices, int count) {
         gosShaderMaterial* mat = 
             curStates_[gos_State_Texture]!=0 ? basic_tex_material_ : basic_material_;
         mat->setTransform(projection_);
+		mat->setFogColor(fog_color_);
         tris_->draw(mat);
         tris_->rewind();
     } 
@@ -1309,6 +1343,7 @@ void gosRenderer::drawTris(gos_VERTEX* vertices, int count) {
     gosShaderMaterial* mat = 
         curStates_[gos_State_Texture]!=0 ? basic_tex_material_ : basic_material_;
     mat->setTransform(projection_);
+    mat->setFogColor(fog_color_);
     tris_->draw(mat);
     tris_->rewind();
 
@@ -1329,6 +1364,7 @@ void gosRenderer::drawIndexedTris(gos_VERTEX* vertices, int num_vertices, WORD* 
         gosShaderMaterial* mat = 
             curStates_[gos_State_Texture]!=0 ? basic_tex_material_ : basic_material_;
         mat->setTransform(projection_);
+		mat->setFogColor(fog_color_);
         indexed_tris_->drawIndexed(mat);
         indexed_tris_->rewind();
     } 
@@ -1343,6 +1379,7 @@ void gosRenderer::drawIndexedTris(gos_VERTEX* vertices, int num_vertices, WORD* 
     gosShaderMaterial* mat = 
         curStates_[gos_State_Texture]!=0 ? basic_tex_material_ : basic_material_;
     mat->setTransform(projection_);
+    mat->setFogColor(fog_color_);
     indexed_tris_->drawIndexed(mat);
     indexed_tris_->rewind();
 
@@ -1354,10 +1391,10 @@ static int get_next_break(const char* text) {
     do {
         char c = *text;
         if(c==' ' || c=='\n')
-            return text - start;
+            return (int32_t)(text - start);
     } while(*text++);
 
-    return text - start - 1;
+    return (int32_t)(text - start - 1);
 }
 
 int findTextBreak(const char* text, const int count, const gosFont* font, const int region_width, int* out_str_width) {
@@ -1428,6 +1465,7 @@ void addCharacter(gosMesh* text_, const float u, const float v, const float u2, 
     tl.u = u;
     tl.v = v;
     tl.argb = 0xffffffff;
+    tl.frgb = 0xff000000;
 
     tr.x = x2;
     tr.y = y;
@@ -1435,6 +1473,7 @@ void addCharacter(gosMesh* text_, const float u, const float v, const float u2, 
     tr.u = u2;
     tr.v = v;
     tr.argb = 0xffffffff;
+    tr.frgb = 0xff000000;
 
     bl.x = x;
     bl.y = y2;
@@ -1442,6 +1481,7 @@ void addCharacter(gosMesh* text_, const float u, const float v, const float u2, 
     bl.u = u;
     bl.v = v2;
     bl.argb = 0xffffffff;
+    bl.frgb = 0xff000000;
 
     br.x = x2;
     br.y = y2;
@@ -1449,6 +1489,7 @@ void addCharacter(gosMesh* text_, const float u, const float v, const float u2, 
     br.u = u2;
     br.v = v2;
     br.argb = 0xffffffff;
+    br.frgb = 0xff000000;
 
     text_->addVertices(&tl, 1);
     text_->addVertices(&tr, 1);
@@ -1580,6 +1621,7 @@ void gosRenderer::drawText(const char* text) {
     //ta.DisableEmbeddedCodes
 
     mat->setTransform(projection_);
+    mat->setFogColor(fog_color_);
     text_->draw(mat);
     text_->rewind();
 
