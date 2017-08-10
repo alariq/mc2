@@ -74,9 +74,9 @@ static void process_events( void ) {
             break;
 		case SDL_WINDOWEVENT_RESIZED:
 			{
-				glViewport(0, 0, (GLsizei) event.window.data1, (GLsizei) event.window.data2);
 				float w = (float)event.window.data1;
 				float h = (float)event.window.data2;
+				glViewport(0, 0, (GLsizei)w, (GLsizei)h);
                 SPEW(("INPUT", "resize event: w: %f h:%f\n", w, h));
 			}
 			break;
@@ -197,6 +197,26 @@ int main(int argc, char** argv)
         SPEW(("GRAPHICS", "No shader program support\n"));
         return 1;
     }
+
+    if(!glewIsSupported("GL_VERSION_3_0")) {
+        SPEW(("GRAPHICS", "Minimum required OpenGL version is 3.0\n"));
+        return 1;
+    }
+
+    const char* glsl_version = (const char*)glGetString(GL_SHADING_LANGUAGE_VERSION);
+    SPEW(("GRAPHICS", "GLSL version supported: %s\n", glsl_version));
+
+    int glsl_maj = 0, glsl_min = 0;
+    sscanf(glsl_version, "%d.%d", &glsl_maj, &glsl_min);
+
+    if(glsl_maj < 3 || (glsl_maj==3 && glsl_min < 30) ) {
+        SPEW(("GRAPHICS", "Minimum required OpenGL version is 330 ES, current: %d.%d\n", glsl_maj, glsl_min));
+        return 1;
+    }
+
+    char version[16] = {0};
+    snprintf(version, sizeof(version), "%d%d", glsl_maj, glsl_min);
+    SPEW(("GRAPHICS", "Using %s shader version\n", version));
 
     gos_CreateRenderer(ctx, win, w, h);
     if(!gos_CreateAudio())

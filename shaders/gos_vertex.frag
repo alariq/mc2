@@ -1,9 +1,11 @@
-#version 420
+#version 300 es
 
-in vec4 Color;
-in vec2 Texcoord;
+#define PREC highp
 
-layout (location=0) out vec4 FragColor;
+in PREC vec4 Color;
+in PREC vec2 Texcoord;
+
+layout (location=0) out PREC vec4 FragColor;
 
 #ifdef ENABLE_TEXTURE1
 uniform sampler2D tex1;
@@ -13,7 +15,7 @@ uniform sampler2D tex3;
 
 void main(void)
 {
-    vec4 c = Color;
+    PREC vec4 c = Color;
 #ifdef ENABLE_TEXTURE1
     c *= texture(tex1, Texcoord);
 #endif
