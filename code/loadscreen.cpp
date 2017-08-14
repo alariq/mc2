@@ -121,27 +121,33 @@ void LoadScreenWrapper::changeRes()
 	}
     */
 
-	switch( prefs.resolutionX )
-	{
-	case 640:
-		Appendix = "_640";
-		break;
-	case 1024:
-		Appendix = "_1024";
-		break;
-	case 1280:
-		Appendix = "_1280";
-		break;
-	case 1600:
-		Appendix = "_1600";
-		break;
-	case 1920:
-		Appendix = "_1920";
-		break;
-	default:
-		Assert( 0, 0, "Unexpected resolution found in prefs" );
-		break;
-	}
+    //sebi:
+    const int resolutions[] = {     640,    1024,       1280,       1600,       1920};
+    const char* const str_resolutions[] = { "_640", "_1024",    "_1280",    "_1600",    "_1920"};
+    bool b_search_for_best_resolution = true;
+    int suitable_res = 0;
+
+    for(int i=0;i<sizeof(resolutions)/sizeof(resolutions[0]);++i) {
+        if(prefs.resolutionX == resolutions[i]) {
+            suitable_res = i;
+            b_search_for_best_resolution = false;
+            break;
+        }
+    }
+
+    if(b_search_for_best_resolution) {
+        int min_pos_dist = 10000;
+        SPEW(("GRAPHICS", "Not native resolution, selecting closest matching resolution for loading screens"));
+        for(int i=0;i<sizeof(resolutions)/sizeof(resolutions[0]);++i) {
+            int dst = resolutions[i] - prefs.resolutionX;
+            if(dst >=0 && dst < min_pos_dist) {
+                min_pos_dist = dst;
+                suitable_res = resolutions[i];
+            }
+        }
+    }
+    Appendix = str_resolutions[suitable_res];
+    //
 
 	char fileName[256];
 	sprintf( fileName, "mcl_loadingscreen" );
@@ -416,7 +422,7 @@ void LoadScreen::init(FitIniFile& file, DWORD neverFlush)
 		animIndices = new int[animObjectsCount];
 		for ( int i= 0; i < animObjectsCount; i++ )
 		{
-			sprintf( blockName, "AnimObject%ld", i );
+			sprintf( blockName, "AnimObject%d", i );
 			file.seekBlock( blockName );
 			file.readIdString( "AnimationOut", blockName, 255 );
 			if ( strstr( blockName, "2" ) )

@@ -36,46 +36,49 @@ int KeyboardRef::init()
 	// clear out old stuff first
 	clear();
 
+
+    //sebi:
+    const int resolutions[] = {     640,    1024,       1280,       1600,       1920};
+    const char* const str_resolutions[] = { "_640", "_1024",    "_1280",    "_1600",    "_1920"};
+    bool b_search_for_best_resolution = true;
+    int suitable_res = 0;
+
+    for(int i=0;i<sizeof(resolutions)/sizeof(resolutions[0]);++i) {
+        if(Environment.screenWidth == resolutions[i]) {
+            suitable_res = i;
+            b_search_for_best_resolution = false;
+            break;
+        }
+    }
+
+    if(b_search_for_best_resolution) {
+        int min_pos_dist = 10000;
+        SPEW(("GRAPHICS", "Not native resolution, selecting closest matching resolution for loading screens"));
+        for(int i=0;i<sizeof(resolutions)/sizeof(resolutions[0]);++i) {
+            int dst = resolutions[i] - Environment.screenWidth;
+            if(dst >=0 && dst < min_pos_dist) {
+                min_pos_dist = dst;
+                suitable_res = resolutions[i];
+            }
+        }
+    }
+    const char* Appendix = str_resolutions[suitable_res];
+    //
+
 	FullPathFileName path;
 
-	switch( Environment.screenWidth )
-	{
-	case 640:
-		path.init( artPath, "mcui_keyref_640", ".fit" );
-			break;
-
-	case 800:
-		path.init( artPath, "mcui_keyref_800", ".fit" );
-		break;
-
-	case 1024:
-		path.init( artPath, "mcui_keyref_1024", ".fit" );
-		break;
-	case 1280:
-		path.init( artPath, "mcui_keyref_1280", ".fit" );
-		break;
-	case 1600:
-		path.init( artPath, "mcui_keyref_1600", ".fit" );
-		break;
-	case 1920:
-		path.init( artPath, "mcui_keyref_1920", ".fit" );
-		break;
-	default:
-		gosASSERT( !"Invalid resolution" );
-		return -1;
-
-	}
+	char fileName[256];
+	S_snprintf(fileName, 256, "mcui_keyref%s", Appendix);
+    path.init( artPath, fileName, ".fit" );
 
 	FitIniFile file;
 	file.open( path );
-
 
 	LogisticsScreen::init( file, "Static", "Text", "Rect", "Button" );
 
 	listBox.init( rects[2].left(), rects[2].top(), rects[2].width(), rects[2].height() );
 
 	file.close();
-
 
 	path.init( artPath, "mcui_keyref_entry", ".fit" );
 	file.open( path );
@@ -127,8 +130,6 @@ void KeyboardRef::reseed( MissionInterfaceManager::Command* commands )
 			count++;
 		}
 	}
-
-	long curCount = 0;
 
 	for (int i = 0; i < MAX_COMMAND; i++ )
 	{

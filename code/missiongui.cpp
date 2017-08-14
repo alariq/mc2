@@ -702,6 +702,8 @@ void MissionInterfaceManager::update (void)
 	if ( bDrawHotKeys )
 	{
 		keyboardRef->update();
+		//sebi: also check keys, otherwise no way to exit from keyboardref screen (when pressing F1)
+		update(false, false, -1, -1, 0,  false);
 		return;
 	}
 

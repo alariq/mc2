@@ -2639,24 +2639,23 @@ void ControlGui::swapResolutions( int resolutionX, int resolutionY )
 	char fileName[32];
 
     int y_correction = 0;
-	
-	if ( resolutionX == 1920)
-    {
-		strcpy( fileName, "buttonlayout1920.fit" ); // 1920x1200
-        y_correction = resolutionY - 1200;
-    }
-	else if ( resolutionX == 1600)
+    int x_correction = 0;
+
+	if ( resolutionX == 1920) {
+		strcpy( fileName, "buttonlayout1920.fit" );
+    } else if ( resolutionX == 1600) {
 		strcpy( fileName, "buttonlayout1600.fit" ); 
-	else if ( resolutionX == 1280)
+    } else if ( resolutionX == 1280) {
 		strcpy( fileName, "buttonlayout1280.fit" ); 
-	else if ( resolutionX == 1024)
+    } else if ( resolutionX == 1024) {
 		strcpy( fileName, "buttonlayout1024.fit" ); 
-	else if ( resolutionX == 800 )
+    } else if ( resolutionX == 800 ) {
 		strcpy( fileName, "buttonlayout800.fit" );
-	else if ( resolutionX == 640 )
+    } else if ( resolutionX == 640 ) {
 		strcpy( fileName, "buttonlayout640.fit" );
-	else 
-		strcpy( fileName, "buttonlayout1024.fit" );
+    } else {
+		strcpy( fileName, "buttonlayout1920.fit" );
+    }
 	
 	strcat( path, fileName );
 	if ( NO_ERR != buttonFile.open( path ) )
@@ -2678,13 +2677,33 @@ void ControlGui::swapResolutions( int resolutionX, int resolutionY )
 		result = buttonFile.readIdLong("yOffset",hiResOffsetY);
 		if (result != NO_ERR)
 			hiResOffsetY = 0;
-        else
-            hiResOffsetY += y_correction;
 	}
 	else
 	{
 		hiResOffsetX = hiResOffsetY = 0;
 	}
+
+	if ( resolutionX == 1920) {
+        y_correction = resolutionY - (768 + hiResOffsetY);
+        x_correction = (resolutionX - (1600 + hiResOffsetX)) / 2; //sebi: need to correct X as well, because buttonlayout1920 is actually same as 1600, do we ned then separate file for 1920?
+    } else if ( resolutionX == 1600) {
+        y_correction = resolutionY - (768 + hiResOffsetY);
+    } else if ( resolutionX == 1280) {
+        y_correction = resolutionY - (768 + hiResOffsetY);
+    } else if ( resolutionX == 1024) {
+        y_correction = resolutionY - (768 + hiResOffsetY);
+    } else if ( resolutionX == 800 ) {
+        y_correction = resolutionY - (600 + hiResOffsetY);
+    } else if ( resolutionX == 640 ) {
+        y_correction = resolutionY - (480 + hiResOffsetY);
+    } else {
+        y_correction = resolutionY - (768 + hiResOffsetY);
+        x_correction = (resolutionX - (1600 + hiResOffsetX)) / 2;
+    }
+	
+    // add corrections
+	hiResOffsetY += y_correction;
+	hiResOffsetX += x_correction;
 		
 	infoWnd->init( buttonFile );
 
