@@ -58,7 +58,7 @@ int KeyboardRef::init()
             int dst = resolutions[i] - Environment.screenWidth;
             if(dst >=0 && dst < min_pos_dist) {
                 min_pos_dist = dst;
-                suitable_res = resolutions[i];
+                suitable_res = i;
             }
         }
     }

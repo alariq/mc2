@@ -142,7 +142,7 @@ void LoadScreenWrapper::changeRes()
             int dst = resolutions[i] - prefs.resolutionX;
             if(dst >=0 && dst < min_pos_dist) {
                 min_pos_dist = dst;
-                suitable_res = resolutions[i];
+                suitable_res = i;
             }
         }
     }
