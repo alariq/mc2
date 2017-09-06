@@ -5,7 +5,7 @@ Currently game can be run on both Linux and Windows.
 Can be compiled in 64-bit.
 
 Fixed a lot of bugs (including ones present in original game).
-Sound system is not fully iplemented (panning, doppler, etc. not supported yet)
+Sound system is not fully implemented (panning, doppler, etc. not supported yet)
 
 ## TODO: 
 * fix remaining memory leaks (finish implementation of memory heaps)
