@@ -80,12 +80,15 @@ int unpack(const char* fst_file, const char* out_path)
         char tmp[1024] = {0};
         char* sep = out_file_path;
         char* prev_sep = out_file_path;
-        sep = strchr(sep, PATH_SEPARATOR_AS_CHAR);
+        sep = strchr(prev_sep, PATH_SEPARATOR_AS_CHAR);
         while(sep) {
 
             // skip multiple path separators
-            if(sep == prev_sep)
+            if(sep == prev_sep) {
+                prev_sep++;
+                sep = strchr(prev_sep, PATH_SEPARATOR_AS_CHAR);
                 continue;
+            }
 
             strncat(tmp, prev_sep, sep - prev_sep + 1);
             // f dire not exists and failed to be created
@@ -237,6 +240,7 @@ int pack(const char* in_path, const char* fst_file, bool b_compress) {
                 filebuf_size = len;
                 filebuf = new uint8_t[filebuf_size];
             }
+            fseek(fh, 0, SEEK_SET);
 
             size_t num_read = 0;
             while(num_read != len) {
@@ -245,7 +249,7 @@ int pack(const char* in_path, const char* fst_file, bool b_compress) {
                 assert(num_cur_read == 1);
                 memcpy(filebuf + num_read, chunk, num_cur_read);
 
-                num_read += num_cur_read;
+                num_read += num_cur_read * bytes2read;
             }
             assert(len == num_read);
             fclose(fh);
