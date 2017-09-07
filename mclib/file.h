@@ -90,6 +90,7 @@ bool file1OlderThan2(const char *file1, const char* file2);
 #define	NO_RAM_FOR_CHILD_LIST	0xBADF0012
 #define MAPPED_WRITE_NOT_SUPPORTED	0xBADF0013
 #define COULD_NOT_MAP_FILE		0xBADF0014
+#define FILE_ALREADY_OPEN       0xBADF0015  //sebi
 
 //---------------------------------------------------------------------------
 //									File

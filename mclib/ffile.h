@@ -31,6 +31,9 @@
 #define FASTFILE_VERSION		0xCADDECAF
 #define FASTFILE_VERSION_LZ		0xFADDECAF
 
+#define FASTFILE_ENTRY_TABLE_START 8 //sebi
+
+
 #pragma pack(1)
 typedef struct 
 {
@@ -65,6 +68,13 @@ class FastFile
 
 		bool		useLZCompress;
 
+		// used when creating fast file
+		int						numWrittenFiles;
+
+		long writeVersion(FILE* handle);
+		long writeNumFiles(FILE* handle, int num_files);
+		long writeFileEntries(FILE* handle, FILE_HANDLE* files, int num_files, int offset);
+
 	public:
 		FastFile (void);
 		~FastFile (void);
@@ -96,6 +106,9 @@ class FastFile
 		{
 			return numFiles;
 		}
+		const FILE_HANDLE* getFilesInfo() const { return files; }
+
+		const char* getFileName() { return fileName; }
 
 		long openFast (DWORD hash, const char *fName);
 
@@ -112,6 +125,11 @@ class FastFile
 		{
 			return useLZCompress;
 		}
+
+
+		long create(const char* fName, bool compressed);
+		long reserve(int num_files);
+		long writeFast (const char* fastFileName, void* buffer, int nbytes);
 };
 
 //---------------------------------------------------------------------------

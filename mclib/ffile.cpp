@@ -12,6 +12,10 @@
 #include"ffile.h"
 #endif
 
+#ifndef FASTFILE_H
+#include "fastfile.h"
+#endif
+
 #ifndef UTILITIES_H
 #include"utilities.h"
 #endif
@@ -20,9 +24,8 @@
 
 #include<zlib.h>
 
-
-
 #include"platform_windows.h"
+#include"platform_io.h"
 
 #include<string.h>
 #include"platform_str.h"
@@ -68,6 +71,8 @@ FastFile::FastFile (void)
 	logicalPosition = 0;
 
 	useLZCompress = false;
+
+	numWrittenFiles = 0;
 }
 			
 //---------------------------------------------------------------------------
@@ -80,6 +85,47 @@ FastFile::~FastFile (void)
 		free(LZPacketBuffer);
 		LZPacketBuffer = NULL;
 	}
+}
+
+long FastFile::writeVersion(FILE* handle)
+{
+	fseek(handle, 0, SEEK_SET);
+	int version = useLZCompress ? FASTFILE_VERSION_LZ : FASTFILE_VERSION;
+	int result = fwrite(&version, 1, 4, handle);  
+	logicalPosition += result;
+
+	if (result != 4)
+	{
+		long lastError = errno;
+		return lastError;
+	}
+
+	return NO_ERR;
+}
+
+long FastFile::writeNumFiles(FILE* handle, int num_files)
+{
+	fseek(handle, 4, SEEK_SET);
+	int result = fwrite(&numFiles, 1, 4, handle);
+	if (result != 4)
+	{
+		long lastError = errno;
+		return lastError;
+	}
+
+	return NO_ERR;
+}
+
+long FastFile::writeFileEntries(FILE* handle, FILE_HANDLE* files, int num_files, int offset)
+{
+	fseek(handle, FASTFILE_ENTRY_TABLE_START + offset * sizeof(FILEENTRY), SEEK_SET);
+	int result  = 0;
+	for (int i=0;i<num_files;i++)
+	{
+		result += fwrite(files[i].pfe, 1, sizeof(FILEENTRY), handle);
+	}
+
+	return result == sizeof(FILEENTRY) * num_files ? NO_ERR : BAD_WRITE_ERR;
 }
 
 //---------------------------------------------------------------------------
@@ -195,7 +241,7 @@ long FastFile::open (const char* fName)
 		files[i].pos = 0;
 	}
 
-	return (result);
+	return (0);
 }
 		
 //---------------------------------------------------------------------------
@@ -227,6 +273,78 @@ void FastFile::close (void)
 
 	files = NULL;
 	numFiles = 0;
+}
+long FastFile::create(const char* fName, bool compressed)
+{
+	if(handle)
+		return FILE_ALREADY_OPEN;
+
+	//-------------------------------------------------------------
+	long fNameLength = strlen(fName);
+	fileName = new char [fNameLength+1];
+
+	if (!fileName) {
+        delete[] fileName;
+		return(NO_RAM_FOR_FILENAME);
+    }
+		
+	strncpy(fileName,fName,fNameLength+1);
+
+	handle = fopen(fileName, "wb");
+	if (handle != NULL)
+	{
+		logicalPosition = 0;
+		fileSize();				//Sets Length
+	}
+
+	useLZCompress = compressed;
+
+	long res = writeVersion(handle);
+	if(NO_ERR != res) {
+        delete[] fileName;
+		return res;
+    }
+
+	res = writeNumFiles(handle, 0);
+
+	logicalPosition = ftell(handle);
+		
+	return NO_ERR;
+}
+
+long FastFile::reserve(int num_files)
+{
+	numWrittenFiles = 0;
+
+	if(files) {
+
+		for (int i=0; i<numFiles; i++) {
+			free(files[i].pfe);
+		}
+		free(files);
+	}
+	numFiles = num_files;
+
+	long res = writeNumFiles(handle, numFiles);
+	if(NO_ERR != res)
+		return res;
+
+	files = (FILE_HANDLE*)malloc(sizeof(FILE_HANDLE) * numFiles);
+
+	for (long i=0;i<numFiles;i++)
+	{
+		files[i].pfe = (FILEENTRY *)calloc(1, sizeof(FILEENTRY));
+		files[i].inuse = FALSE;
+		files[i].pos = 0;
+	}
+
+	res = writeFileEntries(handle, files, numFiles, 0);
+	if(NO_ERR != res)
+		return res;
+
+	logicalPosition = ftell(handle);
+
+	return NO_ERR;
 }
 
 //---------------------------------------------------------------------------
@@ -373,7 +491,8 @@ long FastFile::readFast (DWORD fastFileHandle, void *bfr, DWORD size)
 				result = fread(LZPacketBuffer,1,files[fastFileHandle].pfe->size,handle);
 				logicalPosition += files[fastFileHandle].pfe->size;
 
-				if (result != files[fastFileHandle].pfe->size)
+				//sebi: second cndiotion to handle zero-length files
+				if (result != files[fastFileHandle].pfe->size && files[fastFileHandle].pfe->size>0)
 				{
 					//READ Error.  Maybe the CD is missing?
 					bool openFailed = false;
@@ -428,6 +547,106 @@ long FastFile::readFast (DWORD fastFileHandle, void *bfr, DWORD size)
 	}
 
 	return FILE_NOT_OPEN;
+}
+
+//---------------------------------------------------------------------------
+long FastFile::writeFast (const char* fastFileName, void* buffer, int nbytes)
+{
+	if(handle == NULL)
+		return FILE_NOT_OPEN;
+	
+	if (numWrittenFiles >= numFiles)
+		return TOO_MANY_CHILDREN;
+
+	const int fastFileHandle = numWrittenFiles;
+
+	fseek(handle, 0, SEEK_END);
+	const int file_pos = ftell(handle);
+
+	files[fastFileHandle].inuse = true;
+	files[fastFileHandle].pos = 0;
+	files[fastFileHandle].pfe->offset = file_pos;
+
+	strncpy(files[fastFileHandle].pfe->name, fastFileName, MAX_FILENAME_SIZE-1);
+	files[fastFileHandle].pfe->name[MAX_FILENAME_SIZE-1] = '\0';
+	files[fastFileHandle].pfe->hash = elfHash(files[fastFileHandle].pfe->name);
+	files[fastFileHandle].pfe->realSize = nbytes;
+
+	fseek(handle, file_pos, SEEK_SET);
+
+	if(useLZCompress)
+	{
+		unsigned long workBufferSize = (nbytes << 1);
+		workBufferSize = workBufferSize < 4096 ? 4096 : workBufferSize;
+
+		if (!LZPacketBuffer)
+		{
+			LZPacketBuffer = (MemoryPtr)malloc(LZPacketBufferSize);
+			if (!LZPacketBuffer)
+				return 0;
+		}
+				
+		if (LZPacketBufferSize < workBufferSize)
+		{
+			LZPacketBufferSize = workBufferSize;
+				
+			free(LZPacketBuffer);
+			LZPacketBuffer = (MemoryPtr)malloc(LZPacketBufferSize);
+			if (!LZPacketBuffer)
+				return 0;
+		}
+
+		gosASSERT(LZPacketBuffer);
+
+		size_t compressedSize = LZCompress(LZPacketBuffer, (Bytef*)buffer, nbytes);
+		size_t uncompressedSize = LZDecomp((Bytef*)buffer, LZPacketBuffer, compressedSize);
+		if (nbytes != uncompressedSize)
+			STOP(("fast File size changed after compression.  Was %d is now %d", nbytes, uncompressedSize));
+
+		files[fastFileHandle].pfe->size = compressedSize;
+	
+		// write file itself
+		int result = fwrite(LZPacketBuffer, compressedSize, 1, handle);
+		if(result != 1)
+			return BAD_WRITE_ERR;
+
+		if(0)
+		{
+			int file = creat("d:/ffile.bin", S_IWRITE);
+			//FILE* file = fopen("d:/ffile.bin", "wb");
+			int result = write(file, LZPacketBuffer, compressedSize);
+			_close(file);
+
+			char* fbc = new char[compressedSize];
+			char* fb = new char[nbytes];
+
+			file = _open("d:/ffile.bin", _O_RDONLY | _O_BINARY);
+			result = _read(file, fbc, compressedSize);
+			_close(file);
+
+			gosASSERT(memcmp(LZPacketBuffer, fbc, compressedSize) == 0);
+
+			size_t uncompressedSize = LZDecomp((Bytef*)fb, (Bytef*)fbc, compressedSize);
+			gosASSERT(nbytes == uncompressedSize);
+		}
+	}
+	else
+	{
+		files[fastFileHandle].pfe->size = nbytes;
+	
+		// write file itself
+		int result = fwrite(buffer, nbytes, 1, handle);
+		if(result != 1 && nbytes > 0) // to handle case when input file has zero length
+			return BAD_WRITE_ERR;
+	}
+
+	long res = writeFileEntries(handle, &files[fastFileHandle], 1, fastFileHandle);
+	if(NO_ERR != res)
+		return res;
+
+	numWrittenFiles++;
+
+	return NO_ERR;
 }
 
 //---------------------------------------------------------------------------
