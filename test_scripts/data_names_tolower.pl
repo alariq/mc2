@@ -9,7 +9,8 @@ my @files = readdir(DIR);
 closedir(DIR);
 foreach(@files) {
 
-    if(/\.([a-zA-Z]{3})$/) {
+    # all files with 1 to 3 letters extension: *.h, *.cpp, *.pl
+    if(/\.([a-zA-Z]{1,3})$/ || -d ) {
 
         my $o = $_;
 
