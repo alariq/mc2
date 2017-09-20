@@ -1,7 +1,17 @@
 cmake_minimum_required (VERSION 2.8)
 project(pak)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O0 -std=c++0x -ggdb -Wno-unused-local-typedefs -Wno-unknown-warning-option")
+if("${CMAKE_SIZEOF_VOID_P}" EQUAL "8")
+	message(STATUS "Target is 64 bits")
+	set_property(GLOBAL PROPERTY FIND_LIBRARY_USE_LIB64_PATHS TRUE)
+else("${CMAKE_SIZEOF_VOID_P}" EQUAL "8")
+	message(STATUS "Target is 32 bits")
+endif("${CMAKE_SIZEOF_VOID_P}" EQUAL "8")
+
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O0 -std=c++0x -ggdb ")
+if(NOT MSVC)
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-local-typedefs -Wno-unknown-warning-option")
+endif()
 
 add_definitions(-D_ARMOR)
 add_definitions(-D_DEBUG)
@@ -27,6 +37,8 @@ else()
     set(SDL_INCLUDES ${SDL2_INCLUDE})
 endif()
 
+find_library(ZLIB NAMES "z" "zlib")
+
 message("SDL includes: ${SDL_INCLUDES}")
 
 include_directories(${SDL_INCLUDES})
@@ -46,6 +58,9 @@ set(SOURCES
     "main.cpp"
     )
 
+set(PAKPAK_SOURCES 
+    "pak.cpp"
+    )
 
 if(WIN32)
 	set(ADDITIONAL_LIBS winmm) # timeGetTime used in gameos
@@ -55,5 +70,8 @@ if(WIN32)
 endif()
 
 add_executable(pak ${SOURCES})
-target_link_libraries(pak mclib stuff gameos windows z ${SDL_LIBS} ${ADDITIONAL_LIBS})
+target_link_libraries(pak mclib stuff gameos windows ${ZLIB} ${SDL_LIBS} ${ADDITIONAL_LIBS})
+
+add_executable(pakpak ${PAKPAK_SOURCES})
+target_link_libraries(pakpak mclib stuff gameos windows ${ZLIB} ${SDL_LIBS} ${ADDITIONAL_LIBS})
 
