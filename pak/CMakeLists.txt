@@ -1,5 +1,5 @@
 cmake_minimum_required (VERSION 2.8)
-project(pak)
+project(pack_tools)
 
 if("${CMAKE_SIZEOF_VOID_P}" EQUAL "8")
 	message(STATUS "Target is 64 bits")
@@ -58,7 +58,7 @@ set(SOURCES
     "main.cpp"
     )
 
-set(PAKPAK_SOURCES 
+set(PAK_SOURCES 
     "pak.cpp"
     )
 
@@ -69,9 +69,9 @@ if(WIN32)
 	message("OpenGL library include: ${OPENGL_INCLUDE_DIR}")
 endif()
 
-add_executable(pak ${SOURCES})
-target_link_libraries(pak mclib stuff gameos windows ${ZLIB} ${SDL_LIBS} ${ADDITIONAL_LIBS})
+add_executable(makefst ${SOURCES})
+target_link_libraries(makefst mclib stuff gameos windows ${ZLIB} ${SDL_LIBS} ${ADDITIONAL_LIBS})
 
-add_executable(pakpak ${PAKPAK_SOURCES})
-target_link_libraries(pakpak mclib stuff gameos windows ${ZLIB} ${SDL_LIBS} ${ADDITIONAL_LIBS})
+add_executable(pak ${PAK_SOURCES})
+target_link_libraries(pak mclib stuff gameos windows ${ZLIB} ${SDL_LIBS} ${ADDITIONAL_LIBS})
 

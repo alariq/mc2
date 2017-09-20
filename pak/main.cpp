@@ -12,9 +12,10 @@ long numFastFiles = 0;
 long maxFastFiles = 0;
 
 void usage(char** argv) {
-    printf("%s [-d] [-c] <-f pak_file> [-p path]\n", argv[0]);
+    printf("%s [-d] [-c] <-f pak_file> [-p path] [-m mount_path]\n", argv[0]);
     printf("\\t-d - unpack\n");
     printf("\\t-c - compress (when packing)\n");
+    printf("\\t-m - path under which files will be \"stored\" in fst\n");
 }
 
 // TODO: add possibility to read non compressed fastfiles (currently not present in ffile.cpp, but we have readRAW, maybe use it internally)
@@ -128,7 +129,7 @@ int unpack(const char* fst_file, const char* out_path)
     return 0;
 }
 
-int pack(const char* in_path, const char* fst_file, bool b_compress) {
+int pack(const char* in_path, const char* fst_file, const char* mount, const char* rsp_file, bool b_compress) {
 
     if(!in_path || !fst_file)
         return -1;
@@ -148,64 +149,90 @@ int pack(const char* in_path, const char* fst_file, bool b_compress) {
 
     const char* prefix = in_path;
 
-	char* findString = new char[1];
-	strcpy(findString, "");
-    dirs2process.push(findString);
 
-    while(!dirs2process.empty()) {
+    if(!rsp_file) {
 
-        char* cur_dir = dirs2process.front();
-        dirs2process.pop();
+        char* findString = new char[1];
+        strcpy(findString, "");
+        dirs2process.push(findString);
 
-        SPEW(("Processing dir: ", "%s\n", cur_dir));
+        while(!dirs2process.empty()) {
 
-	    char* cur_search_path = new char[strlen(prefix) + strlen(PATH_SEPARATOR) + strlen(cur_dir) + strlen(PATH_SEPARATOR) + strlen("*") + 1];
-        if(strlen(cur_dir) > 0) {
-    	    sprintf(cur_search_path,"%s" PATH_SEPARATOR "%s" PATH_SEPARATOR "*", prefix, cur_dir);
-        } else { // can happen first time when current path is 
-    	    sprintf(cur_search_path,"%s" PATH_SEPARATOR "*", prefix);
-        }
+            char* cur_dir = dirs2process.front();
+            dirs2process.pop();
 
-        WIN32_FIND_DATA	findResult;
-        HANDLE searchHandle = FindFirstFile(cur_search_path, &findResult); 
-        if (searchHandle != INVALID_HANDLE_VALUE)
-        {
-            do
+            SPEW(("Processing dir: ", "%s\n", cur_dir));
+
+            char* cur_search_path = new char[strlen(prefix) + strlen(PATH_SEPARATOR) + strlen(cur_dir) + strlen(PATH_SEPARATOR) + strlen("*") + 1];
+            if(strlen(cur_dir) > 0) {
+                sprintf(cur_search_path,"%s" PATH_SEPARATOR "%s" PATH_SEPARATOR "*", prefix, cur_dir);
+            } else { // can happen first time when current path is ""
+                sprintf(cur_search_path,"%s" PATH_SEPARATOR "*", prefix);
+            }
+
+            WIN32_FIND_DATA	findResult;
+            HANDLE searchHandle = FindFirstFile(cur_search_path, &findResult); 
+            if (searchHandle != INVALID_HANDLE_VALUE)
             {
-                if ((findResult.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) == 0)
+                do
                 {
-	                char* filename = new char[strlen(cur_dir) + strlen(PATH_SEPARATOR) + strlen(findResult.cFileName) + 1];
-
-                    if(strlen(cur_dir) > 0) {
-	                    sprintf(filename, "%s" PATH_SEPARATOR "%s", cur_dir, findResult.cFileName);
-                    } else { // can happen first time when current path is 
-	                    sprintf(filename, "%s", findResult.cFileName);
-                    }
-
-                    files2pack.push(filename);
-                    SPEW(("\t", "%s\n", filename));
-                    num_files2pack++;
-                } else {
-                    if(strcmp(findResult.cFileName, ".") && strcmp(findResult.cFileName, "..")) {
-    	                char* findString = new char[strlen(cur_dir) + strlen(findResult.cFileName) + strlen(PATH_SEPARATOR) + 1];
+                    if ((findResult.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) == 0)
+                    {
+                        char* filename = new char[strlen(cur_dir) + strlen(PATH_SEPARATOR) + strlen(findResult.cFileName) + 1];
 
                         if(strlen(cur_dir) > 0) {
-                    	    sprintf(findString, "%s" PATH_SEPARATOR "%s", cur_dir, findResult.cFileName);
-                        } else {
-                    	    sprintf(findString, "%s", findResult.cFileName);
+                            sprintf(filename, "%s" PATH_SEPARATOR "%s", cur_dir, findResult.cFileName);
+                        } else { // can happen first time when current path is ""
+                            sprintf(filename, "%s", findResult.cFileName);
                         }
 
-                        dirs2process.push(findString);
+                        files2pack.push(filename);
+                        SPEW(("\t", "%s\n", filename));
+                        num_files2pack++;
+                    } else {
+                        if(strcmp(findResult.cFileName, ".") && strcmp(findResult.cFileName, "..")) {
+                            char* findString = new char[strlen(cur_dir) + strlen(findResult.cFileName) + strlen(PATH_SEPARATOR) + 1];
+
+                            if(strlen(cur_dir) > 0) {
+                                sprintf(findString, "%s" PATH_SEPARATOR "%s", cur_dir, findResult.cFileName);
+                            } else { // can happen first time when current path is ""
+                                sprintf(findString, "%s", findResult.cFileName);
+                            }
+
+                            dirs2process.push(findString);
+                        }
                     }
-                }
-            } while (FindNextFile(searchHandle, &findResult) != 0);
+                } while (FindNextFile(searchHandle, &findResult) != 0);
 
-            FindClose(searchHandle);
+                FindClose(searchHandle);
+            }
+
+            delete[] cur_search_path;
+            delete[] cur_dir;
+
         }
+    } else {
 
-        delete[] cur_search_path;
-        delete[] cur_dir;
+        FILE* fh = fopen(rsp_file, "r");
+        char* line = new char[1024];
+        while(fgets(line, 1024, fh)) {
+            size_t linelen = strlen(line);
 
+            if(linelen == 0 || line[0] == '\n')
+                continue;
+
+            if(line[linelen - 1] == '\n')
+                line[linelen - 1] = '\0';
+
+            char* fname = new char[strlen(line) + 1];
+            strcpy(fname, line);
+
+            files2pack.push(fname);
+
+            num_files2pack++;
+        }
+        fclose(fh);
+        delete[] line;
     }
 
     SPEW(("DBG: ", "Numfiles to pack: %d\n", num_files2pack));
@@ -230,7 +257,7 @@ int pack(const char* in_path, const char* fst_file, bool b_compress) {
 
         FILE* fh = fopen(filename_buf, "rb");
         if(!fh) {
-            STOP(("Cannot open file: %s\n", filename_buf));
+            STOP(("Cannot open file: \'%s\'\n", filename_buf));
         } else {
 
             fseek(fh, 0, SEEK_END);
@@ -247,14 +274,21 @@ int pack(const char* in_path, const char* fst_file, bool b_compress) {
                 size_t bytes2read = min(CHUNK_SIZE, len - num_read);
                 size_t num_cur_read = fread(chunk, bytes2read, 1, fh);
                 assert(num_cur_read == 1);
-                memcpy(filebuf + num_read, chunk, num_cur_read);
+                memcpy(filebuf + num_read, chunk, num_cur_read*bytes2read);
 
                 num_read += num_cur_read * bytes2read;
             }
             assert(len == num_read);
             fclose(fh);
 
-            out_ff.writeFast(filename, filebuf, len);
+            if(mount) {
+                S_snprintf(filename_buf, filenamebuf_size, "%s" PATH_SEPARATOR "%s", mount, filename);
+                out_ff.writeFast(filename_buf, filebuf, len);
+            } else {
+                out_ff.writeFast(filename, filebuf, len);
+            }
+
+
 
         }
     }
@@ -271,6 +305,8 @@ int main(int argc, char** argv)
 {
     const char* pak_file = {0};
     const char* out_path = ".";
+    const char* mount = nullptr;
+    const char* rsp_file = nullptr;
 
     if(argc < 2) {
         usage(argv);
@@ -303,6 +339,16 @@ int main(int argc, char** argv)
            out_path = argv[i+1];
            ++i;
         }
+
+        if(0 == strcmp(argv[i], "-m") && i+1 < argc) {
+           mount = argv[i+1];
+           ++i;
+        }
+
+        if(0 == strcmp(argv[i], "-rsp") && i+1 < argc) {
+           rsp_file = argv[i+1];
+           ++i;
+        }
     }
 
     // always compress, because no way to read uncompressed fast files yet
@@ -311,7 +357,7 @@ int main(int argc, char** argv)
     if(b_unpack)
         return unpack(pak_file, out_path);
     else
-        return pack(out_path, pak_file, b_compress);
+        return pack(out_path, pak_file, mount, rsp_file, b_compress);
 
 
 }
