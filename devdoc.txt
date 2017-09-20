@@ -1,0 +1,23 @@
+cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DCMAKE_CXX_COMPILER=/home/a/Downloads/llvm-build/libexec/c++-analyzer ..
+
+cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DCMAKE_CXX_COMPILER=/home/a/Downloads/llvm-build/bin/clang++ ..
+
+# cehck performance
+valgrind --tool=callgrind --cache-sim=yes ./build-reldbginfo/mc2
+callgrind_control -i off
+
+
+# check memory ops with debug on
+1) valgrind --suppressions=./valgrind-fglrx.supp --gen-suppressions=yes  --vgdb=yes --vgdb-error=0      ./build-dbg/mc2
+2) gdb mc2
+2.1) gdb> target remote | vgdb
+
+
+# view data
+kcachegrind <filename>
+
+
+memory corruption investigation
+https://en.wikibooks.org/wiki/Linux_Applications_Debugging_Techniques/Heap_corruption
+pageheap.exe, application verifier
+gflags.exe
