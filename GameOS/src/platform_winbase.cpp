@@ -57,7 +57,20 @@ VOID WINAPI GetSystemTime(LPSYSTEMTIME t)
 
 BOOL CreateDirectory(LPCSTR dir, LPSECURITY_ATTRIBUTES attr)
 {
-    return 0 == mkdir(dir, S_IRWXU);
+    int rv = mkdir(dir, S_IRWXU);
+    if (rv) {
+        gGetLastError = errno;
+        switch (gGetLastError)
+        {
+        case EEXIST:
+            gGetLastError = ERROR_ALREADY_EXISTS;
+            break;
+        case ENOENT:
+            gGetLastError = ERROR_PATH_NOT_FOUND;
+            break;
+        }
+    }
+    return rv==0;
 }
 
 BOOL SetFileAttributes(LPCSTR str, DWORD attr_bits)
