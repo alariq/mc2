@@ -19,114 +19,52 @@ void usage(char** argv) {
     printf("\\t-r - rsp file with file list\n");
 }
 
-// TODO: add possibility to read non compressed fastfiles (currently not present in ffile.cpp, but we have readRAW, maybe use it internally)
-
-int unpack(const char* fst_file, const char* out_path)
+int unpack(const char* pak_file, const char* out_path)
 {
-    if(!fst_file || !out_path)
+    if(!pak_file || !out_path)
         return -1;
 
-	FastFile* ff = new FastFile;
-	long result = ff->open(fst_file);
-	if (0 != result) {
-        if(result == FASTFILE_VERSION) {
-            SPEW(("DBG", "Wrong fast file version\n"));
-        }
-        PAUSE(("Error opening fast file\n"));
-        delete ff;
+    PacketFile* pakFile = new PacketFile;
+    int result = pakFile->open(pak_file);
+
+	if (NO_ERR != result) {
+        PAUSE(("Error opening packet file\n"));
+        delete pakFile;
 		return -1;
 	}
 
-    // get fst file name without path prefix (if it exists)
-    const char* ff_name = strrchr(fst_file, PATH_SEPARATOR_AS_CHAR);
-    if(!ff_name) {
-        ff_name = fst_file;
-    } else {
-        ff_name++;
-    }
-			
-    const int numFiles = ff->getNumFiles();
-    const FILE_HANDLE* fh = ff->getFilesInfo();
+	MemoryPtr packet_buffer = NULL;
+	size_t packet_buffer_len = 0;
 
-    char* content = NULL;
-    size_t content_size = 0;
+    const int num_packets = pakFile->getNumPackets();
 
-    for(int j=0; j<numFiles;++j)
-    {
-        DWORD hash = fh[j].pfe->hash;
-        char* fname = fh[j].pfe->name;
-        const size_t fname_len = strlen(fname);
-        char* cur_fname = fname;
-        
-        // switch to forward slash path representation (/)
-        cur_fname = new char[fname_len + 1];
-        strcpy(cur_fname, fname);
-        for(int i=0;i<fname_len;++i) {
-            if(cur_fname[i] == '\\')
-                cur_fname[i] = PATH_SEPARATOR_AS_CHAR;
-        }
-
-        long fHandle = ff->openFast(hash, fname);
-        if(fHandle==-1)
-        {
-            SPEW(("DUMP", "Failed to find file: %s in fast file\n", fname));
-            continue;
-        }
-
-        char out_file_path[1024];
-
-        S_snprintf(out_file_path, 1024, "%s" PATH_SEPARATOR "%s" PATH_SEPARATOR "%s", out_path, ff_name, cur_fname);
-
-        delete[] cur_fname;
-
-        char tmp[1024] = {0};
-        char* sep = out_file_path;
-        char* prev_sep = out_file_path;
-        sep = strchr(prev_sep, PATH_SEPARATOR_AS_CHAR);
-        while(sep) {
-
-            // skip multiple path separators
-            if(sep == prev_sep) {
-                prev_sep++;
-                sep = strchr(prev_sep, PATH_SEPARATOR_AS_CHAR);
-                continue;
+    for(int i=0; i<num_packets;++i) {
+        if(NO_ERR == pakFile->seekPacket(i)) {
+            const int messageSize = pakFile->getPacketSize();
+            int storage_type = pakFile->getStorageType();
+            if(!packet_buffer || packet_buffer_len<messageSize) {
+                if(packet_buffer)
+                    delete[] packet_buffer;
+                packet_buffer = (MemoryPtr) new unsigned char[messageSize];
+                packet_buffer_len = messageSize;
             }
+            pakFile->readPacket(i, packet_buffer);
 
-            strncat(tmp, prev_sep, sep - prev_sep + 1);
-            // f dire not exists and failed to be created
-            if(!gos_FileExists(tmp) && !CreateDirectory(tmp, NULL))
-            {
-                DWORD err = GetLastError();
-                if (err == ERROR_ALREADY_EXISTS) {
-                    SPEW(("DBG", "Failed to create directory %s, error code: %d - directory already exists\n", tmp, err));
-                } else {
-                    PAUSE(("Failed to create directory %s, error code: %d\n", tmp, err));
+            char fname[16];
+            S_snprintf(fname, 16, "packet_%d", i);
+            FILE* fh = fopen(fname, "wb");
+            if(fh) {
+                size_t bytes = fwrite(packet_buffer, 1, packet_buffer_len, fh);
+                if(bytes!=packet_buffer_len) {
+		            SPEW(("unpack: ", "Failed to write data to packet_%d file\n", i));
                 }
+                fclose(fh);
+            } else {
+		        SPEW(("unpack: ", "Failed to open packet_%d file for writing\n", i));
             }
-            prev_sep = sep + 1;
-            sep = strchr(prev_sep, PATH_SEPARATOR_AS_CHAR);
         }
-
-        File out_f;
-        if (0 != out_f.createWithCase(out_file_path)) {
-            PAUSE(("Failed to create file: %s\n", out_file_path));
-            continue;
-        }
-
-        int file_len = ff->sizeFast(fHandle);
-        if(file_len > content_size) {
-            delete[] content;
-            content = new char[file_len];
-            content_size = file_len;
-        }
-
-        ff->readFast(fHandle, content, file_len);
-
-        out_f.write((MemoryPtr)content, file_len);
-        out_f.close();
     }
 
-    delete[] content;
     return 0;
 }
 
@@ -146,7 +84,7 @@ int pack(const char* pak_file, const char* rsp_file, bool b_compress) {
     std::queue<char*> files2pack;
     size_t num_files2pack = 0;
 
-	char* rsp_path_prefix = ".";
+	const char* rsp_path_prefix = ".";
 
 	size_t rsp_file_len = strlen(rsp_file);
 	char* rsp_file_dir = new char[rsp_file_len + 1];
@@ -190,19 +128,28 @@ int pack(const char* pak_file, const char* rsp_file, bool b_compress) {
 		if (rec_len > 0 && record[rec_len - 1] == '\n')
 			record[rec_len - 1] = '\0';
 
+		if (rec_len > 1 && record[rec_len - 2] == '\r')
+			record[rec_len - 2] = '\0';
+
 		if (record[0] == '\0')
 			continue;
 
-		if (0 != strcmp(record, NULL_RECORD_STR))
+		if (0 != strncmp(record, NULL_RECORD_STR, strlen(NULL_RECORD_STR)))
 		{
-			if (0 == strncmp(record, NULL_RECORD_STR, strlen(NULL_RECORD_STR)))
-			{
-				continue;
+			const size_t rec_len = strlen(record);
+			for(int i=rec_len-1; i>=0; --i) {
+				if(record[i] == '\r' || record[i] == ' ' || record[i] == '\n') {
+					record[i] = '\0';
+				} else {
+					break;
+				}
 			}
+
 			size_t fpath_len = strlen(rsp_path_prefix) + strlen(PATH_SEPARATOR) + strlen(record) + 1;
 			char* fpath = new char[fpath_len];
 			S_snprintf(fpath, fpath_len, "%s" PATH_SEPARATOR "%s", rsp_path_prefix, record);
 			fpath[fpath_len - 1] = '\0';
+			S_strlwr(fpath);
 			files2pack.push(fpath);
 		} else {
 			files2pack.push(nullptr);
@@ -219,6 +166,8 @@ int pack(const char* pak_file, const char* rsp_file, bool b_compress) {
 		if (nullptr != fpath)
 		{
 			int storage_type = b_compress ? STORAGE_TYPE_ZLIB : STORAGE_TYPE_RAW;
+
+            SPEW(("DBG", "File: %s\n", fpath));
 
 			FILE* fh = fopen(fpath, "rb");
 			if (!fh) {
@@ -255,9 +204,13 @@ int pack(const char* pak_file, const char* rsp_file, bool b_compress) {
 		}
 	}
 
+    pakFile->close();
+
     delete[] chunk;
     delete[] packet_buffer;
 	delete[] record;
+
+    delete pakFile;
 
     return 0;
 }
