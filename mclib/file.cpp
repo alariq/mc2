@@ -42,6 +42,7 @@
 #include"platform_io.h"
 #include<ctype.h>
 #include<errno.h>
+#include<cstdlib> // std::abs sebi
 
 #include "platform_windows.h"
 
@@ -166,6 +167,7 @@ File::File (void)
 	parentOffset = 0;
 	physicalLength = 0;
 
+    maxChildren = 0;
 	childList = NULL;
 	numChildren = 0;
 
@@ -252,6 +254,9 @@ long File::open (const char* fName, FileMode _mode, long numChild, bool doNotLow
 			fastFile = FastFileFind(fileName,fastFileHandle);
 			if (!fastFile)
 			{
+                if(!Environment.checkCDForFiles)
+                    return 2;
+
 				//Not in main installed directory and not in fastfile.  Look on CD.
 
 				char actualPath[2048];
@@ -700,7 +705,7 @@ long File::seek (long pos, long from)
 			break;
 
 		case SEEK_END:
-			if ((abs(pos) > (long)getLength()) || (pos > 0))
+			if ((std::abs(pos) > (long)getLength()) || (pos > 0))
 			{
 				return READ_PAST_EOF_ERR;
 			}
@@ -1177,11 +1182,17 @@ long File::readLine (MemoryPtr buffer, long maxLength)
 		while ((i<maxLength) && (buffer[i]!='\r') && (buffer[i]!='\n'))
 			i++;
 
+        int skipChar = 0;
+        // skip next \n;
+        if(i<maxLength && buffer[i]=='\r')
+            skipChar = 1;
+
 		buffer[i++]=0;
 		logicalPosition += i;
 
-		if( buffer[i]=='\n' )
-			logicalPosition+=1;
+		//if( buffer[i]=='\n' )
+		//	logicalPosition+=1;
+        logicalPosition+=skipChar;
 
 		fastFile->seekFast(fastFileHandle,logicalPosition);
 	}
@@ -1198,12 +1209,23 @@ long File::readLine (MemoryPtr buffer, long maxLength)
 			while( i<maxLength && buffer[i]!='\r' && buffer[i]!='\n')
 				i++;
 
+#if 1
+            int skipChar = 0;
+            // skip next \n;
+            if(i<maxLength && buffer[i]=='\r')
+                skipChar = 1;
+#endif
+
 			buffer[i++]=0;
 
 			logicalPosition+=i;
 
-			if( buffer[i]=='\n' )
-				logicalPosition+=1;
+			//if( buffer[i]=='\n' )
+			//	logicalPosition+=1;
+#if 1
+			logicalPosition+=skipChar;
+#endif
+
 
 			seek(logicalPosition);
 		}

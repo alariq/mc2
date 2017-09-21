@@ -26,6 +26,7 @@
 
 #include<inttypes.h>
 #include <cstdarg> // va_list
+#include <new>
 
 #ifndef PLATFORM_WINDOWS
 #define __stdcall
@@ -200,6 +201,8 @@ typedef struct
 	bool	allowMultipleApps;		// Allows the game to be run more than once on a single system (network testing)
 	DWORD	MegMemoryRequired;		// Megabytes of virtual memory required to run game (default is 64Meg)
 	bool	dontClearRegistry;		// When true, the registry is not cleared when the .exe is changed
+    // sebi:
+    bool    checkCDForFiles;        // Whether to check for files on CD when File::open is called 
 //
 // Current screen mode (application can check, but may change from frame to frame)
 //
