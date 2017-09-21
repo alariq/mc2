@@ -19,19 +19,70 @@ void usage(char** argv) {
     printf("\\t-r - rsp file with file list\n");
 }
 
+static int create_path(const char* out_file_path) {
+
+        char tmp[1024] = {0};
+        const char* sep = out_file_path;
+        const char* prev_sep = out_file_path;
+        sep = strchr(prev_sep, PATH_SEPARATOR_AS_CHAR);
+        while(*sep!='\0') {
+
+            // skip multiple path separators
+            if(sep == prev_sep) {
+                prev_sep++;
+                sep = strchrnul(prev_sep, PATH_SEPARATOR_AS_CHAR);
+                continue;
+            }
+
+            strncat(tmp, prev_sep, sep - prev_sep + 1);
+            // if dir does not exist and failed to be created
+            if(!gos_FileExists(tmp) && !CreateDirectory(tmp, NULL))
+            {
+                DWORD err = GetLastError();
+                if (err == ERROR_ALREADY_EXISTS) {
+                    SPEW(("DBG", "Failed to create directory %s, error code: %d - directory already exists\n", tmp, err));
+                } else {
+                    PAUSE(("Failed to create directory %s, error code: %d\n", tmp, err));
+                    return -1;
+                }
+            }
+            prev_sep = sep + 1;
+            sep = strchrnul(prev_sep, PATH_SEPARATOR_AS_CHAR);
+        }
+
+        strncat(tmp, prev_sep, sep - prev_sep + 1);
+        // if dir does not exist and failed to be created
+        if(!gos_FileExists(tmp) && !CreateDirectory(tmp, NULL))
+        {
+            DWORD err = GetLastError();
+            if (err == ERROR_ALREADY_EXISTS) {
+                SPEW(("DBG", "Failed to create directory %s, error code: %d - directory already exists\n", tmp, err));
+            } else {
+                PAUSE(("Failed to create directory %s, error code: %d\n", tmp, err));
+                return -1;
+            }
+        }
+
+        return 0;
+}
+
 int unpack(const char* pak_file, const char* out_path)
 {
     if(!pak_file || !out_path)
         return -1;
 
     PacketFile* pakFile = new PacketFile;
-    int result = pakFile->open(pak_file);
+    int result = pakFile->open(pak_file, READ, 50, true); // do not lower name
 
 	if (NO_ERR != result) {
         PAUSE(("Error opening packet file\n"));
         delete pakFile;
 		return -1;
 	}
+
+    if(create_path(out_path))
+        return -1;
+
 
 	MemoryPtr packet_buffer = NULL;
 	size_t packet_buffer_len = 0;
@@ -48,14 +99,19 @@ int unpack(const char* pak_file, const char* out_path)
                 packet_buffer = (MemoryPtr) new unsigned char[messageSize];
                 packet_buffer_len = messageSize;
             }
+
+            if(i==63)
+            {
+                int sdfasda=0;
+            }
             pakFile->readPacket(i, packet_buffer);
 
-            char fname[16];
-            S_snprintf(fname, 16, "packet_%d", i);
+			char fname[1024];
+            S_snprintf(fname, 1024, "%s" PATH_SEPARATOR "packet_%d", out_path, i);
             FILE* fh = fopen(fname, "wb");
             if(fh) {
-                size_t bytes = fwrite(packet_buffer, 1, packet_buffer_len, fh);
-                if(bytes!=packet_buffer_len) {
+                size_t bytes = fwrite(packet_buffer, 1, messageSize, fh);
+                if(bytes!=messageSize) {
 		            SPEW(("unpack: ", "Failed to write data to packet_%d file\n", i));
                 }
                 fclose(fh);
@@ -158,6 +214,7 @@ int pack(const char* pak_file, const char* rsp_file, bool b_compress) {
 
 	pakFile->reserve((unsigned int)files2pack.size());
 
+    int i=0;
 	while(!files2pack.empty()) {
 
 		char* fpath = files2pack.front();
@@ -197,11 +254,20 @@ int pack(const char* pak_file, const char* rsp_file, bool b_compress) {
 				assert(len == num_read);
 				fclose(fh);
 
+                if(i==63) {
+                    FILE* fh_dbg = fopen("dbg.wav", "wb");
+                    size_t written = fwrite(packet_buffer, 1, len, fh_dbg);
+                    assert(written == len);
+                    fclose(fh_dbg);
+                }
+
 				pakFile->writePacket(packet++, packet_buffer, len, storage_type);
 			}
 		} else {
 			pakFile->writePacket(packet++, nullptr, 0, STORAGE_TYPE_NUL);
 		}
+
+        i++;
 	}
 
     pakFile->close();
@@ -234,6 +300,8 @@ int main(int argc, char** argv)
     }
     systemHeap->init(32*1024*1024);
 
+    Environment.checkCDForFiles = false;
+
     bool b_unpack = false;
     bool b_compress = false;
 
@@ -261,7 +329,19 @@ int main(int argc, char** argv)
     }
 
     // always compress, because no way to read uncompressed fast files yet
-    b_compress = true;
+	b_compress = true;
+	
+	if(!pak_file) {
+        SPEW(("DBG", "No pack file given\n"));
+        usage(argv);
+        return 1;
+	}
+
+	if(!rsp_file && false == b_unpack) {
+        SPEW(("DBG", "No rsp file given\n"));
+        usage(argv);
+        return 1;
+	}
 
     if(b_unpack)
         return unpack(pak_file, out_path);
