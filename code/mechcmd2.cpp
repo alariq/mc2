@@ -2654,6 +2654,8 @@ void __stdcall GetGameOSEnvironment(const char* CommandLine )
 
 	Environment.allowMultipleApps = false;
 	Environment.dontClearRegistry = true;
+
+    Environment.checkCDForFiles = true;
 	
 	if (useSound)
 	{

@@ -701,6 +701,8 @@ void __stdcall GetGameOSEnvironment( const char* CommandLine )
 	Environment.InitializeGameEngine	= InitializeGameEngine;
 	Environment.DoGameLogic				= DoGameLogic;
 	Environment.TerminateGameEngine		= TerminateGameEngine;
+
+    Environment.checkCDForFiles         = true;
 	
 	if (useSound)
 	{
