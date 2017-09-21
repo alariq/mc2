@@ -82,7 +82,7 @@ class PacketFile : public File
 		PacketFile (void);
 		~PacketFile (void);
 		
-		virtual long open (const char* fName, FileMode _mode = READ, long numChildren = 50);
+		virtual long open (const char* fName, FileMode _mode = READ, long numChildren = 50, bool doNotLower = false);
 		virtual long open (FilePtr _parent, unsigned long fileSize, long numChildren = 50);
 		
 		virtual long create (const char* fName);

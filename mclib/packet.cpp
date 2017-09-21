@@ -203,9 +203,9 @@ PacketFile::~PacketFile (void)
 }
 
 //---------------------------------------------------------------------------
-long PacketFile::open (const char* fName, FileMode _mode, long numChild)
+long PacketFile::open (const char* fName, FileMode _mode, long numChild, bool doNotLower)
 {
-	long openResult = File::open(fName,_mode,numChild);
+	long openResult = File::open(fName, _mode, numChild, doNotLower);
 	
 	if (openResult != NO_ERR)
 	{
@@ -352,7 +352,9 @@ int PacketFile::readPacket (int packet, unsigned char *buffer)
 					if (LZPacketBuffer)
 					{
 						read(LZPacketBuffer,(packetSize-sizeof(unsigned int)));
-						unsigned long decompLength = LZPacketBufferSize;
+                        //sebi: ORIG BUG FIX!!! see zlib "uncompress()" documentation for explanation
+						//unsigned long decompLength = LZPacketBufferSize;
+						unsigned long decompLength = packetUnpackedSize;
 						unsigned int decompResult = uncompress(buffer,&decompLength,LZPacketBuffer, packetSize-sizeof(unsigned int));
 						if ((decompResult != Z_OK) || (decompLength != packetUnpackedSize))
 							result = 0;
