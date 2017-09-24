@@ -24,7 +24,7 @@ static int create_path(const char* out_file_path) {
         char tmp[1024] = {0};
         const char* sep = out_file_path;
         const char* prev_sep = out_file_path;
-        sep = strchr(prev_sep, PATH_SEPARATOR_AS_CHAR);
+        sep = strchrnul(prev_sep, PATH_SEPARATOR_AS_CHAR);
         while(*sep!='\0') {
 
             // skip multiple path separators
@@ -132,7 +132,7 @@ int pack(const char* pak_file, const char* rsp_file, bool b_compress) {
 	PacketFile* pakFile = new PacketFile;
 
 	if (NO_ERR != pakFile->create(pak_file)) {
-		SPEW(("pack: ", "Failed to create new pack file %s\n", rsp_file));
+		SPEW(("pack: ", "Failed to create new pack file %s\n", pak_file));
 		return -1;
 	}
 
@@ -200,8 +200,15 @@ int pack(const char* pak_file, const char* rsp_file, bool b_compress) {
 					break;
 				}
 			}
+            
+            size_t record_len = strlen(record);
+            for(int i=0;i<rec_len;++i) {
+                if(record[i] == '\\') {
+                    record[i] = PATH_SEPARATOR_AS_CHAR;
+                }
+            }
 
-			size_t fpath_len = strlen(rsp_path_prefix) + strlen(PATH_SEPARATOR) + strlen(record) + 1;
+			size_t fpath_len = strlen(rsp_path_prefix) + strlen(PATH_SEPARATOR) + record_len + 1;
 			char* fpath = new char[fpath_len];
 			S_snprintf(fpath, fpath_len, "%s" PATH_SEPARATOR "%s", rsp_path_prefix, record);
 			fpath[fpath_len - 1] = '\0';
@@ -219,8 +226,8 @@ int pack(const char* pak_file, const char* rsp_file, bool b_compress) {
 
 		char* fpath = files2pack.front();
 		files2pack.pop();
-		
-		if (nullptr != fpath)
+
+		if (nullptr != fpath && gos_FileExists(fpath))
 		{
 			int storage_type = b_compress ? STORAGE_TYPE_ZLIB : STORAGE_TYPE_RAW;
 
@@ -264,6 +271,10 @@ int pack(const char* pak_file, const char* rsp_file, bool b_compress) {
 				pakFile->writePacket(packet++, packet_buffer, len, storage_type);
 			}
 		} else {
+            
+            if(fpath && !gos_FileExists(fpath)) {
+                SPEW(("DBG", "File %s does not exists though present in .rsp file, will be insluded as NULL packet instead\n", fpath));
+            }
 			pakFile->writePacket(packet++, nullptr, 0, STORAGE_TYPE_NUL);
 		}
 
