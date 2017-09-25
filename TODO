@@ -4,3 +4,4 @@
 4) add compressed tga loading support
 5) add support for .rsp files for pack/unpack tool
 5) tgl/agl files are generated when running game, add generaton tool ase -> tgl/agl
+6) objmgr.cpp Save/Load chnge watchSave to be int* instead of long*
