@@ -24,6 +24,9 @@ if(MSVC)
 	message("Compiling on M$ Windows")
 endif()
 
+# TODO: get rid of gl library by not using old style opengl
+find_package(OpenGL REQUIRED)
+
 find_package(SDL2 QUIET)
 if(SDL2_FOUND)
 	set(SDL_LIBS ${SDL2_LIBRARIES})
@@ -37,6 +40,8 @@ else()
     set(SDL_INCLUDES ${SDL2_INCLUDE})
 endif()
 
+find_library(SDL2_mixer NAMES "SDL2_mixer")
+find_library(GLEW NAMES "GLEW" "glew32")
 find_library(ZLIB NAMES "z" "zlib")
 
 message("SDL includes: ${SDL_INCLUDES}")
@@ -45,8 +50,8 @@ include_directories(${SDL_INCLUDES})
 include_directories("./window" "../GameOS/include" "../mclib" "../gui" "../code" "../netlib")
 
 add_subdirectory("../mclib/" "./out/mclib")
-#add_subdirectory("../mclib/mlr" "./out/mclib/mlr")
-#add_subdirectory("../mclib/gosfx" "./out/mclib/gosfx")
+add_subdirectory("../mclib/mlr" "./out/mclib/mlr")
+add_subdirectory("../mclib/gosfx" "./out/mclib/gosfx")
 add_subdirectory("../mclib/stuff" "./out/mclib/stuff")
 #add_subdirectory("../gui" "./out/gui")
 add_subdirectory("../GameOS/gameos" "./out/GameOS/gameos")
@@ -62,6 +67,10 @@ set(PAK_SOURCES
     "pak.cpp"
     )
 
+set(ASECONV_SOURCES 
+    "aseconv.cpp"
+    )
+
 if(WIN32)
 	set(ADDITIONAL_LIBS winmm) # timeGetTime used in gameos
 	set(ADDITIONAL_LIBS ${ADDITIONAL_LIBS} ${OPENGL_gl_LIBRARY} )
@@ -74,4 +83,8 @@ target_link_libraries(makefst mclib stuff gameos windows ${ZLIB} ${SDL_LIBS} ${A
 
 add_executable(pak ${PAK_SOURCES})
 target_link_libraries(pak mclib stuff gameos windows ${ZLIB} ${SDL_LIBS} ${ADDITIONAL_LIBS})
+
+add_executable(aseconv ${ASECONV_SOURCES})
+target_link_libraries(aseconv mclib gosfx mlr stuff gameos windows ${ZLIB} ${SDL_LIBS} ${GLEW} ${SDL2_mixer} ${ADDITIONAL_LIBS} ${OPENGL_gl_LIBRARY})
+
 
