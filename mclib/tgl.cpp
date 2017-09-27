@@ -256,11 +256,12 @@ long TG_TypeNode::MakeFromHelper (BYTE *aseBuffer, const char *fileName)
 	if (strlen(nodeString) >= TG_NODE_ID)
 	{
 		if (!silentMode)
-			PAUSE(("WARNING: Node ID %s in Shape %s is greater then 24 characters!!",nodeString,fileName));
+			PAUSE(("WARNING: Node ID %s in Shape %s is greater then %d characters!!",nodeString,fileName, TG_NODE_ID-1));
 	}
 #endif
 
-	strncpy(nodeId,nodeString,24);
+	strncpy(nodeId,nodeString, TG_NODE_ID-1);
+	nodeId[TG_NODE_ID - 1] = '\0'; //sebi
 		 
 	char* parentName = strstr((char *)nodeName,ASE_NODE_PARENT);
 
@@ -272,7 +273,8 @@ long TG_TypeNode::MakeFromHelper (BYTE *aseBuffer, const char *fileName)
 		parentName += strlen(ASE_NODE_PARENT)+1;
 		GetNameData(parentName,nodeString);
 		
-		strncpy(parentId,nodeString,24);
+		strncpy(parentId,nodeString, TG_NODE_ID-1);
+		parentId[TG_NODE_ID - 1] = '\0'; //sebi
 	}
 	else
 	{
@@ -610,11 +612,12 @@ long TG_TypeShape::MakeFromHelper (BYTE *aseBuffer, const char *fileName)
 	if (strlen(nodeString) >= TG_NODE_ID)
 	{
 		if (!silentMode)
-			PAUSE(("WARNING: Node ID %s in Shape %s is greater then 24 characters!!",nodeString,fileName));
+			PAUSE(("WARNING: Node ID %s in Shape %s is greater then %d characters!!",nodeString,fileName, TG_NODE_ID-1));
 	}
 #endif
 
-	strncpy(nodeId,nodeString,24);
+	strncpy(nodeId,nodeString, TG_NODE_ID-1);
+	nodeId[TG_NODE_ID - 1] = '\0';
 		 
 	char* parentName = strstr((char *)nodeName,ASE_NODE_PARENT);
 
@@ -626,7 +629,8 @@ long TG_TypeShape::MakeFromHelper (BYTE *aseBuffer, const char *fileName)
 		parentName += strlen(ASE_NODE_PARENT)+1;
 		GetNameData(parentName,nodeString);
 		
-		strncpy(parentId,nodeString,24);
+		strncpy(parentId,nodeString, TG_NODE_ID-1);
+		parentId[TG_NODE_ID - 1] = '\0';
 	}
 	else
 	{
@@ -687,11 +691,14 @@ long TG_TypeShape::ParseASEFile (BYTE *aseBuffer, const char *fileName)
 	if (strlen(nodeString) >= TG_NODE_ID)
 	{
 		if (!silentMode)
-			PAUSE(("WARNING: Node ID %s in Shape %s is greater then 24 characters!!",nodeString,fileName));
+			PAUSE(("WARNING: Node ID %s in Shape %s is greater then %d characters!!",nodeString,fileName, TG_NODE_ID-1));
 	}
 #endif
 
-	strncpy(nodeId,nodeString,24);
+	//sebi: ORIG BUG FIX srtrncpy will not add 0 at the end of source string bigger then destination one
+	//strncpy(nodeId,nodeString, 24);
+	strncpy(nodeId,nodeString, TG_NODE_ID-1);
+	nodeId[TG_NODE_ID - 1] = '\0';
 	
 	char* parentName = strstr((char *)nodeName,ASE_NODE_PARENT);
 
@@ -703,7 +710,8 @@ long TG_TypeShape::ParseASEFile (BYTE *aseBuffer, const char *fileName)
 		parentName += strlen(ASE_NODE_PARENT)+1;
 		GetNameData(parentName,nodeString);
 		
-		strncpy(parentId,nodeString,24);
+		strncpy(parentId,nodeString, TG_NODE_ID-1);
+		parentId[TG_NODE_ID - 1] = '\0';
 	}
 	else
 	{
@@ -734,8 +742,10 @@ long TG_TypeShape::ParseASEFile (BYTE *aseBuffer, const char *fileName)
 	// Find the Number of Vertices
 	char *vertexCount = strstr((char *)aseBuffer,ASE_NUM_VERTEX);
 	gosASSERT(vertexCount != NULL);
-		
-	vertexCount += strlen(ASE_NUM_FACE)+1;
+	
+	//sebi: ORIG BUG FIX
+	//vertexCount += strlen(ASE_NUM_FACE)+1;
+	vertexCount += strlen(ASE_NUM_VERTEX)+1;
 	numTypeVertices = atol(vertexCount);
 	if (numTypeVertices == 0)			//NO Data for this node.  WARN and then do NOT allocate anything!
 	{
