@@ -415,7 +415,7 @@ long TG_TypeMultiShape::LoadTGMultiShapeFromASE (const char *fileName, bool forc
 
 	if( !forceMakeBinary)
 	{
-		if (!fileExists(fileName) && !fileExists(binaryFileName))		//Line 0
+		if (!fileExists(fileName, FILE_ON_DISK) && !fileExists(binaryFileName))		//Line 0
 		{
 	#ifdef _DEBUG
 	//		if (!silentMode)
@@ -423,7 +423,7 @@ long TG_TypeMultiShape::LoadTGMultiShapeFromASE (const char *fileName, bool forc
 	#endif
 			makeBinary = true;
 		}
-		else if (!fileExists(fileName) && fileExists(binaryFileName))	//Line 1-3
+		else if (!fileExists(fileName, FILE_ON_DISK) && fileExists(binaryFileName))	//Line 1-3
 		{
 			File binFile;
 			
@@ -443,11 +443,11 @@ long TG_TypeMultiShape::LoadTGMultiShapeFromASE (const char *fileName, bool forc
 				}
 			}
 		}
-		else if (fileExists(fileName) && (!fileExists(binaryFileName) || (fileExists(binaryFileName) == 2)))	//Line 4-5
+		else if (fileExists(fileName, FILE_ON_DISK) && (!fileExists(binaryFileName) || (fileExists(binaryFileName, FILE_ON_FST))))	//Line 4-5
 		{
 			makeBinary = true;
 		}
-		else if (fileExists(fileName) && ((fileExists(binaryFileName) == 1) && file1OlderThan2(binaryFileName,fileName)))	//Line 6-7
+		else if (fileExists(fileName, FILE_ON_DISK) && ((fileExists(binaryFileName) == 1) && file1OlderThan2(binaryFileName,fileName)))	//Line 6-7
 		{
 			makeBinary = true;
 		}
@@ -569,8 +569,10 @@ long TG_TypeMultiShape::LoadTGMultiShapeFromASE (const char *fileName, bool forc
 				//-------------------------------------------------------------------------------
 				// Get and store texture Name.  Will need multiple for Multi-Sub if implemented
 				char textId[256];
-                // sebi: added %d, oh my how did it worked before??? thank you clang!
-				sprintf(textId,"%s%d",ASE_MATERIAL_BITMAP_ID,i);
+                // sebi: looks like if there is only one texture then ASE_MATERIAL_BITMAP_ID has no index
+				// anyway original code is incorrect, because it passes i but has no format specifier for it
+				//sprintf(textId,"%s",ASE_MATERIAL_BITMAP_ID,i);
+				sprintf(textId, "%s", ASE_MATERIAL_BITMAP_ID);
 		
 				char *txmTemp = txmData;
 				txmData = strstr(txmData,textId);
