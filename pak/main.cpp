@@ -224,6 +224,17 @@ int pack(const char* in_path, const char* fst_file, const char* mount, const cha
             if(line[linelen - 1] == '\n')
                 line[linelen - 1] = '\0';
 
+			// strip spaces after file name (otherwise hash wil lbe calculated incorrectly
+			linelen = strlen(line);
+			for (int i = linelen - 1; i >= 0; --i) {
+				if (isspace(line[i])) {
+					line[i] = '\0';
+				}
+				else {
+					break;
+				}
+			}
+
             char* fname = new char[strlen(line) + 1];
             strcpy(fname, line);
 
@@ -282,6 +293,11 @@ int pack(const char* in_path, const char* fst_file, const char* mount, const cha
             fclose(fh);
 
             if(mount) {
+
+				if (strstr(filename, "pmwbubba.fit")) {
+					int asdfa = 0;
+				}
+
                 S_snprintf(filename_buf, filenamebuf_size, "%s" PATH_SEPARATOR "%s", mount, filename);
                 out_ff.writeFast(filename_buf, filebuf, len);
             } else {
