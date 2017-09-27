@@ -58,9 +58,13 @@ enum FileClass
 };
 
 //---------------------------------------------------------------------------
-// Function Declarations
 //Returns 1 if file is on HardDrive and 2 if file is in FastFile
-long fileExists(const char *fName);
+#define FILE_NOT_FOUND	0
+#define FILE_ON_DISK	1
+#define FILE_ON_FST		2
+
+// Function Declarations
+long fileExists(const char *fName, long destination_mask = FILE_ON_DISK|FILE_ON_FST);
 long fileExistsOnCD(const char *fName);
 bool file1OlderThan2(const char *file1, const char* file2);
 

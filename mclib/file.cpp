@@ -87,18 +87,18 @@ void createTrafficLog (void)
 
 //---------------------------------------------------------------------------
 // Global Functions
-long fileExists (const char* fName)
+long fileExists (const char* fName, long destination_mask)
 {
 	struct _stat st;
 	if (_stat(fName,&st) != -1)
 	{
-		return 1;
+		return 1 & destination_mask;
 	}
 
 	long fastFileHandle = -1;
 	FastFilePtr	fastFile = FastFileFind(fName,fastFileHandle);
 	if (fastFile)
-		return 2;
+		return 2 & destination_mask;
 
 	return 0;
 }
