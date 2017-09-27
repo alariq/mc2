@@ -1832,7 +1832,10 @@ void _TG_Animation::SaveBinaryCopy (File *binFile)
 {
 	if (S_stricmp(nodeId,"NONE") != 0)
 	{
-		binFile->write((MemoryPtr)nodeId,TG_NODE_ID);	
+        // sebi: nodeId is not generally TG_NODE_ID bytes long
+        char buf[TG_NODE_ID] = {0};
+        strncpy(buf, nodeId, TG_NODE_ID);
+		binFile->write((MemoryPtr)buf,TG_NODE_ID);	
 		binFile->writeInt(-1);			//ShapeIds ALWAYS start with -1.  We will scan on frame 1 please!
 		binFile->writeInt(numFrames);
 		binFile->writeFloat(frameRate);
