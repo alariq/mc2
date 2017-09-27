@@ -21,16 +21,18 @@ void usage(char** argv) {
 
 static int create_path(const char* out_file_path) {
 
-        char tmp[1024] = {0};
+        char* tmp = new char[strlen(out_file_path) + 1];
+		memset(tmp, 0, strlen(out_file_path) + 1);
+
         const char* sep = out_file_path;
         const char* prev_sep = out_file_path;
-        sep = strchrnul(prev_sep, PATH_SEPARATOR_AS_CHAR);
-        while(*sep!='\0') {
+        sep = strchr(prev_sep, PATH_SEPARATOR_AS_CHAR);
+        while(sep) {
 
             // skip multiple path separators
             if(sep == prev_sep) {
                 prev_sep++;
-                sep = strchrnul(prev_sep, PATH_SEPARATOR_AS_CHAR);
+                sep = strchr(prev_sep, PATH_SEPARATOR_AS_CHAR);
                 continue;
             }
 
@@ -43,14 +45,17 @@ static int create_path(const char* out_file_path) {
                     SPEW(("DBG", "Failed to create directory %s, error code: %d - directory already exists\n", tmp, err));
                 } else {
                     PAUSE(("Failed to create directory %s, error code: %d\n", tmp, err));
+					delete[] tmp;
                     return -1;
                 }
             }
             prev_sep = sep + 1;
-            sep = strchrnul(prev_sep, PATH_SEPARATOR_AS_CHAR);
+            sep = strchr(prev_sep, PATH_SEPARATOR_AS_CHAR);
         }
 
-        strncat(tmp, prev_sep, sep - prev_sep + 1);
+        //strncat(tmp, prev_sep, sep - prev_sep + 1);
+        strcat(tmp, prev_sep);
+
         // if dir does not exist and failed to be created
         if(!gos_FileExists(tmp) && !CreateDirectory(tmp, NULL))
         {
@@ -59,10 +64,12 @@ static int create_path(const char* out_file_path) {
                 SPEW(("DBG", "Failed to create directory %s, error code: %d - directory already exists\n", tmp, err));
             } else {
                 PAUSE(("Failed to create directory %s, error code: %d\n", tmp, err));
+				delete[] tmp;
                 return -1;
             }
         }
 
+		delete[] tmp;
         return 0;
 }
 
@@ -82,7 +89,6 @@ int unpack(const char* pak_file, const char* out_path)
 
     if(create_path(out_path))
         return -1;
-
 
 	MemoryPtr packet_buffer = NULL;
 	size_t packet_buffer_len = 0;
