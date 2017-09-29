@@ -1,5 +1,5 @@
 cmake_minimum_required (VERSION 2.8)
-project(pack_tools)
+project(data_tools)
 
 if("${CMAKE_SIZEOF_VOID_P}" EQUAL "8")
 	message(STATUS "Target is 64 bits")
@@ -58,18 +58,13 @@ add_subdirectory("../GameOS/gameos" "./out/GameOS/gameos")
 
 add_subdirectory("../GameOS/src" "./out/windows")
 
-# must be after all add_subdirectory(ies) because we use same array name (SOURCES) for all projects
-set(SOURCES 
-    "main.cpp"
-    )
+set(MAKEFST_SOURCES "makefst.cpp")
 
-set(PAK_SOURCES 
-    "pak.cpp"
-    )
+set(PAK_SOURCES "pak.cpp" "common.hpp")
 
-set(ASECONV_SOURCES 
-    "aseconv.cpp"
-    )
+set(ASECONV_SOURCES "aseconv.cpp" "common.hpp")
+
+set(MAKERSP_SOURCES "makersp.cpp")
 
 if(WIN32)
 	set(ADDITIONAL_LIBS winmm) # timeGetTime used in gameos
@@ -78,7 +73,7 @@ if(WIN32)
 	message("OpenGL library include: ${OPENGL_INCLUDE_DIR}")
 endif()
 
-add_executable(makefst ${SOURCES})
+add_executable(makefst ${MAKEFST_SOURCES})
 target_link_libraries(makefst mclib stuff gameos windows ${ZLIB} ${SDL_LIBS} ${ADDITIONAL_LIBS})
 
 add_executable(pak ${PAK_SOURCES})
@@ -87,4 +82,6 @@ target_link_libraries(pak mclib stuff gameos windows ${ZLIB} ${SDL_LIBS} ${ADDIT
 add_executable(aseconv ${ASECONV_SOURCES})
 target_link_libraries(aseconv mclib gosfx mlr stuff gameos windows ${ZLIB} ${SDL_LIBS} ${GLEW} ${SDL2_mixer} ${ADDITIONAL_LIBS} ${OPENGL_gl_LIBRARY})
 
+add_executable(makersp ${MAKERSP_SOURCES})
+target_link_libraries(makersp mclib stuff gameos windows ${ZLIB} ${SDL_LIBS} ${ADDITIONAL_LIBS})
 

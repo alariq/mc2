@@ -15,6 +15,8 @@ using namespace Microsoft::Xna::Arm;
 
 #include "mclib.h"
 
+#include "common.hpp"
+
 HSTRRES gosResourceHandle = 0;
 
 Stuff::MemoryStream *effectStream = NULL;
@@ -64,6 +66,49 @@ unsigned long currentFloatHelp = 0;
 char fileName[1024];
 char listName[1024];
 char prefixPath[1024];
+char dstPath[1024];
+
+//----------------------------------------------------------------------------
+int parseParam(int i, int n_args, char* argv[30], char* pstr) {
+
+	i++;
+	if (i < n_args)
+	{
+		if (argv[i][0] == '"')
+		{
+			// They typed in a quote, keep reading argvs
+			// until you find the close quote
+			strcpy(pstr, &(argv[i][1]));
+			bool scanName = true;
+			while (scanName && (i < n_args))
+			{
+				i++;
+				if (i < n_args)
+				{
+					strcat(pstr, " ");
+					strcat(pstr, argv[i]);
+
+					if (strstr(argv[i], "\"") != NULL)
+					{
+						scanName = false;
+						pstr[strlen(pstr) - 1] = 0;
+					}
+				}
+				else
+				{
+					//They put a quote on the line with no space.
+					//
+					scanName = false;
+					pstr[strlen(pstr) - 1] = 0;
+				}
+			}
+		}
+		else
+			strcpy(pstr, argv[i]);
+	}
+
+	return i;
+}
 
 //----------------------------------------------------------------------------
 // Same command line Parser as MechCommander
@@ -96,119 +141,17 @@ void ParseCommandLine(char *command_line)
 	i = 0;
 	while (i<n_args)
 	{
-		if (strcmpi(argv[i], "-file") == 0)
-		{
-			i++;
-			if (i < n_args)
-			{
-				if (argv[i][0] == '"')
-				{
-					// They typed in a quote, keep reading argvs
-					// until you find the close quote
-					strcpy(fileName, &(argv[i][1]));
-					bool scanName = true;
-					while (scanName && (i < n_args))
-					{
-						i++;
-						if (i < n_args)
-						{
-							strcat(fileName, " ");
-							strcat(fileName, argv[i]);
-
-							if (strstr(argv[i], "\"") != NULL)
-							{
-								scanName = false;
-								fileName[strlen(fileName) - 1] = 0;
-							}
-						}
-						else
-						{
-							//They put a quote on the line with no space.
-							//
-							scanName = false;
-							fileName[strlen(fileName) - 1] = 0;
-						}
-					}
-				}
-				else
-					strcpy(fileName, argv[i]);
-			}
+		if (strcmpi(argv[i], "-file") == 0)	{
+			i = parseParam(i, n_args, argv, fileName);
 		}
-		if (strcmpi(argv[i], "-list") == 0)
-		{
-			i++;
-			if (i < n_args)
-			{
-				if (argv[i][0] == '"')
-				{
-					// They typed in a quote, keep reading argvs
-					// until you find the close quote
-					strcpy(listName, &(argv[i][1]));
-					bool scanName = true;
-					while (scanName && (i < n_args))
-					{
-						i++;
-						if (i < n_args)
-						{
-							strcat(listName, " ");
-							strcat(listName, argv[i]);
-
-							if (strstr(argv[i], "\"") != NULL)
-							{
-								scanName = false;
-								listName[strlen(listName) - 1] = 0;
-							}
-						}
-						else
-						{
-							//They put a quote on the line with no space.
-							//
-							scanName = false;
-							listName[strlen(listName) - 1] = 0;
-						}
-					}
-				}
-				else
-					strcpy(listName, argv[i]);
-			}
+		if (strcmpi(argv[i], "-list") == 0) {
+			i = parseParam(i, n_args, argv, listName);
 		}
-		if (strcmpi(argv[i], "-prefix-path") == 0)
-		{
-			i++;
-			if (i < n_args)
-			{
-				if (argv[i][0] == '"')
-				{
-					// They typed in a quote, keep reading argvs
-					// until you find the close quote
-					strcpy(prefixPath, &(argv[i][1]));
-					bool scanName = true;
-					while (scanName && (i < n_args))
-					{
-						i++;
-						if (i < n_args)
-						{
-							strcat(prefixPath, " ");
-							strcat(prefixPath, argv[i]);
-
-							if (strstr(argv[i], "\"") != NULL)
-							{
-								scanName = false;
-								prefixPath[strlen(prefixPath) - 1] = 0;
-							}
-						}
-						else
-						{
-							//They put a quote on the line with no space.
-							//
-							scanName = false;
-							prefixPath[strlen(prefixPath) - 1] = 0;
-						}
-					}
-				}
-				else
-					strcpy(prefixPath, argv[i]);
-			}
+		if (strcmpi(argv[i], "-prefix-path") == 0) {
+			i = parseParam(i, n_args, argv, prefixPath);
+		}
+		if (strcmpi(argv[i], "-dst-path") == 0)	{
+			i = parseParam(i, n_args, argv, dstPath);
 		}
 
 		if (strcmpi(argv[i], "-arm") == 0)
@@ -523,7 +466,7 @@ long convertASE2TGL(char *file)
 
 void usage(const char* program_name)
 {
-	printf("%s <-file file.ase | -prefix-path /path/to/ase/files/>\n", program_name);
+	printf("%s <-file file.ase | -prefix-path /path/to/ase/files/> [-dst-path /path/to/output/converted/files/]\n", program_name);
 }
 
 //-----------------------------
@@ -643,6 +586,7 @@ int main(int argc, char** argv)
 	memset(fileName, 0, sizeof(fileName));
 	memset(listName, 0, sizeof(listName));
 	memset(prefixPath, 0, sizeof(prefixPath));
+	strcpy(dstPath, "." PATH_SEPARATOR);
 
 	// gather command line
 	size_t cmdline_len = 0;
@@ -673,7 +617,9 @@ int main(int argc, char** argv)
 	}
 
 	// tglPath used by Load*** functions when they compose filename for outpur binary file
-	strcpy(tglPath, "./data/tgl/");
+	strcpy(tglPath, dstPath);
+
+	create_path(dstPath);
 
 	// Initialize COM and create an instance of the InterfaceImplementation class:
 	CoInitialize(NULL);
