@@ -2980,8 +2980,8 @@ void GameObjectManager::CopyFrom (ObjectManagerData *data)
 //-------------------------------------------------------------------
 long GameObjectManager::Save (PacketFilePtr file, long packetNum)
 {
-	long *watchSave = (long *)malloc(sizeof(long) * (getMaxObjects() + 1));
-	memset(watchSave,0,sizeof(long) * (getMaxObjects() + 1));
+	int32_t *watchSave = (int32_t*)malloc(sizeof(int32_t) * (getMaxObjects() + 1));
+	memset(watchSave,0,sizeof(int32_t) * (getMaxObjects() + 1));
 
 	ObjectManagerData data;
 	CopyTo(&data);
@@ -3014,7 +3014,7 @@ long GameObjectManager::Save (PacketFilePtr file, long packetNum)
 		}
 	}
 
-	file->writePacket(packetNum,(MemoryPtr)watchSave,sizeof(long) * (getMaxObjects() + 1),STORAGE_TYPE_ZLIB);
+	file->writePacket(packetNum,(MemoryPtr)watchSave, sizeof(int32_t) * (getMaxObjects() + 1), STORAGE_TYPE_ZLIB);
 	packetNum++;
 
 	free(watchSave);
@@ -3609,8 +3609,8 @@ long GameObjectManager::Load (PacketFilePtr file, long packetNum)
 	GameObject::setInitialize(false);
 
 	//Reload the Object Watchers
-	long *watchSave = (long *)malloc(sizeof(long) * (getMaxObjects() + 1));
-	memset(watchSave,0,sizeof(long) * (getMaxObjects() + 1));
+	int32_t *watchSave = (int32_t*)malloc(sizeof(int32_t) * (getMaxObjects() + 1));
+	memset(watchSave,0,sizeof(int32_t) * (getMaxObjects() + 1));
 
 	file->readPacket(packetNum,(MemoryPtr)watchSave);
 	packetNum++;
@@ -3619,7 +3619,7 @@ long GameObjectManager::Load (PacketFilePtr file, long packetNum)
 	// If none, let it be.  It'll be zero already
 	// DO NOT CALL getWatchID!!!!!!!
 	// That will assign them to objects which don't have them!!!!
-	for (long j=0;j<getMaxObjects();j++)
+	for (int j=0;j<getMaxObjects();j++)
 	{
 		watchList[j] = objList[watchSave[j]];
 	}
