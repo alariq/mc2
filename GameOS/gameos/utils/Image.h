@@ -109,6 +109,7 @@ public:
 
 private:
     bool loadTGA(const TGAHeader* header, unsigned char* readPixels);
+    bool loadCompressedTGA(const TGAHeader* header, const unsigned char* readPixels, size_t len);
 
 	unsigned char *pixels;
 	long width, height;
