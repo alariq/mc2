@@ -166,11 +166,8 @@ bool Image::loadTGA(FILE* file)
 		int size = header.width * header.height * pixelSize;
 		readPixels = new unsigned char[size];
 		fread(readPixels, size, 1, file);
-		fclose(file);
 
 		rv = loadTGA(&header, readPixels);
-
-		delete[] readPixels;
 	}
 	else if(header.imageType == (unsigned char)TGADataType::kRLERGB) {
 
