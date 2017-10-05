@@ -15,7 +15,7 @@ char* S_strupr(char* s);
 char* S_strlwr(char* s);
 int S_snprintf(char *str, size_t size, const char *format, ...);
 int S_vsnprintf(char *str, size_t size, const char *format, va_list ap);
-int S_sprintf(char *str, const char *format, ...);
+//int S_sprintf(char *str, const char *format, ...);
 
 #define _strdup strdup
 
