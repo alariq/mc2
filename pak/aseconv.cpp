@@ -96,7 +96,7 @@ void ParseCommandLine(char *command_line)
 	i = 0;
 	while (i<n_args)
 	{
-		if (strcmpi(argv[i], "-file") == 0)
+		if (S_stricmp(argv[i], "-file") == 0)
 		{
 			i++;
 			if (i < n_args)
@@ -134,7 +134,7 @@ void ParseCommandLine(char *command_line)
 					strcpy(fileName, argv[i]);
 			}
 		}
-		if (strcmpi(argv[i], "-list") == 0)
+		if (S_stricmp(argv[i], "-list") == 0)
 		{
 			i++;
 			if (i < n_args)
@@ -172,7 +172,7 @@ void ParseCommandLine(char *command_line)
 					strcpy(listName, argv[i]);
 			}
 		}
-		if (strcmpi(argv[i], "-prefix-path") == 0)
+		if (S_stricmp(argv[i], "-prefix-path") == 0)
 		{
 			i++;
 			if (i < n_args)
@@ -211,7 +211,7 @@ void ParseCommandLine(char *command_line)
 			}
 		}
 
-		if (strcmpi(argv[i], "-arm") == 0)
+		if (S_stricmp(argv[i], "-arm") == 0)
 		{
 			createARM = true;
 		}
