@@ -61,6 +61,17 @@ struct BMPHeader {
 	unsigned int   biClrImportant;
 };
 
+enum class TGADataType {
+	kNoImageData = 0,
+	kUncompressedColorMapped = 1,
+	kUncompressedRGB = 2,
+	kUncompressedBlackAndWhite = 3,
+	kRLEColorMapped = 9,
+	kRLERGB = 10,
+	kCompressedBlackAndWhite = 11,
+	kCompressedColorMappedHuffman = 32,
+	kCompressedColorMappedHuffman4PassQuadTree = 33,
+};
 
 template <typename DATA_TYPE>
 inline void swapChannels(DATA_TYPE *pixels, int nPixels, const int channels, const int ch0, const int ch1){
@@ -71,7 +82,24 @@ inline void swapChannels(DATA_TYPE *pixels, int nPixels, const int channels, con
 		pixels += channels;
 	} while (--nPixels);
 }
- 
+
+
+static FORMAT getFormatFromBpp(const unsigned int bpp) {
+	switch (bpp) {
+	case 8:
+		return FORMAT_I8;
+		break;
+	case 16:
+		return FORMAT_RGBA8;
+		break;
+	case 24:
+		return FORMAT_RGB8;
+		break;
+	case 32:
+		return FORMAT_RGBA8;
+		break;
+	}
+}
 
 Image::Image(void)
 {
@@ -129,14 +157,34 @@ bool Image::loadTGA(FILE* file)
 	if (header.descLen) fseek(file, header.descLen, SEEK_CUR);
 
 	int pixelSize = header.bpp / 8;
-	int size = header.width * header.height * pixelSize;
 
-	unsigned char *readPixels = new unsigned char[size];
-	fread(readPixels, size, 1, file);
+	bool rv = false;
+	unsigned char *readPixels = 0;
+
+	if (header.imageType == (unsigned char)TGADataType::kUncompressedRGB) {
+
+		int size = header.width * header.height * pixelSize;
+		readPixels = new unsigned char[size];
+		fread(readPixels, size, 1, file);
+
+		rv = loadTGA(&header, readPixels);
+	}
+	else if(header.imageType == (unsigned char)TGADataType::kRLERGB) {
+
+		size_t fpos = ftell(file);
+		fseek(file, 0, SEEK_END);
+		size_t fsize = ftell(file) - fpos;
+		fseek(file, fpos, SEEK_SET);
+
+		readPixels = new unsigned char[fsize];
+		fread(readPixels, fsize, 1, file);
+
+		rv = loadCompressedTGA(&header, readPixels, fsize);
+	}
+
 	fclose(file);
+	delete[] readPixels;
 
-    bool rv = loadTGA(&header, readPixels);
-    delete[] readPixels;
     return rv;
 }
 
@@ -160,14 +208,20 @@ bool Image::loadTGA(const unsigned char* mem, size_t len)
 	unsigned int pixelSize = header.bpp / 8;
 	int size = header.width * header.height * pixelSize;
 
-    assert(len >= header.width * header.height * pixelSize);
+	unsigned char *readPixels = 0;
+	bool rv = false;
 
-	unsigned char *readPixels = new unsigned char[size];
-	memcpy(readPixels, mem, size);
 
-    bool rv = loadTGA(&header, readPixels);
-
-    delete[] readPixels;
+	if (header.imageType == (unsigned char)TGADataType::kUncompressedRGB) {
+		assert(len >= header.width * header.height * pixelSize);
+		readPixels = new unsigned char[size];
+		memcpy(readPixels, mem, size);
+		rv = loadTGA(&header, readPixels);
+		delete[] readPixels;
+	}
+	else if(header.imageType == (unsigned char)TGADataType::kRLERGB) {
+		rv = loadCompressedTGA(&header, mem, len);
+	}
 
     return rv;
 }
@@ -177,6 +231,8 @@ bool Image::loadTGA(const TGAHeader* header, unsigned char* readPixels)
 	width  = header->width;
 	height = header->height;
 
+	format = getFormatFromBpp(header->bpp);
+
 	int pixelSize = header->bpp / 8;
 
 	unsigned char *dest, *src = readPixels + width * (height - 1) * pixelSize;
@@ -184,7 +240,6 @@ bool Image::loadTGA(const TGAHeader* header, unsigned char* readPixels)
 	int x, y;
 	switch (header->bpp) {
 		case 8:
-			format = FORMAT_I8;
 			dest = pixels = new unsigned char[width * height];
 			for (y = 0; y < height; y++){
 				memcpy(dest, src, width);
@@ -193,7 +248,6 @@ bool Image::loadTGA(const TGAHeader* header, unsigned char* readPixels)
 			}
 			break;
 		case 16:
-			format = FORMAT_RGBA8;
 			dest = pixels = new unsigned char[width * height * 4];
 			for (y = 0; y < height; y++){
 				for (x = 0; x < width; x++){
@@ -210,7 +264,6 @@ bool Image::loadTGA(const TGAHeader* header, unsigned char* readPixels)
 			}
 			break;
 		case 24:
-			format = FORMAT_RGB8;
 			dest = pixels = new unsigned char[width * height * 3];
 			for (y = 0; y < height; y++){
 				for (x = 0; x < width; x++){
@@ -223,7 +276,6 @@ bool Image::loadTGA(const TGAHeader* header, unsigned char* readPixels)
 			}
 			break;
 		case 32:
-			format = FORMAT_RGBA8;
 			dest = pixels = new unsigned char[width * height * 4];
 			for (y = 0; y < height; y++){
 				for (x = 0; x < width; x++){
@@ -236,6 +288,91 @@ bool Image::loadTGA(const TGAHeader* header, unsigned char* readPixels)
 				src -= 8 * width;
 			}
 			break;
+	}
+
+	if (header->attrib & 0x20) flip();
+
+	return true;
+}
+
+
+static void mergeBytes(unsigned char *dest, unsigned char *src, int pixelSize)
+{
+	if (pixelSize == 4) {
+		*dest++ = src[2];
+		*dest++ = src[1];
+		*dest++ = src[0];
+		*dest++ = src[3];
+	}
+	else if (pixelSize == 3) {
+		*dest++ = src[2];
+		*dest++ = src[1];
+		*dest++ = src[0];
+	}
+	else if (pixelSize == 2) {
+		unsigned short tempPixel = *((unsigned short *)src);
+		dest[0] = ((tempPixel >> 10) & 0x1F) << 3;
+		dest[1] = ((tempPixel >> 5) & 0x1F) << 3;
+		dest[2] = ((tempPixel) & 0x1F) << 3;
+		dest[3] = ((tempPixel >> 15) ? 0xFF : 0);
+	}
+	else {
+		assert(0 && "Unsupported pixelSize");
+	}
+}
+
+bool Image::loadCompressedTGA(const TGAHeader* header, const unsigned char* mem, size_t len) {
+
+	width  = header->width;
+	height = header->height;
+
+	format = getFormatFromBpp(header->bpp);
+
+	const int pixelSize = header->bpp / 8;
+	unsigned char p[5];
+	int num_read_pixels = 0;
+	int offset = 0;
+	const size_t num_pixels = width * height;
+
+	unsigned char* dest = pixels = new unsigned char[width * height * pixelSize];
+
+	while (num_read_pixels < num_pixels) {
+
+		if (len < pixelSize + 1)
+			return false;
+
+		memcpy(p, mem + offset, pixelSize + 1);
+		if (len < pixelSize + 1)
+		{
+			int sdfas = 0;
+		}
+		len -= pixelSize + 1;
+		offset += pixelSize + 1;
+
+		mergeBytes(&(pixels[num_read_pixels]), &(p[1]), pixelSize);
+		num_read_pixels++;
+
+		unsigned int  j = p[0] & 0x7f;
+		bool is_rle = p[0] & 0x80;
+		if (is_rle) {
+			for (unsigned int i = 0; i < j; i++) {
+				mergeBytes(&(pixels[num_read_pixels]), &(p[1]), pixelSize);
+				num_read_pixels++;
+			}
+		}
+		else {
+			for (unsigned int i = 0; i < j; i++) {
+
+				if (len < pixelSize)
+					return false;
+				memcpy(p, mem + offset, pixelSize);
+				len -= pixelSize;
+				offset += pixelSize;
+
+				mergeBytes(&(pixels[num_read_pixels]), p, pixelSize);
+				num_read_pixels++;
+			}
+		}
 	}
 
 	if (header->attrib & 0x20) flip();

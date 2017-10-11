@@ -1,7 +1,7 @@
 1) GameDebugWindow is duplicated on code and mclib - Fix it
-2) ablmc2.cpp is found in ABLT and code folders - Fix it
-3) fix mech custom colors which can be set in options menu - they are inverted
+NOTABUG - 2) ablmc2.cpp is found in ABLT and code folders - Fix it -- this is probably ok, but I am not using ABLT anyway, maybe I should?
+DONE - 3) fix mech custom colors which can be set in options menu - they are inverted
 4) add compressed tga loading support
-5) add support for .rsp files for pack/unpack tool
-5) tgl/agl files are generated when running game, add generaton tool ase -> tgl/agl
-6) objmgr.cpp Save/Load chnge watchSave to be int* instead of long*
+DONE - 5) add support for .rsp files for pack/unpack tool
+DONE - 6) tgl/agl files are generated when running game, add generaton tool ase -> tgl/agl
+DONE - 7) objmgr.cpp Save/Load chnge watchSave to be int* instead of long*

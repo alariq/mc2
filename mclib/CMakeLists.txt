@@ -85,6 +85,7 @@ set(SOURCES ${SOURCES}
 
 include_directories("../GameOS/include" "./mclib" "../Editor" "../DirectX8/include" "./")
 
+add_definitions(-DBGR)
 add_library(mclib ${SOURCES})
 
 # cat MCLib.vcproj | grep ".cpp" | perl -pe 's/.+\"(\w+\.cpp)\".+/\1/g' >> CMakeLists.txt
