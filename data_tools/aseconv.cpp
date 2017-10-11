@@ -622,7 +622,7 @@ int main(int argc, char** argv)
 	create_path(dstPath);
 
 	// Initialize COM and create an instance of the InterfaceImplementation class:
-	CoInitialize(NULL);
+	//CoInitialize(NULL);
 	armProvider = CreateProviderEngine("AseConv", versionStamp);
 
 	assert(armProvider);
@@ -676,7 +676,7 @@ int main(int argc, char** argv)
 	//
 	// Exit app
 	//
-	CoUninitialize();
+	//CoUninitialize();
 
 	//ExitGameOS();	
 

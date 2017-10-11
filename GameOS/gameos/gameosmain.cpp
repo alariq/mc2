@@ -166,6 +166,7 @@ static void draw_screen( void )
 
 extern float frameRate;
 
+#ifndef DISABLE_GAMEOS_MAIN
 int main(int argc, char** argv)
 {
     //signal(SIGTRAP, SIG_IGN);
@@ -297,4 +298,4 @@ int main(int argc, char** argv)
 
     return 0;
 }
-
+#endif // DISABLE_GAMEOS_MAIN
