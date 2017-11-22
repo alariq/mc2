@@ -10,13 +10,14 @@ endif("${CMAKE_SIZEOF_VOID_P}" EQUAL "8")
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O0 -std=c++0x -ggdb ")
 if(NOT MSVC)
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-local-typedefs -Wno-unknown-warning-option")
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-local-typedefs -Wno-unknown-warning-option") #-fsanitize=address -fno-omit-frame-pointer")
 endif()
 
 add_definitions(-D_ARMOR)
 add_definitions(-D_DEBUG)
 add_definitions(-DUSE_ASSEMBLER_CODE=0)
 add_definitions(-DLINUX_BUILD)
+add_definitions(-DDISABLE_GAMEOS_MAIN)
 
 if(MSVC)
 	add_definitions(-DPLATFORM_WINDOWS)
@@ -71,6 +72,8 @@ if(WIN32)
 	set(ADDITIONAL_LIBS ${ADDITIONAL_LIBS} ${OPENGL_gl_LIBRARY} )
 	message("OpenGL library linking: ${OPENGL_gl_LIBRARY}")
 	message("OpenGL library include: ${OPENGL_INCLUDE_DIR}")
+else()
+	set(ADDITIONAL_LIBS dl) # needed by gameos linked by aseconv
 endif()
 
 add_executable(makefst ${MAKEFST_SOURCES})

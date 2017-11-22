@@ -141,20 +141,20 @@ void ParseCommandLine(char *command_line)
 	i = 0;
 	while (i<n_args)
 	{
-		if (strcmpi(argv[i], "-file") == 0)	{
+		if (S_stricmp(argv[i], "-file") == 0)	{
 			i = parseParam(i, n_args, argv, fileName);
 		}
-		if (strcmpi(argv[i], "-list") == 0) {
+		if (S_stricmp(argv[i], "-list") == 0) {
 			i = parseParam(i, n_args, argv, listName);
 		}
-		if (strcmpi(argv[i], "-prefix-path") == 0) {
+		if (S_stricmp(argv[i], "-prefix-path") == 0) {
 			i = parseParam(i, n_args, argv, prefixPath);
 		}
-		if (strcmpi(argv[i], "-dst-path") == 0)	{
+		if (S_stricmp(argv[i], "-dst-path") == 0)	{
 			i = parseParam(i, n_args, argv, dstPath);
 		}
 
-		if (strcmpi(argv[i], "-arm") == 0)
+		if (S_stricmp(argv[i], "-arm") == 0)
 		{
 			createARM = true;
 		}
@@ -622,7 +622,7 @@ int main(int argc, char** argv)
 	create_path(dstPath);
 
 	// Initialize COM and create an instance of the InterfaceImplementation class:
-	CoInitialize(NULL);
+	//CoInitialize(NULL);
 	armProvider = CreateProviderEngine("AseConv", versionStamp);
 
 	assert(armProvider);
@@ -676,7 +676,7 @@ int main(int argc, char** argv)
 	//
 	// Exit app
 	//
-	CoUninitialize();
+	//CoUninitialize();
 
 	//ExitGameOS();	
 
