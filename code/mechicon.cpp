@@ -120,7 +120,9 @@ ForceGroupIcon::ForceGroupIcon(  )
 		s_textureMemory->height = 256;
 		s_textureMemory->width = 256;
 		s_textureMemory->pixel_depth = 32;
-		s_textureMemory->image_type = UNC_PAL;
+		//sebi: no palette support
+		s_textureMemory->image_type = UNC_TRUE;
+		//s_textureMemory->image_type = UNC_PAL;
 
 		if ( s_textureHandle[0] == -1 )
 			s_textureHandle[0] = gos_NewTextureFromMemory( gos_Texture_Alpha, ".tga", (unsigned char*)s_textureMemory, size, 0 );
