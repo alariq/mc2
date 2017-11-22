@@ -21,3 +21,5 @@ memory corruption investigation
 https://en.wikibooks.org/wiki/Linux_Applications_Debugging_Techniques/Heap_corruption
 pageheap.exe, application verifier
 gflags.exe
+
+check apitest and libccd for CMake files examples
