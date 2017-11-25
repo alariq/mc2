@@ -2015,7 +2015,7 @@ long TG_AnimateShape::LoadTGMultiShapeAnimationFromASE (const char *fileName, TG
 			}
 			else
 			{
-				long versionId = binFile.readInt();
+				int versionId = binFile.readInt();
 				if (versionId != CURRENT_ANIM_VERSION)
 					makeBinary = true;
 			}
