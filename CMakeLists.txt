@@ -189,3 +189,5 @@ message("sdl2 prefix: ${SDL2_PREFIX}")
 
 add_executable(mc2 ${SOURCES})
 target_link_libraries(mc2 mclib gosfx mlr stuff gui gameos windows ${ZLIB} ${SDL_LIBS} ${GLEW} ${SDL2_mixer} ${ADDITIONAL_LIBS} ${OPENGL_gl_LIBRARY})
+
+add_subdirectory("./Viewer" "./out/Viewer")

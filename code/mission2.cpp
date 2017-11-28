@@ -63,6 +63,18 @@ __int64 MCTimeMissionScript 	= 0;
 __int64 MCTimeInterfaceUpdate 	= 0; 
 __int64 MCTimeMissionTotal 		= 0; 
 
+__int64 MCTimeLOSCalc				= 0;
+__int64 MCTimeTerrainObjectsUpdate	= 0;
+__int64 MCTimeMechsUpdate			= 0;
+__int64 MCTimeVehiclesUpdate		= 0;
+__int64 MCTimeTurretsUpdate			= 0;
+__int64 MCTimeAllElseUpdate			= 0;
+
+__int64 MCTimeTerrainObjectsTL		= 0;
+__int64 MCTimeMechsTL				= 0;
+__int64 MCTimeVehiclesTL			= 0;
+__int64 MCTimeTurretsTL				= 0;
+
 extern __int64 MCTimeTerrainGeometry 	; 
 extern __int64 MCTimeCraterUpdate 		; 
 extern __int64 MCTimeTXMManagerUpdate 	; 

@@ -943,6 +943,8 @@ void gosRenderer::init() {
             0, 0, 1.0f, 0.0f,
             0, 0, 0.0f, 1.0f);
 
+	graphics::get_drawable_size(win_h_, &Environment.drawableWidth, &Environment.drawableHeight);
+
     // setup viewport
     setupViewport(true, 1.0f, true, 0, 0.0f, 0.0f, 1.0f, 1.0f);
 
