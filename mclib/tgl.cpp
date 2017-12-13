@@ -2127,12 +2127,12 @@ long TG_Shape::MultiTransformShape (Stuff::Matrix4D *shapeToClip, Stuff::Point3D
 		
 		if (aRGBHighlight)
 		{
-			DWORD frgb = listOfVertices[j].frgb;
+			DWORD argb = listOfVertices[j].argb;
 
-			DWORD fFinal = (frgb>>24) & 0x000000ff;
-			DWORD rFinal = (frgb>>16) & 0x000000ff;
-			DWORD gFinal = (frgb>>8) & 0x000000ff;
-			DWORD bFinal = (frgb) & 0x000000ff;
+			DWORD fFinal = (argb>>24) & 0x000000ff;
+			DWORD rFinal = (argb>>16) & 0x000000ff;
+			DWORD gFinal = (argb>>8) & 0x000000ff;
+			DWORD bFinal = (argb) & 0x000000ff;
 
 			rFinal += (aRGBHighlight>>16) & 0x000000ff;
 			if (rFinal > 255)
@@ -2146,8 +2146,8 @@ long TG_Shape::MultiTransformShape (Stuff::Matrix4D *shapeToClip, Stuff::Point3D
 			if (bFinal > 255)
 				bFinal = 255;
 
-			frgb = (fFinal << 24) + (rFinal << 16) + (gFinal << 8) + (bFinal);
-			listOfVertices[j].frgb = frgb;
+			argb = (fFinal << 24) + (rFinal << 16) + (gFinal << 8) + (bFinal);
+			listOfVertices[j].argb = argb;
 		}
 	}
 
