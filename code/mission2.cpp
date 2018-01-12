@@ -119,6 +119,7 @@ void Mission::initBareMinimum()
 
 	//Startup the vertex array pool
 	mcTextureManager->startVertices(100000);
+	mcTextureManager->startShapes(10000);
 
 	initTGLForLogistics();
 

@@ -181,6 +181,9 @@ typedef class gosFont*		HGOSFONT3D;
 typedef struct  gosForceEffect*	HGOSFORCEEFFECT;
 typedef struct	gos_Heap*		HGOSHEAP;
 typedef struct gos_StringRes*   HSTRRES; //sebi
+typedef class gosBuffer*		HGOSBUFFER; //sebi
+typedef class gosVertexDeclaration*	HGOSVERTEXDECLARATION; //sebi
+
 
 //////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////
@@ -2223,6 +2226,12 @@ void __stdcall gos_RenderIndexedArray( gos_VERTEX* pVertexArray, DWORD NumberVer
 void __stdcall gos_RenderIndexedArray( gos_VERTEX_2UV* pVertexArray, DWORD NumberVertices, WORD* lpwIndices, DWORD NumberIndices );
 void __stdcall gos_RenderIndexedArray( gos_VERTEX_3UV* pVertexArray, DWORD NumberVertices, WORD* lpwIndices, DWORD NumberIndices );
 
+
+void __stdcall gos_RenderIndexedArray(HGOSBUFFER ib, HGOSBUFFER vb, HGOSVERTEXDECLARATION vdecl, const float* mvp); //sebi
+
+
+void __stdcall gos_SetRenderViewport(float x, float y, float w, float h);
+
 //
 // Set a renderstate
 //
@@ -2553,18 +2562,44 @@ bool __stdcall gos_VertexBuffersLost( DWORD VertexBufferHandle=0 );
 void __stdcall gos_RenderVertexBuffer( DWORD VertexBufferHandle, DWORD StartVertex, DWORD NumberVertices, WORD* lpwIndices, DWORD NumberIndices, gosPRIMITIVETYPE PrimitiveType=PRIMITIVE_TRIANGLELIST );
 
 
+enum class gosBUFFER_TYPE {
+	VERTEX = 0,
+	INDEX,
+	UNIFORM,
+	NUM_BUFFER_TYPES
+};
 
+enum class gosBUFFER_USAGE {
+	STREAM_DRAW = 0,
+	STATIC_DRAW,
+	DYNAMIC_DRAW,
+	NUM_BUFFER_USAGE
+};
 
+enum class gosVERTEX_ATTRIB_TYPE {
+	BYTE,
+	UNSIGNED_BYTE,
+	SHORT, 
+	UNSIGNED_SHORT,
+	INT, 
+	UNSIGNED_INT,
+	FLOAT,
+};
 
+struct gosVERTEX_FORMAT_RECORD {
+	int index;
+	int num_components;
+	bool normalized;
+	int stride;
+	int offset;
+	gosVERTEX_ATTRIB_TYPE type;
+};
 
+HGOSBUFFER __stdcall gos_CreateBuffer(gosBUFFER_TYPE type, gosBUFFER_USAGE usage, int element_size, uint32_t count, void* pdata);
+void __stdcall gos_DestroyBuffer(HGOSBUFFER buffer);
 
-
-
-
-
-
-
-
+HGOSVERTEXDECLARATION __stdcall gos_CreateVertexDeclaration(gosVERTEX_FORMAT_RECORD* records, int count);
+void __stdcall gos_DestroyVertexDeclaration(HGOSVERTEXDECLARATION buffer);
 
 
 //

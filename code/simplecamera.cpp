@@ -257,7 +257,7 @@ long SimpleCamera::update()
 			offsetY += fudgeY; // hack, just to get exactly where Dorje wants it
 		
 
-			TG_Shape::SetViewport(viewMulX,viewMulY, offsetX, offsetY);	
+			TG_Shape::SetViewport(viewMulX,viewMulY, offsetX, offsetY); 
 
 		useShadows = 0;
 		oldCam = eye;

@@ -176,6 +176,8 @@ Texture create2DTexture(int w, int h, TexFormat fmt, const uint8_t* texdata)
             w, h, 0, textureFormats[fmt], textureFormatChannelType[fmt], texdata);
     CHECK_GL_ERROR
 
+	//glGenerateMipmap(GL_TEXTURE_2D);
+
 	Texture t;
 	t.id = texID;
 	t.w = w;
@@ -267,7 +269,8 @@ void updateTexture(const Texture& t, void* pdata, TexFormat pdata_format/*= TF_C
         
 	    //glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, t.w, t.h, 0, GL_RGBA, GL_UNSIGNED_BYTE, pdata);
         glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, t.w, t.h, fmt, ch_type, pdata);
-        CHECK_GL_ERROR
+		CHECK_GL_ERROR
+		//glGenerateMipmap(GL_TEXTURE_2D);
     } else {
         // deprecated
 	    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, t.w, t.h, 0, t.format, GL_UNSIGNED_BYTE, pdata);
@@ -374,8 +377,11 @@ GLuint makeBuffer(GLenum target, const GLvoid* buffer_data, GLsizei buffer_size,
 {
 	GLuint buffer;
 	glGenBuffers(1, &buffer);
+    CHECK_GL_ERROR
 	glBindBuffer(target, buffer);
+    CHECK_GL_ERROR
 	glBufferData(target, buffer_size, buffer_data, type);
+    CHECK_GL_ERROR
 	glBindBuffer(target, 0);
     CHECK_GL_ERROR
 	return buffer;
@@ -385,8 +391,11 @@ void updateBuffer(GLuint buf, GLenum target, const GLvoid* buffer_data, GLsizei 
 {
 	assert(buf && buffer_data);
 	glBindBuffer(target, buf);
+    CHECK_GL_ERROR
 	glBufferSubData(target, 0, buffer_size, buffer_data);
+    CHECK_GL_ERROR
 	glBindBuffer(target, 0);
+    CHECK_GL_ERROR
 }
 
 
@@ -394,8 +403,11 @@ void updateBuffer(GLuint buf, GLenum target, const GLvoid* buffer_data, GLsizei 
 {
 	assert(buf && buffer_data);
 	glBindBuffer(target, buf);
+    CHECK_GL_ERROR
 	glBufferData(target, buffer_size, buffer_data, type);
+    CHECK_GL_ERROR
 	glBindBuffer(target, 0);
+    CHECK_GL_ERROR
 }
 
 

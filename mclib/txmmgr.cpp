@@ -52,6 +52,7 @@
 // static globals
 MC_TextureManager *mcTextureManager = NULL;
 gos_VERTEXManager *MC_TextureManager::gvManager = NULL;
+gos_RenderShapeManager<TG_RenderShape> *MC_TextureManager::rsManager = NULL;
 MemoryPtr			MC_TextureManager::lzBuffer1 = NULL;
 MemoryPtr			MC_TextureManager::lzBuffer2 = NULL;
 int				MC_TextureManager::iBufferRefCount = 0;
@@ -66,13 +67,23 @@ DWORD compressedTextureSize = 0;
 
 //------------------------------------------------------
 // Frees up gos_VERTEX manager memory
-void MC_TextureManager::freeVertices (void)
+void MC_TextureManager::freeVertices(void)
 {
 	if (gvManager)
 	{
 		gvManager->destroy();
 		delete gvManager;
 		gvManager = NULL;
+	}
+}
+
+void MC_TextureManager::freeShapes(void)
+{
+	if (rsManager)
+	{
+		rsManager->destroy();
+		delete rsManager;
+		rsManager = NULL;
 	}
 }
 		
@@ -85,6 +96,16 @@ void MC_TextureManager::startVertices (long maxVertices)
 		gvManager = new gos_VERTEXManager;
 		gvManager->init(maxVertices);
 		gvManager->reset();
+	}
+}
+
+void MC_TextureManager::startShapes(uint32_t maxShapes)
+{
+	if (rsManager == NULL)
+	{
+		rsManager = new gos_RenderShapeManager<TG_RenderShape>;
+		rsManager->init(maxShapes);
+		rsManager->reset();
 	}
 }
 	 
@@ -110,6 +131,12 @@ void MC_TextureManager::start (void)
 	gosASSERT(masterVertexNodes != NULL);
 	
 	memset(masterVertexNodes,0,nodeRAM);
+
+	nodeRAM = MC_MAXTEXTURES * sizeof(MC_HardwareVertexArrayNode);
+	masterHardwareVertexNodes = (MC_HardwareVertexArrayNode *)systemHeap->Malloc(nodeRAM);
+	gosASSERT(masterHardwareVertexNodes != NULL);
+	
+	memset(masterHardwareVertexNodes,0,nodeRAM);
 
 	textureCacheHeap = new UserHeap;
 	textureCacheHeap->init(TEXTURE_CACHE_SIZE,"TXMCache");
@@ -464,6 +491,200 @@ bool MC_TextureManager::flushCache (void)
 	return cacheNotFull;
 }
 
+void MC_TextureManager::addRenderShape(DWORD nodeId, TG_RenderShape* render_shape, DWORD flags)
+{
+	//This function adds the actual vertex data to the texture Node.
+	if (nodeId < MC_MAXTEXTURES)
+	{
+		if (masterTextureNodes[nodeId].hardwareVertexData &&
+			masterTextureNodes[nodeId].hardwareVertexData->flags == flags)
+		{
+			TG_RenderShape* shapes = masterTextureNodes[nodeId].hardwareVertexData->currentShape;
+			if (!shapes && !masterTextureNodes[nodeId].hardwareVertexData->shapes)
+			{
+				masterTextureNodes[nodeId].hardwareVertexData->currentShape =
+					shapes =
+					masterTextureNodes[nodeId].hardwareVertexData->shapes =
+					rsManager->getBlock(masterTextureNodes[nodeId].hardwareVertexData->numShapes);
+			}
+
+			if (shapes < (masterTextureNodes[nodeId].hardwareVertexData->shapes + masterTextureNodes[nodeId].hardwareVertexData->numShapes))
+			{
+				*shapes = *render_shape;
+				shapes++;
+			}
+
+			masterTextureNodes[nodeId].hardwareVertexData->currentShape = shapes;
+		}
+		else if (masterTextureNodes[nodeId].hardwareVertexData2 &&
+			masterTextureNodes[nodeId].hardwareVertexData2->flags == flags)
+		{
+			TG_RenderShape* shapes = masterTextureNodes[nodeId].hardwareVertexData2->currentShape;
+
+			//sebi: looks like assert may happen if more vertices added than was calculated on stage when addTriange was called. As one can see in (*) first time we go here, we allocate enough memory for all potential vertices, but if it is not enough this assert will trigger
+#if defined( _DEBUG) || defined(_ARMOR)
+			TG_RenderShape* oldShapes = shapes;
+			TG_RenderShape* oldStart = (masterTextureNodes[nodeId].hardwareVertexData2->shapes + masterTextureNodes[nodeId].hardwareVertexData2->numShapes);
+#endif
+			gosASSERT(oldShapes < oldStart);
+
+			// (*)
+			if (!shapes && !masterTextureNodes[nodeId].hardwareVertexData2->shapes)
+			{
+				masterTextureNodes[nodeId].hardwareVertexData2->currentShape =
+					shapes =
+					masterTextureNodes[nodeId].hardwareVertexData2->shapes =
+					rsManager->getBlock(masterTextureNodes[nodeId].hardwareVertexData2->numShapes);
+			}
+
+			if (shapes < (masterTextureNodes[nodeId].hardwareVertexData2->shapes + masterTextureNodes[nodeId].hardwareVertexData2->numShapes))
+			{
+				*shapes = *render_shape;
+				shapes++;
+			}
+
+			masterTextureNodes[nodeId].hardwareVertexData2->currentShape = shapes;
+		}
+		else if (masterTextureNodes[nodeId].vertexData3 &&
+			masterTextureNodes[nodeId].vertexData3->flags == flags)
+		{
+			TG_RenderShape * shapes = masterTextureNodes[nodeId].hardwareVertexData3->currentShape;
+
+#if defined(_DEBUG) || defined(_ARMOR)
+			TG_RenderShape * oldShapes = shapes;
+			TG_RenderShape * oldStart = (masterTextureNodes[nodeId].hardwareVertexData3->shapes + masterTextureNodes[nodeId].hardwareVertexData3->numShapes);
+#endif
+			gosASSERT(oldShapes < oldStart);
+
+			if (!shapes && !masterTextureNodes[nodeId].hardwareVertexData3->shapes)
+			{
+				masterTextureNodes[nodeId].hardwareVertexData3->currentShape =
+					shapes =
+					masterTextureNodes[nodeId].hardwareVertexData3->shapes =
+					rsManager->getBlock(masterTextureNodes[nodeId].hardwareVertexData3->numShapes);
+			}
+
+			if (shapes < (masterTextureNodes[nodeId].hardwareVertexData3->shapes + masterTextureNodes[nodeId].hardwareVertexData3->numShapes))
+			{
+				*shapes = *render_shape;
+				shapes++;
+			}
+
+			masterTextureNodes[nodeId].hardwareVertexData3->currentShape = shapes;
+		}
+		else	//If we got here, something is really wrong
+		{
+#ifdef _DEBUG
+			SPEW(("GRAPHICS", "Flags do not match either set of render shapes Data\n"));
+#endif
+		}
+	}
+	else
+	{
+		if (hardwareVertexData && hardwareVertexData->flags == flags)
+		{
+			TG_RenderShape * shapes = hardwareVertexData->currentShape;
+			if (!shapes && !hardwareVertexData->shapes)
+			{
+				hardwareVertexData->currentShape =
+					shapes =
+					hardwareVertexData->shapes =
+					rsManager->getBlock(hardwareVertexData->numShapes);
+			}
+
+			if (shapes <= (hardwareVertexData->shapes + hardwareVertexData->numShapes))
+			{
+				*shapes = *render_shape;
+				shapes ++;
+			}
+
+			hardwareVertexData->currentShape = shapes;
+		}
+		else if (hardwareVertexData2 && hardwareVertexData2->flags == flags)
+		{
+			TG_RenderShape * shapes = hardwareVertexData2->currentShape;
+			if (!shapes && !hardwareVertexData2->shapes)
+			{
+				hardwareVertexData2->currentShape =
+					shapes =
+					hardwareVertexData2->shapes =
+					rsManager->getBlock(hardwareVertexData2->numShapes);
+			}
+
+			if (shapes <= (hardwareVertexData2->shapes + hardwareVertexData2->numShapes))
+			{
+				*shapes = *render_shape;
+				shapes ++;
+			}
+
+			hardwareVertexData2->currentShape = shapes;
+		}
+		else if (hardwareVertexData3 && hardwareVertexData3->flags == flags)
+		{
+			TG_RenderShape * shapes = hardwareVertexData3->currentShape;
+			if (!shapes && !hardwareVertexData3->shapes)
+			{
+				hardwareVertexData3->currentShape =
+					shapes =
+					hardwareVertexData3->shapes =
+					rsManager->getBlock(hardwareVertexData3->numShapes);
+			}
+
+			if (shapes <= (hardwareVertexData3->shapes + hardwareVertexData3->numShapes))
+			{
+				*shapes = *render_shape;
+				shapes ++;
+			}
+
+			hardwareVertexData3->currentShape = shapes;
+		}
+		else if (hardwareVertexData4 && hardwareVertexData4->flags == flags)
+		{
+			TG_RenderShape * shapes = hardwareVertexData4->currentShape;
+			if (!shapes && !hardwareVertexData4->shapes)
+			{
+				hardwareVertexData4->currentShape =
+					shapes =
+					hardwareVertexData4->shapes =
+					rsManager->getBlock(hardwareVertexData4->numShapes);
+			}
+
+			if (shapes <= (hardwareVertexData4->shapes + hardwareVertexData4->numShapes))
+			{
+				*shapes = *render_shape;
+				shapes ++;
+			}
+
+			hardwareVertexData4->currentShape = shapes;
+		}
+		else if (hardwareVertexData5 && hardwareVertexData5->flags == flags)
+		{
+			TG_RenderShape * shapes = hardwareVertexData5->currentShape;
+			if (!shapes && !hardwareVertexData5->shapes)
+			{
+				hardwareVertexData5->currentShape =
+					shapes =
+					hardwareVertexData5->shapes =
+					rsManager->getBlock(hardwareVertexData5->numShapes);
+			}
+
+			if (shapes <= (hardwareVertexData5->shapes + hardwareVertexData5->numShapes))
+			{
+				*shapes = *render_shape;
+				shapes ++;
+			}
+
+			hardwareVertexData5->currentShape = shapes;
+		}
+		else	//If we got here, something is really wrong
+		{
+#ifdef _DEBUG
+			SPEW(("GRAPHICS", "Flags do not match any set of untextured shapes\n"));
+#endif
+		}
+	}
+}
+
 //----------------------------------------------------------------------
 // Draws all textures with isTerrain set that are solid first,
 // then draws all alpha with isTerrain set.
@@ -514,6 +735,52 @@ void MC_TextureManager::renderLists (void)
 	{
 		gos_SetRenderState( gos_State_Fog, 0);
 	}
+
+	static bool bSkip = true;
+
+	gos_SetRenderState(gos_State_Culling, gos_Cull_CW);
+	for (long i = 0; i<nextAvailableHardwareVertexNode; i++)
+	{
+		if ((masterHardwareVertexNodes[i].flags & MC2_DRAWSOLID) &&
+			(masterHardwareVertexNodes[i].shapes))
+		{
+			if (masterHardwareVertexNodes[i].flags & MC2_ISTERRAIN)
+				gos_SetRenderState(gos_State_TextureAddress, gos_TextureClamp);
+			else
+				gos_SetRenderState(gos_State_TextureAddress, gos_TextureWrap);
+
+			uint32_t totalShapes = masterHardwareVertexNodes[i].numShapes;
+			// in case less shapes were addded in Render() that it was "promised" in Update(), generally etter to investigate and remove all such cases
+			if (masterHardwareVertexNodes[i].currentShape != (masterHardwareVertexNodes[i].shapes + masterHardwareVertexNodes[i].numShapes))
+			{
+				totalShapes = masterHardwareVertexNodes[i].currentShape - masterHardwareVertexNodes[i].shapes;
+			}
+			for (uint32_t sh = 0; sh < totalShapes; ++sh)
+			{
+				DWORD textureIndex = masterHardwareVertexNodes[i].textureIndex;
+				if (textureIndex == 1227 && bSkip)
+					continue;
+				gos_SetRenderState(gos_State_Texture, masterTextureNodes[textureIndex].get_gosTextureHandle());
+				TG_RenderShape* rs = masterHardwareVertexNodes[i].shapes + sh;
+				gos_SetRenderViewport(rs->viewport_[2], rs->viewport_[3], rs->viewport_[0], rs->viewport_[1]);
+				//gos_SetRenderViewport(0, 0, Environment.drawableWidth, Environment.drawableHeight);
+				// TODO: set mvp_ in a separate function, like gos_set_render_camera(mvp_)...
+				gos_RenderIndexedArray(rs->ib_, rs->vb_, rs->vdecl_, (const float*)rs->mvp_);
+			}
+
+			//Reset the list to zero length to avoid drawing more then once!
+			//Also comes in handy if gameLogic is not called.
+			masterHardwareVertexNodes[i].currentShape = masterHardwareVertexNodes[i].shapes;
+			//masterHardwareVertexNodes[i].numShapes = 0;
+		}
+	}
+
+	// restore state as all old-style geometry is culled on CPU and all vertices are already pretransformed
+	gos_SetRenderState(gos_State_Culling, gos_Cull_None);
+
+	// restore viewport
+	gos_SetRenderViewport(0, 0, Environment.drawableWidth, Environment.drawableHeight);
+
 	
 	for (long i=0;i<nextAvailableVertexNode;i++)
 	{

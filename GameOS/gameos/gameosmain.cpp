@@ -135,7 +135,7 @@ static void draw_screen( void )
     gos_DrawQuads(&q[0], 4);
     g_disable_quads = true;
 #endif
-
+	/*
     glMatrixMode(GL_PROJECTION);
     glPushMatrix();
     glLoadTransposeMatrixf((const float*)proj);
@@ -143,6 +143,9 @@ static void draw_screen( void )
     glMatrixMode(GL_MODELVIEW);
     glPushMatrix();
     glLoadTransposeMatrixf((const float*)viewM);
+	*/
+
+    CHECK_GL_ERROR;
 
     // TODO: reset all states to sane defaults!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     glDepthMask(GL_TRUE);
@@ -156,15 +159,75 @@ static void draw_screen( void )
 	//g_myprogram->setMat4("ModelViewProjectionMatrix", (const float*)viewproj);
     //draw_textured_cube(0);
 
+	/*
     glPopMatrix();
     glMatrixMode(GL_PROJECTION);
     glPopMatrix();
+	*/
 
     glUseProgram(0);
     //CHECK_GL_ERROR;
 }
 
 extern float frameRate;
+
+
+const char* getStringForType(GLenum type)
+{
+	switch (type)
+	{
+	case GL_DEBUG_TYPE_ERROR: return "DEBUG_TYPE_ERROR";
+	case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR: return "DEBUG_TYPE_DEPRECATED_BEHAVIOR";
+	case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR: return "DEBUG_TYPE_UNDEFINED_BEHAVIOR";
+	case GL_DEBUG_TYPE_PERFORMANCE: return "DEBUG_TYPE_PERFORMANCE";
+	case GL_DEBUG_TYPE_PORTABILITY: return "DEBUG_TYPE_PORTABILITY";
+	case GL_DEBUG_TYPE_MARKER: return "DEBUG_TYPE_MARKER";
+	case GL_DEBUG_TYPE_PUSH_GROUP: return "DEBUG_TYPE_PUSH_GROUP";
+	case GL_DEBUG_TYPE_POP_GROUP: return "DEBUG_TYPE_POP_GROUP";
+	case GL_DEBUG_TYPE_OTHER: return "DEBUG_TYPE_OTHER";
+	default: return "(undefined)";
+	}
+}
+
+const char* getStringForSource(GLenum type)
+{
+	switch (type)
+	{
+	case GL_DEBUG_SOURCE_API: return "DEBUG_SOURCE_API";
+	case GL_DEBUG_SOURCE_SHADER_COMPILER: return "DEBUG_SOURCE_SHADER_COMPILER";
+	case GL_DEBUG_SOURCE_WINDOW_SYSTEM: return "DEBUG_SOURCE_WINDOW_SYSTEM";
+	case GL_DEBUG_SOURCE_THIRD_PARTY: return "DEBUG_SOURCE_THIRD_PARTY";
+	case GL_DEBUG_SOURCE_APPLICATION: return "DEBUG_SOURCE_APPLICATION";
+	case GL_DEBUG_SOURCE_OTHER: return "DEBUG_SOURCE_OTHER";
+	default: return "(undefined)";
+	}
+}
+
+const char* getStringForSeverity(GLenum type)
+{
+	switch (type)
+	{
+	case GL_DEBUG_SEVERITY_HIGH: return "DEBUG_SEVERITY_HIGH";
+	case GL_DEBUG_SEVERITY_MEDIUM: return "DEBUG_SEVERITY_MEDIUM";
+	case GL_DEBUG_SEVERITY_LOW: return "DEBUG_SEVERITY_LOW";
+	case GL_DEBUG_SEVERITY_NOTIFICATION: return "DEBUG_SEVERITY_NOTIFICATION";
+	default: return "(undefined)";
+	}
+}
+//typedef void (GLAPIENTRY *GLDEBUGPROCARB)(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam);
+void GLAPIENTRY OpenGLDebugLog(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam)
+{
+	if (severity != GL_DEBUG_SEVERITY_NOTIFICATION && severity != GL_DEBUG_SEVERITY_LOW)
+	{
+		printf("Type: %s; Source: %s; ID: %d; Severity : %s\n",
+			getStringForType(type),
+			getStringForSource(source),
+			id,
+			getStringForSeverity(severity)
+		);
+		printf("Message : %s\n", message);
+	}
+}
 
 #ifndef DISABLE_GAMEOS_MAIN
 int main(int argc, char** argv)
@@ -204,6 +267,8 @@ int main(int argc, char** argv)
     if(!ctx)
         return 1;
 
+    graphics::make_current_context(ctx);
+
     GLenum err = glewInit();
     if (GLEW_OK != err)
     {
@@ -211,12 +276,19 @@ int main(int argc, char** argv)
         return 1;
     }
 
+	glEnable(GL_DEBUG_OUTPUT);
+	glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+	//glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 76, 1, "My debug group");
+	glDebugMessageControlARB(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, NULL, GL_TRUE);
+	glDebugMessageCallbackARB(&OpenGLDebugLog, NULL);
+
+
     SPEW(("GRAPHICS", "Status: Using GLEW %s\n", glewGetString(GLEW_VERSION)));
-    if (!GLEW_ARB_vertex_program || !GLEW_ARB_fragment_program)
-    {
-        SPEW(("GRAPHICS", "No shader program support\n"));
-        return 1;
-    }
+    //if ((!GLEW_ARB_vertex_program || !GLEW_ARB_fragment_program))
+    //{
+     //   SPEW(("GRAPHICS", "No shader program support\n"));
+      //  return 1;
+    //}
 
     if(!glewIsSupported("GL_VERSION_3_0")) {
         SPEW(("GRAPHICS", "Minimum required OpenGL version is 3.0\n"));
@@ -246,7 +318,6 @@ int main(int argc, char** argv)
 
     Environment.InitializeGameEngine();
 
-    graphics::make_current_context(ctx);
 
 	g_myprogram = glsl_program::makeProgram("object_tex", "shaders/object_tex.vert", "shaders/object_tex.frag");
     if(!g_myprogram) {

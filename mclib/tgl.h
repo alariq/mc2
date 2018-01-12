@@ -43,6 +43,22 @@ typedef struct _TG_TypeVertex
 typedef  TG_TypeVertex* TG_TypeVertexPtr;
 
 //-------------------------------------------------------------------------------
+// TG_HWTypeVertex
+//This Structure stores information for each vertex of the shape which DOES NOT CHANGE by instance
+typedef struct _TG_HWTypeVertex
+{
+	//Only changes at load time.
+	Stuff::Point3D	position;				//Position of vertex relative to base position of shape.
+	Stuff::Vector3D normal;					//Vertex Normal
+	DWORD    		aRGBLight;				//Vertex Light and Alpha
+	float			u;
+	float			v;
+
+} TG_HWTypeVertex;
+
+typedef  TG_HWTypeVertex* TG_HWTypeVertexPtr;
+
+//-------------------------------------------------------------------------------
 // TG_Vertex
 // This Structure stores information for each vertex of the shape which is instance specific
 // Its used to store UNCHANGING or rarely changing Light/Fog data so I don't have to calc every frame!
@@ -517,6 +533,10 @@ class TG_TypeShape : public TG_TypeNode
 		bool					alphaTestOn;				//Decides if we should draw alphaTest On or not!
 		bool					filterOn;					//Decides if we should filter the shape or not!
 
+		HGOSBUFFER				vb_;
+		HGOSBUFFER				ib_;
+		HGOSVERTEXDECLARATION	vdecl_;
+
 	//-----------------
 	//Member Functions
 	protected:
@@ -540,6 +560,9 @@ class TG_TypeShape : public TG_TypeNode
 			hotPinkRGB = 0x00cbf0ff;
 			hotYellowRGB = 0x00FEfF91;
 			hotGreenRGB = 0x000081b6;
+
+			vb_ = ib_ = 0;
+			vdecl_ = 0;
 		}
 		
 		TG_TypeShape (void)
@@ -662,6 +685,9 @@ class TG_Shape
 															//Draw in this order.  First entry with value 0xffffffff
 															//Means all done, no more to draw.
 
+		float					cur_viewport[4];
+		Stuff::Matrix4D			cur_shape2clip;
+
 		TG_ShadowVertexPtr		listOfShadowVertices;		//Stores shadow vertex information for the shape.
 															//We just use existing listOfTriangles to draw!
 															
@@ -688,12 +714,12 @@ class TG_Shape
 
 	public:
 		//Matrices used to transform the shapes.
-		static Stuff::LinearMatrix4D 	*cameraOrigin;
-		static Stuff::Matrix4D			*cameraToClip;
-		static Stuff::Matrix4D			worldToClip;
-		static Stuff::LinearMatrix4D	worldToCamera;
-		static TG_LightPtr				*listOfLights;		//List passed in a transform time
-		static DWORD					numLights;
+		static Stuff::LinearMatrix4D 	*s_cameraOrigin;
+		static Stuff::Matrix4D			*s_cameraToClip;
+		static Stuff::Matrix4D			s_worldToClip;
+		static Stuff::LinearMatrix4D	s_worldToCamera;
+		static TG_LightPtr				*s_listOfLights;		//List passed in a transform time
+		static DWORD					s_numLights;
 
 		static float					viewMulX;
 		static float					viewAddX;
@@ -704,10 +730,10 @@ class TG_Shape
 		static float					fogFull;
 		static float					fogStart;
 
-		static Stuff::LinearMatrix4D 	lightToShape[MAX_LIGHTS_IN_WORLD];
-		static Stuff::Vector3D			lightDir[MAX_LIGHTS_IN_WORLD];
-		static Stuff::Vector3D			spotDir[MAX_LIGHTS_IN_WORLD];
-		static Stuff::Vector3D			rootLightDir[MAX_LIGHTS_IN_WORLD];
+		static Stuff::LinearMatrix4D 	s_lightToShape[MAX_LIGHTS_IN_WORLD];
+		static Stuff::Vector3D			s_lightDir[MAX_LIGHTS_IN_WORLD];
+		static Stuff::Vector3D			s_spotDir[MAX_LIGHTS_IN_WORLD];
+		static Stuff::Vector3D			s_rootLightDir[MAX_LIGHTS_IN_WORLD];
 
 		static UserHeapPtr 				tglHeap;		//Stores all TGL data so we don't need to go through the FREE merry go round of GOS!
 		
@@ -727,7 +753,7 @@ class TG_Shape
 
 			listOfVertices = NULL;
 			listOfTriangles = NULL;
-			listOfLights = NULL;
+			s_listOfLights = NULL;
 			listOfVisibleFaces = NULL;
 
 			listOfShadowVertices = NULL;
@@ -805,7 +831,7 @@ class TG_Shape
 
 		//This function takes the current listOfVisibleFaces and draws them using
 		//gos_DrawTriangle.  Does clipping, too!
-		void Render (float forceZ = -1.0f, bool isHudElement = false, BYTE alphaValue = 0xff, bool isClamped = false);
+		void Render (float forceZ = -1.0f, bool isHudElement = false, BYTE alphaValue = 0xff, bool isClamped = false, Stuff::Matrix4D* shapeToClip = nullptr);
 
 		//This function takes the current listOfShadowTriangles and draws them using
 		//gos_DrawTriangle.  Does clipping, too!
@@ -845,6 +871,19 @@ class TG_Shape
 };
 
 typedef TG_Shape* TG_ShapePtr;
+
+
+////////////////////////////////////////////////////////////////////////////////
+class TG_RenderShape {
+public:
+	HGOSBUFFER vb_;
+	HGOSBUFFER ib_;
+	HGOSVERTEXDECLARATION vdecl_;
+	Stuff::Matrix4D mvp_;
+	float viewport_[4];
+};
+////////////////////////////////////////////////////////////////////////////////
+
 
 //Pools are defined here.
 

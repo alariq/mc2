@@ -40,21 +40,22 @@ const int constantSizes[] = {
 
 void init_func_ptrs(UNIFORM_FUNC (&uniformFuncs)[15])
 {
-    uniformFuncs[CONSTANT_FLOAT] = (UNIFORM_FUNC) glUniform1fvARB;
-    uniformFuncs[CONSTANT_VEC2]  = (UNIFORM_FUNC) glUniform2fvARB;
-    uniformFuncs[CONSTANT_VEC3]  = (UNIFORM_FUNC) glUniform3fvARB;
-    uniformFuncs[CONSTANT_VEC4]  = (UNIFORM_FUNC) glUniform4fvARB;
-    uniformFuncs[CONSTANT_INT]   = (UNIFORM_FUNC) glUniform1ivARB;
-    uniformFuncs[CONSTANT_IVEC2] = (UNIFORM_FUNC) glUniform2ivARB;
-    uniformFuncs[CONSTANT_IVEC3] = (UNIFORM_FUNC) glUniform3ivARB;
-    uniformFuncs[CONSTANT_IVEC4] = (UNIFORM_FUNC) glUniform4ivARB;
-    uniformFuncs[CONSTANT_BOOL]  = (UNIFORM_FUNC) glUniform1ivARB;
-    uniformFuncs[CONSTANT_BVEC2] = (UNIFORM_FUNC) glUniform2ivARB;
-    uniformFuncs[CONSTANT_BVEC3] = (UNIFORM_FUNC) glUniform3ivARB;
-    uniformFuncs[CONSTANT_BVEC4] = (UNIFORM_FUNC) glUniform4ivARB;
-    uniformFuncs[CONSTANT_MAT2]  = (UNIFORM_FUNC) glUniformMatrix2fvARB;
-    uniformFuncs[CONSTANT_MAT3]  = (UNIFORM_FUNC) glUniformMatrix3fvARB;
-    uniformFuncs[CONSTANT_MAT4]  = (UNIFORM_FUNC) glUniformMatrix4fvARB;
+	// changed fromARB variants, to work with CORE profile as well (because *ARB variants are not initialized in case of CORE profile)
+    uniformFuncs[CONSTANT_FLOAT] = (UNIFORM_FUNC) glUniform1fv;
+    uniformFuncs[CONSTANT_VEC2]  = (UNIFORM_FUNC) glUniform2fv;
+    uniformFuncs[CONSTANT_VEC3]  = (UNIFORM_FUNC) glUniform3fv;
+    uniformFuncs[CONSTANT_VEC4]  = (UNIFORM_FUNC) glUniform4fv;
+    uniformFuncs[CONSTANT_INT]   = (UNIFORM_FUNC) glUniform1iv;
+    uniformFuncs[CONSTANT_IVEC2] = (UNIFORM_FUNC) glUniform2iv;
+    uniformFuncs[CONSTANT_IVEC3] = (UNIFORM_FUNC) glUniform3iv;
+    uniformFuncs[CONSTANT_IVEC4] = (UNIFORM_FUNC) glUniform4iv;
+    uniformFuncs[CONSTANT_BOOL]  = (UNIFORM_FUNC) glUniform1iv;
+    uniformFuncs[CONSTANT_BVEC2] = (UNIFORM_FUNC) glUniform2iv;
+    uniformFuncs[CONSTANT_BVEC3] = (UNIFORM_FUNC) glUniform3iv;
+    uniformFuncs[CONSTANT_BVEC4] = (UNIFORM_FUNC) glUniform4iv;
+    uniformFuncs[CONSTANT_MAT2]  = (UNIFORM_FUNC) glUniformMatrix2fv;
+    uniformFuncs[CONSTANT_MAT3]  = (UNIFORM_FUNC) glUniformMatrix3fv;
+    uniformFuncs[CONSTANT_MAT4]  = (UNIFORM_FUNC) glUniformMatrix4fv;
 }
 
 // true - error, false - no error
@@ -315,6 +316,44 @@ void parse_uniforms(GLuint pprogram, glsl_program::UniArr_t* puniforms, glsl_pro
     delete[] buf;
 }
 
+void parse_uniform_blocks(GLuint pprogram, glsl_program::UniBlockArr_t* puniforms)
+{
+	GLint num_uni_blocks, max_name_len;
+	glGetProgramiv(pprogram, GL_ACTIVE_UNIFORM_BLOCKS, &num_uni_blocks);
+	glGetProgramiv(pprogram, GL_ACTIVE_UNIFORM_BLOCK_MAX_NAME_LENGTH, &max_name_len);
+	char* buf = new char[max_name_len + 1];
+	GLsizei len;
+
+	GLint binding;
+	GLint data_size;
+	GLint num_uniforms;
+	for (GLint i = 0; i<num_uni_blocks; ++i)
+	{
+		glGetActiveUniformBlockName(pprogram, i, max_name_len + 1, &len, buf);
+		glGetActiveUniformBlockiv(pprogram, i, GL_UNIFORM_BLOCK_BINDING, &binding);
+		glGetActiveUniformBlockiv(pprogram, i, GL_UNIFORM_BLOCK_DATA_SIZE, &data_size);
+		glGetActiveUniformBlockiv(pprogram, i, GL_UNIFORM_BLOCK_ACTIVE_UNIFORMS, &num_uniforms);
+
+		// should be equal to i ?
+		GLuint index = glGetUniformBlockIndex(pprogram, buf);
+		
+		// ???
+		if (-1 == i) continue; // gl_ variable or does not correspond to an active uniform variable name in program
+
+		glsl_uniform_block* uni_block = new glsl_uniform_block();
+		uni_block->index_ = index;
+		uni_block->binding_ = binding;
+		uni_block->data_size_ = data_size;
+		uni_block->is_dirty_ = true;
+		uni_block->name_ = buf;
+		uni_block->num_uniforms_ = num_uniforms;
+
+		puniforms->insert(std::make_pair(buf, uni_block));
+	}
+
+	delete[] buf;
+}
+
 glsl_program* glsl_program::makeProgram2(const char* name, const char* vp, const char* hp, const char* dp, const char* gp, const char* fp, int count/* = 0*/, const char** xfb_variables/* = 0*/)
 {
 	if(!uniformFuncs[0])
@@ -435,6 +474,7 @@ glsl_program* glsl_program::makeProgram2(const char* name, const char* vp, const
 	}
 
     parse_uniforms(shp, &pprogram->uniforms_, &pprogram->samplers_);
+    parse_uniform_blocks(shp, &pprogram->uniform_blocks_);
 
     s_programs.insert(std::make_pair(name, pprogram) );
     return pprogram;

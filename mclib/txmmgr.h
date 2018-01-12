@@ -85,9 +85,34 @@ typedef struct _MC_VertexArrayNode
 		textureIndex = 0;
 	}
 
-	void destroy (void);							//Frees all blocks, free GOS_TextureHandle, blank all data.
+	void destroy(void) {};							//Frees all blocks, free GOS_TextureHandle, blank all data.
 
 } MC_VertexArrayNode;
+
+class TG_RenderShape;
+typedef struct _MC_HardwareVertexArrayNode
+{
+	friend class MC_TextureManager;
+
+public:
+	DWORD			textureIndex;
+	DWORD			flags;					//Marks texture render state and terrain or not, etc.
+	uint32_t		numShapes;				//Number of vertices this texture will be used to draw this frame.
+	TG_RenderShape	*currentShape;			//CurrentVertex data being added.
+	TG_RenderShape	*shapes;				//Pointer into the vertex Pool for this texture to draw.
+
+	void init(void)
+	{
+		flags = 0;
+		numShapes = 0;
+		currentShape = 0;
+		shapes = NULL;
+		textureIndex = 0;
+	}
+
+	void destroy(void) {};							//Frees all blocks, free GOS_TextureHandle, blank all data.
+
+} MC_HardwareVertexArrayNode;
 
 //----------------------------------------------------------------------
 struct MC_TextureNode
@@ -121,7 +146,11 @@ struct MC_TextureNode
 														//This will keep system memory usage to a minimum.
 		MC_VertexArrayNode 	*vertexData;				//This holds the vertex draw data.  NULL if not used.
 		MC_VertexArrayNode	*vertexData2;
-		MC_VertexArrayNode	*vertexData3;				
+		MC_VertexArrayNode	*vertexData3;
+
+		MC_HardwareVertexArrayNode	*hardwareVertexData;
+		MC_HardwareVertexArrayNode	*hardwareVertexData2;
+		MC_HardwareVertexArrayNode	*hardwareVertexData3;
 
 	void init (void)
 	{
@@ -139,6 +168,10 @@ struct MC_TextureNode
 		vertexData2 = NULL;
 		vertexData3 = NULL;
 		lzCompSize = 0xffffffff;
+
+		hardwareVertexData = NULL;
+		hardwareVertexData2 = NULL;
+		hardwareVertexData3 = NULL;
 	}
 
 	DWORD findFirstAvailableBlock (void);
@@ -209,11 +242,73 @@ class gos_VERTEXManager : public HeapManager
 			gosASSERT(currentVertex < totalVertices);
 			return start;
 		}
-		
+
 		void reset (void)
 		{
 			currentVertex = 0;
 		}
+};
+
+//---------------------------------------------------------------------------
+template<typename T>
+class gos_RenderShapeManager : public HeapManager
+{
+	//Data Members
+	//-------------
+protected:
+
+	long						count;		//Total number of vertices in pool.
+	long						current;	//Pointer to next available vertex in pool.
+
+public:
+
+	void init(void)
+	{
+		HeapManager::init();
+
+		count = 0;
+		current = 0;
+	}
+
+	gos_RenderShapeManager(void) : HeapManager()
+	{
+		init();
+	}
+
+	void destroy(void)
+	{
+		HeapManager::destroy();
+		reset();
+		count = 0;
+	}
+
+	~gos_RenderShapeManager(void)
+	{
+		destroy();
+	}
+
+	void init(long maxShapes)
+	{
+		count = maxShapes;
+		DWORD heapSize = count * sizeof(T);
+		createHeap(heapSize);
+		commitHeap();
+		reset();
+	}
+
+	T *getBlock(uint32_t num)
+	{
+		T *start = reinterpret_cast<T*>(getHeapPtr());
+		start = &(start[current]);
+		current += num;
+		gosASSERT(current < count);
+		return start;
+	}
+
+	void reset(void)
+	{
+		current = 0;
+	}
 };
 
 //----------------------------------------------------------------------
@@ -230,6 +325,9 @@ class MC_TextureManager
 													
 		MC_VertexArrayNode 				*masterVertexNodes;			//Dynamically allocated from an MC Heap.
 		long							nextAvailableVertexNode;	//index to next available vertex Node
+
+		MC_HardwareVertexArrayNode 		*masterHardwareVertexNodes;			//Dynamically allocated from an MC Heap.
+		size_t							nextAvailableHardwareVertexNode;	//index to next available hardware vertex Node
 													
 		UserHeapPtr						textureCacheHeap;			//Heap used to cache textures from vidCard to system RAM.
 		UserHeapPtr						textureStringHeap;			//Heap used to store filenames of textures so no dupes.
@@ -237,6 +335,8 @@ class MC_TextureManager
 		long							totalCacheMisses;			//NUmber of times flush has been called.\
 		
 		static gos_VERTEXManager		*gvManager;					//Stores arrays of vertices for draw.
+		static gos_RenderShapeManager<TG_RenderShape>	*rsManager;					//Stores arrays of shapes for draw.
+
 		static MemoryPtr				lzBuffer1;					//Used to compress/decompress textures from cache.
 		static MemoryPtr				lzBuffer2;					//Used to compress/decompress textures from cache.
 		/* iBufferRefCount is used to help determine if lzBuffer1&2 are valid. The assumption
@@ -251,6 +351,12 @@ class MC_TextureManager
 		MC_VertexArrayNode 				*vertexData3;				//This holds the vertex draw data for UNTEXTURED triangles!
 		MC_VertexArrayNode				*vertexData4;				//This holds the vertex draw data for UNTEXTURED triangles!
 		MC_VertexArrayNode				*vertexData5;				//This holds the vertex draw data for UNTEXTURED triangles!
+
+		MC_HardwareVertexArrayNode 		*hardwareVertexData;		//This holds the vertex draw data for UNTEXTURED triangles!
+		MC_HardwareVertexArrayNode 		*hardwareVertexData2;		//This holds the vertex draw data for UNTEXTURED triangles!
+		MC_HardwareVertexArrayNode 		*hardwareVertexData3;		//This holds the vertex draw data for UNTEXTURED triangles!
+		MC_HardwareVertexArrayNode 		*hardwareVertexData4;		//This holds the vertex draw data for UNTEXTURED triangles!
+		MC_HardwareVertexArrayNode 		*hardwareVertexData5;		//This holds the vertex draw data for UNTEXTURED triangles!
 		
 	//Member Functions
 	//-----------------
@@ -259,7 +365,7 @@ class MC_TextureManager
 		void init (void)
 		{
 			masterTextureNodes = NULL;
-			
+
 			textureCacheHeap = NULL;
 			textureStringHeap = NULL;
 			textureManagerInstrumented = false;
@@ -269,8 +375,12 @@ class MC_TextureManager
 			
 			masterVertexNodes = NULL;
 			nextAvailableVertexNode = 0;
+
+			masterHardwareVertexNodes = NULL;
+			nextAvailableHardwareVertexNode = 0;
 			
 			vertexData = vertexData2 = vertexData3 = vertexData4 = vertexData5 = NULL;
+			hardwareVertexData = hardwareVertexData2 = hardwareVertexData3 = hardwareVertexData4 = hardwareVertexData5 = NULL;
 		}
 
 		MC_TextureManager (void)
@@ -317,10 +427,18 @@ class MC_TextureManager
 		//------------------------------------------------------
 		// Frees up gos_VERTEX manager memory
 		void freeVertices (void);
+
+		//------------------------------------------------------
+		// Frees up TG_RenderShape manager memory
+		void freeShapes (void);
 		
 		//------------------------------------------------------
 		// Creates gos_VERTEX Manager and allocates RAM.  Will not allocate if already done!
 		void startVertices (long maxVertices = 30000);
+
+		//------------------------------------------------------
+		// Creates TG_RenderShape Manager and allocates RAM.  Will not allocate if already done!
+		void startShapes (uint32_t maxShapes = 3000);
 		
 		//------------------------------------------------------
 		// Frees a specific texture. 
@@ -338,6 +456,141 @@ class MC_TextureManager
 				return masterTextureNodes[nodeId].get_gosTextureHandle();
 			else
 				return nodeId;
+		}
+
+		void addRenderShape(DWORD nodeId, DWORD flags)
+		{
+			if ((nodeId < MC_MAXTEXTURES) && (nextAvailableHardwareVertexNode < MC_MAXTEXTURES))
+			{
+				if (!masterTextureNodes[nodeId].hardwareVertexData)
+				{
+					masterTextureNodes[nodeId].hardwareVertexData = &(masterHardwareVertexNodes[nextAvailableHardwareVertexNode]);
+					gosASSERT(masterTextureNodes[nodeId].hardwareVertexData->numShapes == 0);
+					gosASSERT(masterTextureNodes[nodeId].hardwareVertexData->shapes == NULL);
+
+					nextAvailableHardwareVertexNode++;
+					masterTextureNodes[nodeId].hardwareVertexData->flags = flags;
+					masterTextureNodes[nodeId].hardwareVertexData->textureIndex = nodeId;
+				}
+				else if (masterTextureNodes[nodeId].hardwareVertexData &&
+					(masterTextureNodes[nodeId].hardwareVertexData->flags != flags) &&
+					!masterTextureNodes[nodeId].hardwareVertexData2)
+				{
+					masterTextureNodes[nodeId].hardwareVertexData2 = &(masterHardwareVertexNodes[nextAvailableHardwareVertexNode]);
+					gosASSERT(masterTextureNodes[nodeId].hardwareVertexData2->numShapes == 0);
+					gosASSERT(masterTextureNodes[nodeId].hardwareVertexData2->shapes == NULL);
+
+					nextAvailableHardwareVertexNode++;
+					masterTextureNodes[nodeId].hardwareVertexData2->flags = flags;
+					masterTextureNodes[nodeId].hardwareVertexData2->textureIndex = nodeId;
+				}
+				else if (masterTextureNodes[nodeId].vertexData &&
+					(masterTextureNodes[nodeId].hardwareVertexData->flags != flags) &&
+					masterTextureNodes[nodeId].hardwareVertexData2 &&
+					(masterTextureNodes[nodeId].hardwareVertexData2->flags != flags) &&
+					!masterTextureNodes[nodeId].hardwareVertexData3)
+				{
+					masterTextureNodes[nodeId].hardwareVertexData3 = &(masterHardwareVertexNodes[nextAvailableHardwareVertexNode]);
+					gosASSERT(masterTextureNodes[nodeId].hardwareVertexData3->numShapes == 0);
+					gosASSERT(masterTextureNodes[nodeId].hardwareVertexData3->shapes == NULL);
+
+					nextAvailableHardwareVertexNode++;
+					masterTextureNodes[nodeId].hardwareVertexData3->flags = flags;
+					masterTextureNodes[nodeId].hardwareVertexData3->textureIndex = nodeId;
+				}
+
+				if (masterTextureNodes[nodeId].hardwareVertexData->flags == flags)
+					masterTextureNodes[nodeId].hardwareVertexData->numShapes += 1;
+				else if (masterTextureNodes[nodeId].hardwareVertexData2 &&
+					masterTextureNodes[nodeId].hardwareVertexData2->flags == flags)
+					masterTextureNodes[nodeId].hardwareVertexData2->numShapes += 1;
+				else if (masterTextureNodes[nodeId].hardwareVertexData3 &&
+					masterTextureNodes[nodeId].hardwareVertexData3->flags == flags)
+					masterTextureNodes[nodeId].hardwareVertexData3->numShapes += 1;
+#ifdef _DEBUG
+				else
+					STOP(("Could not AddTriangles.  No flags match vertex data"));
+#endif
+			}
+			else if (nextAvailableHardwareVertexNode < MC_MAXTEXTURES)
+			{
+				//Add this one to the untextured vertexBuffers
+				if (!hardwareVertexData)
+				{
+					hardwareVertexData = &(masterHardwareVertexNodes[nextAvailableHardwareVertexNode]);
+					gosASSERT(hardwareVertexData->numShapes == 0);
+					gosASSERT(hardwareVertexData->shapes == NULL);
+
+					nextAvailableHardwareVertexNode++;
+					hardwareVertexData->flags = flags;
+					hardwareVertexData->textureIndex = 0;
+				}
+				else if (hardwareVertexData && (hardwareVertexData->flags != flags) &&
+					!hardwareVertexData2)
+				{
+					hardwareVertexData2 = &(masterHardwareVertexNodes[nextAvailableHardwareVertexNode]);
+					gosASSERT(hardwareVertexData2->numShapes == 0);
+					gosASSERT(hardwareVertexData2->shapes == NULL);
+
+					nextAvailableHardwareVertexNode++;
+					hardwareVertexData2->flags = flags;
+					hardwareVertexData2->textureIndex = 0;
+				}
+				else if (hardwareVertexData && (vertexData->flags != flags) &&
+					hardwareVertexData2 && (hardwareVertexData2->flags != flags) &&
+					!hardwareVertexData3)
+				{
+					hardwareVertexData3 = &(masterHardwareVertexNodes[nextAvailableHardwareVertexNode]);
+					gosASSERT(hardwareVertexData3->numShapes == 0);
+					gosASSERT(hardwareVertexData3->shapes == NULL);
+
+					nextAvailableHardwareVertexNode++;
+					hardwareVertexData3->flags = flags;
+					hardwareVertexData3->textureIndex = 0;
+				}
+				else if (hardwareVertexData && (vertexData->flags != flags) &&
+					hardwareVertexData2 && (hardwareVertexData2->flags != flags) &&
+					hardwareVertexData3 && (hardwareVertexData3->flags != flags) &&
+					!hardwareVertexData4)
+				{
+					hardwareVertexData4 = &(masterHardwareVertexNodes[nextAvailableHardwareVertexNode]);
+					gosASSERT(hardwareVertexData4->numShapes == 0);
+					gosASSERT(hardwareVertexData4->shapes == NULL);
+
+					nextAvailableHardwareVertexNode++;
+					hardwareVertexData4->flags = flags;
+					hardwareVertexData4->textureIndex = 0;
+				}
+				else if (hardwareVertexData && (vertexData->flags != flags) &&
+					hardwareVertexData2 && (hardwareVertexData2->flags != flags) &&
+					hardwareVertexData3 && (hardwareVertexData3->flags != flags) &&
+					hardwareVertexData4 && (hardwareVertexData4->flags != flags) &&
+					!hardwareVertexData5)
+				{
+					hardwareVertexData5 = &(masterHardwareVertexNodes[nextAvailableHardwareVertexNode]);
+					gosASSERT(hardwareVertexData5->numShapes == 0);
+					gosASSERT(hardwareVertexData5->shapes == NULL);
+
+					nextAvailableHardwareVertexNode++;
+					hardwareVertexData5->flags = flags;
+					hardwareVertexData5->textureIndex = 0;
+				}
+
+				if (hardwareVertexData->flags == flags)
+					hardwareVertexData->numShapes += 1;
+				else if (hardwareVertexData2 && hardwareVertexData2->flags == flags)
+					hardwareVertexData2->numShapes += 1;
+				else if (hardwareVertexData3 && hardwareVertexData3->flags == flags)
+					hardwareVertexData3->numShapes += 1;
+				else if (hardwareVertexData4 && hardwareVertexData4->flags == flags)
+					hardwareVertexData4->numShapes += 1;
+				else if (hardwareVertexData5 && hardwareVertexData5->flags == flags)
+					hardwareVertexData5->numShapes += 1;
+#ifdef _DEBUG
+				else
+					PAUSE(("Could not AddRenderShape.  Too many untextured render shapes"));
+#endif
+			}
 		}
 
 		void addTriangle (DWORD nodeId, DWORD flags)
@@ -735,6 +988,8 @@ class MC_TextureManager
 			}
 		}
 
+		void addRenderShape(DWORD nodeId, TG_RenderShape* render_shape, DWORD flags);
+
 		void clearArrays (void)
 		{
 			for (long i=0;i<MC_MAXTEXTURES;i++)
@@ -742,15 +997,23 @@ class MC_TextureManager
 				masterTextureNodes[i].vertexData = NULL;
 				masterTextureNodes[i].vertexData2 = NULL;
 				masterTextureNodes[i].vertexData3 = NULL;
+
+				masterTextureNodes[i].hardwareVertexData = NULL;
+				masterTextureNodes[i].hardwareVertexData2 = NULL;
+				masterTextureNodes[i].hardwareVertexData3 = NULL;
 			}
 
 			vertexData = vertexData2 = vertexData3 = vertexData4 = vertexData5 = NULL;
+			hardwareVertexData = hardwareVertexData2 = hardwareVertexData3 = hardwareVertexData4 = hardwareVertexData5 = NULL;
 			
 			memset(masterVertexNodes,0,sizeof(MC_VertexArrayNode)*MC_MAXTEXTURES);
+			memset(masterHardwareVertexNodes,0,sizeof(MC_HardwareVertexArrayNode)*MC_MAXTEXTURES);
 			
 			nextAvailableVertexNode = 0;
+			nextAvailableHardwareVertexNode = 0;
 
 			gvManager->reset();
+			rsManager->reset();
 		}
 		
 		//Sends down the triangle lists

@@ -115,6 +115,8 @@ class Camera
 		
 		TG_LightPtr					*terrainLights;					//This is the light list to process every frame for TERRAIN ONLY
 		long						numTerrainLights;				//Number of lights active for terrain.  Actually Correct.
+
+		gosBuffer*					lights_shader_data_;
 		
  		//Camera Scripting stuff
 		Stuff::Vector3D				goalPosition;

@@ -548,12 +548,9 @@ long TG_TypeMultiShape::LoadTGMultiShapeFromASE (const char *fileName, bool forc
 		IProviderAssetPtr armAssetPtr = NULL;
 		if (armProvider)
 		{
-            // sebi !NB
-#ifndef LINUX_BUILD
 			armAssetPtr = armProvider->OpenAsset(fileName, 
 				AssetType_Physical, ProviderType_Primary);
 			armAssetPtr->AddProperty("Type", "Shape");
-#endif
 		}
 	
 		if (numTextures)
@@ -1176,7 +1173,7 @@ long TG_MultiShape::TransformMultiShape (Stuff::Point3D *pos, Stuff::UnitQuatern
 	
 	long i=0;
 	Stuff::Point3D camPosition;
-	camPosition = *TG_Shape::cameraOrigin;
+	camPosition = *TG_Shape::s_cameraOrigin;
 
 	Stuff::Matrix4D  shapeToClip, rootShapeToClip;
 	Stuff::Point3D backFacePoint;
@@ -1367,11 +1364,11 @@ long TG_MultiShape::TransformMultiShape (Stuff::Point3D *pos, Stuff::UnitQuatern
 			// Setup Lighting here.
 			if (Environment.Renderer != 3)
 			{
-				for (long iLight=0;iLight<TG_Shape::numLights;iLight++)
+				for (long iLight=0;iLight<TG_Shape::s_numLights;iLight++)
 				{
-					if ((TG_Shape::listOfLights[iLight] != NULL) && (TG_Shape::listOfLights[iLight]->active))
+					if ((TG_Shape::s_listOfLights[iLight] != NULL) && (TG_Shape::s_listOfLights[iLight]->active))
 					{
-						switch (TG_Shape::listOfLights[iLight]->lightType)
+						switch (TG_Shape::s_listOfLights[iLight]->lightType)
 						{
 							case TG_LIGHT_AMBIENT:
 							{
@@ -1381,18 +1378,18 @@ long TG_MultiShape::TransformMultiShape (Stuff::Point3D *pos, Stuff::UnitQuatern
 		
 							case TG_LIGHT_INFINITE:
 							{
-								if (TG_Shape::listOfLights[iLight] != NULL)
+								if (TG_Shape::s_listOfLights[iLight] != NULL)
 								{
-									TG_Shape::lightToShape[iLight].Multiply(TG_Shape::listOfLights[iLight]->lightToWorld,listOfShapes[i].worldToShape);
+									TG_Shape::s_lightToShape[iLight].Multiply(TG_Shape::s_listOfLights[iLight]->lightToWorld,listOfShapes[i].worldToShape);
 									Stuff::UnitVector3D uVec;
-									TG_Shape::lightToShape[iLight].GetLocalForwardInWorld(&uVec);
-									TG_Shape::lightDir[iLight] = uVec;
+									TG_Shape::s_lightToShape[iLight].GetLocalForwardInWorld(&uVec);
+									TG_Shape::s_lightDir[iLight] = uVec;
 									
 									if (listOfShapes[i].parentNode == NULL)
 									{
-										TG_Shape::rootLightDir[iLight] = TG_Shape::lightDir[iLight];
+										TG_Shape::s_rootLightDir[iLight] = TG_Shape::s_lightDir[iLight];
 										//if (angles.yaw != 0.0f )
-										//	RotateLight(TG_Shape::rootLightDir[iLight],-angles.yaw);
+										//	RotateLight(TG_Shape::s_rootLightDir[iLight],-angles.yaw);
 									}
 								}
 							}
@@ -1400,16 +1397,16 @@ long TG_MultiShape::TransformMultiShape (Stuff::Point3D *pos, Stuff::UnitQuatern
 		
 							case TG_LIGHT_INFINITEWITHFALLOFF:
 							{
-								if (TG_Shape::listOfLights[iLight] != NULL)
+								if (TG_Shape::s_listOfLights[iLight] != NULL)
 								{
-									TG_Shape::lightToShape[iLight].Multiply(TG_Shape::listOfLights[iLight]->lightToWorld,listOfShapes[i].worldToShape);
+									TG_Shape::s_lightToShape[iLight].Multiply(TG_Shape::s_listOfLights[iLight]->lightToWorld,listOfShapes[i].worldToShape);
 									Stuff::UnitVector3D uVec;
-									TG_Shape::lightToShape[iLight].GetLocalForwardInWorld(&uVec);
-									TG_Shape::lightDir[iLight] = uVec;
+									TG_Shape::s_lightToShape[iLight].GetLocalForwardInWorld(&uVec);
+									TG_Shape::s_lightDir[iLight] = uVec;
 									
 									if (listOfShapes[i].parentNode == NULL)
 									{
-										TG_Shape::rootLightDir[iLight] = TG_Shape::lightDir[iLight];
+										TG_Shape::s_rootLightDir[iLight] = TG_Shape::s_lightDir[iLight];
 									}
 								}
 							}
@@ -1417,78 +1414,78 @@ long TG_MultiShape::TransformMultiShape (Stuff::Point3D *pos, Stuff::UnitQuatern
 		
 							case TG_LIGHT_POINT:
 							{
-								if (TG_Shape::listOfLights[iLight] != NULL)
+								if (TG_Shape::s_listOfLights[iLight] != NULL)
 								{
 									Stuff::Point3D lightPos;
-									lightPos = TG_Shape::listOfLights[iLight]->direction;
+									lightPos = TG_Shape::s_listOfLights[iLight]->direction;
 		
 									Stuff::Point3D shapePosition;
 									shapePosition = listOfShapes[i].shapeToWorld;
 		
 									shapePosition -= lightPos;
 									shapePosition.y = 0.0f;
-									TG_Shape::lightDir[iLight] = shapePosition;
+									TG_Shape::s_lightDir[iLight] = shapePosition;
 									//if (angles.yaw != 0.0f )
-									//	RotateLight(TG_Shape::lightDir[iLight],-angles.yaw);
+									//	RotateLight(TG_Shape::s_lightDir[iLight],-angles.yaw);
 								}
 								
 								if (listOfShapes[i].parentNode == NULL)
 								{
-									TG_Shape::rootLightDir[iLight] = TG_Shape::lightDir[iLight];
+									TG_Shape::s_rootLightDir[iLight] = TG_Shape::s_lightDir[iLight];
 								}
 							}
 							break;
 							
 							case TG_LIGHT_TERRAIN:
 							{
-								if (TG_Shape::listOfLights[iLight] != NULL)
+								if (TG_Shape::s_listOfLights[iLight] != NULL)
 								{
 									Stuff::Point3D lightPos;
-									lightPos = TG_Shape::listOfLights[iLight]->direction;
+									lightPos = TG_Shape::s_listOfLights[iLight]->direction;
 		
 									Stuff::Point3D shapePosition;
 									shapePosition = listOfShapes[i].shapeToWorld;
 		
 									shapePosition -= lightPos;
 									shapePosition.y = 0.0f;
-									TG_Shape::lightDir[iLight] = shapePosition;
+									TG_Shape::s_lightDir[iLight] = shapePosition;
 								}
 								
 								if (listOfShapes[i].parentNode == NULL)
 								{
-									TG_Shape::rootLightDir[iLight] = TG_Shape::lightDir[iLight];
+									TG_Shape::s_rootLightDir[iLight] = TG_Shape::s_lightDir[iLight];
 								}
 							}
 							break;
 							
 							case TG_LIGHT_SPOT:
 							{
-								if (TG_Shape::listOfLights[iLight] != NULL)
+								if (TG_Shape::s_listOfLights[iLight] != NULL)
 								{
 									Stuff::Point3D lightPos;
-									lightPos = TG_Shape::listOfLights[iLight]->direction;
+									lightPos = TG_Shape::s_listOfLights[iLight]->direction;
 		
 									Stuff::Point3D shapePosition;
 									shapePosition = listOfShapes[i].shapeToWorld;
 		
 									shapePosition -= lightPos;
 									shapePosition.y = 0.0f;
-									TG_Shape::lightDir[iLight] = shapePosition;
+									TG_Shape::s_lightDir[iLight] = shapePosition;
 									//if (angles.yaw != 0.0f )
-									//	RotateLight(TG_Shape::lightDir[iLight],-angles.yaw);
+									//	RotateLight(TG_Shape::s_lightDir[iLight],-angles.yaw);
 									
-									lightPos = TG_Shape::listOfLights[iLight]->spotDir;
+									lightPos = TG_Shape::s_listOfLights[iLight]->spotDir;
 									shapePosition = listOfShapes[i].shapeToWorld;
 									
 									shapePosition -= lightPos;
 									shapePosition.y = 0.0f;
-									TG_Shape::spotDir[iLight] = shapePosition;
+									TG_Shape::s_spotDir[iLight] = shapePosition;
 									//if (angles.yaw != 0.0f )
-									//	RotateLight(TG_Shape::spotDir[iLight],-angles.yaw);
+									//	RotateLight(TG_Shape::s_spotDir[iLight],-angles.yaw);
 										
 									if (listOfShapes[i].parentNode == NULL)
 									{
-										TG_Shape::rootLightDir[iLight] = TG_Shape::spotDir[iLight];
+										TG_Shape::s_rootLightDir[iLight] = TG_Shape::s_spotDir[iLight];
 									}
 								}
 							}
@@ -1499,7 +1496,7 @@ long TG_MultiShape::TransformMultiShape (Stuff::Point3D *pos, Stuff::UnitQuatern
 			}
 		}
 
-		shapeToClip.Multiply(listOfShapes[i].shapeToWorld,TG_Shape::worldToClip);
+		shapeToClip.Multiply(listOfShapes[i].shapeToWorld,TG_Shape::s_worldToClip);
 		backFacePoint.Multiply(camPosition,listOfShapes[i].worldToShape);
 
 	#ifdef LAB_ONLY
@@ -1547,8 +1544,11 @@ void TG_MultiShape::Render (bool refreshTextures, float forceZ)
 					listOfShapes[i].node->myType->SetTextureAlpha(j,myMultiType->listOfTextures[j].textureAlpha); 
 				}
 			}
+
+			Stuff::Matrix4D  shapeToClip;
+			shapeToClip.Multiply(listOfShapes[i].shapeToWorld, TG_Shape::s_worldToClip);
 		
-			listOfShapes[i].node->Render(forceZ,isHudElement,alphaValue,isClamped);
+			listOfShapes[i].node->Render(forceZ,isHudElement,alphaValue,isClamped, &shapeToClip);
 		}
 	}
 }	

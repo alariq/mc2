@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <assert.h>
 #include <SDL2/SDL.h>
+#include <GL/glew.h>
 #include <GL/gl.h>
 #include "utils/logging.h"
 
@@ -105,11 +106,13 @@ RenderWindow* create_window(const char* pwinname, int width, int height)
 
     // select core profile if needed
     // COMPATIBILITY, ES,...
-    //SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
+    
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_COMPATIBILITY);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
 
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_DEBUG_FLAG);
+	//SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, GL_CONTEXT_FLAG_DEBUG_BIT);
 
     if (VERBOSE_MODES) {
         SDL_DisplayMode mode;
@@ -300,13 +303,14 @@ RenderContextHandle init_render_context(RenderWindowHandle render_window)
            printf("Failed to get SDL_GL_BLUE_SIZE: %s\n", SDL_GetError());
            }
            */
-        status = SDL_GL_GetAttribute(SDL_GL_DEPTH_SIZE, &value);
-        if (!status) {
-            printf("SDL_GL_DEPTH_SIZE: requested %d, got %d\n", 16, value);
-        } else {
-            printf("Failed to get SDL_GL_DEPTH_SIZE: %s\n", SDL_GetError());
-        }
+        //status = SDL_GL_GetAttribute(SDL_GL_DEPTH_SIZE, &value);
+        //if (!status) {
+        //    printf("SDL_GL_DEPTH_SIZE: requested %d, got %d\n", 16, value);
+        //} else {
+        //    printf("Failed to get SDL_GL_DEPTH_SIZE: %s\n", SDL_GetError());
+        //}
 
+		/*
         status = SDL_GL_GetAttribute(SDL_GL_MULTISAMPLEBUFFERS, &value);
         if (!status) {
             printf("SDL_GL_MULTISAMPLEBUFFERS: %d\n", value);
@@ -322,7 +326,7 @@ RenderContextHandle init_render_context(RenderWindowHandle render_window)
             printf("Failed to get SDL_GL_MULTISAMPLESAMPLES: %s\n",
                     SDL_GetError());
         }
-
+		*/
         status = SDL_GL_GetAttribute(SDL_GL_ACCELERATED_VISUAL, &value);
         if (!status) {
             printf("SDL_GL_ACCELERATED_VISUAL: %d\n", value);
@@ -330,7 +334,7 @@ RenderContextHandle init_render_context(RenderWindowHandle render_window)
             printf("Failed to get SDL_GL_ACCELERATED_VISUAL: %s\n",
                     SDL_GetError());
         }
-
+		
         status = SDL_GL_GetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, &value);
         if (!status) {
             printf("SDL_GL_CONTEXT_MAJOR_VERSION: %d\n", value);

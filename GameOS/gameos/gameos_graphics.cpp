@@ -37,6 +37,95 @@ struct gosTextureInfo {
     gos_TextureFormat format_;
 };
 
+////////////////////////////////////////////////////////////////////////////////
+class gosBuffer {
+	friend class gosRenderer;
+public:
+	GLuint buffer_;
+	int element_size_;
+	uint32_t count_;
+	gosBUFFER_TYPE type_;
+	gosBUFFER_USAGE usage_;
+};
+
+GLenum getGLVertexAttribType(gosVERTEX_ATTRIB_TYPE type) {
+	GLenum t = -1;
+	switch (type)
+	{
+	case gosVERTEX_ATTRIB_TYPE::BYTE: return GL_BYTE;
+	case gosVERTEX_ATTRIB_TYPE::UNSIGNED_BYTE: return GL_UNSIGNED_BYTE;
+	case gosVERTEX_ATTRIB_TYPE::SHORT: return GL_SHORT;
+	case gosVERTEX_ATTRIB_TYPE::UNSIGNED_SHORT: return GL_UNSIGNED_SHORT;
+	case gosVERTEX_ATTRIB_TYPE::INT: return GL_INT;
+	case gosVERTEX_ATTRIB_TYPE::UNSIGNED_INT: return GL_UNSIGNED_INT;
+	case gosVERTEX_ATTRIB_TYPE::FLOAT: return GL_FLOAT;
+	default:
+		gosASSERT(0 && "unknows vertex attrib type");
+	}
+
+	return t;
+};
+
+////////////////////////////////////////////////////////////////////////////////
+class gosVertexDeclaration {
+	friend class gosRenderer;
+
+	gosVERTEX_FORMAT_RECORD* vf_;
+	uint32_t count_;
+
+	gosVertexDeclaration() :vf_(0), count_(0) {}
+public:
+
+	static gosVertexDeclaration* create(gosVERTEX_FORMAT_RECORD* vf, int count)
+	{
+		gosVertexDeclaration* vdecl = new gosVertexDeclaration();
+		if (!vdecl)
+			return nullptr;
+
+		vdecl->vf_ = new gosVERTEX_FORMAT_RECORD[count];
+		memcpy(vdecl->vf_, vf, count * sizeof(gosVERTEX_FORMAT_RECORD));
+		vdecl->count_ = count;
+
+		return vdecl;
+	}
+
+	static void destroy(gosVertexDeclaration* vdecl)
+	{
+		delete[] vdecl->vf_;
+		vdecl->count_ = -1;
+		vdecl->vf_ = nullptr;
+		delete vdecl;
+	}
+
+	void apply() {
+
+		size_t buf_offset = 0;
+
+		for (uint32_t i = 0; i < count_; ++i) {
+
+			gosVERTEX_FORMAT_RECORD* rec = vf_ + i;
+
+			GLuint type = getGLVertexAttribType(rec->type);
+
+			glEnableVertexAttribArray(rec->index);
+			glVertexAttribPointer(rec->index, rec->num_components, type, rec->normalized ? GL_TRUE : GL_FALSE, rec->stride, BUFFER_OFFSET(rec->offset));
+
+			//buf_offset += rec->offset;
+		}
+	}
+
+	void end() {
+
+		size_t buf_offset = 0;
+
+		for (uint32_t i = 0; i < count_; ++i) {
+			gosVERTEX_FORMAT_RECORD* rec = vf_ + i;
+			glDisableVertexAttribArray(rec->index);
+		}
+	}
+
+};
+
 class gosShaderMaterial {
 
 		static const std::string s_mvp;
@@ -141,22 +230,24 @@ class gosShaderMaterial {
         // TODO: think how to not expose this
         glsl_program* getShader() { return program_; }
 
-        void end() {
+		void endVertexDeclaration() {
 
-            glDisableVertexAttribArray(pos_loc);
+			glDisableVertexAttribArray(pos_loc);
 
-            if(color_loc != -1) {
-                glDisableVertexAttribArray(color_loc);
-            }
+			if (color_loc != -1) {
+				glDisableVertexAttribArray(color_loc);
+			}
 
-            if(spec_color_and_fog_loc != -1) {
-                glDisableVertexAttribArray(spec_color_and_fog_loc);
-            }
+			if (spec_color_and_fog_loc != -1) {
+				glDisableVertexAttribArray(spec_color_and_fog_loc);
+			}
 
-            if(texcoord_loc != -1) {
-                glDisableVertexAttribArray(texcoord_loc);
-            }
+			if (texcoord_loc != -1) {
+				glDisableVertexAttribArray(texcoord_loc);
+			}
+		}
 
+		void end() {
             glUseProgram(0);
         }
 
@@ -249,6 +340,8 @@ class gosMesh {
         void draw(gosShaderMaterial* material) const;
         void drawIndexed(gosShaderMaterial* material) const;
 
+		static void drawIndexed(HGOSBUFFER ib, HGOSBUFFER vb, HGOSVERTEXDECLARATION vdecl, gosShaderMaterial* material);
+
 		static const std::string s_tex1;
 
     private:
@@ -294,6 +387,7 @@ void gosMesh::draw(gosShaderMaterial* material) const
     material->setSamplerUnit(s_tex1, 0);
 
 	glBindBuffer(GL_ARRAY_BUFFER, vb_);
+    CHECK_GL_ERROR;
 
     material->applyVertexDeclaration();
     CHECK_GL_ERROR;
@@ -315,6 +409,7 @@ void gosMesh::draw(gosShaderMaterial* material) const
 
     glDrawArrays(pt, 0, num_vertices_);
 
+    material->endVertexDeclaration();
     material->end();
 
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -359,12 +454,48 @@ void gosMesh::drawIndexed(gosShaderMaterial* material) const
 
     glDrawElements(pt, num_indices_, getIndexSizeBytes()==2 ? GL_UNSIGNED_SHORT : GL_UNSIGNED_INT, NULL);
 
+    material->endVertexDeclaration();
     material->end();
 
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
 }
+
+void gosMesh::drawIndexed(HGOSBUFFER ib, HGOSBUFFER vb, HGOSVERTEXDECLARATION vdecl, gosShaderMaterial* material)
+{
+	gosASSERT(material);
+
+	int index_size = ib->element_size_;
+	gosASSERT(index_size == 2 || index_size == 4);
+
+	if (ib->count_ == 0)
+		return;
+
+	material->apply();
+	CHECK_GL_ERROR;
+
+	material->setSamplerUnit(s_tex1, 0);
+	CHECK_GL_ERROR;
+
+	glBindBuffer(GL_ARRAY_BUFFER, vb->buffer_);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ib->buffer_);
+	CHECK_GL_ERROR;
+
+	vdecl->apply();
+	CHECK_GL_ERROR;
+
+	GLenum pt = GL_TRIANGLES;
+	glDrawElements(pt, ib->count_, index_size == 2 ? GL_UNSIGNED_SHORT : GL_UNSIGNED_INT, NULL);
+
+	vdecl->end();
+	material->end();
+
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
+}
+
 
 class gosTexture {
     public:
@@ -678,6 +809,8 @@ class gosFont {
         uint32_t ref_count_;
 };
 
+
+
 ////////////////////////////////////////////////////////////////////////////////
 class gosRenderer {
 
@@ -704,7 +837,19 @@ class gosRenderer {
             return (uint32_t)(fontList_.size()-1);
         }
 
-        // TODO: do sae as with texture?
+		uint32_t addBuffer(gosBuffer* buffer) {
+			gosASSERT(buffer);
+			bufferList_.push_back(buffer);
+			return (uint32_t)(bufferList_.size() - 1);
+		}
+
+		uint32_t addVertexDeclaration(gosVertexDeclaration* vdecl) {
+			gosASSERT(vdecl);
+			vertexDeclarationList_.push_back(vdecl);
+			return (uint32_t)(vertexDeclarationList_.size() - 1);
+		}
+
+        // TODO: do same as with texture?
         void deleteFont(gosFont* font) {
             // FIXME: bad use object list, with stable ids
             // to not waste space
@@ -728,6 +873,26 @@ class gosRenderer {
                     fontList_.erase(it);
             }
         }
+
+		bool deleteBuffer(gosBuffer* buffer) {
+			std::vector<gosBuffer*>::iterator it = std::find(bufferList_.begin(), bufferList_.end(), buffer);
+			if (it != bufferList_.end())
+			{
+				bufferList_.erase(it);
+				return true;
+			}
+			return false;
+		}
+
+		bool deleteVertexDeclaration(gosVertexDeclaration* vdecl) {
+			std::vector<gosVertexDeclaration*>::iterator it = std::find(vertexDeclarationList_.begin(), vertexDeclarationList_.end(), vdecl);
+			if (it != vertexDeclarationList_.end())
+			{
+				vertexDeclarationList_.erase(it);
+				return true;
+			}
+			return false;
+		}
 
         gosFont* findFont(const char* font_id) {
             
@@ -802,6 +967,9 @@ class gosRenderer {
             *viewAddY = viewportTop_ * height_;
         }
 
+		void setRenderViewport(const vec4& vp) { render_viewport_ = vp; }
+		vec4 getRenderViewport() { return render_viewport_; }
+
         void setRenderState(gos_RenderState RenderState, int Value) {
             renderStates_[RenderState] = Value;
         }
@@ -829,6 +997,7 @@ class gosRenderer {
         void drawPoints(gos_VERTEX* vertices, int count);
         void drawTris(gos_VERTEX* vertices, int count);
         void drawIndexedTris(gos_VERTEX* vertices, int num_vertices, WORD* indices, int num_indices);
+		void drawIndexedTris(HGOSBUFFER ib, HGOSBUFFER vb, HGOSVERTEXDECLARATION vdecl, const float* mvp);
         void drawText(const char* text);
 
         void beginFrame();
@@ -869,6 +1038,8 @@ class gosRenderer {
 
         std::vector<gosTexture*> textureList_;
         std::vector<gosFont*> fontList_;
+        std::vector<gosBuffer*> bufferList_;
+        std::vector<gosVertexDeclaration*> vertexDeclarationList_;
 
         DWORD reqWidth;
         DWORD reqHeight;
@@ -910,6 +1081,8 @@ class gosRenderer {
         float viewportBottom_;
         float viewportRight_;
         //
+
+		vec4 render_viewport_;
         
         gosMesh* quads_;
         gosMesh* tris_;
@@ -921,6 +1094,8 @@ class gosRenderer {
         gosShaderMaterial* basic_tex_material_;
         gosShaderMaterial* text_material_;
 
+        gosShaderMaterial* basic_lighted_material_;
+        gosShaderMaterial* basic_tex_lighted_material_;
         //
         uint32_t num_draw_calls_;
         uint32_t num_draw_calls_to_draw_;
@@ -967,6 +1142,11 @@ void gosRenderer::init() {
     text_material_ = gosShaderMaterial::load("gos_text");
     gosASSERT(text_material_);
 
+    basic_lighted_material_ = gosShaderMaterial::load("gos_vertex_lighted");
+    gosASSERT(basic_lighted_material_);
+    basic_tex_lighted_material_ = gosShaderMaterial::load("gos_tex_vertex_lighted");
+    gosASSERT(basic_tex_lighted_material_);
+
     pendingRequest = false;
 
     num_draw_calls_ = 0;
@@ -994,6 +1174,9 @@ void gosRenderer::destroy() {
     gosShaderMaterial::destroy(basic_material_);
     gosShaderMaterial::destroy(basic_tex_material_);
     gosShaderMaterial::destroy(text_material_);
+
+    gosShaderMaterial::destroy(basic_lighted_material_);
+    gosShaderMaterial::destroy(basic_tex_lighted_material_);
 
     // delete fonts before textures, because they refer them
     for(size_t i=0; i<fontList_.size(); i++) {
@@ -1073,6 +1256,21 @@ void gosRenderer::popRenderStates()
 void gosRenderer::applyRenderStates() {
 
 	////////////////////////////////////////////////////////////////////////////////
+	switch (renderStates_[gos_State_Culling]) {
+		case gos_Cull_None: glDisable(GL_CULL_FACE); break;
+		case gos_Cull_CW:	
+		case gos_Cull_CCW:
+			glEnable(GL_CULL_FACE);
+			// by default in OpenGL front face is CCW (could be changed by glFrontFace)
+			glCullFace(renderStates_[gos_State_Culling] == gos_Cull_CW ? GL_BACK : GL_FRONT);
+			break;
+		default: gosASSERT(0 && "Wrong cull face value");
+	}
+	curStates_[gos_State_Culling] = renderStates_[gos_State_Culling];
+
+	////////////////////////////////////////////////////////////////////////////////
+
+	////////////////////////////////////////////////////////////////////////////////
 	fog_color_ = uint32_to_vec4(renderStates_[gos_State_Fog]);
 	curStates_[gos_State_Fog] = renderStates_[gos_State_Fog];
 
@@ -1144,7 +1342,7 @@ void gosRenderer::applyRenderStates() {
    ////////////////////////////////////////////////////////////////////////////////
    TexAddressMode address_mode = 
        renderStates_[gos_State_TextureAddress] == gos_TextureWrap ? TAM_REPEAT : TAM_CLAMP;
-   // in this case does not necessaily mean, that state was set, because in OpenGL this is binded to texture (unless separate sampler state extension is used, which is not currently)
+   // in this case does not necessarily mean, that state was set, because in OpenGL this is binded to texture (unless separate sampler state extension is used, which is not currently)
    curStates_[gos_State_TextureAddress] = renderStates_[gos_State_TextureAddress];
 
    ////////////////////////////////////////////////////////////////////////////////
@@ -1384,6 +1582,35 @@ void gosRenderer::drawIndexedTris(gos_VERTEX* vertices, int num_vertices, WORD* 
     mat->setFogColor(fog_color_);
     indexed_tris_->drawIndexed(mat);
     indexed_tris_->rewind();
+
+    afterDrawCall();
+}
+
+void gosRenderer::drawIndexedTris(HGOSBUFFER ib, HGOSBUFFER vb, HGOSVERTEXDECLARATION vdecl, const float* mvp)
+{
+    gosASSERT(ib && vb && mvp);
+    gosASSERT((ib->count_ % 3) == 0);
+
+    if(beforeDrawCall()) return;
+
+    applyRenderStates();
+    gosShaderMaterial* mat = 
+        curStates_[gos_State_Texture]!=0 ? basic_tex_lighted_material_ : basic_lighted_material_;
+
+	mat4 transform(	mvp[0], mvp[1], mvp[2], mvp[3], 
+					mvp[4], mvp[5], mvp[6], mvp[7],
+					mvp[8], mvp[9], mvp[10], mvp[11],
+					mvp[12], mvp[13], mvp[14], mvp[15]);
+
+	vec4 vp = g_gos_renderer->getRenderViewport();
+
+	mat->getShader()->setFloat4("vp", vp);
+	mat->getShader()->setMat4("projection_", projection_);
+
+    mat->setTransform(transform);
+    //mat->setFogColor(fog_color_);
+
+	gosMesh::drawIndexed(ib, vb, vdecl, mat);
 
     afterDrawCall();
 }
@@ -1683,11 +1910,11 @@ gosFont* gosFont::load(const char* fontFile) {
     const char* tex_ext = ".bmp";
     const char* glyph_ext = ".glyph";
     
-	const uint32_t textureNameSize = strlen(fname) + sizeof('/') + strlen(dir) + strlen(tex_ext) + 1;
+	const size_t textureNameSize = strlen(fname) + sizeof('/') + strlen(dir) + strlen(tex_ext) + 1;
     char* textureName = new char[textureNameSize];
 	memset(textureName, 0, textureNameSize);
 
-	const uint32_t glyphNameSize = strlen(fname) + sizeof('/') + strlen(dir) + strlen(glyph_ext) + 1;
+	const size_t glyphNameSize = strlen(fname) + sizeof('/') + strlen(dir) + strlen(glyph_ext) + 1;
     char* glyphName = new char[glyphNameSize];
 	memset(glyphName, 0, glyphNameSize);
 
@@ -1921,6 +2148,12 @@ void __stdcall gos_RenderIndexedArray( gos_VERTEX_2UV* pVertexArray, DWORD Numbe
    gosASSERT(0 && "not implemented");
 }
 
+void __stdcall gos_RenderIndexedArray(HGOSBUFFER ib, HGOSBUFFER vb, HGOSVERTEXDECLARATION vdecl, const float* mvp)
+{
+    gosASSERT(g_gos_renderer);
+    g_gos_renderer->drawIndexedTris(ib, vb, vdecl, mvp);
+}
+
 void __stdcall gos_SetRenderState( gos_RenderState RenderState, int Value )
 {
     gosASSERT(g_gos_renderer);
@@ -1942,6 +2175,15 @@ void __stdcall gos_SetupViewport( bool FillZ, float ZBuffer, bool FillBG, DWORD 
     gosASSERT(g_gos_renderer);
     g_gos_renderer->setupViewport(FillZ, ZBuffer, FillBG, BGColor, top, left, bottom, right, ClearStencil, StencilValue);
 }
+
+
+void __stdcall gos_SetRenderViewport(float x, float y, float w, float h)
+{
+    gosASSERT(g_gos_renderer);
+	//glViewport(x, y, w, h);
+	g_gos_renderer->setRenderViewport(vec4(x, y, w, h));
+}
+
 
 void __stdcall gos_TextDraw( const char *Message, ... )
 {
@@ -2118,6 +2360,94 @@ int gos_GetNumDisplayModes(int DisplayIndex)
 bool gos_GetDisplayModeByIndex(int DisplayIndex, int ModeIndex, int* XRes, int* YRes, int* BitDepth)
 {
     return graphics::get_display_mode_by_index(DisplayIndex, ModeIndex, XRes, YRes, BitDepth);
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+// GPU Buffers management code
+////////////////////////////////////////////////////////////////////////////////
+
+GLenum getGLBufferType(gosBUFFER_TYPE type)
+{
+	GLenum t = -1;
+	switch (type)
+	{
+		case gosBUFFER_TYPE::VERTEX: t = GL_ARRAY_BUFFER; break;
+		case gosBUFFER_TYPE::INDEX: t = GL_ELEMENT_ARRAY_BUFFER; break;
+		case gosBUFFER_TYPE::UNIFORM: t = GL_UNIFORM_BUFFER; break;
+
+		default:
+			gosASSERT(0 && "unknows buffer type");
+	}
+	return t;
+}
+
+GLenum getGLBufferUsage(gosBUFFER_USAGE usage)
+{
+	GLenum u = -1;
+	switch (usage)
+	{
+		case gosBUFFER_USAGE::STREAM_DRAW: u = GL_STREAM_DRAW; break;
+		case gosBUFFER_USAGE::STATIC_DRAW: u = GL_STATIC_DRAW; break;
+		case gosBUFFER_USAGE::DYNAMIC_DRAW: u = GL_DYNAMIC_DRAW; break;
+
+		default:
+			gosASSERT(0 && "unknows buffer usage");
+	}
+	return u;
+}
+
+
+
+gosBuffer* __stdcall gos_CreateBuffer(gosBUFFER_TYPE type, gosBUFFER_USAGE usage, int element_size, uint32_t count, void* buffer_data)
+{
+	GLenum gl_target = getGLBufferType(type);
+	GLenum gl_usage = getGLBufferUsage(usage);
+
+	size_t buffer_size = element_size * count;
+	GLuint buffer;
+	glGenBuffers(1, &buffer);
+	glBindBuffer(gl_target, buffer);
+	glBufferData(gl_target, buffer_size, buffer_data, gl_usage);
+	glBindBuffer(gl_target, 0);
+
+	gosBuffer* pbuffer = new gosBuffer();
+	pbuffer->buffer_ = buffer;
+	pbuffer->element_size_ = element_size;
+	pbuffer->count_ = count;
+	pbuffer->type_ = type;
+	pbuffer->usage_ = usage;
+
+    gosASSERT(g_gos_renderer);
+	g_gos_renderer->addBuffer(pbuffer);
+
+	return pbuffer;
+}
+
+void __stdcall gos_DestroyBuffer(gosBuffer* buffer)
+{
+	gosASSERT(buffer);
+    gosASSERT(g_gos_renderer);
+	bool rv = g_gos_renderer->deleteBuffer(buffer);
+	delete buffer;
+}
+
+HGOSVERTEXDECLARATION __stdcall gos_CreateVertexDeclaration(gosVERTEX_FORMAT_RECORD* records, int count)
+{
+	gosASSERT(records && count > 0);
+    gosASSERT(g_gos_renderer);
+	gosVertexDeclaration* vdecl = gosVertexDeclaration::create(records, count);
+	g_gos_renderer->addVertexDeclaration(vdecl);
+	return vdecl;
+}
+
+void __stdcall gos_DestroyVertexDeclaration(HGOSVERTEXDECLARATION vdecl)
+{
+	gosASSERT(vdecl);
+    gosASSERT(g_gos_renderer);
+	bool rv = g_gos_renderer->deleteVertexDeclaration(vdecl);
+	gosVertexDeclaration::destroy(vdecl);
+
 }
 
 #include "gameos_graphics_debug.cpp"

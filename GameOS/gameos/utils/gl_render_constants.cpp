@@ -61,9 +61,9 @@ const int BACK  = GL_BACK;
 const int FRONT = GL_FRONT;
 
 // Lock flags
-const int WRITE_ONLY = GL_WRITE_ONLY_ARB;
-const int READ_ONLY  = GL_READ_ONLY_ARB;
-const int READ_WRITE = GL_READ_WRITE_ARB;
+const int WRITE_ONLY = GL_WRITE_ONLY;
+const int READ_ONLY  = GL_READ_ONLY;
+const int READ_WRITE = GL_READ_WRITE;
 
 // Buffer clear flags
 const int COLOR_BUFFER   = GL_COLOR_BUFFER_BIT;

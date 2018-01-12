@@ -3360,6 +3360,7 @@ void Mission::destroy (bool initLogistics)
 
 	mcTextureManager->flush();
 	mcTextureManager->freeVertices();
+	mcTextureManager->freeShapes();
 
 	soundSystem->purgeSoundSystem();
 

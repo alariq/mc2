@@ -45,6 +45,16 @@ struct glsl_uniform
     bool is_dirty_;
 };
 
+struct glsl_uniform_block
+{
+    std::string name_;
+	GLuint index_;
+    int num_uniforms_;
+    GLint binding_;
+	GLint data_size_;
+    bool is_dirty_;
+};
+
 struct glsl_sampler
 {
 	SamplerType type_;
@@ -83,7 +93,9 @@ struct glsl_program {
 
     typedef std::map<std::string, glsl_uniform*> UniArr_t;
 	typedef std::map<std::string, glsl_sampler*> SamplerArr_t;
+    typedef std::map<std::string, glsl_uniform_block*> UniBlockArr_t;
     UniArr_t uniforms_;
+	UniBlockArr_t uniform_blocks_;
 	SamplerArr_t samplers_;
 
     bool reload();

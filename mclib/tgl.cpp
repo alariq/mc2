@@ -41,10 +41,10 @@
 #define USE_ASSEMBLY
 //-------------------------------------------------------------------------------
 // Statics
-Stuff::LinearMatrix4D 	*TG_Shape::cameraOrigin = NULL;
-Stuff::Matrix4D			*TG_Shape::cameraToClip = NULL;
-Stuff::LinearMatrix4D	TG_Shape::worldToCamera;
-Stuff::Matrix4D			TG_Shape::worldToClip;
+Stuff::LinearMatrix4D 	*TG_Shape::s_cameraOrigin = NULL;
+Stuff::Matrix4D			*TG_Shape::s_cameraToClip = NULL;
+Stuff::LinearMatrix4D	TG_Shape::s_worldToCamera;
+Stuff::Matrix4D			TG_Shape::s_worldToClip;
 
 float					TG_Shape::viewMulX = 0.0;
 float					TG_Shape::viewAddX = 0.0;
@@ -55,13 +55,13 @@ DWORD					TG_Shape::fogColor = 0xffffffff;
 float					TG_Shape::fogStart = 0.0f;
 float					TG_Shape::fogFull = 0.0f;
 
-TG_LightPtr				*TG_Shape::listOfLights = NULL;
-DWORD					TG_Shape::numLights = 0;
+TG_LightPtr				*TG_Shape::s_listOfLights = NULL;
+DWORD					TG_Shape::s_numLights = 0;
 
-Stuff::LinearMatrix4D 	TG_Shape::lightToShape[MAX_LIGHTS_IN_WORLD];
-Stuff::Vector3D			TG_Shape::lightDir[MAX_LIGHTS_IN_WORLD];
-Stuff::Vector3D			TG_Shape::rootLightDir[MAX_LIGHTS_IN_WORLD];
-Stuff::Vector3D			TG_Shape::spotDir[MAX_LIGHTS_IN_WORLD];
+Stuff::LinearMatrix4D 	TG_Shape::s_lightToShape[MAX_LIGHTS_IN_WORLD];
+Stuff::Vector3D			TG_Shape::s_lightDir[MAX_LIGHTS_IN_WORLD];
+Stuff::Vector3D			TG_Shape::s_rootLightDir[MAX_LIGHTS_IN_WORLD];
+Stuff::Vector3D			TG_Shape::s_spotDir[MAX_LIGHTS_IN_WORLD];
 
 UserHeapPtr 			TG_Shape::tglHeap = NULL;
 
@@ -452,6 +452,16 @@ TG_ShapePtr TG_TypeShape::CreateFrom (void)
 //-------------------------------------------------------------------------------
 void TG_TypeShape::LoadBinaryCopy (File &binFile)
 {
+	gosVERTEX_FORMAT_RECORD vdecl[] =
+	{ 
+		{0, 3, false, sizeof(TG_HWTypeVertex), 0, gosVERTEX_ATTRIB_TYPE::FLOAT },
+		{1, 3, false, sizeof(TG_HWTypeVertex), offsetof(TG_HWTypeVertex, normal) , gosVERTEX_ATTRIB_TYPE::FLOAT },
+		{2, 4, true, sizeof(TG_HWTypeVertex), offsetof(TG_HWTypeVertex, aRGBLight) , gosVERTEX_ATTRIB_TYPE::UNSIGNED_BYTE},
+		{3, 2, false, sizeof(TG_HWTypeVertex), offsetof(TG_HWTypeVertex, u) , gosVERTEX_ATTRIB_TYPE::FLOAT },
+	};
+
+	vdecl_ = gos_CreateVertexDeclaration(vdecl, sizeof(vdecl) / sizeof(gosVERTEX_FORMAT_RECORD));
+
 	//listOfTypeVertices
 	numTypeVertices = binFile.readInt();
 	if (numTypeVertices)
@@ -460,6 +470,7 @@ void TG_TypeShape::LoadBinaryCopy (File &binFile)
 		gosASSERT(listOfTypeVertices != NULL);
 
 		binFile.read((MemoryPtr)listOfTypeVertices,sizeof(TG_TypeVertex) * numTypeVertices);
+
 	}
 	else
 	{
@@ -478,6 +489,46 @@ void TG_TypeShape::LoadBinaryCopy (File &binFile)
 	else
 	{
 		listOfTypeTriangles = NULL;
+	}
+
+	if (numTypeVertices)
+	{
+		// no real index buffer for now...
+		uint32_t num_vertices = numTypeTriangles * 3;
+		uint32_t num_indices = numTypeTriangles * 3;
+
+		uint16_t* ib = new uint16_t[num_indices];
+		TG_HWTypeVertex* vb = new TG_HWTypeVertex[num_vertices];
+
+		for (uint32_t i = 0; i < numTypeTriangles; i++)
+		{
+			TG_TypeTriangle triType = listOfTypeTriangles[i];
+
+			TG_HWTypeVertex gVertex[3];
+
+			for (uint32_t j = 0; j < 3; ++j)
+			{
+				vb[3 * i + j].aRGBLight = listOfTypeVertices[triType.Vertices[j]].aRGBLight;
+				vb[3 * i + j].normal = listOfTypeVertices[triType.Vertices[j]].normal;
+				vb[3 * i + j].position = listOfTypeVertices[triType.Vertices[j]].position;
+
+				ib[3 * i + j] = 3 * i + j;
+			}
+
+			vb[3*i + 0].u = triType.uvdata.u0;
+			vb[3*i + 0].v = triType.uvdata.v0;
+			vb[3*i + 1].u = triType.uvdata.u1;
+			vb[3*i + 1].v = triType.uvdata.v2;
+			vb[3*i + 2].u = triType.uvdata.u2;
+			vb[3*i + 2].v = triType.uvdata.v2;
+
+		}
+
+		ib_ = gos_CreateBuffer(gosBUFFER_TYPE::INDEX, gosBUFFER_USAGE::STATIC_DRAW, sizeof(uint16_t), num_indices, ib);
+		vb_ = gos_CreateBuffer(gosBUFFER_TYPE::VERTEX, gosBUFFER_USAGE::STATIC_DRAW, sizeof(TG_HWTypeVertex), num_vertices, vb);
+
+		delete[] ib;
+		delete[] vb;
 	}
 
 	//listOfTextures
@@ -567,6 +618,21 @@ void TG_TypeShape::destroy (void)
 	listOfTextures = NULL;
 
 	numTypeVertices = numTypeTriangles = numTextures = 0;
+
+	if (vb_) {
+		gos_DestroyBuffer(vb_);
+		vb_ = 0;
+	}
+
+	if (ib_) {
+		gos_DestroyBuffer(ib_);
+		ib_ = 0;
+	}
+
+	if (vdecl_) {
+		gos_DestroyVertexDeclaration(vdecl_);
+		vdecl_ = 0;
+	}
 }	
 
 //-------------------------------------------------------------------------------
@@ -1473,12 +1539,12 @@ void *TG_Shape::operator new (size_t mySize)
 //render pass if the camera does not change for that pass.
 void TG_Shape::SetCameraMatrices (Stuff::LinearMatrix4D *camOrigin, Stuff::Matrix4D *camToClip)
 {
-	cameraOrigin = camOrigin;
-	cameraToClip = camToClip;
+	s_cameraOrigin = camOrigin;
+	s_cameraToClip = camToClip;
 
-	worldToCamera.Invert(*cameraOrigin);
+	s_worldToCamera.Invert(*s_cameraOrigin);
 
-	worldToClip.Multiply(worldToCamera, *cameraToClip);
+	s_worldToClip.Multiply(s_worldToCamera, *s_cameraToClip);
 }	
 
 //-------------------------------------------------------------------------------
@@ -1513,13 +1579,13 @@ long TG_Shape::SetLightList (TG_LightPtr *lightList, DWORD nLights)
 {
 	if (lightList)
 	{
-		listOfLights = lightList;
-		numLights = nLights;
+		s_listOfLights = lightList;
+		s_numLights = nLights;
 	}
 	else
 	{
-		listOfLights = NULL;
-		numLights = 0;
+		s_listOfLights = NULL;
+		s_numLights = 0;
 	}
 
 	return 0;
@@ -1606,6 +1672,7 @@ long TG_Shape::MultiTransformShape (Stuff::Matrix4D *shapeToClip, Stuff::Point3D
 
 	lastTurnTransformed = turn;
 
+	
 	for (long j=0;j<numVertices;j++)
 	{
 		Stuff::Point3D pos = theShape->listOfTypeVertices[j].position;
@@ -1772,12 +1839,12 @@ long TG_Shape::MultiTransformShape (Stuff::Matrix4D *shapeToClip, Stuff::Point3D
 		{
 			if (!isSpotlight && !isWindow)
 			{
-				for (long i=0;i<numLights;i++)
+				for (long i=0;i<s_numLights;i++)
 				{
-					if ((listOfLights[i] != NULL) && (listOfLights[i]->active))
+					if ((s_listOfLights[i] != NULL) && (s_listOfLights[i]->active))
 					{
-						DWORD startLight = listOfLights[i]->GetaRGB();
-						switch (listOfLights[i]->lightType)
+						DWORD startLight = s_listOfLights[i]->GetaRGB();
+						switch (s_listOfLights[i]->lightType)
 						{
 							case TG_LIGHT_AMBIENT:
 							{
@@ -1789,9 +1856,9 @@ long TG_Shape::MultiTransformShape (Stuff::Matrix4D *shapeToClip, Stuff::Point3D
 	
 							case TG_LIGHT_INFINITE:
 							{
-								float cosine = lightDir[i].x * theShape->listOfTypeVertices[j].normal.x;
-								cosine += lightDir[i].y * theShape->listOfTypeVertices[j].normal.y;
-								cosine += lightDir[i].z * theShape->listOfTypeVertices[j].normal.z;
+								float cosine = s_lightDir[i].x * theShape->listOfTypeVertices[j].normal.x;
+								cosine += s_lightDir[i].y * theShape->listOfTypeVertices[j].normal.y;
+								cosine += s_lightDir[i].z * theShape->listOfTypeVertices[j].normal.z;
 
 								if (cosine < 0.0f)
 								{
@@ -1815,7 +1882,7 @@ long TG_Shape::MultiTransformShape (Stuff::Matrix4D *shapeToClip, Stuff::Point3D
 									float mirrorScalar = cosine * 2.0f;
 									Stuff::Vector3D MirrorVector(listOfVertices[i].normal);
 									MirrorVector *= mirrorScalar;
-									MirrorVector.Subtract(MirrorVector,lightDir[i]);
+									MirrorVector.Subtract(MirrorVector,s_lightDir[i]);
 									MirrorVector.Normalize(MirrorVector);
 
 									Stuff::Vector3D SpecPoint;
@@ -1852,7 +1919,7 @@ long TG_Shape::MultiTransformShape (Stuff::Matrix4D *shapeToClip, Stuff::Point3D
 							case TG_LIGHT_INFINITEWITHFALLOFF:
 							{
 								Stuff::Point3D vertexToLight;
-								vertexToLight = lightToShape[i];
+								vertexToLight = s_lightToShape[i];
 								vertexToLight -= theShape->listOfTypeVertices[j].position;
 	
 								float length = vertexToLight.GetApproximateLength();
@@ -1861,9 +1928,9 @@ long TG_Shape::MultiTransformShape (Stuff::Matrix4D *shapeToClip, Stuff::Point3D
 	
 								float red,green,blue;
 	
-								if (listOfLights[i]->GetFalloff(length, falloff))
+								if (s_listOfLights[i]->GetFalloff(length, falloff))
 								{
-									float cosine = -(lightDir[i] * (theShape->listOfTypeVertices[j].normal));
+									float cosine = -(s_lightDir[i] * (theShape->listOfTypeVertices[j].normal));
 	
 									red = float((startLight>>16) & 0x000000ff) * falloff;
 									green = float((startLight>>8) & 0x000000ff) * falloff;
@@ -1883,7 +1950,7 @@ long TG_Shape::MultiTransformShape (Stuff::Matrix4D *shapeToClip, Stuff::Point3D
 							case TG_LIGHT_POINT:
 							{
 								Stuff::Point3D vertexToLight;
-								vertexToLight = lightDir[i];
+								vertexToLight = s_lightDir[i];
 								float length = vertexToLight.GetApproximateLength();
 	
 								if (length > Stuff::SMALL)
@@ -1892,7 +1959,7 @@ long TG_Shape::MultiTransformShape (Stuff::Matrix4D *shapeToClip, Stuff::Point3D
 		
 									float falloff = 1.0f;
 		
-									if (listOfLights[i]->GetFalloff(length, falloff))
+									if (s_listOfLights[i]->GetFalloff(length, falloff))
 									{
 										float cosine = vertexToLight * (theShape->listOfTypeVertices[j].normal);
 		
@@ -1948,13 +2015,13 @@ long TG_Shape::MultiTransformShape (Stuff::Matrix4D *shapeToClip, Stuff::Point3D
 									Stuff::Point3D vertexToLight;
 									Stuff::Vector3D pos = theShape->listOfTypeVertices[j].position;
 									RotateLight(pos,yawRotation);
-									vertexToLight.Add(lightDir[i],pos);
+									vertexToLight.Add(s_lightDir[i],pos);
 									float length = vertexToLight.GetApproximateLength();
 		
 									if (length > Stuff::SMALL)
 									{	
 										float falloff = 1.0f;
-										if (listOfLights[i]->GetFalloff(length, falloff))
+										if (s_listOfLights[i]->GetFalloff(length, falloff))
 										{
 											float red,green,blue;
 			
@@ -1979,7 +2046,7 @@ long TG_Shape::MultiTransformShape (Stuff::Matrix4D *shapeToClip, Stuff::Point3D
  							case TG_LIGHT_SPOT:
 							{
 								Stuff::Point3D vertexToLight;
-								vertexToLight = lightDir[i];
+								vertexToLight = s_lightDir[i];
 								
 								//-------------------------------------------------
 								// Defines the actual spot of light on the ground
@@ -1987,7 +2054,7 @@ long TG_Shape::MultiTransformShape (Stuff::Matrix4D *shapeToClip, Stuff::Point3D
 	
 								//-------------------------------------------------
 								// Defines the REAL direction of the spot light.
-								vertexToLight = spotDir[i];
+								vertexToLight = s_spotDir[i];
 								if (vertexToLight.GetApproximateLength() > Stuff::SMALL)
 									vertexToLight.Normalize(vertexToLight);
 								else
@@ -1995,7 +2062,7 @@ long TG_Shape::MultiTransformShape (Stuff::Matrix4D *shapeToClip, Stuff::Point3D
 	
 								float falloff = 1.0f;
 	
-								if (listOfLights[i]->GetFalloff(length, falloff))
+								if (s_listOfLights[i]->GetFalloff(length, falloff))
 								{
 									float cosine = vertexToLight * (theShape->listOfTypeVertices[j].normal);
 	
@@ -2173,19 +2240,19 @@ long TG_Shape::MultiTransformShape (Stuff::Matrix4D *shapeToClip, Stuff::Point3D
 			{
 				//--------------------------------------------
 				// Flat Shade any face which are flat shaded.
-				for (long i=0;i<numLights;i++)
+				for (long i=0;i<s_numLights;i++)
 				{
-					if (listOfLights[i] != NULL)
+					if (s_listOfLights[i] != NULL)
 					{
-						DWORD startVLight = listOfLights[i]->GetaRGB();
-						switch (listOfLights[i]->lightType)
+						DWORD startVLight = s_listOfLights[i]->GetaRGB();
+						switch (s_listOfLights[i]->lightType)
 						{
 							case TG_LIGHT_INFINITE:
 							{
-								if (lightDir[i].GetLength() > Stuff::SMALL)
-									lightDir[i].Normalize(lightDir[i]);
+								if (s_lightDir[i].GetLength() > Stuff::SMALL)
+									s_lightDir[i].Normalize(s_lightDir[i]);
 		
-								float cosine = -(lightDir[i] * (theShape->listOfTypeTriangles[j].faceNormal));
+								float cosine = -(s_lightDir[i] * (theShape->listOfTypeTriangles[j].faceNormal));
 		
 								if (cosine > 0.0f)
 								{
@@ -2202,13 +2269,13 @@ long TG_Shape::MultiTransformShape (Stuff::Matrix4D *shapeToClip, Stuff::Point3D
 		
 							case TG_LIGHT_INFINITEWITHFALLOFF:
 							{
-								if (lightDir[i].GetLength() > Stuff::SMALL)
-									lightDir[i].Normalize(lightDir[i]);
+								if (s_lightDir[i].GetLength() > Stuff::SMALL)
+									s_lightDir[i].Normalize(s_lightDir[i]);
 		
-								float cosine = -(lightDir[i] * (theShape->listOfTypeTriangles[j].faceNormal));
+								float cosine = -(s_lightDir[i] * (theShape->listOfTypeTriangles[j].faceNormal));
 		
 								Stuff::Point3D vertexToLight;
-								vertexToLight = lightToShape[i];
+								vertexToLight = s_lightToShape[i];
 								vertexToLight -= theShape->listOfTypeVertices[theShape->listOfTypeTriangles[j].Vertices[0]].position;
 		
 								float length = vertexToLight.GetApproximateLength();
@@ -2217,7 +2284,7 @@ long TG_Shape::MultiTransformShape (Stuff::Matrix4D *shapeToClip, Stuff::Point3D
 		
 								float red,green,blue;
 		
-								if ((cosine > 0.0f) && listOfLights[i]->GetFalloff(length, falloff))
+								if ((cosine > 0.0f) && s_listOfLights[i]->GetFalloff(length, falloff))
 								{
 									red = float((startVLight>>16) & 0x000000ff) * falloff;
 									green = float((startVLight>>8) & 0x000000ff) * falloff;
@@ -2237,7 +2304,7 @@ long TG_Shape::MultiTransformShape (Stuff::Matrix4D *shapeToClip, Stuff::Point3D
 							case TG_LIGHT_POINT:
 							{
 								Stuff::Point3D vertexToLight;
-								vertexToLight = lightToShape[i];
+								vertexToLight = s_lightToShape[i];
 								vertexToLight -= theShape->listOfTypeVertices[theShape->listOfTypeTriangles[j].Vertices[0]].position;
 		
 								float length = vertexToLight.GetApproximateLength();
@@ -2245,7 +2312,7 @@ long TG_Shape::MultiTransformShape (Stuff::Matrix4D *shapeToClip, Stuff::Point3D
 								vertexToLight.Normalize(vertexToLight);
 								float falloff = 1.0f;
 		
-								if (listOfLights[i]->GetFalloff(length, falloff))
+								if (s_listOfLights[i]->GetFalloff(length, falloff))
 								{
 									float cosine = -(vertexToLight * (theShape->listOfTypeTriangles[j].faceNormal));
 		
@@ -2349,12 +2416,12 @@ long TG_Shape::MultiTransformShape (Stuff::Matrix4D *shapeToClip, Stuff::Point3D
 			DWORD addFlags = 0;
 			if (isHudElement)
 			{
-				addFlags = MC2_ISCOMPASS;
+				addFlags |= MC2_ISCOMPASS;
 			}
 			
 			if (isClamped)
 			{
-				addFlags = MC2_ISTERRAIN;
+				addFlags |= MC2_ISTERRAIN;
 			}
 			
 			if (isSpotlight)
@@ -2378,7 +2445,35 @@ long TG_Shape::MultiTransformShape (Stuff::Matrix4D *shapeToClip, Stuff::Point3D
 				{
 					mcTextureManager->addTriangle(theShape->listOfTextures[theShape->listOfTypeTriangles[j].localTextureHandle].mcTextureNodeIndex,MC2_DRAWSOLID | addFlags);
 				}
+
 			}
+		}
+	}
+
+	// FIXME: this (listOfTypeTriangles[0]) is not correct if model has more than 1 texture! 
+	if (!isSpotlight && !isWindow && !theShape->listOfTextures[theShape->listOfTypeTriangles[0].localTextureHandle].textureAlpha && (alphaValue == 0xff))
+	{
+		DWORD addFlags = 0;
+		if (isHudElement)
+		{
+			addFlags |= MC2_ISCOMPASS;
+		}
+
+		if (isClamped)
+		{
+			addFlags |= MC2_ISTERRAIN;
+		}
+
+		if (theShape->ib_ && theShape->vb_) {
+
+			cur_viewport[0] = viewMulX;
+			cur_viewport[1] = viewMulY;
+			cur_viewport[2] = viewAddX;
+			cur_viewport[3] = viewAddY;
+			cur_shape2clip = *shapeToClip;
+
+			// FIXME: this (listOfTypeTriangles[0]) is not correct if model has more than 1 texture! 
+			mcTextureManager->addRenderShape(theShape->listOfTextures[theShape->listOfTypeTriangles[0].localTextureHandle].mcTextureNodeIndex, MC2_DRAWSOLID | addFlags);
 		}
 	}
 
@@ -2404,7 +2499,7 @@ long TG_Shape::MultiTransformShape (Stuff::Matrix4D *shapeToClip, Stuff::Point3D
 //-------------------------------------------------------------------------------
 //This function takes the current listOfVisibleFaces and draws them using
 //gos_DrawTriangle.
-void TG_Shape::Render (float forceZ, bool isHudElement, BYTE alphaValue, bool isClamped)
+void TG_Shape::Render (float forceZ, bool isHudElement, BYTE alphaValue, bool isClamped, Stuff::Matrix4D* shapeToClip)
 {
 	if (!renderTGLShapes)
 		return;
@@ -2481,12 +2576,12 @@ void TG_Shape::Render (float forceZ, bool isHudElement, BYTE alphaValue, bool is
 			DWORD addFlags = 0;
 			if (isHudElement)		//We are a HUD Element like the compass.  Mark us as such.
 			{
-				addFlags = MC2_ISCOMPASS;
+				addFlags |= MC2_ISCOMPASS;
 			}
 			
 			if (isClamped)
 			{
-				addFlags = MC2_ISTERRAIN;
+				addFlags |= MC2_ISTERRAIN;
 			}
 
 			if (drawOldWay)
@@ -2560,10 +2655,60 @@ void TG_Shape::Render (float forceZ, bool isHudElement, BYTE alphaValue, bool is
 						else
 						{
 							mcTextureManager->addVertices(theShape->listOfTextures[triType.localTextureHandle].mcTextureNodeIndex,gVertex,MC2_DRAWSOLID | addFlags);
+
+							
 						}
 					}
 				}
 			}
+		}
+	}
+
+
+	// FIXME: this (listOfTypeTriangles[0]) is not correct if model has more than 1 texture! 
+	if (!isSpotlight && !isWindow && !theShape->listOfTextures[theShape->listOfTypeTriangles[0].localTextureHandle].textureAlpha && (alphaValue == 0xff))
+	{
+		DWORD addFlags = 0;
+		if (isHudElement)
+		{
+			addFlags |= MC2_ISCOMPASS;
+		}
+
+		if (isClamped)
+		{
+			addFlags |= MC2_ISTERRAIN;
+		}
+
+		if (theShape->ib_ && theShape->vb_) {
+
+			// FIXME: this is not correct if model has more than 1 texture! 
+			// TODO: split on per texture batches basis
+			TG_TypeTriangle triType = theShape->listOfTypeTriangles[0];
+
+			Stuff::Matrix4D mvp;
+			if ((forceZ >= 0.0f) && (forceZ < 1.0f))
+			{
+				// matrix that wil make (x,y,w * forceZ, w) from (x,y,z,w), so that later after division by w, it will become just forceZ
+				Stuff::Matrix4D forceZMatrix = Stuff::Matrix4D::Identity;
+				forceZMatrix(2, 2) = 0.0f;
+				forceZMatrix(3, 2) = forceZ;
+				mvp.Multiply(cur_shape2clip, forceZMatrix);
+			}
+			else {
+				mvp = cur_shape2clip;
+			}
+
+			TG_RenderShape rs;
+			rs.ib_ = theShape->ib_;
+			rs.vb_ = theShape->vb_;
+			rs.vdecl_ = theShape->vdecl_;
+			rs.mvp_ = mvp;
+			memcpy(rs.viewport_, cur_viewport, 4 * sizeof(float));
+
+			mcTextureManager->addRenderShape(
+				theShape->listOfTextures[triType.localTextureHandle].mcTextureNodeIndex,
+				&rs,
+				MC2_DRAWSOLID | addFlags);
 		}
 	}
 
@@ -2707,11 +2852,11 @@ void TG_Shape::MultiTransformShadows (Stuff::Point3D *pos, Stuff::LinearMatrix4D
 		//-------------------------------------------------------
 		// Now, for each light IN RANGE
 		// Use formula form Blinn-Trip Down the Graphics Pipeline-Chapter 6
-		for (long i=0;i<numLights;i++)
+		for (long i=0;i<s_numLights;i++)
 		{
-			if ((listOfLights[i] != NULL) && (listOfLights[i]->active) && (shadowNum < MAX_SHADOWS))
+			if ((s_listOfLights[i] != NULL) && (s_listOfLights[i]->active) && (shadowNum < MAX_SHADOWS))
 			{
-				switch (listOfLights[i]->lightType)
+				switch (s_listOfLights[i]->lightType)
 				{
 					case TG_LIGHT_AMBIENT:
 					{
@@ -2725,8 +2870,8 @@ void TG_Shape::MultiTransformShadows (Stuff::Point3D *pos, Stuff::LinearMatrix4D
 						// The Sun casts no shadows at night!!!
 						if (!eye->getIsNight())
 						{
-							Stuff::Vector3D lightDir = rootLightDir[i];
-							RotateLight(lightDir,rotation);
+							Stuff::Vector3D s_lightDir = s_rootLightDir[i];
+							RotateLight(s_lightDir,rotation);
 							
 							for (long j=0;j<numVertices;j++)
 							{
@@ -2766,9 +2911,9 @@ void TG_Shape::MultiTransformShadows (Stuff::Point3D *pos, Stuff::LinearMatrix4D
 									}
 									else
 									{
-										float zFactor = up.y / lightDir.y;
-										s_position.x = up.x - (zFactor * lightDir.x);
-										s_position.z = up.z - (zFactor * lightDir.z);
+										float zFactor = up.y / s_lightDir.y;
+										s_position.x = up.x - (zFactor * s_lightDir.x);
+										s_position.z = up.z - (zFactor * s_lightDir.z);
 									}
 									
 									s_position.y = 0.0f;
@@ -2867,18 +3012,18 @@ void TG_Shape::MultiTransformShadows (Stuff::Point3D *pos, Stuff::LinearMatrix4D
 							//-----------------------------------------------------
 							// Check if light source is IN_RANGE!
 							Stuff::Point3D vertexToLight;
-							vertexToLight = lightDir[i];
+							vertexToLight = s_lightDir[i];
 							float length = vertexToLight.GetApproximateLength();
 							
-							vertexToLight = rootLightDir[i];
-							float spotLength = listOfLights[i]->maxSpotLength - vertexToLight.GetApproximateLength();
+							vertexToLight = s_rootLightDir[i];
+							float spotLength = s_listOfLights[i]->maxSpotLength - vertexToLight.GetApproximateLength();
 							if (spotLength < 50.0f)
 								spotLength = 50.0f;
 									
 							float falloff = 1.0f;
 	
 							//Lights do not cast a shadow unless they are intense enough!!
-							if (listOfLights[i]->GetFalloff(length, falloff) && (falloff > 0.5f))
+							if (s_listOfLights[i]->GetFalloff(length, falloff) && (falloff > 0.5f))
 							{
 								for (long j=0;j<numVertices;j++)
 								{
@@ -2907,8 +3052,8 @@ void TG_Shape::MultiTransformShadows (Stuff::Point3D *pos, Stuff::LinearMatrix4D
 									else
 									{
 										float zFactor = up.y / spotLength;
-										s_position.x = up.x - (zFactor * -rootLightDir[i].x);
-										s_position.z = up.z - (zFactor * -rootLightDir[i].z);
+										s_position.x = up.x - (zFactor * -s_rootLightDir[i].x);
+										s_position.z = up.z - (zFactor * -s_rootLightDir[i].z);
 									}
 									
 									s_position.y = 0.0f;

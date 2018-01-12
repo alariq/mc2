@@ -1447,7 +1447,7 @@ void TerrainQuad::draw (void)
 		}
 
 		Stuff::Point3D camPosition;
-		camPosition = *TG_Shape::cameraOrigin;
+		camPosition = *TG_Shape::s_cameraOrigin;
 
 		if (uvMode == BOTTOMRIGHT)
 		{

@@ -141,6 +141,10 @@ namespace Stuff {
 					return entries[(column<<2)+row];
 				}
 
+		operator const Scalar*() const {
+			return entries;
+		}
+
 		//
 		// Matrix4D Multiplication
 		//

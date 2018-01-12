@@ -579,6 +579,7 @@ void __stdcall InitializeGameEngine()
 
 	//Startup the vertex array pool
 	mcTextureManager->startVertices(500000);
+	mcTextureManager->startShapes(50000);
 
 	//--------------------------------------------------
 	// Setup Mouse Parameters from Prefs.CFG

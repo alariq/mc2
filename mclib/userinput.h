@@ -356,12 +356,12 @@ class UserInput
 
 		bool leftAlt (void)
 		{
-			return (getKeyDown(KEY_LMENU));
+			return (getKeyDown(KEY_LALT));
 		}
 
 		bool rightAlt (void)
 		{
-			return (getKeyDown(KEY_RMENU));
+			return (getKeyDown(KEY_RALT));
 		}
 
 		bool alt (void)
