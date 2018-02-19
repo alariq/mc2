@@ -104,9 +104,28 @@ cmake.exe -G "Visual Studio 15 2017 Win64" -DCMAKE_PREFIX_PATH=c:/path_to_your_d
 (to generate project for VS1027 for 64bit build)
 
 or for 32bit build:
+
 `cmake.exe -G "Visual Studio 15 2017 Win64" -DCMAKE_PREFIX_PATH=c:/path_to_your_dependencies/ -DCMAKE_LIBRARY_ARCHITECTURE=x86 ..`
 
 Now run generated solution and try to build it!
+
+
+Now build string resources
+--------------------------
+
+First use script in ```test_scripts/res_conv/res_conv.pl``` to generate ```strings.res.cpp``` and  ```strings.res.h`` files or just take them from that folder
+Then copy them to ```./res``` folder
+Then:
+
+```
+cd res
+md build64
+cd build 64
+cmake.exe -G "Visual Studio 15 2017 Win64" -DCMAKE_LIBRARY_ARCHITECTURE=x64 ..
+```
+put resulting dll along with executable file
+
+
 
 Building on Linux
 =================
