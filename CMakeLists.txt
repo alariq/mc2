@@ -9,6 +9,8 @@ include(CMakeToolsHelpers OPTIONAL)
 #   SET(CMAKE_BUILD_TYPE RelWithDebInfo)
 #ENDIF(NOT CMAKE_CONFIGURATION_TYPES AND NOT CMAKE_BUILD_TYPE)
 
+message("CMAKE library architecture: ${CMAKE_LIBRARY_ARCHITECTURE}")
+
 if("${CMAKE_SIZEOF_VOID_P}" EQUAL "8")
 	message(STATUS "Target is 64 bits")
 	set_property(GLOBAL PROPERTY FIND_LIBRARY_USE_LIB64_PATHS TRUE)
@@ -169,6 +171,7 @@ find_package(OpenGL REQUIRED)
 
 message("OPENGL library found in ${OPENGL}")
 message("GLEW library found in ${GLEW}")
+message("Zlib library found in ${ZLIB}")
 
 include_directories("./GameOS/include" "./mclib" "./gui" "./code" "./netlib")
 
@@ -189,3 +192,5 @@ message("sdl2 prefix: ${SDL2_PREFIX}")
 
 add_executable(mc2 ${SOURCES})
 target_link_libraries(mc2 mclib gosfx mlr stuff gui gameos windows ${ZLIB} ${SDL_LIBS} ${GLEW} ${SDL2_mixer} ${ADDITIONAL_LIBS} ${OPENGL_gl_LIBRARY})
+
+add_subdirectory("./Viewer" "./out/Viewer")

@@ -260,7 +260,7 @@ void parse_uniforms(GLuint pprogram, glsl_program::UniArr_t* puniforms, glsl_pro
 		if(type >=GL_SAMPLER_1D && type<= GL_SAMPLER_2D_SHADOW)
 		{
 			glsl_sampler* psampler = new glsl_sampler;
-			psampler->index_ = i;
+			psampler->index_ =  glGetUniformLocation(pprogram, buf);
 			psampler->name_ = buf;
 			psampler->type_ = (SamplerType)(type - GL_SAMPLER_1D);
 

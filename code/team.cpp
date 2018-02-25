@@ -868,7 +868,7 @@ bool Team::teamLineOfSight (Stuff::Vector3D tPos, float extRad)
 }
 
 #ifdef LAB_ONLY
-__int64 MCTimeLOSCalc = 0;
+extern __int64 MCTimeLOSCalc;
 #endif
 
 //#define USE_OLD_LOS

@@ -1630,17 +1630,17 @@ void GameObjectManager::renderShadows (bool terrain, bool movers, bool other) {
 
 //---------------------------------------------------------------------------
 #ifdef LAB_ONLY
-__int64 MCTimeTerrainObjectsUpdate 	= 0;
-__int64 MCTimeMechsUpdate 			= 0;
-__int64 MCTimeVehiclesUpdate		= 0;
-__int64 MCTimeTurretsUpdate			= 0;
+extern __int64 MCTimeTerrainObjectsUpdate;
+extern __int64 MCTimeMechsUpdate;
+extern __int64 MCTimeVehiclesUpdate;
+extern __int64 MCTimeTurretsUpdate;
 
-__int64 MCTimeTerrainObjectsTL 		= 0;
-__int64 MCTimeMechsTL 				= 0;
-__int64 MCTimeVehiclesTL			= 0;
-__int64 MCTimeTurretsTL				= 0;
+extern __int64 MCTimeTerrainObjectsTL;
+extern __int64 MCTimeMechsTL;
+extern __int64 MCTimeVehiclesTL;
+extern __int64 MCTimeTurretsTL;
 
-__int64 MCTimeAllElseUpdate			= 0;
+extern __int64 MCTimeAllElseUpdate;
 __int64 MCTimeCaptureListUpdate		= 0;
 extern __int64 MCTimeTransformandLight;
 extern __int64 MCTimeAnimationandMatrix;

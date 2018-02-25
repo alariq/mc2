@@ -83,6 +83,8 @@ FastFile *FastFileFind (const char *fname, long &fastFileHandle)
 			currentFastFile++;
 		}
 
+// sebi: our .fst files now all have forward slashes
+#if 0
         // sebi NB!
         // if we are here file was not found, try with backslashes
         char* fname2 = _strdup(fname);
@@ -106,7 +108,7 @@ FastFile *FastFileFind (const char *fname, long &fastFileHandle)
 
 			currentFastFile++;
 		}
-
+#endif
 
 	}
 

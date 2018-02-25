@@ -405,8 +405,9 @@ __int64 __stdcall gos_GetDriveFreeSpace( char* Path )
 
     return s.f_bsize * s.f_bfree;
 #else
-	STOP(("implement in platform_ as GetDiskFreeSpace"));
-	return 1024*1024*1024;
+	ULARGE_INTEGER freeBytesAvailable;
+	GetDiskFreeSpaceEx(NULL, &freeBytesAvailable, NULL, NULL);
+	return freeBytesAvailable.QuadPart;
 #endif
 }
 
@@ -566,7 +567,7 @@ bool __stdcall gos_GetUserDataDirectory(char* user_dir, const int len)
         }
     }
     
-    int conf_len = strlen(mc2_conf_dir);
+    size_t conf_len = strlen(mc2_conf_dir);
     conf_len = len - 1 < conf_len ? len - 1 : conf_len;
 
     strncpy(user_dir, mc2_conf_dir, conf_len);
