@@ -4,9 +4,13 @@
 
 #include <sys/types.h>
 #include <sys/stat.h>
-//#include <unistd.h>
 
-#include <io.h>
+#ifdef PLATFORM_WINDOWS
+    #include <io.h> 
+#else
+    #include <unistd.h>
+#endif
+
 #include <stdio.h> // fseek ftell etc...
 
 #ifndef PLATFORM_WINDOWS
