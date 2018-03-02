@@ -58,7 +58,7 @@ class SoundEngine {
         bool init(int frequency, bool b_fmt_16_bit, bool b_fmt_signed, bool b_stereo);
         void destroy();
 
-        DWORD addAudio(gosAudio* audio) {
+        size_t addAudio(gosAudio* audio) {
             gosASSERT(audio);
             audioList_.push_back(audio);
             return audioList_.size()-1;
@@ -312,7 +312,8 @@ void __stdcall gosAudio_CreateResource( HGOSAUDIO* hgosaudio, enum gosAudio_Reso
     const bool needs_conversion = g_sound_engine->needsConversion(src_fmt, src_channels, src_freq);
     if(needs_conversion) {
 
-        SDL_AudioCVT cvt;
+		SDL_AudioCVT cvt = { 0 };
+
         if(0 > SDL_BuildAudioCVT(&cvt,
                     src_fmt, src_channels, src_freq,
                     dst_fmt, dst_channels, dst_freq)) {
@@ -349,7 +350,12 @@ void __stdcall gosAudio_CreateResource( HGOSAUDIO* hgosaudio, enum gosAudio_Reso
             return;
         }
 
-        gosASSERT(cvt.len_cvt == audio_data_size);
+		// for some reason len_cvt may be less than required :-/
+        gosASSERT(cvt.len_cvt <= (int)audio_data_size);
+		if(cvt.len_cvt < (int)audio_data_size)
+            SPEW(("AUDIO", "cvt.len_cvt != audio_data_len %d != %d\n", cvt.len_cvt, audio_data_size));
+		if (cvt.len_cvt < (int)audio_data_size)
+			audio_data_size = cvt.len_cvt;
 
         // if conversion took place in original buffer
         if(audio_data != cvt.buf) {
