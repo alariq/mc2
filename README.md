@@ -125,6 +125,19 @@ cmake.exe -G "Visual Studio 15 2017 Win64" -DCMAKE_LIBRARY_ARCHITECTURE=x64 ..
 ```
 put resulting dll along with executable file
 
+Building data
+--------------------------
+
+Data files are located in a separate [repository](https://github.com/alariq/mc2srcdata)
+Building data is just a matter of executing ```make``` command. You can find instruction on how to do it there.
+But first one needs to build all necessary tools. There are 2 projects which have to be built:
+
+* data_tools 
+* text_tool
+
+All steps are same as for the main application. As a result you'll have next binaries: ```aseconv, makefst, makersp, mpak, text_tool```. Copy those to the ```build_scripts``` folder in ```mc2srcdata``` repository.
+
+Once everything in place, you can launch build scripts as described in corresponding ```README.txt``` file.
 
 
 Building on Linux
