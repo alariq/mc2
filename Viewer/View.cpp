@@ -16,7 +16,7 @@
 
 #include "mclib.h"
 #include "gamesound.h"
-#include <windows.h>
+#include "platform_windows.h"
 #include "mission.h"
 #include "mechlopedia.h"
 #include "logisticsdata.h"
@@ -270,7 +270,7 @@ void __stdcall InitializeGameEngine()
 	systemHeap->init(systemHeapSize,"SYSTEM");
 	
 	float doubleClickThreshold = 0.2f;
-	long dragThreshold = .016667;
+	float dragThreshold = .016667f;
 
 	//--------------------------------------------------------------
 	// Read in System.CFG
@@ -298,6 +298,7 @@ void __stdcall InitializeGameEngine()
 		gosASSERT(systemBlockResult == NO_ERR);
 		{
 			long result = systemFile.readIdULong("systemHeapSize",systemHeapSize);
+            (void)result;
 			gosASSERT(result == NO_ERR);
 		}
 
@@ -391,7 +392,7 @@ void __stdcall InitializeGameEngine()
 				fastFiles = (FastFile **)malloc(maxFastFiles*sizeof(FastFile *));
 				memset(fastFiles,0,maxFastFiles*sizeof(FastFile *));
 
-				long fileNum = 0;
+				int fileNum = 0;
 				char fastFileId[10];
 				char fileName[100];
 				sprintf(fastFileId,"File%d",fileNum);
@@ -491,9 +492,9 @@ void __stdcall InitializeGameEngine()
 			if (result != NO_ERR)
 				doubleClickThreshold = 0.2f;
 
-			result = prefs->readIdLong("DragThreshold",dragThreshold);
+			result = prefs->readIdFloat("DragThreshold",dragThreshold);
 			if (result != NO_ERR)
-				dragThreshold = .016667;
+				dragThreshold = .016667f;
 				
 			result = prefs->readIdULong("BaseVertexColor",BaseVertexColor);
 			if (result != NO_ERR)

@@ -398,8 +398,7 @@ __int64 __stdcall gos_GetDriveFreeSpace( char* Path )
 #ifndef PLATFORM_WINDOWS
     struct statvfs s;
     if(-1 == statvfs(Path, &s)) {
-        int last_err = errno;
-        SPEW(("statvfs: %s\n", strerror(last_err)));
+        SPEW(("statvfs: %s\n", strerror(errno)));
         return 0;
     }
 
@@ -448,8 +447,7 @@ void __stdcall gos_LoadDataFromRegistry( const char* keyName, void* pData, DWORD
 
     struct stat st;
     if(-1 == stat(cfg_dir, &st)) {
-        int last_err = errno;
-        SPEW(("stat: %s\n", strerror(last_err)));
+        SPEW(("stat: %s\n", strerror(errno)));
         *szData = 0;
         return;
     }
@@ -473,8 +471,7 @@ void __stdcall gos_LoadDataFromRegistry( const char* keyName, void* pData, DWORD
 #else
         if(-1 == mkdir(mc2_conf_dir, permissions)) {
 #endif
-            int last_err = errno;
-            SPEW(("stat: %s\n", strerror(last_err)));
+            SPEW(("stat: %s\n", strerror(errno)));
             *szData = 0;
             delete[] mc2_conf_dir;
             return;
@@ -530,8 +527,7 @@ bool __stdcall gos_GetUserDataDirectory(char* user_dir, const int len)
         cfg_dir[cfg_dir_size-1] = '\0';
 
         if(-1 == stat(cfg_dir, &st)) {
-            int last_err = errno;
-            SPEW(("stat: %s\n", strerror(last_err)));
+            SPEW(("stat: %s\n", strerror(errno)));
             return false;
         }
 
@@ -560,8 +556,7 @@ bool __stdcall gos_GetUserDataDirectory(char* user_dir, const int len)
 #else
         if(-1 == mkdir(mc2_conf_dir, permissions)) {
 #endif
-            int last_err = errno;
-            SPEW(("stat: %s\n", strerror(last_err)));
+            SPEW(("stat: %s\n", strerror(errno)));
             delete[] mc2_conf_dir;
             return false;
         }
