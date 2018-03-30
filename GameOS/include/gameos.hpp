@@ -26,7 +26,7 @@
 
 #include<inttypes.h>
 #include <cstdarg> // va_list
-#include <new>
+//#include <new> because we have our own new / delete
 
 #ifndef PLATFORM_WINDOWS
 #define __stdcall
@@ -137,9 +137,12 @@ static inline unsigned long long rdtsc(void)
 
 
 
-
-
-
+void* operator new(std::size_t sz);
+void operator delete(void* ptr)
+#ifndef PLATFORM_WINDOWS
+noexcept 
+#endif
+;
 
 
 

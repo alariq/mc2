@@ -39,7 +39,7 @@ int MessageBoxA(HWND,LPCSTR header, LPCSTR message, UINT )
 
 int MessageBoxW(HWND,LPCWSTR header, LPCWSTR message, UINT)
 {
-    printf("MSGBOX: %s : %s\n", header, message);
+    printf("MSGBOX: %S : %S\n", header, message);
     return 0;
 }
 

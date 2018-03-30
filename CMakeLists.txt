@@ -9,6 +9,8 @@ include(CMakeToolsHelpers OPTIONAL)
 #   SET(CMAKE_BUILD_TYPE RelWithDebInfo)
 #ENDIF(NOT CMAKE_CONFIGURATION_TYPES AND NOT CMAKE_BUILD_TYPE)
 
+message("CMAKE library architecture: ${CMAKE_LIBRARY_ARCHITECTURE}")
+
 if("${CMAKE_SIZEOF_VOID_P}" EQUAL "8")
 	message(STATUS "Target is 64 bits")
 	set_property(GLOBAL PROPERTY FIND_LIBRARY_USE_LIB64_PATHS TRUE)
@@ -19,7 +21,7 @@ endif("${CMAKE_SIZEOF_VOID_P}" EQUAL "8")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x -g")
 
 if(NOT MSVC)
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-local-typedefs -Werror=array-bounds -Wno-switch -Wno-unknown-warning-option -Wunused-variable -fsanitize=address -fno-omit-frame-pointer")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-local-typedefs -Werror=array-bounds -Wno-switch -Wwrite-strings -Wno-unknown-warning-option -Wunused-variable") # -fsanitize=address -fno-omit-frame-pointer")
 endif()
 # -Wno-unused-local-typedefs - to disable "typedef was ignored on this declaration"
 
@@ -169,6 +171,7 @@ find_package(OpenGL REQUIRED)
 
 message("OPENGL library found in ${OPENGL}")
 message("GLEW library found in ${GLEW}")
+message("Zlib library found in ${ZLIB}")
 
 include_directories("./GameOS/include" "./mclib" "./gui" "./code" "./netlib")
 

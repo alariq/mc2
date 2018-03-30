@@ -29,7 +29,6 @@ static bool g_exit = false;
 static bool g_focus_lost = false;
 bool g_debug_draw_calls = false;
 static camera g_camera;
-static glsl_program* g_myprogram = NULL;
 
 input::MouseInfo g_mouse_info;
 input::KeyboardInfo g_keyboard_info;
@@ -155,16 +154,6 @@ static void draw_screen( void )
     Environment.UpdateRenderers();
     gos_RendererEndFrame();
 
-	//mat4 viewproj = proj*viewM;
-	//g_myprogram->setMat4("ModelViewProjectionMatrix", (const float*)viewproj);
-    //draw_textured_cube(0);
-
-	/*
-    glPopMatrix();
-    glMatrixMode(GL_PROJECTION);
-    glPopMatrix();
-	*/
-
     glUseProgram(0);
     //CHECK_GL_ERROR;
 }
@@ -215,7 +204,7 @@ const char* getStringForSeverity(GLenum type)
 	}
 }
 //typedef void (GLAPIENTRY *GLDEBUGPROCARB)(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam);
-void GLAPIENTRY OpenGLDebugLog(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam)
+void GLAPIENTRY OpenGLDebugLog(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, GLvoid* userParam)
 {
 	if (severity != GL_DEBUG_SEVERITY_NOTIFICATION && severity != GL_DEBUG_SEVERITY_LOW)
 	{
@@ -318,12 +307,6 @@ int main(int argc, char** argv)
 
     Environment.InitializeGameEngine();
 
-
-	g_myprogram = glsl_program::makeProgram("object_tex", "shaders/object_tex.vert", "shaders/object_tex.frag");
-    if(!g_myprogram) {
-		SPEW(("SHADERS", "Failed to create object_tex material\n"));
-        return 1;
-	}
 
 	float aspect = (float)w/(float)h;
 	mat4 proj_mat = frustumProjMatrix(-aspect*0.5f, aspect*0.5f, -.5f, .5f, 1.0f, 100.0f);

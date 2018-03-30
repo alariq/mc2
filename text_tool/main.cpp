@@ -75,13 +75,17 @@ int main(int argc, char** argv)
         return 1;
     }
 
-    int size_width = 2; // 2 chars enough to store 0 to 99
-    textureFile = new char[strlen(outFile) + strlen(tex_ext) + size_width + 1];
-    glyphFile = new char[strlen(outFile) + strlen(glyph_ext) + size_width + 1];
+    //int size_width = 2; // 2 chars enough to store 0 to 99
+    //textureFile = new char[strlen(outFile) + strlen(tex_ext) + size_width + 1];
+    //glyphFile = new char[strlen(outFile) + strlen(glyph_ext) + size_width + 1];
 
-    sprintf(textureFile, "%s%d%s", outFile, fontSize, tex_ext);
-    sprintf(glyphFile, "%s%d%s", outFile, fontSize, glyph_ext);
-
+    //sprintf(textureFile, "%s%d%s", outFile, fontSize, tex_ext);
+    //sprintf(glyphFile, "%s%d%s", outFile, fontSize, glyph_ext);
+    
+    textureFile = new char[strlen(outFile) + strlen(tex_ext) + 1];
+    glyphFile = new char[strlen(outFile) + strlen(glyph_ext) + 1];
+    sprintf(textureFile, "%s%s", outFile, tex_ext);
+    sprintf(glyphFile, "%s%s", outFile, glyph_ext);
 
     graphics::set_verbose(false);
 

@@ -234,6 +234,7 @@ long convertASE2TGL(char *file)
 
 						//sprintf(aseName, "%s%s%s", tglPath, fileName, ".ase");
 						sprintf(aseName, "%s%s%s", prefixPath, fileName, ".ase");
+                        S_strlwr(aseName);
 
 						//---------------------------------------------------------------------------------------------
 						// Load Base Shape or LOD 0 Shape.
@@ -259,6 +260,8 @@ long convertASE2TGL(char *file)
 				char aseName[1024];
 				//sprintf(aseName, "%s%s%s", tglPath, fileName, ".ase");
 				sprintf(aseName, "%s%s%s", prefixPath, fileName, ".ase");
+                S_strlwr(aseName);
+
 
 				//---------------------------------------------------------------------------------------------
 				// Load Base Shape or LOD 0 Shape.
@@ -281,6 +284,7 @@ long convertASE2TGL(char *file)
 					char aseName[1024];
 					//sprintf(aseName, "%s%s%s", tglPath, fileName, ".ase");
 					sprintf(aseName, "%s%s%s", prefixPath, fileName, ".ase");
+                    S_strlwr(aseName);
 
 					//---------------------------------------------------------------------------------------------
 					// Load Base Shape or LOD 0 Shape.
@@ -346,6 +350,7 @@ long convertASE2TGL(char *file)
 							char mechFileName[1024];
 							//sprintf(mechFileName, "%s%s%s.ase", tglPath, name, MechAnimationNames[i]);
 							sprintf(mechFileName, "%s%s%s.ase", prefixPath, name, MechAnimationNames[i]);
+							S_strlwr(mechFileName);
 
 							TG_AnimateShape *anim = new TG_AnimateShape;
 							gosASSERT(anim != NULL);
@@ -378,6 +383,7 @@ long convertASE2TGL(char *file)
 							char mechFileName[1024];
 							//sprintf(mechFileName, "%s%s%s.ase", tglPath, name, MechAnimationNames[i]);
 							sprintf(mechFileName, "%s%s%s.ase", prefixPath, name, MechAnimationNames[i]);
+							S_strlwr(mechFileName);
 
 							//-----------------------------------------------
 							shape = new TG_TypeMultiShape;
@@ -410,6 +416,7 @@ long convertASE2TGL(char *file)
 						char aseName[1024];
 						//sprintf(aseName, "%s%s%s", tglPath, fileName, ".ase");
 						sprintf(aseName, "%s%s%s", prefixPath, fileName, ".ase");
+                        S_strlwr(aseName);
 
 						//---------------------------------------------------------------------------------------------
 						// Load Base Shape or LOD 0 Shape.
@@ -433,6 +440,7 @@ long convertASE2TGL(char *file)
 						char aseName[1024];
 						//sprintf(aseName, "%s%s%s", tglPath, fileName, ".ase");
 						sprintf(aseName, "%s%s%s", prefixPath, fileName, ".ase");
+                        S_strlwr(aseName);
 
 						//---------------------------------------------------------------------------------------------
 						// Load Base Shape or LOD 0 Shape.

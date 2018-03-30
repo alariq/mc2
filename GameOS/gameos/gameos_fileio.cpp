@@ -8,7 +8,8 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
-#include <unistd.h> // close()
+//#include <unistd.h> // close()
+#include "platform_io.h"
 //
 
 #include <stdio.h> // fopen
