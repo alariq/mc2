@@ -104,7 +104,7 @@ namespace MidLevelRenderer {
 	// ARE IN THIS ORDER
 		virtual int
 			GetNumPrimitives()
-				{ Check_Object(this); return lengths.GetLength(); }
+				{ Check_Object(this); return (int)lengths.GetLength(); }
 
 		virtual void
 			SetSubprimitiveLengths(
@@ -136,7 +136,7 @@ namespace MidLevelRenderer {
 
 		int
 			GetNumVertices()
-				{ Check_Object(this); return coords.GetLength(); }
+				{ Check_Object(this); return (int)coords.GetLength(); }
 
 		virtual void
 			SetCoordData(
@@ -288,12 +288,12 @@ namespace MidLevelRenderer {
 			GetSize()
 		{ 
 			Check_Object(this);
-			int ret = 0;
+			size_t ret = 0;
 			ret += coords.GetSize();
 			ret += texCoords.GetSize();
 			ret += lengths.GetSize();
 
-			return ret;
+			return (int)ret;
 		}
 
 		void

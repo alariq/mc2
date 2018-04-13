@@ -159,7 +159,7 @@ namespace MidLevelRenderer {
 			GetSize()
 		{
 			Check_Object(this); 
-			int ret = allPrimitives.GetSize();
+			int ret = (int)allPrimitives.GetSize();
 
 			return ret;
 		}
