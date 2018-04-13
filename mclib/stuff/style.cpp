@@ -52,3 +52,6 @@ float
 	}
 
 #endif
+
+void* operator new(size_t size, void* where) noexcept
+		{Check_Pointer(where); return where;}

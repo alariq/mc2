@@ -175,9 +175,4 @@ namespace Stuff {
 
 }
 
-#ifndef __PLACEMENT_NEW_INLINE
-#define __PLACEMENT_NEW_INLINE
-inline void*
-	operator new(size_t size, void* where)
-		{Check_Pointer(where); return where;}
-#endif
+void* operator new(size_t size, void* where) noexcept;
