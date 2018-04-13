@@ -182,7 +182,7 @@ void __stdcall gos_WalkMemoryHeap(HGOSHEAP pHeap, bool vociferous/* = false*/)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-void* operator new(std::size_t sz) {
+void* operator new(size_t sz) {
     return gos_Malloc(sz, NULL);
 }
 void operator delete(void* ptr)

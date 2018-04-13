@@ -137,7 +137,7 @@ static inline unsigned long long rdtsc(void)
 
 
 
-void* operator new(std::size_t sz);
+void* operator new(size_t sz);
 void operator delete(void* ptr)
 #ifndef PLATFORM_WINDOWS
 noexcept 
