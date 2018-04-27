@@ -48,7 +48,7 @@ out vec4 Light;
 
 void main(void)
 {
-    vec4 p = wvp * vec4(pos.xyz, 1);
+    vec4 p = wvp_ * vec4(pos.xyz, 1);
 	float rhw = 1 / p.w;
 
 	p.x = (p.x * rhw) * vp.z + vp.x + 100.0;
