@@ -56,7 +56,7 @@ set(SOURCES ${SOURCES}
     mlrheaders.cpp
     )
 
-include_directories("../../GameOS/include" "../../mclib")
+include_directories(${COMMON_INCLUDE_DIRS} "../../GameOS/include" "../../mclib")
 
 add_library(mlr ${SOURCES})
 

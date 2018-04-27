@@ -58,6 +58,11 @@ else()
 endif()
 message("SDL libs are here: ${SDL_LIBS}")
 
+get_filename_component(COM_PATH1 "./GameOS/include" ABSOLUTE)
+get_filename_component(COM_PATH2 "./GameOS/gameos" ABSOLUTE)
+
+set(COMMON_INCLUDE_DIRS  ${COM_PATH1} ${COM_PATH2})
+
 include_directories(${SDL_INCLUDES})
 include_directories(${GLEW_INCLUDE})
 
@@ -173,7 +178,7 @@ message("OPENGL library found in ${OPENGL}")
 message("GLEW library found in ${GLEW}")
 message("Zlib library found in ${ZLIB}")
 
-include_directories("./GameOS/include" "./mclib" "./gui" "./code" "./netlib")
+include_directories(${COMMON_INCLUDE_DIRS} "./mclib" "./gui" "./code" "./netlib")
 
 message("OpenGL library linking: ${OPENGL_gl_LIBRARY}")
 message("OpenGL library include: ${OPENGL_INCLUDE_DIR}")

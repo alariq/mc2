@@ -23,7 +23,7 @@ set(SOURCES ${SOURCES}
     gosfxheaders.cpp
 )
 
-include_directories("../../GameOS/include" "../../mclib")
+include_directories(${COMMON_INCLUDE_DIRS} "../../mclib")
 
 add_library(gosfx ${SOURCES})
 

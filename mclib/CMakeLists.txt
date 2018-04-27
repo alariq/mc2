@@ -83,7 +83,7 @@ set(SOURCES ${SOURCES}
     utilities.cpp
     )
 
-include_directories("../GameOS/include" "./mclib" "../Editor" "../DirectX8/include" "./")
+include_directories(${COMMON_INCLUDE_DIRS} "./mclib" "../Editor" "../DirectX8/include" "./")
 
 add_definitions(-DBGR)
 add_library(mclib ${SOURCES})

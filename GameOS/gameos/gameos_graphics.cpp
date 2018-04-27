@@ -227,7 +227,7 @@ class gosRenderMaterial {
             program_->apply();
         }
 
-        const char* getName() { name_; }
+        const char* getName() const { name_; }
 
         // TODO: think how to not expose this
         glsl_program* getShader() { return program_; }

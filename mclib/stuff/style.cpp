@@ -53,5 +53,8 @@ float
 
 #endif
 
+// according to standard, placement new cannot be overridden
+#if 0
 void* operator new(size_t size, void* where) noexcept
 		{Check_Pointer(where); return where;}
+#endif

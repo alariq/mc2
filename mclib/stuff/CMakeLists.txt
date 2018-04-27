@@ -81,7 +81,7 @@ set(SOURCES ${SOURCES}
     stuffheaders.cpp
     )
 
-include_directories("../../GameOS/include")
+include_directories(${COMMON_INCLUDE_DIRS})
 
 add_library(stuff ${SOURCES})
 

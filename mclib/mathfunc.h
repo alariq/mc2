@@ -201,11 +201,13 @@ inline float fmin (float f1, float f2)
 }
 #endif
 
+#if 0 // defined in vec.h
 #ifndef max
 template<typename T> T max(const T& a, const T& b) { return a > b ? a : b; }
 #endif
 #ifndef min
 template<typename T> T min(const T& a, const T& b) { return a < b ? a : b; }
+#endif
 #endif
 
 //---------------------------------------------------------------------------

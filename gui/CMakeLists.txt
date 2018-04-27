@@ -12,6 +12,6 @@ set(SOURCES ${SOURCES}
     logisticsscreen.cpp
     )
 
-include_directories("../GameOS/include" "../mclib" "../Code")
+include_directories(${COMMON_INCLUDE_DIRS} "../mclib" "../Code")
 
 add_library(gui ${SOURCES})
