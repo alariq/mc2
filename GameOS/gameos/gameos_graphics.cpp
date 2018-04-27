@@ -126,14 +126,14 @@ public:
 
 };
 
-class gosShaderMaterial {
+class gosRenderMaterial {
 
 		static const std::string s_mvp;
 		static const std::string s_fog_color;
     public:
-        static gosShaderMaterial* load(const char* shader) {
+        static gosRenderMaterial* load(const char* shader) {
             gosASSERT(shader);
-            gosShaderMaterial* pmat = new gosShaderMaterial();
+            gosRenderMaterial* pmat = new gosRenderMaterial();
             char vs[256];
             char ps[256];
             StringFormat(vs, 255, "shaders/%s.vert", shader);
@@ -156,7 +156,7 @@ class gosShaderMaterial {
             return pmat;
         }
 
-        static void destroy(gosShaderMaterial* pmat) {
+        static void destroy(gosRenderMaterial* pmat) {
             gosASSERT(pmat);
             if(pmat->program_) {
                 glsl_program::deleteProgram(pmat->name_);
@@ -227,6 +227,8 @@ class gosShaderMaterial {
             program_->apply();
         }
 
+        const char* getName() { name_; }
+
         // TODO: think how to not expose this
         glsl_program* getShader() { return program_; }
 
@@ -252,7 +254,7 @@ class gosShaderMaterial {
         }
 
     private:
-        gosShaderMaterial():
+        gosRenderMaterial():
             program_(NULL)
             , name_(NULL)
             , pos_loc(-1)
@@ -270,8 +272,8 @@ class gosShaderMaterial {
         GLint texcoord_loc;
 };
 
-const std::string gosShaderMaterial::s_mvp = std::string("mvp");
-const std::string gosShaderMaterial::s_fog_color = std::string("fog_color");
+const std::string gosRenderMaterial::s_mvp = std::string("mvp");
+const std::string gosRenderMaterial::s_fog_color = std::string("fog_color");
 
 class gosMesh {
     public:
@@ -337,10 +339,10 @@ class gosMesh {
 
         void rewind() { num_vertices_ = 0; num_indices_ = 0; }
 
-        void draw(gosShaderMaterial* material) const;
-        void drawIndexed(gosShaderMaterial* material) const;
+        void draw(gosRenderMaterial* material) const;
+        void drawIndexed(gosRenderMaterial* material) const;
 
-		static void drawIndexed(HGOSBUFFER ib, HGOSBUFFER vb, HGOSVERTEXDECLARATION vdecl, gosShaderMaterial* material);
+		static void drawIndexed(HGOSBUFFER ib, HGOSBUFFER vb, HGOSVERTEXDECLARATION vdecl, gosRenderMaterial* material);
 
 		static const std::string s_tex1;
 
@@ -373,7 +375,7 @@ class gosMesh {
 
 const std::string gosMesh::s_tex1 = std::string("tex1");
 
-void gosMesh::draw(gosShaderMaterial* material) const
+void gosMesh::draw(gosRenderMaterial* material) const
 {
     gosASSERT(material);
 
@@ -416,7 +418,7 @@ void gosMesh::draw(gosShaderMaterial* material) const
 
 }
 
-void gosMesh::drawIndexed(gosShaderMaterial* material) const
+void gosMesh::drawIndexed(gosRenderMaterial* material) const
 {
     gosASSERT(material);
 
@@ -462,7 +464,7 @@ void gosMesh::drawIndexed(gosShaderMaterial* material) const
 
 }
 
-void gosMesh::drawIndexed(HGOSBUFFER ib, HGOSBUFFER vb, HGOSVERTEXDECLARATION vdecl, gosShaderMaterial* material)
+void gosMesh::drawIndexed(HGOSBUFFER ib, HGOSBUFFER vb, HGOSVERTEXDECLARATION vdecl, gosRenderMaterial* material)
 {
 	gosASSERT(material);
 
@@ -810,9 +812,10 @@ class gosFont {
 };
 
 
-
 ////////////////////////////////////////////////////////////////////////////////
 class gosRenderer {
+
+    friend class gosShapeRenderer;
 
     typedef uint32_t RenderState[gos_MaxState];
 	static const std::string s_Foreground;
@@ -932,6 +935,25 @@ class gosRenderer {
             textureList_[texture_id] = 0;
         }
 
+        gosRenderMaterial* getRenderMaterial(const char* name) {
+
+            struct equals_to {
+                const char* name_;
+                bool operator()(const gosRenderMaterial* m) {
+                    return strcmp(m->getName(), name_)==0;
+                }
+            };
+
+            equals_to eq;
+            eq.name_ = name;
+
+            std::vector<gosRenderMaterial*>::iterator it = 
+                std::find_if(materialList_.begin(), materialList_.end(), eq);
+            if(it != materialList_.end())
+                return *it;
+            return NULL;
+        }
+
         gosTextAttribs& getTextAttributes() { return curTextAttribs_; }
         void setTextPos(int x, int y) { curTextPosX_ = x; curTextPosY_ = y; }
         void getTextPos(int& x, int& y) { x = curTextPosX_; y = curTextPosY_; }
@@ -969,6 +991,8 @@ class gosRenderer {
 
 		void setRenderViewport(const vec4& vp) { render_viewport_ = vp; }
 		vec4 getRenderViewport() { return render_viewport_; }
+
+		const mat4& getProj2Screen() { return projection_; }
 
         void setRenderState(gos_RenderState RenderState, int Value) {
             renderStates_[RenderState] = Value;
@@ -1016,6 +1040,8 @@ class gosRenderer {
 
         graphics::RenderContextHandle getRenderContextHandle() { return ctx_h_; }
 
+        uint32_t getRenderState(gos_RenderState render_state) { return curStates_[render_state]; }
+
 		void handleEvents();
 
     private:
@@ -1040,6 +1066,7 @@ class gosRenderer {
         std::vector<gosFont*> fontList_;
         std::vector<gosBuffer*> bufferList_;
         std::vector<gosVertexDeclaration*> vertexDeclarationList_;
+        std::vector<gosRenderMaterial*> materialList_;
 
         DWORD reqWidth;
         DWORD reqHeight;
@@ -1090,12 +1117,12 @@ class gosRenderer {
         gosMesh* lines_;
         gosMesh* points_;
         gosMesh* text_;
-        gosShaderMaterial* basic_material_;
-        gosShaderMaterial* basic_tex_material_;
-        gosShaderMaterial* text_material_;
+        gosRenderMaterial* basic_material_;
+        gosRenderMaterial* basic_tex_material_;
+        gosRenderMaterial* text_material_;
 
-        gosShaderMaterial* basic_lighted_material_;
-        gosShaderMaterial* basic_tex_lighted_material_;
+        gosRenderMaterial* basic_lighted_material_;
+        gosRenderMaterial* basic_tex_lighted_material_;
         //
         uint32_t num_draw_calls_;
         uint32_t num_draw_calls_to_draw_;
@@ -1135,17 +1162,23 @@ void gosRenderer::init() {
     gosASSERT(points_);
     text_ = gosMesh::makeMesh(PRIMITIVE_TRIANGLELIST, 4024 * 6);
     gosASSERT(text_);
-    basic_material_ = gosShaderMaterial::load("gos_vertex");
+    basic_material_ = gosRenderMaterial::load("gos_vertex");
     gosASSERT(basic_material_);
-    basic_tex_material_ = gosShaderMaterial::load("gos_tex_vertex");
+    materialList_.push_back(basic_material_);
+    basic_tex_material_ = gosRenderMaterial::load("gos_tex_vertex");
     gosASSERT(basic_tex_material_);
-    text_material_ = gosShaderMaterial::load("gos_text");
+    materialList_.push_back(basic_tex_material_);
+    text_material_ = gosRenderMaterial::load("gos_text");
     gosASSERT(text_material_);
+    materialList_.push_back(text_material_);
 
-    basic_lighted_material_ = gosShaderMaterial::load("gos_vertex_lighted");
+    basic_lighted_material_ = gosRenderMaterial::load("gos_vertex_lighted");
     gosASSERT(basic_lighted_material_);
-    basic_tex_lighted_material_ = gosShaderMaterial::load("gos_tex_vertex_lighted");
+    materialList_.push_back(basic_lighted_material_);
+    basic_tex_lighted_material_ = gosRenderMaterial::load("gos_tex_vertex_lighted");
     gosASSERT(basic_tex_lighted_material_);
+    materialList_.push_back(basic_tex_lighted_material_);
+
 
     pendingRequest = false;
 
@@ -1171,12 +1204,10 @@ void gosRenderer::destroy() {
     gosMesh::destroy(points_);
     gosMesh::destroy(text_);
 
-    gosShaderMaterial::destroy(basic_material_);
-    gosShaderMaterial::destroy(basic_tex_material_);
-    gosShaderMaterial::destroy(text_material_);
-
-    gosShaderMaterial::destroy(basic_lighted_material_);
-    gosShaderMaterial::destroy(basic_tex_lighted_material_);
+    for(size_t i=0; i<fontList_.size(); i++) {
+        gosRenderMaterial::destroy(materialList_[i]);
+    }
+    materialList_.clear();
 
     // delete fonts before textures, because they refer them
     for(size_t i=0; i<fontList_.size(); i++) {
@@ -1434,7 +1465,7 @@ void gosRenderer::drawQuads(gos_VERTEX* vertices, int count) {
 
     if(quads_->getNumVertices() + num_vertices > quads_->getVertexCapacity()) {
         applyRenderStates();
-        gosShaderMaterial* mat = 
+        gosRenderMaterial* mat = 
             curStates_[gos_State_Texture]!=0 ? basic_tex_material_ : basic_material_;
 
         mat->setTransform(projection_);
@@ -1458,7 +1489,7 @@ void gosRenderer::drawQuads(gos_VERTEX* vertices, int count) {
     // for now draw anyway because no render state saved for draw calls
     applyRenderStates();
 
-    gosShaderMaterial* mat = 
+    gosRenderMaterial* mat = 
         curStates_[gos_State_Texture]!=0 ? basic_tex_material_ : basic_material_;
     mat->setTransform(projection_);
     mat->setFogColor(fog_color_);
@@ -1527,7 +1558,7 @@ void gosRenderer::drawTris(gos_VERTEX* vertices, int count) {
 
     if(tris_->getNumVertices() + count > tris_->getVertexCapacity()) {
         applyRenderStates();
-        gosShaderMaterial* mat = 
+        gosRenderMaterial* mat = 
             curStates_[gos_State_Texture]!=0 ? basic_tex_material_ : basic_material_;
         mat->setTransform(projection_);
 		mat->setFogColor(fog_color_);
@@ -1540,7 +1571,7 @@ void gosRenderer::drawTris(gos_VERTEX* vertices, int count) {
 
     // for now draw anyway because no render state saved for draw calls
     applyRenderStates();
-    gosShaderMaterial* mat = 
+    gosRenderMaterial* mat = 
         curStates_[gos_State_Texture]!=0 ? basic_tex_material_ : basic_material_;
     mat->setTransform(projection_);
     mat->setFogColor(fog_color_);
@@ -1561,7 +1592,7 @@ void gosRenderer::drawIndexedTris(gos_VERTEX* vertices, int num_vertices, WORD* 
     bool not_enough_indices = indexed_tris_->getNumIndices() + num_indices > indexed_tris_->getIndexCapacity();
     if(not_enough_vertices || not_enough_indices){
         applyRenderStates();
-        gosShaderMaterial* mat = 
+        gosRenderMaterial* mat = 
             curStates_[gos_State_Texture]!=0 ? basic_tex_material_ : basic_material_;
         mat->setTransform(projection_);
 		mat->setFogColor(fog_color_);
@@ -1576,7 +1607,7 @@ void gosRenderer::drawIndexedTris(gos_VERTEX* vertices, int num_vertices, WORD* 
 
     // for now draw anyway because no render state saved for draw calls
     applyRenderStates();
-    gosShaderMaterial* mat = 
+    gosRenderMaterial* mat = 
         curStates_[gos_State_Texture]!=0 ? basic_tex_material_ : basic_material_;
     mat->setTransform(projection_);
     mat->setFogColor(fog_color_);
@@ -1594,7 +1625,7 @@ void gosRenderer::drawIndexedTris(HGOSBUFFER ib, HGOSBUFFER vb, HGOSVERTEXDECLAR
     if(beforeDrawCall()) return;
 
     applyRenderStates();
-    gosShaderMaterial* mat = 
+    gosRenderMaterial* mat = 
         curStates_[gos_State_Texture]!=0 ? basic_tex_lighted_material_ : basic_lighted_material_;
 
 	mat4 transform(	mvp[0], mvp[1], mvp[2], mvp[3], 
@@ -1739,7 +1770,7 @@ void gosRenderer::drawText(const char* text) {
 /*
     if(text_->getNumVertices() + count > text_->getCapacity()) {
         applyRenderStates();
-        gosShaderMaterial* mat = 
+        gosRenderMaterial* mat = 
             curStates_[gos_State_Texture]!=0 ? basic_tex_material_ : basic_material_;
         text_->draw(mat);
         text_->rewind();
@@ -1831,7 +1862,7 @@ void gosRenderer::drawText(const char* text) {
 
     // for now draw anyway because no render state saved for draw calls
     applyRenderStates();
-    gosShaderMaterial* mat = text_material_;
+    gosRenderMaterial* mat = text_material_;
 
     //ta.Foreground
     vec4 fg;
@@ -1993,6 +2024,54 @@ const gosGlyphMetrics& gosFont::getGlyphMetrics(int c) const {
 
     return gi_.glyphs_[pos];
 }
+
+////////////////////////////////////////////////////////////////////////////////
+class gosShapeRenderer {
+
+    mat4* world_;
+    mat4* view_;
+    mat4* wvp_;
+    float* viewport_;
+
+    void setup(mat4* world, mat4* view, mat4* wvp, float* viewport)
+    {
+        gosASSERT(world && view && wvp && viewport);
+        world_ = world;
+        view_ = view;
+        wvp_ = wvp;
+        viewport_ = viewport;
+    }
+
+    void render(HGOSBUFFER vb, HGOSBUFFER ib, HGOSVERTEXDECLARATION vdecl, DWORD texture_id)
+    {
+        gos_SetRenderState(gos_State_Texture, texture_id);
+        gos_SetRenderViewport(viewport_[2], viewport_[3], viewport_[0], viewport_[1]);
+
+        if(g_gos_renderer->beforeDrawCall()) return;
+
+        g_gos_renderer->applyRenderStates();
+
+        uint32_t tex = g_gos_renderer->getRenderState(gos_State_Texture);
+        gosRenderMaterial* mat = tex!=0 ? g_gos_renderer->basic_tex_lighted_material_ : g_gos_renderer->basic_lighted_material_;
+
+        vec4 vp = g_gos_renderer->getRenderViewport();
+
+        mat->getShader()->setFloat4("vp", vp);
+        mat->getShader()->setMat4("world_", *world_);
+        mat->getShader()->setMat4("view_", *view_);
+        mat->getShader()->setMat4("wvp_", *wvp_);
+        mat->getShader()->setMat4("projection_", g_gos_renderer->getProj2Screen());
+
+        // TODO: either use this or setMat4("wvp_", ...);
+        mat->setTransform(*wvp_);
+
+        gosMesh::drawIndexed(ib, vb, vdecl, mat);
+
+        g_gos_renderer->afterDrawCall();
+
+    }
+
+};
 
 
 ////////////////////////////////////////////////////////////////////////////////

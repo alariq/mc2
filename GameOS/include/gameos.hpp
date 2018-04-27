@@ -52,7 +52,7 @@ static __inline__ unsigned long long rdtsc(void)
 //clock_gettime(CLOCK_PROCESS_CPUTIME_ID)
 #else
 #include <memory.h> // memcmp
-#include<inttypes.h>
+#include <inttypes.h>
 #include <windows.h>
 #ifdef _WIN64
 static inline unsigned long long rdtsc(void)
@@ -69,6 +69,8 @@ static inline unsigned long long rdtsc(void)
 }
 #endif //!_WIN64
 #endif // PLATFORM_WINDOWS
+
+#include "utils/vec.h"
 //
 //
 //
@@ -186,6 +188,8 @@ typedef struct	gos_Heap*		HGOSHEAP;
 typedef struct gos_StringRes*   HSTRRES; //sebi
 typedef class gosBuffer*		HGOSBUFFER; //sebi
 typedef class gosVertexDeclaration*	HGOSVERTEXDECLARATION; //sebi
+typedef class gosShaderMaterial*	HGOSRENDERMATERIAL; //sebi
+
 
 
 //////////////////////////////////////////////////////////////////////////////////
@@ -2358,16 +2362,20 @@ typedef enum
 //
 // Vector definition (Identical to D3DVECTOR)
 //
+/*
 typedef struct
 {
 	float x,y,z;
 
 } gosVECTOR;
+*/
+typedef vec3 gosVECTOR;
 
 
 //
 // Matrix definition (Identical to D3DMATRIX)
 //
+/*
 typedef struct
 {
 	union
@@ -2383,6 +2391,8 @@ typedef struct
 	};
 
 } gosMATRIX;
+*/
+typedef mat4 gosMATRIX;
 
 
 //
@@ -2511,9 +2521,10 @@ void __stdcall gos_SetMaterial( gosMATERIAL* MaterialData );
 //
 void __stdcall gos_RenderIndexedArray( void* pVertexArray, DWORD NumberVertices, WORD* lpwIndices, DWORD NumberIndices, gosVERTEXTYPE VertexType, gosPRIMITIVETYPE PrimitiveType=PRIMITIVE_TRIANGLELIST );
 
-
-
-
+//sebi
+void __stdcall gos_SetRenderMaterial(HGOSRENDERMATERIAL material);
+void __stdcall gos_SetRenderMaterialParameterFloat4(HGOSRENDERMATERIAL material, float* v);
+void __stdcall gos_SetRenderMaterialParameterMat4(HGOSRENDERMATERIAL material, float* m);
 
 
 

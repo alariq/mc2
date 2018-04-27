@@ -1132,6 +1132,138 @@ Stuff::Vector3D TG_MultiShape::GetTransformedNodePosition (Stuff::Point3D *pos, 
 	return result;
 }
 
+void TG_MultiShape::GatherLightsForShape(const int shape_index, TG_HWLights& lights, size_t& num_lights)
+{
+	num_lights = 0;
+    const TG_ShapeRecPtr sh = &listOfShapes[shape_index];
+
+	for (int iLight = 0; iLight < TG_Shape::s_numLights; iLight++)
+	{
+		if(num_lights == 16)
+			break;
+			
+		if ((TG_Shape::s_listOfLights[iLight] != NULL) && (TG_Shape::s_listOfLights[iLight]->active))
+		{
+
+            Stuff::LinearMatrix4D light2shape;
+            light2shape.Multiply(TG_Shape::s_listOfLights[iLight]->lightToWorld, sh->worldToShape);
+            memcpy(lights.lightToShape[num_lights], (const float*)light2shape, sizeof(light2shape.entries));
+
+            const DWORD type = TG_Shape::s_listOfLights[iLight]->lightType;
+            lights.lightDir[num_lights][3] = (float)type;
+
+            switch (type)
+            {
+                case TG_LIGHT_AMBIENT:
+                    break;
+
+                case TG_LIGHT_INFINITE:
+                case TG_LIGHT_INFINITEWITHFALLOFF:
+                    {
+                        // TODO: just do in shader
+                        Stuff::UnitVector3D uVec;
+                        light2shape.GetLocalForwardInWorld(&uVec);
+                        lights.lightDir[num_lights][0] = uVec.x;
+                        lights.lightDir[num_lights][1] = uVec.y;
+                        lights.lightDir[num_lights][2] = uVec.z;
+
+                        if (sh->parentNode == NULL)
+                        {
+                            memcpy(lights.rootLightDir[num_lights], lights.lightDir[iLight], 3*sizeof(float));
+                        }
+                    }
+                    break;
+
+                case TG_LIGHT_POINT:
+                    {
+                        {
+                            Stuff::Point3D lightPos;
+                            lightPos = TG_Shape::s_listOfLights[iLight]->direction;
+
+                            Stuff::Point3D shapePosition;
+                            shapePosition = sh->shapeToWorld;
+
+                            shapePosition -= lightPos;
+                            shapePosition.y = 0.0f;
+
+                            lights.lightDir[num_lights][0] = shapePosition.x;
+                            lights.lightDir[num_lights][1] = shapePosition.y;
+                            lights.lightDir[num_lights][2] = shapePosition.z;
+                        }
+
+                        if (sh->parentNode == NULL)
+                        {
+                            memcpy(lights.rootLightDir[num_lights], lights.lightDir[iLight], 3*sizeof(float));
+                        }
+                    }
+                    break;
+
+                case TG_LIGHT_TERRAIN:
+                    {
+                        if (TG_Shape::s_listOfLights[iLight] != NULL)
+                        {
+                            Stuff::Point3D lightPos;
+                            lightPos = TG_Shape::s_listOfLights[iLight]->direction;
+
+                            Stuff::Point3D shapePosition;
+                            shapePosition = sh->shapeToWorld;
+
+                            shapePosition -= lightPos;
+                            shapePosition.y = 0.0f;
+
+                            lights.lightDir[num_lights][0] = shapePosition.x;
+                            lights.lightDir[num_lights][1] = shapePosition.y;
+                            lights.lightDir[num_lights][2] = shapePosition.z;
+                        }
+
+                        if (sh->parentNode == NULL)
+                        {
+                            memcpy(lights.rootLightDir[num_lights], lights.lightDir[iLight], 3*sizeof(float));
+                        }
+                    }
+                    break;
+
+                case TG_LIGHT_SPOT:
+                    {
+                        Stuff::Point3D lightPos;
+                        lightPos = TG_Shape::s_listOfLights[iLight]->direction;
+
+                        Stuff::Point3D shapePosition;
+                        shapePosition = sh->shapeToWorld;
+
+                        shapePosition -= lightPos;
+                        shapePosition.y = 0.0f;
+
+                        lights.lightDir[num_lights][0] = shapePosition.x;
+                        lights.lightDir[num_lights][1] = shapePosition.y;
+                        lights.lightDir[num_lights][2] = shapePosition.z;
+
+                        lightPos = TG_Shape::s_listOfLights[iLight]->spotDir;
+                        shapePosition = sh->shapeToWorld;
+
+                        shapePosition -= lightPos;
+                        shapePosition.y = 0.0f;
+
+                        lights.spotDir[num_lights][0] = shapePosition.x;
+                        lights.spotDir[num_lights][1] = shapePosition.y;
+                        lights.spotDir[num_lights][2] = shapePosition.z;
+
+                        if (sh->parentNode == NULL)
+                        {
+                            memcpy(lights.rootLightDir[num_lights], lights.spotDir[iLight], 3*sizeof(float));
+                        }
+                    }
+                    break;
+
+                default:
+                    STOP(("Unknown light type id: %d", type));
+            }
+
+            num_lights++;
+        }
+    }
+}
+
 Stuff::UnitQuaternion moveem;
 //-------------------------------------------------------------------------------
 //This function does the actual transform math, clip checks and lighting math.
@@ -1152,377 +1284,377 @@ __int64 MCTimePerShapeTransform		= 0;
 
 long TG_MultiShape::TransformMultiShape (Stuff::Point3D *pos, Stuff::UnitQuaternion *rot)
 {
-	//Profile T&L so I can break out GameLogic from T&L
-	#ifdef LAB_ONLY
-	__int64 x;
-	x=GetCycles();
-	#endif
-	
- 	Stuff::LinearMatrix4D 	shapeOrigin;
-	Stuff::LinearMatrix4D	shadowOrigin;
-	Stuff::LinearMatrix4D 	localShapeOrigin;
-	
-	shapeOrigin.BuildRotation(*rot);
-	shapeOrigin.BuildTranslation(*pos);
+    //Profile T&L so I can break out GameLogic from T&L
+#ifdef LAB_ONLY
+    __int64 x;
+    x=GetCycles();
+#endif
 
-	Stuff::EulerAngles angles(*rot);
-	yawRotation = angles.yaw;
+    Stuff::LinearMatrix4D 	shapeOrigin;
+    Stuff::LinearMatrix4D	shadowOrigin;
+    Stuff::LinearMatrix4D 	localShapeOrigin;
 
-	shadowOrigin.BuildRotation(Stuff::EulerAngles(-angles.pitch,0.0f,0.0f));
-	shadowOrigin.BuildTranslation(*pos);
-	
-	long i=0;
-	Stuff::Point3D camPosition;
-	camPosition = *TG_Shape::s_cameraOrigin;
+    shapeOrigin.BuildRotation(*rot);
+    shapeOrigin.BuildTranslation(*pos);
 
-	Stuff::Matrix4D  shapeToClip, rootShapeToClip;
-	Stuff::Point3D backFacePoint;
+    Stuff::EulerAngles angles(*rot);
+    yawRotation = angles.yaw;
 
-	TG_ShapeRecPtr childChain[MAX_NODES];
+    shadowOrigin.BuildRotation(Stuff::EulerAngles(-angles.pitch,0.0f,0.0f));
+    shadowOrigin.BuildTranslation(*pos);
 
-	for (i=0;i<numTG_Shapes;i++)
-	{
-		//----------------------------------------------
-		// Must set each transform!  Animating Textures!
-		for (long j=0;j<myMultiType->numTextures;j++)
-		{
-			listOfShapes[i].node->myType->SetTextureHandle(j,myMultiType->listOfTextures[j].mcTextureNodeIndex);
-			listOfShapes[i].node->myType->SetTextureAlpha(j,myMultiType->listOfTextures[j].textureAlpha); 
-		}
+    long i=0;
+    Stuff::Point3D camPosition;
+    camPosition = *TG_Shape::s_cameraOrigin;
 
-		//-----------------------------------------------------------------
-		// Heirarchy Animation Code.
-		//
-		// Simple, really.  For each shape in list, traverse back UP
-		// the heirarchy and store the traversal pointers in a temp list.
-		// Starting at the TOP of the heirarchy and for each shape, 
-		// check if matrix set for that shape. If so, next node down.  If
-		// not, copy above matrix into node and apply animation data.
-		// Do this until at end of this heirarchy.
-		long curChild = 0;
-		childChain[curChild] = &listOfShapes[i];
-		while (childChain[curChild]->parentNode)
-		{
-			curChild++;
+    Stuff::Matrix4D  shapeToClip, rootShapeToClip;
+    Stuff::Point3D backFacePoint;
 
-			gosASSERT(curChild < MAX_NODES);
+    TG_ShapeRecPtr childChain[MAX_NODES];
 
-			childChain[curChild] = childChain[curChild-1]->parentNode;
-		}
+    for (i=0;i<numTG_Shapes;i++)
+    {
+        //----------------------------------------------
+        // Must set each transform!  Animating Textures!
+        for (long j=0;j<myMultiType->numTextures;j++)
+        {
+            listOfShapes[i].node->myType->SetTextureHandle(j,myMultiType->listOfTextures[j].mcTextureNodeIndex);
+            listOfShapes[i].node->myType->SetTextureAlpha(j,myMultiType->listOfTextures[j].textureAlpha); 
+        }
 
-		long fNum = float2long(frameNum);
+        //-----------------------------------------------------------------
+        // Heirarchy Animation Code.
+        //
+        // Simple, really.  For each shape in list, traverse back UP
+        // the heirarchy and store the traversal pointers in a temp list.
+        // Starting at the TOP of the heirarchy and for each shape, 
+        // check if matrix set for that shape. If so, next node down.  If
+        // not, copy above matrix into node and apply animation data.
+        // Do this until at end of this heirarchy.
+        long curChild = 0;
+        childChain[curChild] = &listOfShapes[i];
+        while (childChain[curChild]->parentNode)
+        {
+            curChild++;
 
-		Stuff::Point3D zero;
-		zero.x = zero.y = zero.z = 0.0f;
-		for (int j=curChild;j>=0;j--)
-		{
-			if (childChain[j]->calcedThisFrame != turn)
-			{
-				if (j == curChild)		//This is the ROOT Node.
-				{
-					//----------------------------------------------------
-					// Top O the hierarchy.  Used passed in shapeMatrices
-					// Apply any animation data, if data is non-NULL
-					if (childChain[j]->currentAnimation)
-					{
-						//--------------------------------------
-						// Slerp between current and next frame
-						Stuff::UnitQuaternion slerpQuat;
-						slerpQuat.x = slerpQuat.y = slerpQuat.z = 0.0f;
-						slerpQuat.w = 1.0f;
-						
-						if (childChain[j]->currentAnimation->quat)
-							slerpQuat = childChain[j]->currentAnimation->quat[fNum];
+            gosASSERT(curChild < MAX_NODES);
 
-						//--------------------------------------
-						//First Apply Animation to this local piece of heirarchy.
-						// If piece had base rotation, apply it.  Otherwise, no.
-						Stuff::UnitQuaternion totalRotation = slerpQuat;
-						if ((childChain[j]->baseRotation.w == 1.0f) && 
-							(childChain[j]->baseRotation.x == 0.0f) &&
-							(childChain[j]->baseRotation.y == 0.0f) && 
-							(childChain[j]->baseRotation.z == 0.0f))
-						{
-						}
-						else
-						{
-							totalRotation.Multiply(slerpQuat,childChain[j]->baseRotation);
-							totalRotation.Normalize();
-						}
+            childChain[curChild] = childChain[curChild-1]->parentNode;
+        }
 
-						localShapeOrigin.BuildRotation(totalRotation);
- 						  
-						if (childChain[j]->currentAnimation->pos)
-							localShapeOrigin.BuildTranslation(childChain[j]->currentAnimation->pos[fNum]);		//SPECIAL.  ROOT HAS ITS OWN OFFSETS!
-						else
-							localShapeOrigin.BuildTranslation(childChain[j]->node->myType->GetNodeCenter());
+        long fNum = float2long(frameNum);
 
-						childChain[j]->localShapeToWorld = localShapeOrigin;
+        Stuff::Point3D zero;
+        zero.x = zero.y = zero.z = 0.0f;
+        for (int j=curChild;j>=0;j--)
+        {
+            if (childChain[j]->calcedThisFrame != turn)
+            {
+                if (j == curChild)		//This is the ROOT Node.
+                {
+                    //----------------------------------------------------
+                    // Top O the hierarchy.  Used passed in shapeMatrices
+                    // Apply any animation data, if data is non-NULL
+                    if (childChain[j]->currentAnimation)
+                    {
+                        //--------------------------------------
+                        // Slerp between current and next frame
+                        Stuff::UnitQuaternion slerpQuat;
+                        slerpQuat.x = slerpQuat.y = slerpQuat.z = 0.0f;
+                        slerpQuat.w = 1.0f;
 
-						//------------------------------------------------------------------
-						//Then move the piece of the heirarchy into the frame of the parent
-						childChain[j]->shapeToWorld.Multiply(childChain[j]->localShapeToWorld,shapeOrigin);
+                        if (childChain[j]->currentAnimation->quat)
+                            slerpQuat = childChain[j]->currentAnimation->quat[fNum];
 
-						childChain[j]->worldToShape.Invert(childChain[j]->shapeToWorld);
-						childChain[j]->calcedThisFrame = turn;
-					}
-					else
-					{
-						localShapeOrigin.BuildRotation(Stuff::EulerAngles(0.0f,0.0f,0.0f));
-						localShapeOrigin.BuildTranslation(childChain[j]->node->myType->GetNodeCenter());
+                        //--------------------------------------
+                        //First Apply Animation to this local piece of heirarchy.
+                        // If piece had base rotation, apply it.  Otherwise, no.
+                        Stuff::UnitQuaternion totalRotation = slerpQuat;
+                        if ((childChain[j]->baseRotation.w == 1.0f) && 
+                                (childChain[j]->baseRotation.x == 0.0f) &&
+                                (childChain[j]->baseRotation.y == 0.0f) && 
+                                (childChain[j]->baseRotation.z == 0.0f))
+                        {
+                        }
+                        else
+                        {
+                            totalRotation.Multiply(slerpQuat,childChain[j]->baseRotation);
+                            totalRotation.Normalize();
+                        }
 
-						childChain[j]->localShapeToWorld = localShapeOrigin;
+                        localShapeOrigin.BuildRotation(totalRotation);
 
-						childChain[j]->shapeToWorld.Multiply(childChain[j]->localShapeToWorld,shapeOrigin);
+                        if (childChain[j]->currentAnimation->pos)
+                            localShapeOrigin.BuildTranslation(childChain[j]->currentAnimation->pos[fNum]);		//SPECIAL.  ROOT HAS ITS OWN OFFSETS!
+                        else
+                            localShapeOrigin.BuildTranslation(childChain[j]->node->myType->GetNodeCenter());
 
-						childChain[j]->worldToShape.Invert(childChain[j]->shapeToWorld);
-						childChain[j]->calcedThisFrame = turn;
-					}
-				}
-				else
-				{
-					//----------------------------------------------------------------------
-					// Not Top O the Heirarchy.  Figure out matrix based on Animation data.
-					if (childChain[j]->currentAnimation)
-					{
-						//--------------------------------------
-						// Slerp between current and next frame
-						Stuff::UnitQuaternion slerpQuat;
-						slerpQuat.x = slerpQuat.y = slerpQuat.z = 0.0f;
-						slerpQuat.w = 1.0f;
-						
-						if (childChain[j]->currentAnimation->quat)
-							slerpQuat = childChain[j]->currentAnimation->quat[fNum];
+                        childChain[j]->localShapeToWorld = localShapeOrigin;
 
-						//--------------------------------------
-						//First Apply Animation to this local piece of heirarchy.
-						// If piece had base rotation, apply it.  Otherwise, no.
-						Stuff::UnitQuaternion totalRotation = slerpQuat;
-						if ((childChain[j]->baseRotation.w == 1.0f) && 
-							(childChain[j]->baseRotation.x == 0.0f) &&
-							(childChain[j]->baseRotation.y == 0.0f) && 
-							(childChain[j]->baseRotation.z == 0.0f))
-						{
-						}
-						else
-						{
-							totalRotation.Multiply(slerpQuat,childChain[j]->baseRotation);
-							totalRotation.Normalize();
-						}
+                        //------------------------------------------------------------------
+                        //Then move the piece of the heirarchy into the frame of the parent
+                        childChain[j]->shapeToWorld.Multiply(childChain[j]->localShapeToWorld,shapeOrigin);
 
-						localShapeOrigin.BuildRotation(totalRotation);
-						
-						if (childChain[j]->currentAnimation->pos)
-							localShapeOrigin.BuildTranslation(childChain[j]->currentAnimation->pos[fNum]);
-						else
-							localShapeOrigin.BuildTranslation(childChain[j]->node->myType->GetRelativeNodeCenter());
-							
-						childChain[j]->localShapeToWorld = localShapeOrigin;
+                        childChain[j]->worldToShape.Invert(childChain[j]->shapeToWorld);
+                        childChain[j]->calcedThisFrame = turn;
+                    }
+                    else
+                    {
+                        localShapeOrigin.BuildRotation(Stuff::EulerAngles(0.0f,0.0f,0.0f));
+                        localShapeOrigin.BuildTranslation(childChain[j]->node->myType->GetNodeCenter());
 
-						//------------------------------------------------------------------
-						//Then move the piece of the heirarchy into the frame of the parent
-						childChain[j]->localShapeToWorld.Multiply(localShapeOrigin,childChain[j+1]->localShapeToWorld);
+                        childChain[j]->localShapeToWorld = localShapeOrigin;
 
-						//------------------------------------------------------------------
-						// Then deal with global translation.
-						childChain[j]->shapeToWorld.Multiply(childChain[j]->localShapeToWorld,shapeOrigin);
+                        childChain[j]->shapeToWorld.Multiply(childChain[j]->localShapeToWorld,shapeOrigin);
 
-						childChain[j]->worldToShape.Invert(childChain[j]->shapeToWorld);
-						childChain[j]->calcedThisFrame = turn;
-					}
-					else
-					{
-						//--------------------------------------
-						// NO Animation if we are here.
-						//
-						// Apply Base Rotation.  If it is Zero, no problem!
-						Stuff::UnitQuaternion totalRotation = childChain[j]->baseRotation;
-						localShapeOrigin.BuildRotation(totalRotation);
-						localShapeOrigin.BuildTranslation(childChain[j]->node->myType->GetRelativeNodeCenter());
+                        childChain[j]->worldToShape.Invert(childChain[j]->shapeToWorld);
+                        childChain[j]->calcedThisFrame = turn;
+                    }
+                }
+                else
+                {
+                    //----------------------------------------------------------------------
+                    // Not Top O the Heirarchy.  Figure out matrix based on Animation data.
+                    if (childChain[j]->currentAnimation)
+                    {
+                        //--------------------------------------
+                        // Slerp between current and next frame
+                        Stuff::UnitQuaternion slerpQuat;
+                        slerpQuat.x = slerpQuat.y = slerpQuat.z = 0.0f;
+                        slerpQuat.w = 1.0f;
 
-						childChain[j]->localShapeToWorld = localShapeOrigin;
+                        if (childChain[j]->currentAnimation->quat)
+                            slerpQuat = childChain[j]->currentAnimation->quat[fNum];
 
-						//------------------------------------------------------------------
-						//Then move the piece of the heirarchy into the frame of the parent
-						localShapeOrigin = childChain[j]->localShapeToWorld;
-						childChain[j]->localShapeToWorld.Multiply(localShapeOrigin,childChain[j+1]->localShapeToWorld);
+                        //--------------------------------------
+                        //First Apply Animation to this local piece of heirarchy.
+                        // If piece had base rotation, apply it.  Otherwise, no.
+                        Stuff::UnitQuaternion totalRotation = slerpQuat;
+                        if ((childChain[j]->baseRotation.w == 1.0f) && 
+                                (childChain[j]->baseRotation.x == 0.0f) &&
+                                (childChain[j]->baseRotation.y == 0.0f) && 
+                                (childChain[j]->baseRotation.z == 0.0f))
+                        {
+                        }
+                        else
+                        {
+                            totalRotation.Multiply(slerpQuat,childChain[j]->baseRotation);
+                            totalRotation.Normalize();
+                        }
 
-						//------------------------------------------------------------------
-						// Then deal with global translation.
-						childChain[j]->shapeToWorld.Multiply(childChain[j]->localShapeToWorld,shapeOrigin);
+                        localShapeOrigin.BuildRotation(totalRotation);
 
-						childChain[j]->worldToShape.Invert(childChain[j]->shapeToWorld);
-						childChain[j]->calcedThisFrame = turn;
-					}
-				}
-			}
-		}
+                        if (childChain[j]->currentAnimation->pos)
+                            localShapeOrigin.BuildTranslation(childChain[j]->currentAnimation->pos[fNum]);
+                        else
+                            localShapeOrigin.BuildTranslation(childChain[j]->node->myType->GetRelativeNodeCenter());
 
-		if (useFaceLighting || useVertexLighting)
-		{
-			//----------------------------------------------------
-			// Setup Lighting here.
-			if (Environment.Renderer != 3)
-			{
-				for (long iLight=0;iLight<TG_Shape::s_numLights;iLight++)
-				{
-					if ((TG_Shape::s_listOfLights[iLight] != NULL) && (TG_Shape::s_listOfLights[iLight]->active))
-					{
-						switch (TG_Shape::s_listOfLights[iLight]->lightType)
-						{
-							case TG_LIGHT_AMBIENT:
-							{
-								//No Setup needed for Ambient light
-							}
-							break;
-		
-							case TG_LIGHT_INFINITE:
-							{
-								if (TG_Shape::s_listOfLights[iLight] != NULL)
-								{
-									TG_Shape::s_lightToShape[iLight].Multiply(TG_Shape::s_listOfLights[iLight]->lightToWorld,listOfShapes[i].worldToShape);
-									Stuff::UnitVector3D uVec;
-									TG_Shape::s_lightToShape[iLight].GetLocalForwardInWorld(&uVec);
-									TG_Shape::s_lightDir[iLight] = uVec;
-									
-									if (listOfShapes[i].parentNode == NULL)
-									{
-										TG_Shape::s_rootLightDir[iLight] = TG_Shape::s_lightDir[iLight];
-										//if (angles.yaw != 0.0f )
-										//	RotateLight(TG_Shape::s_rootLightDir[iLight],-angles.yaw);
-									}
-								}
-							}
-							break;
-		
-							case TG_LIGHT_INFINITEWITHFALLOFF:
-							{
-								if (TG_Shape::s_listOfLights[iLight] != NULL)
-								{
-									TG_Shape::s_lightToShape[iLight].Multiply(TG_Shape::s_listOfLights[iLight]->lightToWorld,listOfShapes[i].worldToShape);
-									Stuff::UnitVector3D uVec;
-									TG_Shape::s_lightToShape[iLight].GetLocalForwardInWorld(&uVec);
-									TG_Shape::s_lightDir[iLight] = uVec;
-									
-									if (listOfShapes[i].parentNode == NULL)
-									{
-										TG_Shape::s_rootLightDir[iLight] = TG_Shape::s_lightDir[iLight];
-									}
-								}
-							}
-							break;
-		
-							case TG_LIGHT_POINT:
-							{
-								if (TG_Shape::s_listOfLights[iLight] != NULL)
-								{
-									Stuff::Point3D lightPos;
-									lightPos = TG_Shape::s_listOfLights[iLight]->direction;
-		
-									Stuff::Point3D shapePosition;
-									shapePosition = listOfShapes[i].shapeToWorld;
-		
-									shapePosition -= lightPos;
-									shapePosition.y = 0.0f;
-									TG_Shape::s_lightDir[iLight] = shapePosition;
-									//if (angles.yaw != 0.0f )
-									//	RotateLight(TG_Shape::s_lightDir[iLight],-angles.yaw);
-								}
-								
-								if (listOfShapes[i].parentNode == NULL)
-								{
-									TG_Shape::s_rootLightDir[iLight] = TG_Shape::s_lightDir[iLight];
-								}
-							}
-							break;
-							
-							case TG_LIGHT_TERRAIN:
-							{
-								if (TG_Shape::s_listOfLights[iLight] != NULL)
-								{
-									Stuff::Point3D lightPos;
-									lightPos = TG_Shape::s_listOfLights[iLight]->direction;
-		
-									Stuff::Point3D shapePosition;
-									shapePosition = listOfShapes[i].shapeToWorld;
-		
-									shapePosition -= lightPos;
-									shapePosition.y = 0.0f;
-									TG_Shape::s_lightDir[iLight] = shapePosition;
-								}
-								
-								if (listOfShapes[i].parentNode == NULL)
-								{
-									TG_Shape::s_rootLightDir[iLight] = TG_Shape::s_lightDir[iLight];
-								}
-							}
-							break;
-							
-							case TG_LIGHT_SPOT:
-							{
-								if (TG_Shape::s_listOfLights[iLight] != NULL)
-								{
-									Stuff::Point3D lightPos;
-									lightPos = TG_Shape::s_listOfLights[iLight]->direction;
-		
-									Stuff::Point3D shapePosition;
-									shapePosition = listOfShapes[i].shapeToWorld;
-		
-									shapePosition -= lightPos;
-									shapePosition.y = 0.0f;
-									TG_Shape::s_lightDir[iLight] = shapePosition;
-									//if (angles.yaw != 0.0f )
-									//	RotateLight(TG_Shape::s_lightDir[iLight],-angles.yaw);
-									
-									lightPos = TG_Shape::s_listOfLights[iLight]->spotDir;
-									shapePosition = listOfShapes[i].shapeToWorld;
-									
-									shapePosition -= lightPos;
-									shapePosition.y = 0.0f;
-									TG_Shape::s_spotDir[iLight] = shapePosition;
-									//if (angles.yaw != 0.0f )
-									//	RotateLight(TG_Shape::s_spotDir[iLight],-angles.yaw);
-										
-									if (listOfShapes[i].parentNode == NULL)
-									{
-										TG_Shape::s_rootLightDir[iLight] = TG_Shape::s_spotDir[iLight];
-									}
-								}
-							}
-							break;
-						}
-					}
-				}
-			}
-		}
+                        childChain[j]->localShapeToWorld = localShapeOrigin;
 
-		shapeToClip.Multiply(listOfShapes[i].shapeToWorld,TG_Shape::s_worldToClip);
-		backFacePoint.Multiply(camPosition,listOfShapes[i].worldToShape);
+                        //------------------------------------------------------------------
+                        //Then move the piece of the heirarchy into the frame of the parent
+                        childChain[j]->localShapeToWorld.Multiply(localShapeOrigin,childChain[j+1]->localShapeToWorld);
 
-	#ifdef LAB_ONLY
-	x=GetCycles()-x;
-	MCTimeAnimationandMatrix += x;
-	x=GetCycles();
-	#endif
-	
-		listOfShapes[i].node->MultiTransformShape(&shapeToClip,&backFacePoint,listOfShapes[i].parentNode,isHudElement,alphaValue,isClamped);
+                        //------------------------------------------------------------------
+                        // Then deal with global translation.
+                        childChain[j]->shapeToWorld.Multiply(childChain[j]->localShapeToWorld,shapeOrigin);
 
-		if (useShadows && d_useShadows)
-		{
-			listOfShapes[i].node->MultiTransformShadows(pos, &(listOfShapes[i].shapeToWorld),yawRotation);
-		}
-		
-	#ifdef LAB_ONLY
-	x=GetCycles()-x;
-	MCTimePerShapeTransform += x;
-	x=GetCycles();
-	#endif
-	}
+                        childChain[j]->worldToShape.Invert(childChain[j]->shapeToWorld);
+                        childChain[j]->calcedThisFrame = turn;
+                    }
+                    else
+                    {
+                        //--------------------------------------
+                        // NO Animation if we are here.
+                        //
+                        // Apply Base Rotation.  If it is Zero, no problem!
+                        Stuff::UnitQuaternion totalRotation = childChain[j]->baseRotation;
+                        localShapeOrigin.BuildRotation(totalRotation);
+                        localShapeOrigin.BuildTranslation(childChain[j]->node->myType->GetRelativeNodeCenter());
 
-	#ifdef LAB_ONLY
-	MCTimeTransformandLight = MCTimeAnimationandMatrix + MCTimePerShapeTransform;
-	#endif
-	return(0);
+                        childChain[j]->localShapeToWorld = localShapeOrigin;
+
+                        //------------------------------------------------------------------
+                        //Then move the piece of the heirarchy into the frame of the parent
+                        localShapeOrigin = childChain[j]->localShapeToWorld;
+                        childChain[j]->localShapeToWorld.Multiply(localShapeOrigin,childChain[j+1]->localShapeToWorld);
+
+                        //------------------------------------------------------------------
+                        // Then deal with global translation.
+                        childChain[j]->shapeToWorld.Multiply(childChain[j]->localShapeToWorld,shapeOrigin);
+
+                        childChain[j]->worldToShape.Invert(childChain[j]->shapeToWorld);
+                        childChain[j]->calcedThisFrame = turn;
+                    }
+                }
+            }
+        }
+
+        if (useFaceLighting || useVertexLighting)
+        {
+            //----------------------------------------------------
+            // Setup Lighting here.
+            if (Environment.Renderer != 3)
+            {
+                for (long iLight=0;iLight<TG_Shape::s_numLights;iLight++)
+                {
+                    if ((TG_Shape::s_listOfLights[iLight] != NULL) && (TG_Shape::s_listOfLights[iLight]->active))
+                    {
+                        switch (TG_Shape::s_listOfLights[iLight]->lightType)
+                        {
+                            case TG_LIGHT_AMBIENT:
+                                {
+                                    //No Setup needed for Ambient light
+                                }
+                                break;
+
+                            case TG_LIGHT_INFINITE:
+                                {
+                                    if (TG_Shape::s_listOfLights[iLight] != NULL)
+                                    {
+                                        TG_Shape::s_lightToShape[iLight].Multiply(TG_Shape::s_listOfLights[iLight]->lightToWorld,listOfShapes[i].worldToShape);
+                                        Stuff::UnitVector3D uVec;
+                                        TG_Shape::s_lightToShape[iLight].GetLocalForwardInWorld(&uVec);
+                                        TG_Shape::s_lightDir[iLight] = uVec;
+
+                                        if (listOfShapes[i].parentNode == NULL)
+                                        {
+                                            TG_Shape::s_rootLightDir[iLight] = TG_Shape::s_lightDir[iLight];
+                                            //if (angles.yaw != 0.0f )
+                                            //	RotateLight(TG_Shape::s_rootLightDir[iLight],-angles.yaw);
+                                        }
+                                    }
+                                }
+                                break;
+
+                            case TG_LIGHT_INFINITEWITHFALLOFF:
+                                {
+                                    if (TG_Shape::s_listOfLights[iLight] != NULL)
+                                    {
+                                        TG_Shape::s_lightToShape[iLight].Multiply(TG_Shape::s_listOfLights[iLight]->lightToWorld,listOfShapes[i].worldToShape);
+                                        Stuff::UnitVector3D uVec;
+                                        TG_Shape::s_lightToShape[iLight].GetLocalForwardInWorld(&uVec);
+                                        TG_Shape::s_lightDir[iLight] = uVec;
+
+                                        if (listOfShapes[i].parentNode == NULL)
+                                        {
+                                            TG_Shape::s_rootLightDir[iLight] = TG_Shape::s_lightDir[iLight];
+                                        }
+                                    }
+                                }
+                                break;
+
+                            case TG_LIGHT_POINT:
+                                {
+                                    if (TG_Shape::s_listOfLights[iLight] != NULL)
+                                    {
+                                        Stuff::Point3D lightPos;
+                                        lightPos = TG_Shape::s_listOfLights[iLight]->direction;
+
+                                        Stuff::Point3D shapePosition;
+                                        shapePosition = listOfShapes[i].shapeToWorld;
+
+                                        shapePosition -= lightPos;
+                                        shapePosition.y = 0.0f;
+                                        TG_Shape::s_lightDir[iLight] = shapePosition;
+                                        //if (angles.yaw != 0.0f )
+                                        //	RotateLight(TG_Shape::s_lightDir[iLight],-angles.yaw);
+                                    }
+
+                                    if (listOfShapes[i].parentNode == NULL)
+                                    {
+                                        TG_Shape::s_rootLightDir[iLight] = TG_Shape::s_lightDir[iLight];
+                                    }
+                                }
+                                break;
+
+                            case TG_LIGHT_TERRAIN:
+                                {
+                                    if (TG_Shape::s_listOfLights[iLight] != NULL)
+                                    {
+                                        Stuff::Point3D lightPos;
+                                        lightPos = TG_Shape::s_listOfLights[iLight]->direction;
+
+                                        Stuff::Point3D shapePosition;
+                                        shapePosition = listOfShapes[i].shapeToWorld;
+
+                                        shapePosition -= lightPos;
+                                        shapePosition.y = 0.0f;
+                                        TG_Shape::s_lightDir[iLight] = shapePosition;
+                                    }
+
+                                    if (listOfShapes[i].parentNode == NULL)
+                                    {
+                                        TG_Shape::s_rootLightDir[iLight] = TG_Shape::s_lightDir[iLight];
+                                    }
+                                }
+                                break;
+
+                            case TG_LIGHT_SPOT:
+                                {
+                                    if (TG_Shape::s_listOfLights[iLight] != NULL)
+                                    {
+                                        Stuff::Point3D lightPos;
+                                        lightPos = TG_Shape::s_listOfLights[iLight]->direction;
+
+                                        Stuff::Point3D shapePosition;
+                                        shapePosition = listOfShapes[i].shapeToWorld;
+
+                                        shapePosition -= lightPos;
+                                        shapePosition.y = 0.0f;
+                                        TG_Shape::s_lightDir[iLight] = shapePosition;
+                                        //if (angles.yaw != 0.0f )
+                                        //	RotateLight(TG_Shape::s_lightDir[iLight],-angles.yaw);
+
+                                        lightPos = TG_Shape::s_listOfLights[iLight]->spotDir;
+                                        shapePosition = listOfShapes[i].shapeToWorld;
+
+                                        shapePosition -= lightPos;
+                                        shapePosition.y = 0.0f;
+                                        TG_Shape::s_spotDir[iLight] = shapePosition;
+                                        //if (angles.yaw != 0.0f )
+                                        //	RotateLight(TG_Shape::s_spotDir[iLight],-angles.yaw);
+
+                                        if (listOfShapes[i].parentNode == NULL)
+                                        {
+                                            TG_Shape::s_rootLightDir[iLight] = TG_Shape::s_spotDir[iLight];
+                                        }
+                                    }
+                                }
+                                break;
+                        }
+                    }
+                }
+            }
+        }
+
+        shapeToClip.Multiply(listOfShapes[i].shapeToWorld,TG_Shape::s_worldToClip);
+        backFacePoint.Multiply(camPosition,listOfShapes[i].worldToShape);
+
+#ifdef LAB_ONLY
+        x=GetCycles()-x;
+        MCTimeAnimationandMatrix += x;
+        x=GetCycles();
+#endif
+
+        listOfShapes[i].node->MultiTransformShape(&shapeToClip,&backFacePoint,listOfShapes[i].parentNode,isHudElement,alphaValue,isClamped);
+
+        if (useShadows && d_useShadows)
+        {
+            listOfShapes[i].node->MultiTransformShadows(pos, &(listOfShapes[i].shapeToWorld),yawRotation);
+        }
+
+#ifdef LAB_ONLY
+        x=GetCycles()-x;
+        MCTimePerShapeTransform += x;
+        x=GetCycles();
+#endif
+    }
+
+#ifdef LAB_ONLY
+    MCTimeTransformandLight = MCTimeAnimationandMatrix + MCTimePerShapeTransform;
+#endif
+    return(0);
 }	
 
 //-------------------------------------------------------------------------------
@@ -1548,7 +1680,8 @@ void TG_MultiShape::Render (bool refreshTextures, float forceZ)
 			Stuff::Matrix4D  shapeToClip;
 			shapeToClip.Multiply(listOfShapes[i].shapeToWorld, TG_Shape::s_worldToClip);
 		
-			listOfShapes[i].node->Render(forceZ,isHudElement,alphaValue,isClamped, &shapeToClip);
+            Stuff::Matrix4D shape2world(listOfShapes[i].shapeToWorld);
+			listOfShapes[i].node->Render(forceZ,isHudElement,alphaValue,isClamped, &shapeToClip, &shape2world);
 		}
 	}
 }	

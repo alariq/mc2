@@ -278,6 +278,18 @@ typedef struct _TG_Light
 
 typedef  TG_Light *TG_LightPtr;
 
+
+#define MAX_HW_LIGHTS_IN_WORLD	16
+typedef struct _TG_HWLights {
+	float lightToShape[MAX_HW_LIGHTS_IN_WORLD][16];
+	float lightDir[MAX_HW_LIGHTS_IN_WORLD][4];
+	float rootLightDir[MAX_HW_LIGHTS_IN_WORLD][4];
+	float spotDir[MAX_HW_LIGHTS_IN_WORLD][4];
+} TG_HWLights;
+
+typedef TG_HWLights* TG_HWLightsPtr;
+
+
 //-------------------------------------------------------------------------------
 // TG_Texture
 typedef struct _TG_Texture
@@ -831,7 +843,7 @@ class TG_Shape
 
 		//This function takes the current listOfVisibleFaces and draws them using
 		//gos_DrawTriangle.  Does clipping, too!
-		void Render (float forceZ = -1.0f, bool isHudElement = false, BYTE alphaValue = 0xff, bool isClamped = false, Stuff::Matrix4D* shapeToClip = nullptr);
+		void Render (float forceZ = -1.0f, bool isHudElement = false, BYTE alphaValue = 0xff, bool isClamped = false, const Stuff::Matrix4D* shapeToClip = nullptr, const Stuff::Matrix4D* shapeToWorld = nullptr);
 
 		//This function takes the current listOfShadowTriangles and draws them using
 		//gos_DrawTriangle.  Does clipping, too!
@@ -879,7 +891,8 @@ public:
 	HGOSBUFFER vb_;
 	HGOSBUFFER ib_;
 	HGOSVERTEXDECLARATION vdecl_;
-	Stuff::Matrix4D mvp_;
+	Stuff::Matrix4D mvp_; // model -> projection
+	Stuff::Matrix4D mw_; // model -> world
 	float viewport_[4];
 };
 ////////////////////////////////////////////////////////////////////////////////

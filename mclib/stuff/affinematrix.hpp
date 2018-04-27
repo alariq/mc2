@@ -108,6 +108,11 @@ namespace Stuff {
 					return *this;
 				}
 
+        //
+        // Converaion operators
+        // 
+        operator const float *() const { return entries; }
+
 		//
 		// Comparison operators
 		//

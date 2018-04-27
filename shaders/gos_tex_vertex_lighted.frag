@@ -2,7 +2,7 @@
 
 #define PREC highp
 
-in PREC vec4 Color;
+in PREC vec3 Normal;
 //in PREC float FogValue;
 in PREC vec2 Texcoord;
 in PREC vec4 Light;
@@ -18,6 +18,6 @@ void main(void)
     c *= texture(tex1, Texcoord);
 	//if(fog_color.x>0.0 || fog_color.y>0.0 || fog_color.z>0.0 || fog_color.w>0.0)
     //	c.rgb = mix(fog_color.rgb, c.rgb, FogValue);
-	FragColor = c;// * Light;
+	FragColor = c*0.0001 + vec4(Normal*0.5 + 0.5, 1);// * Light;
 }
 

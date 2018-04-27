@@ -300,6 +300,8 @@ class TG_MultiShape
 
 		//This function sets the fog values for the shape.  Straight fog right now.
 		void SetFogRGB (DWORD fRGB);
+
+        void GatherLightsForShape(const int shape_index, TG_HWLights& lights, size_t& num_lights);
 		
 		//This function does the actual transform math, clip checks and lighting math.
 		//The matrices passed in are the translation/rotation matrix for the shape and

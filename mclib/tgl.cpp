@@ -33,6 +33,7 @@
 #endif
 
 #include "platform_str.h"
+#include <stddef.h> // linux offsetof()
 
 //-------------------------------------------------------------------------------
 // Include Files
@@ -491,6 +492,20 @@ void TG_TypeShape::LoadBinaryCopy (File &binFile)
 		listOfTypeTriangles = NULL;
 	}
 
+	//listOfTextures
+	numTextures = binFile.readInt();
+	if (numTextures)
+	{
+		listOfTextures = (TG_TinyTexturePtr)TG_Shape::tglHeap->Malloc(sizeof(TG_TinyTexture) * numTextures);
+		gosASSERT(listOfTextures != NULL);
+
+		binFile.read((MemoryPtr)listOfTextures,sizeof(TG_TinyTexture) * numTextures);
+	}
+	else
+	{
+		listOfTextures = NULL;
+	}
+
 	if (numTypeVertices)
 	{
 		// no real index buffer for now...
@@ -503,8 +518,6 @@ void TG_TypeShape::LoadBinaryCopy (File &binFile)
 		for (uint32_t i = 0; i < numTypeTriangles; i++)
 		{
 			TG_TypeTriangle triType = listOfTypeTriangles[i];
-
-			TG_HWTypeVertex gVertex[3];
 
 			for (uint32_t j = 0; j < 3; ++j)
 			{
@@ -531,19 +544,6 @@ void TG_TypeShape::LoadBinaryCopy (File &binFile)
 		delete[] vb;
 	}
 
-	//listOfTextures
-	numTextures = binFile.readInt();
-	if (numTextures)
-	{
-		listOfTextures = (TG_TinyTexturePtr)TG_Shape::tglHeap->Malloc(sizeof(TG_TinyTexture) * numTextures);
-		gosASSERT(listOfTextures != NULL);
-
-		binFile.read((MemoryPtr)listOfTextures,sizeof(TG_TinyTexture) * numTextures);
-	}
-	else
-	{
-		listOfTextures = NULL;
-	}
 
 	//Other Data
 	nodeCenter.x = binFile.readFloat();
@@ -1607,6 +1607,7 @@ void TG_TypeShape::movePosRelativeCenterNode (void)
 	}
 }
 
+
 extern float yawRotation;
 //-------------------------------------------------------------------------------
 //This function does exactly what TranformShape does EXCEPT that the shapeToClip,
@@ -2499,7 +2500,7 @@ long TG_Shape::MultiTransformShape (Stuff::Matrix4D *shapeToClip, Stuff::Point3D
 //-------------------------------------------------------------------------------
 //This function takes the current listOfVisibleFaces and draws them using
 //gos_DrawTriangle.
-void TG_Shape::Render (float forceZ, bool isHudElement, BYTE alphaValue, bool isClamped, Stuff::Matrix4D* shapeToClip)
+void TG_Shape::Render (float forceZ, bool isHudElement, BYTE alphaValue, bool isClamped, const Stuff::Matrix4D* shapeToClip, const Stuff::Matrix4D* shapeToWorld)
 {
 	if (!renderTGLShapes)
 		return;
@@ -2703,6 +2704,7 @@ void TG_Shape::Render (float forceZ, bool isHudElement, BYTE alphaValue, bool is
 			rs.vb_ = theShape->vb_;
 			rs.vdecl_ = theShape->vdecl_;
 			rs.mvp_ = mvp;
+			rs.mw_ = *shapeToWorld;
 			memcpy(rs.viewport_, cur_viewport, 4 * sizeof(float));
 
 			mcTextureManager->addRenderShape(
