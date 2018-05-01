@@ -34,11 +34,15 @@ layout (binding = 0, std140) uniform lights_data_arrays
 
 uniform mat4 mvp_; // TODO: remove, use wvp_ instead
 
-uniform mat4 wvp_;
 uniform mat4 world_;
+uniform mat4 view_;
+uniform mat4 wvp_;
+
+// common parameters
 uniform mat4 projection_;
 uniform vec4 vp; //viewport
-uniform float forceZ;
+
+uniform float forceZ; // baked in a wvp matrix
 
 out vec3 Normal;
 out float FogValue;
@@ -49,19 +53,22 @@ out vec4 Light;
 void main(void)
 {
     vec4 p = wvp_ * vec4(pos.xyz, 1);
-	float rhw = 1 / p.w;
+    float rhw = 1 / p.w;
 
-	p.x = (p.x * rhw) * vp.z + vp.x + 100.0;
-	p.y = (p.y * rhw) * vp.w + vp.y;
-	p.z = p.z * rhw;
-	p.w = abs(rhw);
+    p.x = (p.x * rhw) * vp.z + vp.x + 100.0;
+    p.y = (p.y * rhw) * vp.w + vp.y;
+    p.z = p.z * rhw;
+    p.w = abs(rhw);
 
-	vec4 p2 = projection_ * vec4(p.xyz,1);
+
+    vec4 p2 = projection_ * vec4(p.xyz,1);
+
+    //mat4 norm_view_mat = inverse(view_);
 
     gl_Position = p2 / p.w;
-    Normal = normal;
-	//FogValue = fog.w;
+    Normal = ((world_ * view_) * vec4(normal, 0)).xyz;
+    //FogValue = fog.w;
     Texcoord = texcoord;
-	Light = aRGBLight;
+    Light = aRGBLight;
 }
 

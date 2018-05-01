@@ -10,7 +10,9 @@ Standard 3D math definitions and routines
 */
 
 #include <math.h>
+#ifndef PI
 #define PI 3.1415926535f
+#endif
 #ifndef M_PI
 #define M_PI PI
 #endif

@@ -685,6 +685,71 @@ void MC_TextureManager::addRenderShape(DWORD nodeId, TG_RenderShape* render_shap
 	}
 }
 
+
+mat4 gos2my(Stuff::Matrix4D& m)
+{
+	mat4 m2(
+		m.entries[0], m.entries[1], m.entries[2], m.entries[3],
+		m.entries[4], m.entries[5], m.entries[6], m.entries[7],
+		m.entries[8], m.entries[9], m.entries[10], m.entries[11],
+		m.entries[12], m.entries[13], m.entries[14], m.entries[15]);
+	return m2;
+}
+
+mat4 gos2my(Stuff::LinearMatrix4D& m)
+{
+	mat4 m2(
+		m.entries[0], m.entries[1], m.entries[2], m.entries[3],
+		m.entries[4], m.entries[5], m.entries[6], m.entries[7],
+		m.entries[8], m.entries[9], m.entries[10], m.entries[11],
+		0.0f, 0.0f, 0.0f, 1.0f);
+	return m2;
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+class ShapeRenderer {
+
+	mat4* world_;
+	mat4* view_;
+	mat4* wvp_;
+	float* viewport_;
+
+public:
+
+	void setup(mat4* world, mat4* view, mat4* wvp, float* viewport)
+	{
+		gosASSERT(world && view && wvp && viewport);
+		world_ = world;
+		view_ = view;
+		wvp_ = wvp;
+		viewport_ = viewport;
+	}
+
+	void render(HGOSBUFFER vb, HGOSBUFFER ib, HGOSVERTEXDECLARATION vdecl, DWORD texture_id)
+	{
+		gos_SetRenderState(gos_State_Texture, texture_id);
+		gos_SetRenderViewport(viewport_[2], viewport_[3], viewport_[0], viewport_[1]);
+
+		HGOSRENDERMATERIAL mat = texture_id == 0 ? gos_getRenderMaterial("gos_vertex_lighted") : gos_getRenderMaterial("gos_tex_vertex_lighted");
+
+		gos_SetRenderMaterialParameterMat4(mat, "world_", (const float*)*world_);
+		gos_SetRenderMaterialParameterMat4(mat, "view_", (const float*)*view_);
+		gos_SetRenderMaterialParameterMat4(mat, "wvp_", (const float*)*wvp_);
+
+		gos_ApplyRenderMaterial(mat);
+
+		// TODO: either use this or setMat4("wvp_", ...);
+		//mat->setTransform(*wvp_);
+
+		gos_RenderIndexedArray(ib, vb, vdecl);
+
+	}
+
+};
+
+
+
 //----------------------------------------------------------------------
 // Draws all textures with isTerrain set that are solid first,
 // then draws all alpha with isTerrain set.
@@ -760,12 +825,35 @@ void MC_TextureManager::renderLists (void)
 				DWORD textureIndex = masterHardwareVertexNodes[i].textureIndex;
 				if (textureIndex == 1227 && bSkip)
 					continue;
-				gos_SetRenderState(gos_State_Texture, masterTextureNodes[textureIndex].get_gosTextureHandle());
-				TG_RenderShape* rs = masterHardwareVertexNodes[i].shapes + sh;
-				gos_SetRenderViewport(rs->viewport_[2], rs->viewport_[3], rs->viewport_[0], rs->viewport_[1]);
-				//gos_SetRenderViewport(0, 0, Environment.drawableWidth, Environment.drawableHeight);
-				// TODO: set mvp_ in a separate function, like gos_set_render_camera(mvp_)...
-				gos_RenderIndexedArray(rs->ib_, rs->vb_, rs->vdecl_, (const float*)rs->mvp_);
+
+				static bool b_old_way = false;
+				if (b_old_way)
+				{
+					gos_SetRenderState(gos_State_Texture, masterTextureNodes[textureIndex].get_gosTextureHandle());
+					TG_RenderShape* rs = masterHardwareVertexNodes[i].shapes + sh;
+					gos_SetRenderViewport(rs->viewport_[2], rs->viewport_[3], rs->viewport_[0], rs->viewport_[1]);
+
+
+					//gos_SetRenderViewport(0, 0, Environment.drawableWidth, Environment.drawableHeight);
+					// TODO: set mvp_ in a separate function, like gos_set_render_camera(mvp_)...
+					gos_RenderIndexedArray(rs->ib_, rs->vb_, rs->vdecl_, (const float*)rs->mvp_);
+				}
+				else
+				{
+					DWORD texture = masterTextureNodes[textureIndex].get_gosTextureHandle();
+					TG_RenderShape* rs = masterHardwareVertexNodes[i].shapes + sh;
+
+					
+					mat4 view_mat = gos2my(TG_Shape::s_worldToCamera);
+					mat4 world_mat = gos2my(rs->mw_);
+					mat4 wvp_mat = gos2my(rs->mvp_);
+
+					ShapeRenderer shape_renderer;
+					shape_renderer.setup(&world_mat, &view_mat, &wvp_mat, rs->viewport_);
+					shape_renderer.render(rs->vb_, rs->ib_, rs->vdecl_, texture);
+
+				}
+
 			}
 
 			//Reset the list to zero length to avoid drawing more then once!

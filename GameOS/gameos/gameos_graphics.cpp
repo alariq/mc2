@@ -227,7 +227,7 @@ class gosRenderMaterial {
             program_->apply();
         }
 
-        const char* getName() const { name_; }
+        const char* getName() const { return name_; }
 
         // TODO: think how to not expose this
         glsl_program* getShader() { return program_; }
@@ -343,6 +343,7 @@ class gosMesh {
         void drawIndexed(gosRenderMaterial* material) const;
 
 		static void drawIndexed(HGOSBUFFER ib, HGOSBUFFER vb, HGOSVERTEXDECLARATION vdecl, gosRenderMaterial* material);
+		static void drawIndexed(HGOSBUFFER ib, HGOSBUFFER vb, HGOSVERTEXDECLARATION vdecl);
 
 		static const std::string s_tex1;
 
@@ -497,6 +498,37 @@ void gosMesh::drawIndexed(HGOSBUFFER ib, HGOSBUFFER vb, HGOSVERTEXDECLARATION vd
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
 }
+
+void gosMesh::drawIndexed(HGOSBUFFER ib, HGOSBUFFER vb, HGOSVERTEXDECLARATION vdecl)
+{
+	int index_size = ib->element_size_;
+	gosASSERT(index_size == 2 || index_size == 4);
+
+	if (ib->count_ == 0)
+		return;
+
+	CHECK_GL_ERROR;
+
+	glBindBuffer(GL_ARRAY_BUFFER, vb->buffer_);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ib->buffer_);
+	CHECK_GL_ERROR;
+
+	vdecl->apply();
+	CHECK_GL_ERROR;
+
+	GLenum pt = GL_TRIANGLES;
+	glDrawElements(pt, ib->count_, index_size == 2 ? GL_UNSIGNED_SHORT : GL_UNSIGNED_INT, NULL);
+
+	vdecl->end();
+
+	//material->end();
+	glUseProgram(0);
+
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
+}
+
 
 
 class gosTexture {
@@ -1022,6 +1054,7 @@ class gosRenderer {
         void drawTris(gos_VERTEX* vertices, int count);
         void drawIndexedTris(gos_VERTEX* vertices, int num_vertices, WORD* indices, int num_indices);
 		void drawIndexedTris(HGOSBUFFER ib, HGOSBUFFER vb, HGOSVERTEXDECLARATION vdecl, const float* mvp);
+		void drawIndexedTris(HGOSBUFFER ib, HGOSBUFFER vb, HGOSVERTEXDECLARATION vdecl);
         void drawText(const char* text);
 
         void beginFrame();
@@ -1646,6 +1679,25 @@ void gosRenderer::drawIndexedTris(HGOSBUFFER ib, HGOSBUFFER vb, HGOSVERTEXDECLAR
     afterDrawCall();
 }
 
+void gosRenderer::drawIndexedTris(HGOSBUFFER ib, HGOSBUFFER vb, HGOSVERTEXDECLARATION vdecl)
+{
+    gosASSERT(ib && vb);
+    gosASSERT((ib->count_ % 3) == 0);
+
+    if(beforeDrawCall()) return;
+
+    applyRenderStates();
+
+	// maybe getCurMaterial->set.... to not set it from outer code?
+	//vec4 vp = g_gos_renderer->getRenderViewport();
+	//mat->getShader()->setFloat4("vp", vp);
+	//mat->getShader()->setMat4("projection_", projection_);
+
+	gosMesh::drawIndexed(ib, vb, vdecl);
+
+    afterDrawCall();
+}
+
 static int get_next_break(const char* text) {
     const char* start = text;
     do {
@@ -2025,53 +2077,7 @@ const gosGlyphMetrics& gosFont::getGlyphMetrics(int c) const {
     return gi_.glyphs_[pos];
 }
 
-////////////////////////////////////////////////////////////////////////////////
-class gosShapeRenderer {
 
-    mat4* world_;
-    mat4* view_;
-    mat4* wvp_;
-    float* viewport_;
-
-    void setup(mat4* world, mat4* view, mat4* wvp, float* viewport)
-    {
-        gosASSERT(world && view && wvp && viewport);
-        world_ = world;
-        view_ = view;
-        wvp_ = wvp;
-        viewport_ = viewport;
-    }
-
-    void render(HGOSBUFFER vb, HGOSBUFFER ib, HGOSVERTEXDECLARATION vdecl, DWORD texture_id)
-    {
-        gos_SetRenderState(gos_State_Texture, texture_id);
-        gos_SetRenderViewport(viewport_[2], viewport_[3], viewport_[0], viewport_[1]);
-
-        if(g_gos_renderer->beforeDrawCall()) return;
-
-        g_gos_renderer->applyRenderStates();
-
-        uint32_t tex = g_gos_renderer->getRenderState(gos_State_Texture);
-        gosRenderMaterial* mat = tex!=0 ? g_gos_renderer->basic_tex_lighted_material_ : g_gos_renderer->basic_lighted_material_;
-
-        vec4 vp = g_gos_renderer->getRenderViewport();
-
-        mat->getShader()->setFloat4("vp", vp);
-        mat->getShader()->setMat4("world_", *world_);
-        mat->getShader()->setMat4("view_", *view_);
-        mat->getShader()->setMat4("wvp_", *wvp_);
-        mat->getShader()->setMat4("projection_", g_gos_renderer->getProj2Screen());
-
-        // TODO: either use this or setMat4("wvp_", ...);
-        mat->setTransform(*wvp_);
-
-        gosMesh::drawIndexed(ib, vb, vdecl, mat);
-
-        g_gos_renderer->afterDrawCall();
-
-    }
-
-};
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -2233,6 +2239,12 @@ void __stdcall gos_RenderIndexedArray(HGOSBUFFER ib, HGOSBUFFER vb, HGOSVERTEXDE
     g_gos_renderer->drawIndexedTris(ib, vb, vdecl, mvp);
 }
 
+void __stdcall gos_RenderIndexedArray(HGOSBUFFER ib, HGOSBUFFER vb, HGOSVERTEXDECLARATION vdecl)
+{
+    gosASSERT(g_gos_renderer);
+    g_gos_renderer->drawIndexedTris(ib, vb, vdecl);
+}
+
 void __stdcall gos_SetRenderState( gos_RenderState RenderState, int Value )
 {
     gosASSERT(g_gos_renderer);
@@ -2261,6 +2273,17 @@ void __stdcall gos_SetRenderViewport(float x, float y, float w, float h)
     gosASSERT(g_gos_renderer);
 	//glViewport(x, y, w, h);
 	g_gos_renderer->setRenderViewport(vec4(x, y, w, h));
+}
+
+void __stdcall gos_GetRenderViewport(float* x, float* y, float* w, float* h)
+{
+    gosASSERT(x && y && w && h);
+    gosASSERT(g_gos_renderer);
+	vec4 vp = g_gos_renderer->getRenderViewport();
+	*x = vp.x;
+	*y = vp.y;
+	*w = vp.z;
+	*h = vp.w;
 }
 
 
@@ -2528,5 +2551,51 @@ void __stdcall gos_DestroyVertexDeclaration(HGOSVERTEXDECLARATION vdecl)
 	gosVertexDeclaration::destroy(vdecl);
 
 }
+
+HGOSRENDERMATERIAL __stdcall gos_getRenderMaterial(const char* material)
+{
+	gosASSERT(material);
+	gosASSERT(g_gos_renderer);
+	return g_gos_renderer->getRenderMaterial(material);
+}
+
+void __stdcall gos_ApplyRenderMaterial(HGOSRENDERMATERIAL material)
+{
+	gosASSERT(material);
+
+	//setup commoin stuff
+	gos_SetCommonMaterialParameters(material);
+
+	material->apply();
+	material->setSamplerUnit(gosMesh::s_tex1, 0);
+}
+
+void __stdcall gos_SetRenderMaterialParameterFloat4(HGOSRENDERMATERIAL material, const char* name, const float* v)
+{
+	gosASSERT(material);
+	gosASSERT(v);
+	material->getShader()->setFloat4(name, v);
+}
+
+void __stdcall gos_SetRenderMaterialParameterMat4(HGOSRENDERMATERIAL material, const char* name, const float* m)
+{
+	gosASSERT(material);
+	gosASSERT(m);
+	material->getShader()->setMat4(name, m);
+}
+
+void __stdcall gos_SetCommonMaterialParameters(HGOSRENDERMATERIAL material)
+{
+	gosASSERT(material);
+	gosASSERT(g_gos_renderer);
+
+	const mat4& projection = g_gos_renderer->getProj2Screen();
+	const vec4& vp = getGosRenderer()->getRenderViewport();
+
+	// TODO: make typed parameters !!!!!!!!!!!!!!! not just float* pointers, helps track errors
+	gos_SetRenderMaterialParameterMat4(material, "projection_", projection);
+	gos_SetRenderMaterialParameterFloat4(material, "vp", vp);
+}
+
 
 #include "gameos_graphics_debug.cpp"

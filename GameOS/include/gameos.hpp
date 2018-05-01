@@ -188,7 +188,7 @@ typedef struct	gos_Heap*		HGOSHEAP;
 typedef struct gos_StringRes*   HSTRRES; //sebi
 typedef class gosBuffer*		HGOSBUFFER; //sebi
 typedef class gosVertexDeclaration*	HGOSVERTEXDECLARATION; //sebi
-typedef class gosShaderMaterial*	HGOSRENDERMATERIAL; //sebi
+typedef class gosRenderMaterial*	HGOSRENDERMATERIAL; //sebi
 
 
 
@@ -2235,9 +2235,11 @@ void __stdcall gos_RenderIndexedArray( gos_VERTEX_3UV* pVertexArray, DWORD Numbe
 
 
 void __stdcall gos_RenderIndexedArray(HGOSBUFFER ib, HGOSBUFFER vb, HGOSVERTEXDECLARATION vdecl, const float* mvp); //sebi
+void __stdcall gos_RenderIndexedArray(HGOSBUFFER ib, HGOSBUFFER vb, HGOSVERTEXDECLARATION vdecl); //sebi
 
 
 void __stdcall gos_SetRenderViewport(float x, float y, float w, float h);
+void __stdcall gos_GetRenderViewport(float* x, float* y, float* w, float* h); //sebi
 
 //
 // Set a renderstate
@@ -2522,9 +2524,11 @@ void __stdcall gos_SetMaterial( gosMATERIAL* MaterialData );
 void __stdcall gos_RenderIndexedArray( void* pVertexArray, DWORD NumberVertices, WORD* lpwIndices, DWORD NumberIndices, gosVERTEXTYPE VertexType, gosPRIMITIVETYPE PrimitiveType=PRIMITIVE_TRIANGLELIST );
 
 //sebi
-void __stdcall gos_SetRenderMaterial(HGOSRENDERMATERIAL material);
-void __stdcall gos_SetRenderMaterialParameterFloat4(HGOSRENDERMATERIAL material, float* v);
-void __stdcall gos_SetRenderMaterialParameterMat4(HGOSRENDERMATERIAL material, float* m);
+HGOSRENDERMATERIAL __stdcall gos_getRenderMaterial(const char* material);
+void __stdcall gos_ApplyRenderMaterial(HGOSRENDERMATERIAL material);
+void __stdcall gos_SetRenderMaterialParameterFloat4(HGOSRENDERMATERIAL material, const char* name, const float* v);
+void __stdcall gos_SetRenderMaterialParameterMat4(HGOSRENDERMATERIAL material, const char* name, const float* m);
+void __stdcall gos_SetCommonMaterialParameters(HGOSRENDERMATERIAL material);
 
 
 
