@@ -357,6 +357,8 @@ class MC_TextureManager
 		MC_HardwareVertexArrayNode 		*hardwareVertexData3;		//This holds the vertex draw data for UNTEXTURED triangles!
 		MC_HardwareVertexArrayNode 		*hardwareVertexData4;		//This holds the vertex draw data for UNTEXTURED triangles!
 		MC_HardwareVertexArrayNode 		*hardwareVertexData5;		//This holds the vertex draw data for UNTEXTURED triangles!
+
+		gosBuffer						*lightData_;
 		
 	//Member Functions
 	//-----------------
@@ -381,6 +383,8 @@ class MC_TextureManager
 			
 			vertexData = vertexData2 = vertexData3 = vertexData4 = vertexData5 = NULL;
 			hardwareVertexData = hardwareVertexData2 = hardwareVertexData3 = hardwareVertexData4 = hardwareVertexData5 = NULL;
+
+			lightData_ = 0;
 		}
 
 		MC_TextureManager (void)

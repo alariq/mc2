@@ -212,6 +212,16 @@ class gosRenderMaterial {
             return false;
         }
 
+        bool setUniformBlock(const std::string& uniform_block_name, uint32_t unit) {
+            gosASSERT(!uniform_block_name.empty());
+            if(program_->uniform_blocks_.count(uniform_block_name)) {
+				//glBindBufferBase(GL_UNIFORM_BUFFER, , unit);
+				glUniformBlockBinding(program_->shp_, program_->uniform_blocks_[uniform_block_name]->index_, unit);
+                return true;
+            }
+            return false;
+        }
+
         bool setTransform(const mat4& m) {
             program_->setMat4(s_mvp, m);
             return true;
@@ -2534,6 +2544,21 @@ void __stdcall gos_DestroyBuffer(gosBuffer* buffer)
 	delete buffer;
 }
 
+void __stdcall gos_BindBufferBase(gosBuffer* buffer, uint32_t slot)
+{
+	gosASSERT(buffer);
+
+	GLenum gl_target = getGLBufferType(buffer->type_);
+	glBindBufferBase(gl_target, slot, buffer->buffer_);
+}
+
+void __stdcall gos_UpdateBuffer(HGOSBUFFER buffer, void* data, size_t offset, size_t num_bytes)
+{
+	gosASSERT(buffer);
+	GLenum gl_target = getGLBufferType(buffer->type_);
+	glBufferSubData(gl_target, offset, num_bytes, data);
+}
+
 HGOSVERTEXDECLARATION __stdcall gos_CreateVertexDeclaration(gosVERTEX_FORMAT_RECORD* records, int count)
 {
 	gosASSERT(records && count > 0);
@@ -2568,6 +2593,7 @@ void __stdcall gos_ApplyRenderMaterial(HGOSRENDERMATERIAL material)
 
 	material->apply();
 	material->setSamplerUnit(gosMesh::s_tex1, 0);
+	material->setUniformBlock("lights_data", 0);
 }
 
 void __stdcall gos_SetRenderMaterialParameterFloat4(HGOSRENDERMATERIAL material, const char* name, const float* v)
@@ -2584,12 +2610,18 @@ void __stdcall gos_SetRenderMaterialParameterMat4(HGOSRENDERMATERIAL material, c
 	material->getShader()->setMat4(name, m);
 }
 
+void __stdcall gos_SetRenderMaterialParameterUniformBlock(HGOSRENDERMATERIAL material, const char* name, uint32_t slot)
+{
+	gosASSERT(material && name);
+	material->setUniformBlock(name, slot);
+}
+
 void __stdcall gos_SetCommonMaterialParameters(HGOSRENDERMATERIAL material)
 {
 	gosASSERT(material);
 	gosASSERT(g_gos_renderer);
 
-	const mat4& projection = g_gos_renderer->getProj2Screen();
+	const mat4& projection = getGosRenderer()->getProj2Screen();
 	const vec4& vp = getGosRenderer()->getRenderViewport();
 
 	// TODO: make typed parameters !!!!!!!!!!!!!!! not just float* pointers, helps track errors

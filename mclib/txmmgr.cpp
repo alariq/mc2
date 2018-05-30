@@ -177,6 +177,9 @@ void MC_TextureManager::start (void)
 	masterTextureNodes[0].width = 0;
 	masterTextureNodes[0].lastUsed = -1;
 	masterTextureNodes[0].textureData = NULL;
+
+	lightData_ = gos_CreateBuffer(gosBUFFER_TYPE::UNIFORM, gosBUFFER_USAGE::STATIC_DRAW, sizeof(TG_HWLights), 1, NULL);
+	gos_BindBufferBase(lightData_, LIGHT_DATA_ATTACHMENT_SLOT);
 }
 
 extern Stuff::MemoryStream *effectStream;
@@ -233,6 +236,10 @@ void MC_TextureManager::destroy (void)
 
 	delete textureStringHeap;
 	textureStringHeap = NULL;
+
+	if(lightData_)
+		gos_DestroyBuffer(lightData_);
+	lightData_ = nullptr;
 }
 
 //----------------------------------------------------------------------
@@ -714,6 +721,7 @@ class ShapeRenderer {
 	mat4* view_;
 	mat4* wvp_;
 	float* viewport_;
+	HGOSBUFFER lights_data_;
 
 public:
 
@@ -724,6 +732,11 @@ public:
 		view_ = view;
 		wvp_ = wvp;
 		viewport_ = viewport;
+	}
+
+	void set_lights_data(const HGOSBUFFER lights_data)
+	{
+		lights_data_ = lights_data;
 	}
 
 	void render(HGOSBUFFER vb, HGOSBUFFER ib, HGOSVERTEXDECLARATION vdecl, DWORD texture_id)
@@ -737,6 +750,8 @@ public:
 		gos_SetRenderMaterialParameterMat4(mat, "view_", (const float*)*view_);
 		gos_SetRenderMaterialParameterMat4(mat, "wvp_", (const float*)*wvp_);
 
+		gos_SetRenderMaterialParameterUniformBlock(mat, "LightsData", 0);
+
 		gos_ApplyRenderMaterial(mat);
 
 		// TODO: either use this or setMat4("wvp_", ...);
@@ -747,6 +762,75 @@ public:
 	}
 
 };
+
+void GatherLightsParameters(TG_HWLightsData* lights, size_t* lights_capacity)
+{
+	gosASSERT(lights && lights_capacity);
+
+	size_t num_lights = 0;
+	const size_t max_num_lights = *lights_capacity;
+
+	TG_LightPtr* listOfLights = eye->getWorldLights();
+	DWORD numLights = eye->getNumLights();
+
+	for (int iLight = 0; iLight < numLights; iLight++)
+	{
+		if (num_lights == max_num_lights)
+			break;
+
+		if ((listOfLights[iLight] != NULL) && (listOfLights[iLight]->active))
+		{
+
+			const DWORD type = listOfLights[iLight]->lightType;
+
+			Stuff::LinearMatrix4D light2world;
+			if (TG_LIGHT_AMBIENT != type)
+				light2world = listOfLights[iLight]->lightToWorld;
+			else
+				light2world = Stuff::LinearMatrix4D::Identity;
+
+			memcpy(lights->lightToWorld[num_lights], (const float*)light2world, 12*sizeof(float));
+			lights->lightToWorld[num_lights][12] = lights->lightToWorld[num_lights][13] = lights->lightToWorld[num_lights][14] = 0.0f;
+			lights->lightToWorld[num_lights][15] = 1.0f;
+
+			Stuff::UnitVector3D uVec;
+			light2world.GetLocalForwardInWorld(&uVec);
+			lights->lightDir[num_lights][0] = uVec.x;
+			lights->lightDir[num_lights][1] = uVec.y;
+			lights->lightDir[num_lights][2] = uVec.z;
+
+			lights->lightDir[num_lights][3] = (float)type;
+
+			DWORD startLight = listOfLights[iLight]->GetaRGB();
+
+			lights->lightColor[num_lights][0] = ((startLight >> 16) & 0x000000ff) / 255.0f;
+			lights->lightColor[num_lights][1] = ((startLight >> 8) & 0x000000ff) / 255.0f;
+			lights->lightColor[num_lights][2] = ((startLight) & 0x000000ff) / 255.0f;
+			lights->lightColor[num_lights][3] = 1.0f;
+
+			switch (type)
+			{
+			case TG_LIGHT_AMBIENT:
+				break;
+			case TG_LIGHT_INFINITE:
+			case TG_LIGHT_INFINITEWITHFALLOFF:
+				break;
+			case TG_LIGHT_POINT:
+				break;
+			case TG_LIGHT_TERRAIN:
+				break;
+			case TG_LIGHT_SPOT:
+				break;
+			default:
+				STOP(("Unknown light type id: %d", type));
+			}
+
+			num_lights++;
+		}
+	}
+
+	*lights_capacity = num_lights;
+}
 
 
 
@@ -804,6 +888,13 @@ void MC_TextureManager::renderLists (void)
 	static bool bSkip = true;
 
 	gos_SetRenderState(gos_State_Culling, gos_Cull_CW);
+
+	TG_HWLightsData lightsData;
+	size_t numLights = MAX_HW_LIGHTS_IN_WORLD;
+	GatherLightsParameters(&lightsData, &numLights);
+	gos_UpdateBuffer(lightData_, &lightsData, 0, sizeof(lightsData));
+	gosASSERT(numLights > 0); // ensure at least one light was filled
+
 	for (long i = 0; i<nextAvailableHardwareVertexNode; i++)
 	{
 		if ((masterHardwareVertexNodes[i].flags & MC2_DRAWSOLID) &&

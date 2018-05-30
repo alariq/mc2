@@ -289,6 +289,14 @@ typedef struct _TG_HWLights {
 
 typedef TG_HWLights* TG_HWLightsPtr;
 
+typedef struct _TG_HWLightsData {
+	float lightToWorld[MAX_HW_LIGHTS_IN_WORLD][16];
+	float lightDir[MAX_HW_LIGHTS_IN_WORLD][4];
+	float lightColor[MAX_HW_LIGHTS_IN_WORLD][4];
+} TG_HWLightsData;
+
+typedef TG_HWLightsData* TG_HWLightsDataPtr;
+
 
 //-------------------------------------------------------------------------------
 // TG_Texture

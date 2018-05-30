@@ -7,12 +7,6 @@ layout(location = 1) in vec3 normal;
 layout(location = 2) in vec4 aRGBLight;
 layout(location = 3) in vec2 texcoord;
 
-layout (binding = 0, std140) uniform lights_data
-{ 
-  vec4 camera_position;
-  vec4 light_position;
-  vec4 light_diffuse;
-};
 
 layout (binding = 1, std140) uniform mesh_data
 { 
@@ -20,16 +14,31 @@ layout (binding = 1, std140) uniform mesh_data
   vec4 diffuse;
 };
 
+// should be in sync with C++ code
+#define     LIGHT_DATA_ATTACHMENT_SLOT      0
 
+#define 	TG_LIGHT_AMBIENT				0
+#define		TG_LIGHT_INFINITE				1
+#define		TG_LIGHT_INFINITEWITHFALLOFF	2
+#define 	TG_LIGHT_POINT					3
+#define		TG_LIGHT_SPOT					4
+#define		TG_LIGHT_TERRAIN				5
 #define MAX_LIGHTS_IN_WORLD 16
 
-layout (binding = 0, std140) uniform lights_data_arrays
+layout (binding = 0, std140) uniform LightsDataArrays
 {
     mat4 light_to_shape[MAX_LIGHTS_IN_WORLD];
     vec4 light_dir[MAX_LIGHTS_IN_WORLD]; // w - light type
     vec4 root_light_dir[MAX_LIGHTS_IN_WORLD];
     vec4 spot_light_dir[MAX_LIGHTS_IN_WORLD];
-};
+}lights_data_arrays;
+
+layout (binding = LIGHT_DATA_ATTACHMENT_SLOT, std140) uniform LightsData
+{
+    mat4 light_to_world[MAX_LIGHTS_IN_WORLD];
+    vec4 light_dir[MAX_LIGHTS_IN_WORLD]; // w - light type
+    vec4 light_color[MAX_LIGHTS_IN_WORLD];
+} lights_data;
 
 
 uniform mat4 mvp_; // TODO: remove, use wvp_ instead
@@ -66,7 +75,8 @@ void main(void)
     //mat4 norm_view_mat = inverse(view_);
 
     gl_Position = p2 / p.w;
-    Normal = ((world_ * view_) * vec4(normal, 0)).xyz;
+    //Normal = ((world_ * view_) * vec4(normal, 0)).xyz;
+    Normal = (world_ * vec4(normal, 0)).xyz;
     //FogValue = fog.w;
     Texcoord = texcoord;
     Light = aRGBLight;

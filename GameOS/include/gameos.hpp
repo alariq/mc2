@@ -2528,6 +2528,7 @@ HGOSRENDERMATERIAL __stdcall gos_getRenderMaterial(const char* material);
 void __stdcall gos_ApplyRenderMaterial(HGOSRENDERMATERIAL material);
 void __stdcall gos_SetRenderMaterialParameterFloat4(HGOSRENDERMATERIAL material, const char* name, const float* v);
 void __stdcall gos_SetRenderMaterialParameterMat4(HGOSRENDERMATERIAL material, const char* name, const float* m);
+void __stdcall gos_SetRenderMaterialParameterUniformBlock(HGOSRENDERMATERIAL material, const char* name, uint32_t slot);
 void __stdcall gos_SetCommonMaterialParameters(HGOSRENDERMATERIAL material);
 
 
@@ -2615,9 +2616,17 @@ struct gosVERTEX_FORMAT_RECORD {
 
 HGOSBUFFER __stdcall gos_CreateBuffer(gosBUFFER_TYPE type, gosBUFFER_USAGE usage, int element_size, uint32_t count, void* pdata);
 void __stdcall gos_DestroyBuffer(HGOSBUFFER buffer);
+void __stdcall gos_UpdateBuffer(HGOSBUFFER buffer, void* data, size_t offset, size_t num_bytes);
+void __stdcall gos_BindBufferBase(HGOSBUFFER buffer, uint32_t slot);
 
 HGOSVERTEXDECLARATION __stdcall gos_CreateVertexDeclaration(gosVERTEX_FORMAT_RECORD* records, int count);
 void __stdcall gos_DestroyVertexDeclaration(HGOSVERTEXDECLARATION buffer);
+
+
+//
+// Uniform buffers attachment slots (indices)
+// 
+#define LIGHT_DATA_ATTACHMENT_SLOT	0
 
 
 //
