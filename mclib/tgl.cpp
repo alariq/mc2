@@ -531,10 +531,9 @@ void TG_TypeShape::LoadBinaryCopy (File &binFile)
 			vb[3*i + 0].u = triType.uvdata.u0;
 			vb[3*i + 0].v = triType.uvdata.v0;
 			vb[3*i + 1].u = triType.uvdata.u1;
-			vb[3*i + 1].v = triType.uvdata.v2;
+			vb[3*i + 1].v = triType.uvdata.v1;
 			vb[3*i + 2].u = triType.uvdata.u2;
 			vb[3*i + 2].v = triType.uvdata.v2;
-
 		}
 
 		ib_ = gos_CreateBuffer(gosBUFFER_TYPE::INDEX, gosBUFFER_USAGE::STATIC_DRAW, sizeof(uint16_t), num_indices, ib);
