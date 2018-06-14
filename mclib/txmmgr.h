@@ -311,6 +311,8 @@ public:
 	}
 };
 
+struct TG_HWLightsData;
+
 //----------------------------------------------------------------------
 class MC_TextureManager
 {
@@ -358,7 +360,10 @@ class MC_TextureManager
 		MC_HardwareVertexArrayNode 		*hardwareVertexData4;		//This holds the vertex draw data for UNTEXTURED triangles!
 		MC_HardwareVertexArrayNode 		*hardwareVertexData5;		//This holds the vertex draw data for UNTEXTURED triangles!
 
-		gosBuffer						*lightData_;
+        TG_HWLightsData*                lightData_;
+        uint32_t                        lightDataStructuresCapacity;
+        uint32_t                        lightDataStructuresCount;
+		gosBuffer						*lightDataBuffer_;
 		
 	//Member Functions
 	//-----------------
@@ -384,7 +389,10 @@ class MC_TextureManager
 			vertexData = vertexData2 = vertexData3 = vertexData4 = vertexData5 = NULL;
 			hardwareVertexData = hardwareVertexData2 = hardwareVertexData3 = hardwareVertexData4 = hardwareVertexData5 = NULL;
 
-			lightData_ = 0;
+			lightData_ = nullptr;
+            lightDataBuffer_ = nullptr;
+            lightDataStructuresCapacity = 0;
+            lightDataStructuresCount = 0;
 		}
 
 		MC_TextureManager (void)
@@ -451,7 +459,10 @@ class MC_TextureManager
 		//------------------------------------------------------
 		// Frees a specific textureNode. 
 		void removeTextureNode (DWORD textureNode);
+
 		
+        void resetLightData();
+
  		//-----------------------------------------------------------------
 		// Gets gosTextureHandle for Node ID.  Does all caching necessary.
 		DWORD get_gosTextureHandle (DWORD nodeId)
@@ -994,6 +1005,10 @@ class MC_TextureManager
 
 		void addRenderShape(DWORD nodeId, TG_RenderShape* render_shape, DWORD flags);
 
+        // returns index at which this light structure was added
+        // ( if same one was found, then that index is returned and nothing is added)
+        uint32_t addLightDataStructure(TG_HWLightsData* lightData);
+
 		void clearArrays (void)
 		{
 			for (long i=0;i<MC_MAXTEXTURES;i++)
@@ -1018,6 +1033,8 @@ class MC_TextureManager
 
 			gvManager->reset();
 			rsManager->reset();
+
+            resetLightData();
 		}
 		
 		//Sends down the triangle lists
@@ -1055,6 +1072,8 @@ class MC_TextureManager
 		}
 		
 };
+
+void GatherLightsParameters(TG_HWLightsData* lights);
 
 //----------------------------------------------------------------------
 extern MC_TextureManager *mcTextureManager;

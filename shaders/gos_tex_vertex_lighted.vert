@@ -1,6 +1,6 @@
 //#version 300 es
 // using this because it is required if we want to use "binding" qualifier in layout (can be set in cpp code but it is easier to do in shader, so procedd like this and maybe change later)
-#version 420
+//#version 420
 
 layout(location = 0) in vec3 pos;
 layout(location = 1) in vec3 normal;
@@ -25,20 +25,22 @@ layout (binding = 1, std140) uniform mesh_data
 #define		TG_LIGHT_TERRAIN				5
 #define MAX_LIGHTS_IN_WORLD 16
 
-layout (binding = 0, std140) uniform LightsDataArrays
-{
-    mat4 light_to_shape[MAX_LIGHTS_IN_WORLD];
-    vec4 light_dir[MAX_LIGHTS_IN_WORLD]; // w - light type
-    vec4 root_light_dir[MAX_LIGHTS_IN_WORLD];
-    vec4 spot_light_dir[MAX_LIGHTS_IN_WORLD];
-}lights_data_arrays;
+#define ENABLE_VERTEX_LIGHTING              0
 
-layout (binding = LIGHT_DATA_ATTACHMENT_SLOT, std140) uniform LightsData
-{
+
+struct ObjectLights {
     mat4 light_to_world[MAX_LIGHTS_IN_WORLD];
     vec4 light_dir[MAX_LIGHTS_IN_WORLD]; // w - light type
     vec4 light_color[MAX_LIGHTS_IN_WORLD];
-} lights_data;
+    ivec4 numLights;
+};
+
+layout (binding = LIGHT_DATA_ATTACHMENT_SLOT, std140) uniform LightsData
+{
+    ObjectLights light[128];
+};
+
+uniform vec4 light_offset_;
 
 
 uniform mat4 mvp_; // TODO: remove, use wvp_ instead
@@ -56,7 +58,7 @@ uniform float forceZ; // baked in a wvp matrix
 out vec3 Normal;
 out float FogValue;
 out vec2 Texcoord;
-out vec4 Light;
+out vec4 VertexLight;
 
 
 void main(void)
@@ -79,6 +81,17 @@ void main(void)
     Normal = (world_ * vec4(normal, 0)).xyz;
     //FogValue = fog.w;
     Texcoord = texcoord;
-    Light = aRGBLight;
+
+#if ENABLE_VERTEX_LIGHTING
+    const int lights_index = int(light_offset_.x);
+    ObjectLights ld = light[lights_index];
+    float n_dot_l = clamp(dot(normalize(Normal), -ld.light_dir[0].xyz), 0.0, 1.0);
+	VertexLight = clamp(n_dot_l + ld.light_color[1], 0.0, 1.0);
+#else
+    VertexLight = aRGBLight;
+#endif
+
+
+
 }
 

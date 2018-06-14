@@ -278,24 +278,26 @@ typedef struct _TG_Light
 
 typedef  TG_Light *TG_LightPtr;
 
-
 #define MAX_HW_LIGHTS_IN_WORLD	16
-typedef struct _TG_HWLights {
-	float lightToShape[MAX_HW_LIGHTS_IN_WORLD][16];
-	float lightDir[MAX_HW_LIGHTS_IN_WORLD][4];
-	float rootLightDir[MAX_HW_LIGHTS_IN_WORLD][4];
-	float spotDir[MAX_HW_LIGHTS_IN_WORLD][4];
-} TG_HWLights;
 
-typedef TG_HWLights* TG_HWLightsPtr;
-
-typedef struct _TG_HWLightsData {
+struct TG_HWLightsData {
 	float lightToWorld[MAX_HW_LIGHTS_IN_WORLD][16];
 	float lightDir[MAX_HW_LIGHTS_IN_WORLD][4];
 	float lightColor[MAX_HW_LIGHTS_IN_WORLD][4];
-} TG_HWLightsData;
+    int numLights_;
+    int pad[3];
+
+    TG_HWLightsData():numLights_(0)
+    {
+		memset(lightToWorld, 0, sizeof(lightToWorld));
+		memset(lightDir, 0, sizeof(lightDir));
+		memset(lightColor, 0, sizeof(lightColor));
+        pad[0] = pad[1] = pad[2] = 13;
+    } 
+};
 
 typedef TG_HWLightsData* TG_HWLightsDataPtr;
+
 
 
 //-------------------------------------------------------------------------------
@@ -707,6 +709,7 @@ class TG_Shape
 
 		float					cur_viewport[4];
 		Stuff::Matrix4D			cur_shape2clip;
+        TG_HWLightsData         lightData_;
 
 		TG_ShadowVertexPtr		listOfShadowVertices;		//Stores shadow vertex information for the shape.
 															//We just use existing listOfTriangles to draw!
@@ -802,7 +805,7 @@ class TG_Shape
             listOfShadowTVertices = NULL;
             lastTurnTransformed = 0;
             //
-
+			
 		}
 		
 		TG_Shape (void)
@@ -902,6 +905,7 @@ public:
 	Stuff::Matrix4D mvp_; // model -> projection
 	Stuff::Matrix4D mw_; // model -> world
 	float viewport_[4];
+    uint32_t light_data_buffer_index_;
 };
 ////////////////////////////////////////////////////////////////////////////////
 

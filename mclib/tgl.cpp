@@ -349,7 +349,9 @@ void TG_TypeNode::SaveBinaryCopy (File &binFile)
 TG_ShapePtr TG_TypeShape::CreateFrom (void)
 {
 	TG_ShapePtr newShape = NULL;
-	newShape = (TG_ShapePtr)TG_Shape::tglHeap->Malloc(sizeof(TG_Shape));
+	//newShape = (TG_ShapePtr)TG_Shape::tglHeap->Malloc(sizeof(TG_Shape));
+	void* memarea = TG_Shape::tglHeap->Malloc(sizeof(TG_Shape));
+	newShape = ::new(memarea) TG_Shape();
 	gosASSERT(newShape != NULL);
 	
 	//listOfVertices
@@ -2466,6 +2468,11 @@ long TG_Shape::MultiTransformShape (Stuff::Matrix4D *shapeToClip, Stuff::Point3D
 
 		if (theShape->ib_ && theShape->vb_) {
 
+
+            size_t numLights = MAX_HW_LIGHTS_IN_WORLD;
+            GatherLightsParameters(&lightData_);
+            gosASSERT(numLights > 0); // ensure at least one light was filled
+
 			cur_viewport[0] = viewMulX;
 			cur_viewport[1] = viewMulY;
 			cur_viewport[2] = viewAddX;
@@ -2705,6 +2712,7 @@ void TG_Shape::Render (float forceZ, bool isHudElement, BYTE alphaValue, bool is
 			rs.mvp_ = mvp;
 			rs.mw_ = *shapeToWorld;
 			memcpy(rs.viewport_, cur_viewport, 4 * sizeof(float));
+            rs.light_data_buffer_index_ = mcTextureManager->addLightDataStructure(&lightData_);
 
 			mcTextureManager->addRenderShape(
 				theShape->listOfTextures[triType.localTextureHandle].mcTextureNodeIndex,

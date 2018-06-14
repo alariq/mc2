@@ -129,7 +129,7 @@ GLuint getTexType(TexType tt) {
 
 const GLint textureAddressMode[TAM_COUNT] = {
     0,
-    GL_CLAMP,
+    GL_CLAMP_TO_EDGE,
     GL_REPEAT
 };
 
@@ -257,7 +257,6 @@ Texture createPBO(int w, int h, GLenum fmt, int el_size)
 
 void updateTexture(const Texture& t, void* pdata, TexFormat pdata_format/*= TF_COUNT*/) {
 
-    glEnable(GL_TEXTURE_2D);
 	glBindTexture(GL_TEXTURE_2D, t.id);
     assert(t.fmt_ != TF_NONE && "t.format is deprecated");
     if(t.fmt_ != TF_NONE) {

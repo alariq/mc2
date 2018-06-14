@@ -1132,6 +1132,7 @@ Stuff::Vector3D TG_MultiShape::GetTransformedNodePosition (Stuff::Point3D *pos, 
 	return result;
 }
 
+#if 0
 void TG_MultiShape::GatherLightsForShape(const int shape_index, TG_HWLights& lights, size_t& num_lights)
 {
 	num_lights = 0;
@@ -1263,6 +1264,7 @@ void TG_MultiShape::GatherLightsForShape(const int shape_index, TG_HWLights& lig
         }
     }
 }
+#endif
 
 Stuff::UnitQuaternion moveem;
 //-------------------------------------------------------------------------------

@@ -106,7 +106,6 @@ static void draw_screen( void )
     g_disable_quads = false;
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
     glCullFace(GL_FRONT);
-    glEnable(GL_TEXTURE_2D);
     //CHECK_GL_ERROR;
     
 	const int viewport_w = Environment.drawableWidth;

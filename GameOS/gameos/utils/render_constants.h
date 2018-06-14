@@ -40,7 +40,7 @@ enum TexFormat {
 
 enum TexAddressMode {
     TAM_NONE,
-    TAM_CLAMP,
+    TAM_CLAMP_TO_EDGE,
     TAM_REPEAT,
     TAM_COUNT
 };

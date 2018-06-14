@@ -136,7 +136,9 @@ static inline unsigned long long rdtsc(void)
 #endif
 
 
-
+template <typename T, std::size_t N>
+char(&COUNTOF_REQUIRES_ARRAY_ARGUMENT(T(&)[N]))[N];
+#define COUNTOF(x) sizeof(COUNTOF_REQUIRES_ARRAY_ARGUMENT(x))
 
 
 void* operator new(size_t sz);
@@ -2528,7 +2530,7 @@ HGOSRENDERMATERIAL __stdcall gos_getRenderMaterial(const char* material);
 void __stdcall gos_ApplyRenderMaterial(HGOSRENDERMATERIAL material);
 void __stdcall gos_SetRenderMaterialParameterFloat4(HGOSRENDERMATERIAL material, const char* name, const float* v);
 void __stdcall gos_SetRenderMaterialParameterMat4(HGOSRENDERMATERIAL material, const char* name, const float* m);
-void __stdcall gos_SetRenderMaterialParameterUniformBlock(HGOSRENDERMATERIAL material, const char* name, uint32_t slot);
+void __stdcall gos_SetRenderMaterialUniformBlockBindingPoint(HGOSRENDERMATERIAL material, const char* name, uint32_t slot);
 void __stdcall gos_SetCommonMaterialParameters(HGOSRENDERMATERIAL material);
 
 
@@ -2618,6 +2620,8 @@ HGOSBUFFER __stdcall gos_CreateBuffer(gosBUFFER_TYPE type, gosBUFFER_USAGE usage
 void __stdcall gos_DestroyBuffer(HGOSBUFFER buffer);
 void __stdcall gos_UpdateBuffer(HGOSBUFFER buffer, void* data, size_t offset, size_t num_bytes);
 void __stdcall gos_BindBufferBase(HGOSBUFFER buffer, uint32_t slot);
+
+uint32_t gos_GetBufferSizeBytes(HGOSBUFFER buffer);
 
 HGOSVERTEXDECLARATION __stdcall gos_CreateVertexDeclaration(gosVERTEX_FORMAT_RECORD* records, int count);
 void __stdcall gos_DestroyVertexDeclaration(HGOSVERTEXDECLARATION buffer);

@@ -73,8 +73,8 @@ struct glsl_shader
 
     static std::map<std::string, glsl_shader*> s_shaders[glsl_shader::NUM_SHADER_TYPES];
 
-    bool reload();
-    static glsl_shader* makeShader(Shader_t type, const char* fname);
+    bool reload(const char* prefix);
+    static glsl_shader* makeShader(Shader_t type, const char* fname, const char* prefix = nullptr);
     static void deleteShader(glsl_shader* psh);
 
 private:
@@ -90,6 +90,7 @@ struct glsl_program {
 	glsl_shader* hsh_;
 	glsl_shader* dsh_;
 	glsl_shader* gsh_;
+    char* prefix_;
 
     typedef std::map<std::string, glsl_uniform*> UniArr_t;
 	typedef std::map<std::string, glsl_sampler*> SamplerArr_t;
@@ -117,8 +118,8 @@ struct glsl_program {
    
     bool is_valid();
 
-    static glsl_program* makeProgram(const char* name, const char* vsh, const char* fsh);
-	static glsl_program* makeProgram2(const char* name, const char* vp, const char* hp, const char* dp, const char* gp, const char* fp, int count = 0, const char** xfb_variables = 0);
+    static glsl_program* makeProgram(const char* name, const char* vsh, const char* fsh, const char* prefix = nullptr);
+	static glsl_program* makeProgram2(const char* name, const char* vp, const char* hp, const char* dp, const char* gp, const char* fp, int count = 0, const char** xfb_variables = 0, const char* prefix = nullptr);
 	static void deleteProgram(const char* name);
 	GLint getAttribLocation(const char* pattrib);
 

@@ -51,11 +51,12 @@ an equality operator in order to work properly (of course only if the default ve
 not sufficient).
 
 **************************************************************************************************/
-#ifndef __PLACEMENT_NEW_INLINE
-#define __PLACEMENT_NEW_INLINE
-	inline void *__cdecl operator new(size_t, void *_P)
-	{return (_P); } // placement new
-#endif
+// sebi: one cannot simply redefine placement new ( c++ standard)
+//#ifndef __PLACEMENT_NEW_INLINE
+//#define __PLACEMENT_NEW_INLINE
+//	inline void *__cdecl operator new(size_t, void *_P)
+//	{return (_P); } // placement new
+//#endif
 
 
 ELIST_TPL_DEF class EList

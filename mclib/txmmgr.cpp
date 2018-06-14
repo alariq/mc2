@@ -178,8 +178,11 @@ void MC_TextureManager::start (void)
 	masterTextureNodes[0].lastUsed = -1;
 	masterTextureNodes[0].textureData = NULL;
 
-	lightData_ = gos_CreateBuffer(gosBUFFER_TYPE::UNIFORM, gosBUFFER_USAGE::STATIC_DRAW, sizeof(TG_HWLights), 1, NULL);
-	gos_BindBufferBase(lightData_, LIGHT_DATA_ATTACHMENT_SLOT);
+    lightDataStructuresCapacity = 128;
+    lightDataStructuresCount = 0;
+    lightData_ = new TG_HWLightsData[lightDataStructuresCapacity];
+	lightDataBuffer_ = gos_CreateBuffer(gosBUFFER_TYPE::UNIFORM, gosBUFFER_USAGE::STATIC_DRAW, sizeof(TG_HWLightsData) * lightDataStructuresCapacity, 1, NULL);
+	gos_BindBufferBase(lightDataBuffer_, LIGHT_DATA_ATTACHMENT_SLOT);
 }
 
 extern Stuff::MemoryStream *effectStream;
@@ -237,9 +240,12 @@ void MC_TextureManager::destroy (void)
 	delete textureStringHeap;
 	textureStringHeap = NULL;
 
-	if(lightData_)
-		gos_DestroyBuffer(lightData_);
-	lightData_ = nullptr;
+	if(lightDataBuffer_)
+		gos_DestroyBuffer(lightDataBuffer_);
+	lightDataBuffer_ = nullptr;
+
+    delete[] lightData_;
+    lightData_ = nullptr;
 }
 
 //----------------------------------------------------------------------
@@ -692,6 +698,36 @@ void MC_TextureManager::addRenderShape(DWORD nodeId, TG_RenderShape* render_shap
 	}
 }
 
+uint32_t MC_TextureManager::addLightDataStructure(TG_HWLightsData* light_data)
+{
+    for(uint32_t i = 0; i < lightDataStructuresCount; ++i)
+    {
+        if(0 == memcmp(lightData_ + i, light_data, sizeof(TG_HWLightsData)))
+        {
+            return i;
+        }
+    }
+
+    // unique data passed, so add it
+
+    if(lightDataStructuresCount + 1 >= lightDataStructuresCapacity)
+    {
+        TG_HWLightsData* new_lights_data = new TG_HWLightsData[lightDataStructuresCapacity + 128];
+        memcpy(new_lights_data, lightData_, sizeof(TG_HWLightsData)*lightDataStructuresCount);
+        delete[] lightData_;
+        lightData_ = new_lights_data;
+    }
+
+    lightData_[lightDataStructuresCount] = *light_data;
+	uint32_t rv = lightDataStructuresCount;
+	lightDataStructuresCount++;
+    return rv;
+}
+
+void MC_TextureManager::resetLightData()
+{
+    lightDataStructuresCount = 0;
+}
 
 mat4 gos2my(Stuff::Matrix4D& m)
 {
@@ -739,7 +775,7 @@ public:
 		lights_data_ = lights_data;
 	}
 
-	void render(HGOSBUFFER vb, HGOSBUFFER ib, HGOSVERTEXDECLARATION vdecl, DWORD texture_id)
+	void render(HGOSBUFFER vb, HGOSBUFFER ib, HGOSVERTEXDECLARATION vdecl, DWORD texture_id, int light_index)
 	{
 		gos_SetRenderState(gos_State_Texture, texture_id);
 		gos_SetRenderViewport(viewport_[2], viewport_[3], viewport_[0], viewport_[1]);
@@ -747,10 +783,13 @@ public:
 		HGOSRENDERMATERIAL mat = texture_id == 0 ? gos_getRenderMaterial("gos_vertex_lighted") : gos_getRenderMaterial("gos_tex_vertex_lighted");
 
 		gos_SetRenderMaterialParameterMat4(mat, "world_", (const float*)*world_);
-		gos_SetRenderMaterialParameterMat4(mat, "view_", (const float*)*view_);
+		//gos_SetRenderMaterialParameterMat4(mat, "view_", (const float*)*view_);
 		gos_SetRenderMaterialParameterMat4(mat, "wvp_", (const float*)*wvp_);
 
-		gos_SetRenderMaterialParameterUniformBlock(mat, "LightsData", 0);
+        float ld[4] = { (float)light_index, 0.0f, 0.0f, 0.0f};
+		gos_SetRenderMaterialParameterFloat4(mat, "light_offset_", ld);
+
+		gos_SetRenderMaterialUniformBlockBindingPoint(mat, "LightsData", 0);
 
 		gos_ApplyRenderMaterial(mat);
 
@@ -763,17 +802,17 @@ public:
 
 };
 
-void GatherLightsParameters(TG_HWLightsData* lights, size_t* lights_capacity)
+void GatherLightsParameters(TG_HWLightsData* lights)
 {
-	gosASSERT(lights && lights_capacity);
+	gosASSERT(lights);
 
-	size_t num_lights = 0;
-	const size_t max_num_lights = *lights_capacity;
+	uint32_t num_lights = 0;
+	const uint32_t max_num_lights = MAX_HW_LIGHTS_IN_WORLD;
 
-	TG_LightPtr* listOfLights = eye->getWorldLights();
-	DWORD numLights = eye->getNumLights();
+	const TG_LightPtr* listOfLights = eye->getWorldLights();
+	const DWORD numLights = eye->getNumLights();
 
-	for (int iLight = 0; iLight < numLights; iLight++)
+	for (uint32_t iLight = 0; iLight < numLights; iLight++)
 	{
 		if (num_lights == max_num_lights)
 			break;
@@ -829,7 +868,7 @@ void GatherLightsParameters(TG_HWLightsData* lights, size_t* lights_capacity)
 		}
 	}
 
-	*lights_capacity = num_lights;
+	lights->numLights_ = num_lights;
 }
 
 
@@ -889,11 +928,20 @@ void MC_TextureManager::renderLists (void)
 
 	gos_SetRenderState(gos_State_Culling, gos_Cull_CW);
 
-	TG_HWLightsData lightsData;
-	size_t numLights = MAX_HW_LIGHTS_IN_WORLD;
-	GatherLightsParameters(&lightsData, &numLights);
-	gos_UpdateBuffer(lightData_, &lightsData, 0, sizeof(lightsData));
-	gosASSERT(numLights > 0); // ensure at least one light was filled
+    // copy global list of light data into GPU buffer
+    
+	const uint32_t gpu_buf_size = gos_GetBufferSizeBytes(lightDataBuffer_);
+    const uint32_t cpu_buf_size = lightDataStructuresCount*sizeof(TG_HWLightsData);
+    if(gpu_buf_size < cpu_buf_size) {
+        gos_DestroyBuffer(lightDataBuffer_);
+        lightDataBuffer_ = gos_CreateBuffer(gosBUFFER_TYPE::UNIFORM, gosBUFFER_USAGE::STATIC_DRAW, cpu_buf_size, 1, lightData_);
+	    gos_BindBufferBase(lightDataBuffer_, LIGHT_DATA_ATTACHMENT_SLOT);
+    }
+    else {
+        gos_UpdateBuffer(lightDataBuffer_, lightData_, 0, cpu_buf_size);
+	    gos_BindBufferBase(lightDataBuffer_, LIGHT_DATA_ATTACHMENT_SLOT);
+    }
+    //
 
 	for (long i = 0; i<nextAvailableHardwareVertexNode; i++)
 	{
@@ -941,8 +989,7 @@ void MC_TextureManager::renderLists (void)
 
 					ShapeRenderer shape_renderer;
 					shape_renderer.setup(&world_mat, &view_mat, &wvp_mat, rs->viewport_);
-					shape_renderer.render(rs->vb_, rs->ib_, rs->vdecl_, texture);
-
+					shape_renderer.render(rs->vb_, rs->ib_, rs->vdecl_, texture, rs->light_data_buffer_index_);
 				}
 
 			}

@@ -99,8 +99,6 @@ public:
 
 	void apply() {
 
-		size_t buf_offset = 0;
-
 		for (uint32_t i = 0; i < count_; ++i) {
 
 			gosVERTEX_FORMAT_RECORD* rec = vf_ + i;
@@ -109,14 +107,10 @@ public:
 
 			glEnableVertexAttribArray(rec->index);
 			glVertexAttribPointer(rec->index, rec->num_components, type, rec->normalized ? GL_TRUE : GL_FALSE, rec->stride, BUFFER_OFFSET(rec->offset));
-
-			//buf_offset += rec->offset;
 		}
 	}
 
 	void end() {
-
-		size_t buf_offset = 0;
 
 		for (uint32_t i = 0; i < count_; ++i) {
 			gosVERTEX_FORMAT_RECORD* rec = vf_ + i;
@@ -126,19 +120,112 @@ public:
 
 };
 
+class gosMaterialVariationHelper;
+class gosMaterialVariation {
+        friend class gosMaterialVariationHelper;
+        char* defines_;
+        char* unique_name_suffix_;
+
+    public:
+        gosMaterialVariation():defines_(nullptr), unique_name_suffix_(nullptr) {}
+        const char* getDefinesString() const { return defines_; }
+        const char* getUniqueSuffix() const { return unique_name_suffix_; }
+
+        ~gosMaterialVariation()
+        {
+            delete defines_;
+            delete unique_name_suffix_;
+        }
+};
+
+class gosMaterialVariationHelper {
+        std::vector<std::string> defines;
+    public:
+
+        void addDefine(const char* define)
+        {
+            defines.push_back(std::string(define));
+        }
+
+        void addDefines(const char** define)
+        {
+            gosASSERT(define);
+            while(*define)
+            {
+                defines.push_back(std::string(*define));
+                define++;
+            }
+        }
+
+        void addDefines(const std::vector<std::string>& define)
+        {
+            defines.insert(defines.end(), define.begin(), define.end());
+        }
+
+        void getMaterialVariation(gosMaterialVariation& variation)
+        {
+            std::string defines_str = "#version 420\n";
+            std::string unique_suffix_str = "#";
+            for(auto d : defines)
+            {
+                defines_str.append("#define ");
+                defines_str.append(d);
+                defines_str.append(" = 1\n");
+
+                unique_suffix_str.append(d);
+                unique_suffix_str.append("#");
+            }
+            defines_str.append("\n");
+
+            if(variation.defines_)
+                delete[] variation.defines_;
+
+            if(variation.unique_name_suffix_)
+                delete[] variation.unique_name_suffix_;
+
+            size_t size = defines_str.size() + 1;
+            variation.defines_ = new char[size];
+            memcpy(variation.defines_, defines_str.c_str(), size);
+            variation.defines_[size-1]='\0';
+
+            size = unique_suffix_str.size() + 1;
+            variation.unique_name_suffix_ = new char[size];
+            memcpy(variation.unique_name_suffix_, unique_suffix_str.c_str(), size);
+            variation.unique_name_suffix_[size-1]='\0';
+        }
+};
+
+enum class gosGLOBAL_SHADER_FLAGS : unsigned int
+{
+    ALPHA_TEST = 0
+    // etc.
+};
+
+#define SHADER_FLAG_INDEX_TO_MASK(x) (1 << ((uint32_t)x))
+#define SHADER_FLAG_MASK_TO_INDEX(x) (ffs(x)-1) // use __popcnt etc for windows, and move to platform_*.h
+
+static const char* const g_shader_flags[] = {
+    "ALPHA_TEST"
+};
+
+
 class gosRenderMaterial {
 
 		static const std::string s_mvp;
 		static const std::string s_fog_color;
     public:
-        static gosRenderMaterial* load(const char* shader) {
+        static gosRenderMaterial* load(const char* shader, const gosMaterialVariation& mvar) {
             gosASSERT(shader);
             gosRenderMaterial* pmat = new gosRenderMaterial();
             char vs[256];
             char ps[256];
             StringFormat(vs, 255, "shaders/%s.vert", shader);
             StringFormat(ps, 255, "shaders/%s.frag", shader);
-            pmat->program_ = glsl_program::makeProgram(shader, vs, ps);
+
+            std::string sh_name = shader;
+            sh_name.append(mvar.getUniqueSuffix());
+
+            pmat->program_ = glsl_program::makeProgram(sh_name.c_str(), vs, ps, mvar.getDefinesString());
             if(!pmat->program_) {
                 SPEW(("SHADERS", "Failed to create %s material\n", shader));
                 delete pmat;
@@ -977,23 +1064,15 @@ class gosRenderer {
             textureList_[texture_id] = 0;
         }
 
+        uint32_t getFlagsFromStates()
+        {
+            return curStates_[gos_State_AlphaTest] ? SHADER_FLAG_INDEX_TO_MASK(gosGLOBAL_SHADER_FLAGS::ALPHA_TEST) : 0;
+        }
+
         gosRenderMaterial* getRenderMaterial(const char* name) {
 
-            struct equals_to {
-                const char* name_;
-                bool operator()(const gosRenderMaterial* m) {
-                    return strcmp(m->getName(), name_)==0;
-                }
-            };
-
-            equals_to eq;
-            eq.name_ = name;
-
-            std::vector<gosRenderMaterial*>::iterator it = 
-                std::find_if(materialList_.begin(), materialList_.end(), eq);
-            if(it != materialList_.end())
-                return *it;
-            return NULL;
+            uint32_t flags = getFlagsFromStates();
+            return materialDB_[name][flags];
         }
 
         gosTextAttribs& getTextAttributes() { return curTextAttribs_; }
@@ -1085,6 +1164,9 @@ class gosRenderer {
 
         uint32_t getRenderState(gos_RenderState render_state) { return curStates_[render_state]; }
 
+        gosRenderMaterial* selectBasicRenderMaterial(const RenderState& rs) const ;
+        gosRenderMaterial* selectLightedRenderMaterial(const RenderState& rs) const ;
+
 		void handleEvents();
 
     private:
@@ -1110,6 +1192,7 @@ class gosRenderer {
         std::vector<gosBuffer*> bufferList_;
         std::vector<gosVertexDeclaration*> vertexDeclarationList_;
         std::vector<gosRenderMaterial*> materialList_;
+        std::map<const char*, std::map<uint32_t, gosRenderMaterial*>> materialDB_;
 
         DWORD reqWidth;
         DWORD reqHeight;
@@ -1176,6 +1259,8 @@ class gosRenderer {
 
 const std::string gosRenderer::s_Foreground = std::string("Foreground");
 
+static GLuint gVAO = 0;
+
 void gosRenderer::init() {
     initRenderStates();
 
@@ -1205,22 +1290,47 @@ void gosRenderer::init() {
     gosASSERT(points_);
     text_ = gosMesh::makeMesh(PRIMITIVE_TRIANGLELIST, 4024 * 6);
     gosASSERT(text_);
-    basic_material_ = gosRenderMaterial::load("gos_vertex");
-    gosASSERT(basic_material_);
-    materialList_.push_back(basic_material_);
-    basic_tex_material_ = gosRenderMaterial::load("gos_tex_vertex");
-    gosASSERT(basic_tex_material_);
-    materialList_.push_back(basic_tex_material_);
-    text_material_ = gosRenderMaterial::load("gos_text");
-    gosASSERT(text_material_);
-    materialList_.push_back(text_material_);
 
-    basic_lighted_material_ = gosRenderMaterial::load("gos_vertex_lighted");
-    gosASSERT(basic_lighted_material_);
-    materialList_.push_back(basic_lighted_material_);
-    basic_tex_lighted_material_ = gosRenderMaterial::load("gos_tex_vertex_lighted");
-    gosASSERT(basic_tex_lighted_material_);
-    materialList_.push_back(basic_tex_lighted_material_);
+
+    const char* shader_list[] = {"gos_vertex", "gos_tex_vertex", "gos_text", "gos_vertex_lighted", "gos_tex_vertex_lighted"};
+    gosRenderMaterial** shader_ptr_list[] = { &basic_material_, &basic_tex_material_, &text_material_, &basic_lighted_material_, &basic_tex_lighted_material_};
+
+    static_assert(COUNTOF(shader_list) == COUNTOF(shader_ptr_list), "Arrays myst have same size");
+    uint32_t combinations[] = {0, SHADER_FLAG_INDEX_TO_MASK(gosGLOBAL_SHADER_FLAGS::ALPHA_TEST)};
+
+    for(size_t i=0; i<COUNTOF(combinations); ++i)
+    {
+        std::vector<std::string> defines;
+        for(size_t bit = 0; bit < 32; ++bit)
+        {
+            uint32_t bit_mask = 1<<bit;
+            if(bit_mask & combinations[i])
+            {
+                std::string s = g_shader_flags[bit];
+                defines.push_back(s);
+            }
+        }
+
+        gosMaterialVariationHelper helper;
+        helper.addDefines(defines);
+        gosMaterialVariation mvar;
+        helper.getMaterialVariation(mvar);
+
+        //TODO: remove texture / no texture variants and move it to flags
+        
+        for(uint32_t sh_idx = 0; sh_idx < COUNTOF(shader_list); ++sh_idx)
+        {
+            gosRenderMaterial* pmat = gosRenderMaterial::load(shader_list[sh_idx], mvar);
+            gosASSERT(pmat);
+            materialList_.push_back(pmat);
+            materialDB_[ shader_list[sh_idx] ].insert(std::make_pair(combinations[i], pmat));
+
+            *shader_ptr_list[sh_idx] = pmat;
+        }
+    }
+
+
+    glGenVertexArrays(1, &gVAO);
 
 
     pendingRequest = false;
@@ -1262,6 +1372,8 @@ void gosRenderer::destroy() {
         delete textureList_[i];
     }
     textureList_.clear();
+
+    glDeleteVertexArrays(1, &gVAO);
 
 }
 
@@ -1388,6 +1500,7 @@ void gosRenderer::applyRenderStates() {
    curStates_[gos_State_AlphaMode] = renderStates_[gos_State_AlphaMode];
 
    ////////////////////////////////////////////////////////////////////////////////
+   #if 0 // now in shaders (this is not supported in CORE OpenGL profile
    bool enable_alpha_test = renderStates_[gos_State_AlphaTest] == 1;
    if(enable_alpha_test) {
        glEnable(GL_ALPHA_TEST);
@@ -1395,6 +1508,7 @@ void gosRenderer::applyRenderStates() {
    } else {
        glDisable(GL_ALPHA_TEST);
    }
+   #endif
    curStates_[gos_State_AlphaTest] = renderStates_[gos_State_AlphaTest];
 
    ////////////////////////////////////////////////////////////////////////////////
@@ -1415,7 +1529,7 @@ void gosRenderer::applyRenderStates() {
   
    ////////////////////////////////////////////////////////////////////////////////
    TexAddressMode address_mode = 
-       renderStates_[gos_State_TextureAddress] == gos_TextureWrap ? TAM_REPEAT : TAM_CLAMP;
+       renderStates_[gos_State_TextureAddress] == gos_TextureWrap ? TAM_REPEAT : TAM_CLAMP_TO_EDGE;
    // in this case does not necessarily mean, that state was set, because in OpenGL this is binded to texture (unless separate sampler state extension is used, which is not currently)
    curStates_[gos_State_TextureAddress] = renderStates_[gos_State_TextureAddress];
 
@@ -1448,6 +1562,7 @@ void gosRenderer::applyRenderStates() {
 
 void gosRenderer::beginFrame()
 {
+    glBindVertexArray(gVAO);
     num_draw_calls_ = 0;
 }
 
@@ -1498,6 +1613,38 @@ void gosRenderer::afterDrawCall()
 {
 }
 
+gosRenderMaterial* gosRenderer::selectBasicRenderMaterial(const RenderState& rs) const 
+{
+    const auto& sh_var = rs[gos_State_Texture]!=0 ? 
+        materialDB_.find("gos_tex_vertex")->second : 
+        materialDB_.find("gos_vertex")->second;
+    uint32_t flags = rs[gos_State_AlphaTest] ? SHADER_FLAG_INDEX_TO_MASK(gosGLOBAL_SHADER_FLAGS::ALPHA_TEST) : 0;
+
+    if(sh_var.count(flags))
+        return sh_var.at(flags);
+    else
+    {
+        STOP(("Trying to get variation which does not exist: shader: %s flags: %d\n", "basic", flags));
+        return nullptr;
+    }
+}
+
+gosRenderMaterial* gosRenderer::selectLightedRenderMaterial(const RenderState& rs) const
+{
+    const auto& sh_var = rs[gos_State_Texture]!=0 ? 
+        materialDB_.find("gos_tex_vertex_lighted")->second : 
+        materialDB_.find("gos_vertex_lighted")->second;
+    uint32_t flags = rs[gos_State_AlphaTest] ? SHADER_FLAG_INDEX_TO_MASK(gosGLOBAL_SHADER_FLAGS::ALPHA_TEST) : 0;
+
+    if(sh_var.count(flags))
+        return sh_var.at(flags);
+    else
+    {
+        STOP(("Trying to get variation which does not exist: shader: %s flags: %d\n", "lighted", flags));
+        return nullptr;
+    }
+}
+
 void gosRenderer::drawQuads(gos_VERTEX* vertices, int count) {
     gosASSERT(vertices);
 
@@ -1508,8 +1655,8 @@ void gosRenderer::drawQuads(gos_VERTEX* vertices, int count) {
 
     if(quads_->getNumVertices() + num_vertices > quads_->getVertexCapacity()) {
         applyRenderStates();
-        gosRenderMaterial* mat = 
-            curStates_[gos_State_Texture]!=0 ? basic_tex_material_ : basic_material_;
+        gosRenderMaterial* mat = selectBasicRenderMaterial(curStates_);
+        gosASSERT(mat);
 
         mat->setTransform(projection_);
         mat->setFogColor(fog_color_);
@@ -1532,8 +1679,9 @@ void gosRenderer::drawQuads(gos_VERTEX* vertices, int count) {
     // for now draw anyway because no render state saved for draw calls
     applyRenderStates();
 
-    gosRenderMaterial* mat = 
-        curStates_[gos_State_Texture]!=0 ? basic_tex_material_ : basic_material_;
+    gosRenderMaterial* mat = selectBasicRenderMaterial(curStates_);
+    gosASSERT(mat);
+
     mat->setTransform(projection_);
     mat->setFogColor(fog_color_);
     quads_->draw(mat);
@@ -1601,8 +1749,10 @@ void gosRenderer::drawTris(gos_VERTEX* vertices, int count) {
 
     if(tris_->getNumVertices() + count > tris_->getVertexCapacity()) {
         applyRenderStates();
-        gosRenderMaterial* mat = 
-            curStates_[gos_State_Texture]!=0 ? basic_tex_material_ : basic_material_;
+
+        gosRenderMaterial* mat = selectBasicRenderMaterial(curStates_);
+        gosASSERT(mat);
+
         mat->setTransform(projection_);
 		mat->setFogColor(fog_color_);
         tris_->draw(mat);
@@ -1614,8 +1764,10 @@ void gosRenderer::drawTris(gos_VERTEX* vertices, int count) {
 
     // for now draw anyway because no render state saved for draw calls
     applyRenderStates();
-    gosRenderMaterial* mat = 
-        curStates_[gos_State_Texture]!=0 ? basic_tex_material_ : basic_material_;
+
+    gosRenderMaterial* mat = selectBasicRenderMaterial(curStates_);
+    gosASSERT(mat);
+
     mat->setTransform(projection_);
     mat->setFogColor(fog_color_);
     tris_->draw(mat);
@@ -1635,8 +1787,10 @@ void gosRenderer::drawIndexedTris(gos_VERTEX* vertices, int num_vertices, WORD* 
     bool not_enough_indices = indexed_tris_->getNumIndices() + num_indices > indexed_tris_->getIndexCapacity();
     if(not_enough_vertices || not_enough_indices){
         applyRenderStates();
-        gosRenderMaterial* mat = 
-            curStates_[gos_State_Texture]!=0 ? basic_tex_material_ : basic_material_;
+
+        gosRenderMaterial* mat = selectBasicRenderMaterial(curStates_);
+        gosASSERT(mat);
+
         mat->setTransform(projection_);
 		mat->setFogColor(fog_color_);
         indexed_tris_->drawIndexed(mat);
@@ -1650,8 +1804,10 @@ void gosRenderer::drawIndexedTris(gos_VERTEX* vertices, int num_vertices, WORD* 
 
     // for now draw anyway because no render state saved for draw calls
     applyRenderStates();
-    gosRenderMaterial* mat = 
-        curStates_[gos_State_Texture]!=0 ? basic_tex_material_ : basic_material_;
+
+    gosRenderMaterial* mat = selectBasicRenderMaterial(curStates_);
+    gosASSERT(mat);
+
     mat->setTransform(projection_);
     mat->setFogColor(fog_color_);
     indexed_tris_->drawIndexed(mat);
@@ -1668,8 +1824,9 @@ void gosRenderer::drawIndexedTris(HGOSBUFFER ib, HGOSBUFFER vb, HGOSVERTEXDECLAR
     if(beforeDrawCall()) return;
 
     applyRenderStates();
-    gosRenderMaterial* mat = 
-        curStates_[gos_State_Texture]!=0 ? basic_tex_lighted_material_ : basic_lighted_material_;
+
+    gosRenderMaterial* mat = selectLightedRenderMaterial(curStates_);
+    gosASSERT(mat);
 
 	mat4 transform(	mvp[0], mvp[1], mvp[2], mvp[3], 
 					mvp[4], mvp[5], mvp[6], mvp[7],
@@ -2536,11 +2693,18 @@ gosBuffer* __stdcall gos_CreateBuffer(gosBUFFER_TYPE type, gosBUFFER_USAGE usage
 	return pbuffer;
 }
 
+uint32_t gos_GetBufferSizeBytes(HGOSBUFFER buffer)
+{
+	gosASSERT(buffer);
+    return buffer->element_size_ * buffer->count_;
+}
+
 void __stdcall gos_DestroyBuffer(gosBuffer* buffer)
 {
 	gosASSERT(buffer);
     gosASSERT(g_gos_renderer);
 	bool rv = g_gos_renderer->deleteBuffer(buffer);
+    (void)rv;
 	delete buffer;
 }
 
@@ -2555,8 +2719,12 @@ void __stdcall gos_BindBufferBase(gosBuffer* buffer, uint32_t slot)
 void __stdcall gos_UpdateBuffer(HGOSBUFFER buffer, void* data, size_t offset, size_t num_bytes)
 {
 	gosASSERT(buffer);
+    gosASSERT(buffer->element_size_ * buffer->count_ > num_bytes);
 	GLenum gl_target = getGLBufferType(buffer->type_);
+    glBindBuffer(gl_target, buffer->buffer_);
 	glBufferSubData(gl_target, offset, num_bytes, data);
+	//glBufferData(gl_target, num_bytes, data, GL_DYNAMIC_DRAW);
+    glBindBuffer(gl_target, 0);
 }
 
 HGOSVERTEXDECLARATION __stdcall gos_CreateVertexDeclaration(gosVERTEX_FORMAT_RECORD* records, int count)
@@ -2573,6 +2741,7 @@ void __stdcall gos_DestroyVertexDeclaration(HGOSVERTEXDECLARATION vdecl)
 	gosASSERT(vdecl);
     gosASSERT(g_gos_renderer);
 	bool rv = g_gos_renderer->deleteVertexDeclaration(vdecl);
+    (void)rv;
 	gosVertexDeclaration::destroy(vdecl);
 
 }
@@ -2610,7 +2779,7 @@ void __stdcall gos_SetRenderMaterialParameterMat4(HGOSRENDERMATERIAL material, c
 	material->getShader()->setMat4(name, m);
 }
 
-void __stdcall gos_SetRenderMaterialParameterUniformBlock(HGOSRENDERMATERIAL material, const char* name, uint32_t slot)
+void __stdcall gos_SetRenderMaterialUniformBlockBindingPoint(HGOSRENDERMATERIAL material, const char* name, uint32_t slot)
 {
 	gosASSERT(material && name);
 	material->setUniformBlock(name, slot);

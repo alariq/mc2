@@ -158,22 +158,21 @@ const char* glsl_load(const char* fname)
 
 
 
-glsl_shader* glsl_shader::makeShader(Shader_t stype, const char* fname)
+glsl_shader* glsl_shader::makeShader(Shader_t stype, const char* fname, const char* prefix/* = nullptr*/)
 { 
     const char* psource = glsl_load(fname);
     if(!psource)
         return 0;
-
 	
     GLenum type = get_gl_shader_type(stype);
     GLuint shader = glCreateShader(type);
     if(0 == shader)
         return 0;
 
-    const char* strings[] = { psource };
+    const char* strings[] = { prefix == nullptr ? "" : prefix, psource };
 
-    glShaderSource(shader, 1, strings, 0);
-    delete[] strings[0];
+    glShaderSource(shader, sizeof(strings)/sizeof(strings[0]), strings, 0);
+    delete[] psource;
 
     glCompileShader(shader);
 
@@ -222,16 +221,18 @@ glsl_shader::~glsl_shader()
     glDeleteShader(shader_);
 }
 
-bool glsl_shader::reload()
+bool glsl_shader::reload(const char* prefix)
 {
     const char* psource = glsl_load(fname_.c_str());
     if(!psource)
         return false;
 
-    const char* strings[] = { psource };
+    const char* strings[] = { prefix == nullptr ? "" : prefix, psource };
+
+    glShaderSource(shader_, sizeof(strings)/sizeof(strings[0]), strings, 0);
 
     glShaderSource(shader_, 1, strings, 0);
-    delete[] strings[0];
+    delete[] psource;
 
     glCompileShader(shader_);
 
@@ -354,7 +355,7 @@ void parse_uniform_blocks(GLuint pprogram, glsl_program::UniBlockArr_t* puniform
 	delete[] buf;
 }
 
-glsl_program* glsl_program::makeProgram2(const char* name, const char* vp, const char* hp, const char* dp, const char* gp, const char* fp, int count/* = 0*/, const char** xfb_variables/* = 0*/)
+glsl_program* glsl_program::makeProgram2(const char* name, const char* vp, const char* hp, const char* dp, const char* gp, const char* fp, int count/* = 0*/, const char** xfb_variables/* = 0*/, const char* prefix/*=nullptr*/)
 {
 	if(!uniformFuncs[0])
         init_func_ptrs(uniformFuncs);
@@ -369,7 +370,7 @@ glsl_program* glsl_program::makeProgram2(const char* name, const char* vp, const
         return 0;
     }
 
-    glsl_shader* vsh = glsl_shader::makeShader(glsl_shader::VERTEX, vp);
+    glsl_shader* vsh = glsl_shader::makeShader(glsl_shader::VERTEX, vp, prefix);
 	if(!vsh)
 		return 0;
 
@@ -377,29 +378,28 @@ glsl_program* glsl_program::makeProgram2(const char* name, const char* vp, const
 	
 	if(fp)
 	{
-		fsh = glsl_shader::makeShader(glsl_shader::FRAGMENT, fp);
+		fsh = glsl_shader::makeShader(glsl_shader::FRAGMENT, fp, prefix);
 		if(!fsh)
 			return 0;
-
 	}
     	
 	if(hp)
 	{
-		hsh = glsl_shader::makeShader(glsl_shader::HULL, hp);
+		hsh = glsl_shader::makeShader(glsl_shader::HULL, hp, prefix);
 		if(!hsh)
 			return 0;
 	}
 
 	if(dp)
 	{
-		dsh = glsl_shader::makeShader(glsl_shader::DOMAINE, dp);
+		dsh = glsl_shader::makeShader(glsl_shader::DOMAINE, dp, prefix);
 		if(!dsh)
 			return 0;
 	}
 
 	if(gp)
 	{
-		gsh = glsl_shader::makeShader(glsl_shader::GEOMERTY, gp);
+		gsh = glsl_shader::makeShader(glsl_shader::GEOMERTY, gp, prefix);
 		if(!gsh)
 			return 0;
 	}
@@ -465,6 +465,13 @@ glsl_program* glsl_program::makeProgram2(const char* name, const char* vp, const
     pprogram->hsh_ = hsh;
     pprogram->dsh_ = dsh;
     pprogram->gsh_ = gsh;
+    if(prefix) {
+        size_t size = strlen(prefix) + 1;
+        pprogram->prefix_ = new char[size];
+        memcpy(pprogram->prefix_, prefix, size);
+    } else {
+        pprogram->prefix_ = nullptr;
+    }
     pprogram->is_valid_ = true;
 
 	for(size_t i=0; i< sizeof(pipeline)/sizeof(pipeline[0]); ++i)
@@ -481,9 +488,9 @@ glsl_program* glsl_program::makeProgram2(const char* name, const char* vp, const
 
 }
 
-glsl_program* glsl_program::makeProgram(const char* name, const char* vp, const char* fp)
+glsl_program* glsl_program::makeProgram(const char* name, const char* vp, const char* fp, const char* prefix /*= nullptr*/)
 {
-	return makeProgram2(name, vp, 0, 0, 0, fp);
+	return makeProgram2(name, vp, 0, 0, 0, fp, 0, nullptr, prefix);
 }
 
 void glsl_program::deleteProgram(const char* name)
@@ -547,7 +554,7 @@ bool glsl_program::reload()
 	for(size_t i=0; i< sizeof(pipeline)/sizeof(pipeline[0]); ++i)
 	{
 		if(!pipeline[i]) continue;
-		rv &= pipeline[i]->reload();
+		rv &= pipeline[i]->reload(prefix_);
 	}
     if(!rv) return false;
 	
