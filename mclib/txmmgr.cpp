@@ -1063,53 +1063,62 @@ void MC_TextureManager::renderLists (void)
 	else
 	{
 		gos_SetRenderState( gos_State_AlphaMode, gos_Alpha_AlphaInvAlpha);
-		gos_SetRenderState( gos_State_AlphaTest, 1);
 		gos_SetRenderState( gos_State_TextureAddress, gos_TextureWrap );
 	}
-		
-	for (int i=0;i<nextAvailableVertexNode;i++)
-	{
-		if ((masterVertexNodes[i].flags & MC2_ISTERRAIN) &&
-			(masterVertexNodes[i].flags & MC2_DRAWALPHA) &&
-			!(masterVertexNodes[i].flags & MC2_ISCRATERS) &&
-			(masterVertexNodes[i].vertices))
-		{
-			DWORD totalVertices = masterVertexNodes[i].numVertices;
-			if (masterVertexNodes[i].currentVertex != (masterVertexNodes[i].vertices + masterVertexNodes[i].numVertices))
-			{
-				totalVertices = masterVertexNodes[i].currentVertex - masterVertexNodes[i].vertices;
-			}
 	
-			if (totalVertices && (totalVertices < MAX_SENDDOWN))
-			{
-				gos_SetRenderState( gos_State_Texture, masterTextureNodes[masterVertexNodes[i].textureIndex].get_gosTextureHandle());
-				gos_RenderIndexedArray( masterVertexNodes[i].vertices, totalVertices, indexArray, totalVertices );
-			}
-			else if (totalVertices > MAX_SENDDOWN)
-			{
-				gos_SetRenderState( gos_State_Texture, masterTextureNodes[masterVertexNodes[i].textureIndex].get_gosTextureHandle());
-				
-				//Must divide up vertices into batches of 10,000 each to send down.
-				// Somewhere around 20000 to 30000 it really gets screwy!!!
-				long currentVertices = 0;
-				while (currentVertices < totalVertices)
-				{
-					gos_VERTEX *v = masterVertexNodes[i].vertices + currentVertices;
-					long tVertices = totalVertices - currentVertices;
-					if (tVertices > MAX_SENDDOWN)
-						tVertices = MAX_SENDDOWN;
-					
-					gos_RenderIndexedArray(v, tVertices, indexArray, tVertices );
-					
-					currentVertices += tVertices;
-				}
-			}
-			
-			//Reset the list to zero length to avoid drawing more then once!			
-			//Also comes in handy if gameLogic is not called.
-			masterVertexNodes[i].currentVertex = masterVertexNodes[i].vertices;
-		}
-	}
+    // sebi: split in 2 parts, first draw objects which have alpha test off, then with alpha test on
+    for(int states = 0; states < 2; ++states) 
+    {   
+        gos_SetRenderState( gos_State_AlphaTest, states);
+
+        for (int i=0;i<nextAvailableVertexNode;i++)
+        {
+            if ((masterVertexNodes[i].flags & MC2_ISTERRAIN) &&
+                    (masterVertexNodes[i].flags & MC2_DRAWALPHA) &&
+                    !(masterVertexNodes[i].flags & MC2_ISCRATERS) &&
+                    (masterVertexNodes[i].flags & MC2_ALPHATEST)==states*MC2_ALPHATEST &&
+                    (masterVertexNodes[i].vertices))
+            {
+                DWORD totalVertices = masterVertexNodes[i].numVertices;
+                if (masterVertexNodes[i].currentVertex != (masterVertexNodes[i].vertices + masterVertexNodes[i].numVertices))
+                {
+                    totalVertices = masterVertexNodes[i].currentVertex - masterVertexNodes[i].vertices;
+                }
+
+                if (totalVertices && (totalVertices < MAX_SENDDOWN))
+                {
+                    gos_SetRenderState( gos_State_Texture, masterTextureNodes[masterVertexNodes[i].textureIndex].get_gosTextureHandle());
+                    gos_RenderIndexedArray( masterVertexNodes[i].vertices, totalVertices, indexArray, totalVertices );
+                }
+                else if (totalVertices > MAX_SENDDOWN)
+                {
+                    gos_SetRenderState( gos_State_Texture, masterTextureNodes[masterVertexNodes[i].textureIndex].get_gosTextureHandle());
+
+                    //Must divide up vertices into batches of 10,000 each to send down.
+                    // Somewhere around 20000 to 30000 it really gets screwy!!!
+                    long currentVertices = 0;
+                    while (currentVertices < totalVertices)
+                    {
+                        gos_VERTEX *v = masterVertexNodes[i].vertices + currentVertices;
+                        long tVertices = totalVertices - currentVertices;
+                        if (tVertices > MAX_SENDDOWN)
+                            tVertices = MAX_SENDDOWN;
+
+                        gos_RenderIndexedArray(v, tVertices, indexArray, tVertices );
+
+                        currentVertices += tVertices;
+                    }
+                }
+
+                //Reset the list to zero length to avoid drawing more then once!			
+                //Also comes in handy if gameLogic is not called.
+                masterVertexNodes[i].currentVertex = masterVertexNodes[i].vertices;
+            }
+        }
+    }
+    //reset alpha test at the end
+    gos_SetRenderState( gos_State_AlphaTest, 0);
+
 
 	//<< sebi: added this section to draw objects which do not have terrain underlayer (those are added in quad.cpp, see (*) there )
 	if (Environment.Renderer != 3)
@@ -1166,11 +1175,8 @@ void MC_TextureManager::renderLists (void)
 	if (Environment.Renderer == 3)
 	{
 		gos_SetRenderState( gos_State_AlphaMode, gos_Alpha_AlphaInvAlpha);
-		gos_SetRenderState( gos_State_AlphaTest, 1);
 		gos_SetRenderState( gos_State_ShadeMode, gos_ShadeFlat);
 	}
-	
-
 
 	// now begins block which draws quads that have underlayers, so we do not draw in Z-buffer
 	if (Environment.Renderer != 3)
@@ -1180,50 +1186,60 @@ void MC_TextureManager::renderLists (void)
 		gos_SetRenderState(	gos_State_ZWrite, 0);
 	}
 
- 	//Draw the Overlays after the detail textures on the terrain.  There should never be anything here in the OLD universe.
-	for (int i=0;i<nextAvailableVertexNode;i++)
-	{
-		if ((masterVertexNodes[i].flags & MC2_ISTERRAIN) &&
-			(masterVertexNodes[i].flags & MC2_DRAWALPHA) &&
-			(masterVertexNodes[i].flags & MC2_ISCRATERS) && 
-			(masterVertexNodes[i].vertices))
-		{
-			DWORD totalVertices = masterVertexNodes[i].numVertices;
-			if (masterVertexNodes[i].currentVertex != (masterVertexNodes[i].vertices + masterVertexNodes[i].numVertices))
-			{
-				totalVertices = masterVertexNodes[i].currentVertex - masterVertexNodes[i].vertices;
-			}
-	
-			if (totalVertices && (totalVertices < MAX_SENDDOWN))
-			{
-				gos_SetRenderState( gos_State_Texture, masterTextureNodes[masterVertexNodes[i].textureIndex].get_gosTextureHandle());
-				gos_RenderIndexedArray( masterVertexNodes[i].vertices, totalVertices, indexArray, totalVertices );
-			}
-			else if (totalVertices > MAX_SENDDOWN)
-			{
-				gos_SetRenderState( gos_State_Texture, masterTextureNodes[masterVertexNodes[i].textureIndex].get_gosTextureHandle());
-				
-				//Must divide up vertices into batches of 10,000 each to send down.
-				// Somewhere around 20000 to 30000 it really gets screwy!!!
-				long currentVertices = 0;
-				while (currentVertices < totalVertices)
-				{
-					gos_VERTEX *v = masterVertexNodes[i].vertices + currentVertices;
-					long tVertices = totalVertices - currentVertices;
-					if (tVertices > MAX_SENDDOWN)
-						tVertices = MAX_SENDDOWN;
-					
-					gos_RenderIndexedArray(v, tVertices, indexArray, tVertices );
-					
-					currentVertices += tVertices;
-				}
-			}
-			
-			//Reset the list to zero length to avoid drawing more then once!			
-			//Also comes in handy if gameLogic is not called.
-			masterVertexNodes[i].currentVertex = masterVertexNodes[i].vertices;
-		}
-	}
+    // sebi: split in 2 parts, first draw objects which have alpha test off, then with alpha test on
+    for(int states = 0; states < 2; ++states) 
+    {   
+        gos_SetRenderState( gos_State_AlphaTest, states);
+        //Draw the Overlays after the detail textures on the terrain.  There should never be anything here in the OLD universe.
+        for (int i=0;i<nextAvailableVertexNode;i++)
+        {
+            if ((masterVertexNodes[i].flags & MC2_ISTERRAIN) &&
+                    (masterVertexNodes[i].flags & MC2_DRAWALPHA) &&
+                    (masterVertexNodes[i].flags & MC2_ISCRATERS) && 
+                    (masterVertexNodes[i].flags & MC2_ALPHATEST)==states*MC2_ALPHATEST &&
+                    (masterVertexNodes[i].vertices))
+            {
+                DWORD totalVertices = masterVertexNodes[i].numVertices;
+                if (masterVertexNodes[i].currentVertex != (masterVertexNodes[i].vertices + masterVertexNodes[i].numVertices))
+                {
+                    totalVertices = masterVertexNodes[i].currentVertex - masterVertexNodes[i].vertices;
+                }
+
+                if (totalVertices && (totalVertices < MAX_SENDDOWN))
+                {
+                    gos_SetRenderState( gos_State_Texture, masterTextureNodes[masterVertexNodes[i].textureIndex].get_gosTextureHandle());
+                    gos_RenderIndexedArray( masterVertexNodes[i].vertices, totalVertices, indexArray, totalVertices );
+                }
+                else if (totalVertices > MAX_SENDDOWN)
+                {
+                    gos_SetRenderState( gos_State_Texture, masterTextureNodes[masterVertexNodes[i].textureIndex].get_gosTextureHandle());
+
+                    //Must divide up vertices into batches of 10,000 each to send down.
+                    // Somewhere around 20000 to 30000 it really gets screwy!!!
+                    long currentVertices = 0;
+                    while (currentVertices < totalVertices)
+                    {
+                        gos_VERTEX *v = masterVertexNodes[i].vertices + currentVertices;
+                        long tVertices = totalVertices - currentVertices;
+                        if (tVertices > MAX_SENDDOWN)
+                            tVertices = MAX_SENDDOWN;
+
+                        gos_RenderIndexedArray(v, tVertices, indexArray, tVertices );
+
+                        currentVertices += tVertices;
+                    }
+                }
+
+                //Reset the list to zero length to avoid drawing more then once!			
+                //Also comes in handy if gameLogic is not called.
+                masterVertexNodes[i].currentVertex = masterVertexNodes[i].vertices;
+            }
+        }
+    }
+    // reset alpha test at the end
+    gos_SetRenderState( gos_State_AlphaTest, 0);
+
+
 
 	gos_SetRenderState( gos_State_TextureAddress, gos_TextureClamp );
 	gos_SetRenderState(	gos_State_ZWrite, 0);
@@ -1352,51 +1368,60 @@ void MC_TextureManager::renderLists (void)
 		gos_SetRenderState(	gos_State_ZWrite, 1);
 	}
 	
-  	for (int i=0;i<nextAvailableVertexNode;i++)
-	{
-		if (!(masterVertexNodes[i].flags & MC2_ISTERRAIN) &&
-			!(masterVertexNodes[i].flags & MC2_ISSHADOWS) &&
-			!(masterVertexNodes[i].flags & MC2_ISCOMPASS) &&
-			!(masterVertexNodes[i].flags & MC2_ISCRATERS) &&
-			(masterVertexNodes[i].flags & MC2_DRAWALPHA) &&
-			(masterVertexNodes[i].vertices))
-		{
-			DWORD totalVertices = masterVertexNodes[i].numVertices;
-			if (masterVertexNodes[i].currentVertex != (masterVertexNodes[i].vertices + masterVertexNodes[i].numVertices))
-			{
-				totalVertices = masterVertexNodes[i].currentVertex - masterVertexNodes[i].vertices;
-			}
-		
-			if (totalVertices && (totalVertices < MAX_SENDDOWN))
-			{
-				gos_SetRenderState( gos_State_Texture, masterTextureNodes[masterVertexNodes[i].textureIndex].get_gosTextureHandle());
-				gos_RenderIndexedArray( masterVertexNodes[i].vertices, totalVertices, indexArray, totalVertices );
-			}
-			else if (totalVertices > MAX_SENDDOWN)
-			{
-				gos_SetRenderState( gos_State_Texture, masterTextureNodes[masterVertexNodes[i].textureIndex].get_gosTextureHandle());
-				
-				//Must divide up vertices into batches of 10,000 each to send down.
-				// Somewhere around 20000 to 30000 it really gets screwy!!!
-				long currentVertices = 0;
-				while (currentVertices < totalVertices)
-				{
-					gos_VERTEX *v = masterVertexNodes[i].vertices + currentVertices;
-					long tVertices = totalVertices - currentVertices;
-					if (tVertices > MAX_SENDDOWN)
-						tVertices = MAX_SENDDOWN;
-					
-					gos_RenderIndexedArray(v, tVertices, indexArray, tVertices );
-					
-					currentVertices += tVertices;
-				}
-			}
-			
-			//Reset the list to zero length to avoid drawing more then once!
-			//Also comes in handy if gameLogic is not called.
-			masterVertexNodes[i].currentVertex = masterVertexNodes[i].vertices;
-		}
-	}
+    // sebi: split in 2 parts, first draw objects which have alpha test off, then with alpha test on
+    for(int states = 0; states < 2; ++states) 
+    {   
+        gos_SetRenderState( gos_State_AlphaTest, states);
+        for (int i=0;i<nextAvailableVertexNode;i++)
+        {
+            if (!(masterVertexNodes[i].flags & MC2_ISTERRAIN) &&
+                    !(masterVertexNodes[i].flags & MC2_ISSHADOWS) &&
+                    !(masterVertexNodes[i].flags & MC2_ISCOMPASS) &&
+                    !(masterVertexNodes[i].flags & MC2_ISCRATERS) &&
+                    (masterVertexNodes[i].flags & MC2_DRAWALPHA) &&
+                    (masterVertexNodes[i].flags & MC2_ALPHATEST)==states*MC2_ALPHATEST &&
+                    (masterVertexNodes[i].vertices))
+            {
+                DWORD totalVertices = masterVertexNodes[i].numVertices;
+                if (masterVertexNodes[i].currentVertex != (masterVertexNodes[i].vertices + masterVertexNodes[i].numVertices))
+                {
+                    totalVertices = masterVertexNodes[i].currentVertex - masterVertexNodes[i].vertices;
+                }
+
+                if (totalVertices && (totalVertices < MAX_SENDDOWN))
+                {
+                    gos_SetRenderState( gos_State_Texture, masterTextureNodes[masterVertexNodes[i].textureIndex].get_gosTextureHandle());
+                    gos_RenderIndexedArray( masterVertexNodes[i].vertices, totalVertices, indexArray, totalVertices );
+                }
+                else if (totalVertices > MAX_SENDDOWN)
+                {
+                    gos_SetRenderState( gos_State_Texture, masterTextureNodes[masterVertexNodes[i].textureIndex].get_gosTextureHandle());
+
+                    //Must divide up vertices into batches of 10,000 each to send down.
+                    // Somewhere around 20000 to 30000 it really gets screwy!!!
+                    long currentVertices = 0;
+                    while (currentVertices < totalVertices)
+                    {
+                        gos_VERTEX *v = masterVertexNodes[i].vertices + currentVertices;
+                        long tVertices = totalVertices - currentVertices;
+                        if (tVertices > MAX_SENDDOWN)
+                            tVertices = MAX_SENDDOWN;
+
+                        gos_RenderIndexedArray(v, tVertices, indexArray, tVertices );
+
+                        currentVertices += tVertices;
+                    }
+                }
+
+                //Reset the list to zero length to avoid drawing more then once!
+                //Also comes in handy if gameLogic is not called.
+                masterVertexNodes[i].currentVertex = masterVertexNodes[i].vertices;
+            }
+        }
+    }
+    //reset alpha test at the end
+    gos_SetRenderState( gos_State_AlphaTest, 0);
+
 	
 	if (Environment.Renderer == 3)
 	{

@@ -2425,6 +2425,11 @@ long TG_Shape::MultiTransformShape (Stuff::Matrix4D *shapeToClip, Stuff::Point3D
 			{
 				addFlags |= MC2_ISTERRAIN;
 			}
+
+            if(theShape->alphaTestOn)
+			{
+				addFlags |= MC2_ALPHATEST;
+			}
 			
 			if (isSpotlight)
 			{
@@ -2466,8 +2471,12 @@ long TG_Shape::MultiTransformShape (Stuff::Matrix4D *shapeToClip, Stuff::Point3D
 			addFlags |= MC2_ISTERRAIN;
 		}
 
-		if (theShape->ib_ && theShape->vb_) {
+		if(theShape->alphaTestOn)
+		{
+			addFlags |= MC2_ALPHATEST;
+		}
 
+		if (theShape->ib_ && theShape->vb_) {
 
             size_t numLights = MAX_HW_LIGHTS_IN_WORLD;
             GatherLightsParameters(&lightData_);
@@ -2591,6 +2600,11 @@ void TG_Shape::Render (float forceZ, bool isHudElement, BYTE alphaValue, bool is
 				addFlags |= MC2_ISTERRAIN;
 			}
 
+            if(theShape->alphaTestOn)
+			{
+				addFlags |= MC2_ALPHATEST;
+			}
+
 			if (drawOldWay)
 			{
 			
@@ -2684,6 +2698,11 @@ void TG_Shape::Render (float forceZ, bool isHudElement, BYTE alphaValue, bool is
 		if (isClamped)
 		{
 			addFlags |= MC2_ISTERRAIN;
+		}
+
+        if(theShape->alphaTestOn)
+		{
+			addFlags |= MC2_ALPHATEST;
 		}
 
 		if (theShape->ib_ && theShape->vb_) {
