@@ -464,7 +464,7 @@ void __stdcall gosAudio_SetChannelSlider( int Channel, enum gosAudio_Properties 
         {
             ci->fVolume = saturate(value1);
             Mix_Volume(Channel, (DWORD)(ci->fVolume*MAX_VOLUME));
-            printf("Mix_Volume(%d, %d)\n", Channel, (DWORD)(ci->fVolume*MAX_VOLUME));
+            //printf("Mix_Volume(%d, %d)\n", Channel, (DWORD)(ci->fVolume*MAX_VOLUME));
             break;
         }
         case gosAudio_Panning:
