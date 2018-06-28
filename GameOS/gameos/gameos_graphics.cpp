@@ -1,6 +1,7 @@
 #include <vector>
 #include <map>
 #include <algorithm>
+#include <string>
 
 #include "gameos.hpp"
 #include "font3d.hpp"
@@ -1192,7 +1193,9 @@ class gosRenderer {
         std::vector<gosBuffer*> bufferList_;
         std::vector<gosVertexDeclaration*> vertexDeclarationList_;
         std::vector<gosRenderMaterial*> materialList_;
-        std::map<const char*, std::map<uint32_t, gosRenderMaterial*>> materialDB_;
+		typedef std::map<uint32_t, gosRenderMaterial*> MaterialDBValue_t;
+		typedef std::map<std::string, MaterialDBValue_t> MaterialDB_t;
+        MaterialDB_t materialDB_;
 
         DWORD reqWidth;
         DWORD reqHeight;
@@ -1615,9 +1618,9 @@ void gosRenderer::afterDrawCall()
 
 gosRenderMaterial* gosRenderer::selectBasicRenderMaterial(const RenderState& rs) const 
 {
-    const auto& sh_var = rs[gos_State_Texture]!=0 ? 
-        materialDB_.find("gos_tex_vertex")->second : 
-        materialDB_.find("gos_vertex")->second;
+	const auto& sh_var = rs[gos_State_Texture]!=0 ?
+		materialDB_.find("gos_tex_vertex")->second :
+		materialDB_.find("gos_vertex")->second;
     uint32_t flags = rs[gos_State_AlphaTest] ? SHADER_FLAG_INDEX_TO_MASK(gosGLOBAL_SHADER_FLAGS::ALPHA_TEST) : 0;
 
     if(sh_var.count(flags))
@@ -1631,9 +1634,9 @@ gosRenderMaterial* gosRenderer::selectBasicRenderMaterial(const RenderState& rs)
 
 gosRenderMaterial* gosRenderer::selectLightedRenderMaterial(const RenderState& rs) const
 {
-    const auto& sh_var = rs[gos_State_Texture]!=0 ? 
-        materialDB_.find("gos_tex_vertex_lighted")->second : 
-        materialDB_.find("gos_vertex_lighted")->second;
+	const auto& sh_var = rs[gos_State_Texture]!=0 ?
+		materialDB_.find("gos_tex_vertex_lighted")->second :
+		materialDB_.find("gos_vertex_lighted")->second;
     uint32_t flags = rs[gos_State_AlphaTest] ? SHADER_FLAG_INDEX_TO_MASK(gosGLOBAL_SHADER_FLAGS::ALPHA_TEST) : 0;
 
     if(sh_var.count(flags))

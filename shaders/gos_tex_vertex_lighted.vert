@@ -37,7 +37,7 @@ struct ObjectLights {
 
 layout (binding = LIGHT_DATA_ATTACHMENT_SLOT, std140) uniform LightsData
 {
-    ObjectLights light[128];
+    ObjectLights light[32];
 };
 
 uniform vec4 light_offset_;

@@ -136,7 +136,7 @@ static inline unsigned long long rdtsc(void)
 #endif
 
 
-template <typename T, std::size_t N>
+template <typename T, size_t N>
 char(&COUNTOF_REQUIRES_ARRAY_ARGUMENT(T(&)[N]))[N];
 #define COUNTOF(x) sizeof(COUNTOF_REQUIRES_ARRAY_ARGUMENT(x))
 
