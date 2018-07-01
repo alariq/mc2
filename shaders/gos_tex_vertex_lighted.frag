@@ -3,37 +3,16 @@
 //#version 420
 
 #define PREC highp
-// should be in sync with C++ code
-#define     LIGHT_DATA_ATTACHMENT_SLOT      0
-#
-#define     MAX_LIGHTS_IN_WORLD             16
 
-//layout (binding = LIGHT_DATA_ATTACHMENT_SLOT, std140) uniform LightsData
-//{
-//    mat4 light_to_world[MAX_LIGHTS_IN_WORLD];
-//    vec4 light_dir[MAX_LIGHTS_IN_WORLD]; // w - light type
-//    vec4 light_color[MAX_LIGHTS_IN_WORLD];
-//} lights_data;
-
-
-struct ObjectLights {
-    mat4 light_to_world[MAX_LIGHTS_IN_WORLD];
-    vec4 light_dir[MAX_LIGHTS_IN_WORLD]; // w - light type
-    vec4 light_color[MAX_LIGHTS_IN_WORLD];
-    ivec4 numLights;
-};
-
-layout (binding = LIGHT_DATA_ATTACHMENT_SLOT, std140) uniform LightsData
-{
-    ObjectLights light[32];
-};
+#include <include/lighting.hglsl>
 
 uniform vec4 light_offset_;
 
 in PREC vec3 Normal;
 //in PREC float FogValue;
 in PREC vec2 Texcoord;
-in PREC vec4 VertexLight;
+in PREC vec4 VertexColor;
+in PREC vec3 VertexLight;
 
 layout (location=0) out PREC vec4 FragColor;
 
@@ -54,18 +33,13 @@ void main(void)
 	//if(fog_color.x>0.0 || fog_color.y>0.0 || fog_color.z>0.0 || fog_color.w>0.0)
     //	c.rgb = mix(fog_color.rgb, c.rgb, FogValue);
 
-    const int lights_index = int(light_offset_.x);
-
 #if ENABLE_VERTEX_LIGHTING
-    FragColor = c*VertexLight;
+	PREC vec3 lighting = VertexLight;
 #else
-    ObjectLights ld = light[lights_index];
-    float n_dot_l = clamp(dot(normalize(Normal), -ld.light_dir[0].xyz), 0.0, 1.0);
-    vec4 diffuse = c * ld.light_color[0];
-    vec4 ambient = c * ld.light_color[1];//ld.light_color[1];
-	//FragColor = diffuse * n_dot_l + ambient;
-    // this is how MC2 treats ambient :-/
-	FragColor = diffuse * clamp(n_dot_l + ld.light_color[1], 0.0, 1.0);
+    const int lights_index = int(light_offset_.x);
+    PREC vec3 lighting = calc_light(lights_index, Normal, VertexLight);
 #endif
+
+	FragColor = vec4(c.xyz * lighting, c.a);
 }
 

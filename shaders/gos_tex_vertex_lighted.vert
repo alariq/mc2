@@ -2,11 +2,12 @@
 // using this because it is required if we want to use "binding" qualifier in layout (can be set in cpp code but it is easier to do in shader, so procedd like this and maybe change later)
 //#version 420
 
+#include <include/lighting.hglsl>
+
 layout(location = 0) in vec3 pos;
 layout(location = 1) in vec3 normal;
 layout(location = 2) in vec4 aRGBLight;
 layout(location = 3) in vec2 texcoord;
-
 
 layout (binding = 1, std140) uniform mesh_data
 { 
@@ -14,34 +15,7 @@ layout (binding = 1, std140) uniform mesh_data
   vec4 diffuse;
 };
 
-// should be in sync with C++ code
-#define     LIGHT_DATA_ATTACHMENT_SLOT      0
-
-#define 	TG_LIGHT_AMBIENT				0
-#define		TG_LIGHT_INFINITE				1
-#define		TG_LIGHT_INFINITEWITHFALLOFF	2
-#define 	TG_LIGHT_POINT					3
-#define		TG_LIGHT_SPOT					4
-#define		TG_LIGHT_TERRAIN				5
-#define MAX_LIGHTS_IN_WORLD 16
-
-#define ENABLE_VERTEX_LIGHTING              0
-
-
-struct ObjectLights {
-    mat4 light_to_world[MAX_LIGHTS_IN_WORLD];
-    vec4 light_dir[MAX_LIGHTS_IN_WORLD]; // w - light type
-    vec4 light_color[MAX_LIGHTS_IN_WORLD];
-    ivec4 numLights;
-};
-
-layout (binding = LIGHT_DATA_ATTACHMENT_SLOT, std140) uniform LightsData
-{
-    ObjectLights light[32];
-};
-
 uniform vec4 light_offset_;
-
 
 uniform mat4 mvp_; // TODO: remove, use wvp_ instead
 
@@ -58,8 +32,8 @@ uniform float forceZ; // baked in a wvp matrix
 out vec3 Normal;
 out float FogValue;
 out vec2 Texcoord;
-out vec4 VertexLight;
-
+out vec4 VertexColor;
+out vec3 VertexLight;
 
 void main(void)
 {
@@ -82,16 +56,18 @@ void main(void)
     //FogValue = fog.w;
     Texcoord = texcoord;
 
+    // base light can be only calculated in VS because relies on eaxt vertex colors
+    // TODO: pass correct parameters here
+    vec3 base_light = get_base_light(aRGBLight.bgra, false, 0.0, false, false,
+            vec3(0.0), vec3(0.0), vec3(0.0));
+
 #if ENABLE_VERTEX_LIGHTING
     const int lights_index = int(light_offset_.x);
-    ObjectLights ld = light[lights_index];
-    float n_dot_l = clamp(dot(normalize(Normal), -ld.light_dir[0].xyz), 0.0, 1.0);
-	VertexLight = clamp(n_dot_l + ld.light_color[1], 0.0, 1.0);
+    VertexLight = calc_light(lights_index, Normal, base_light);
 #else
-    VertexLight = aRGBLight;
+    VertexLight = base_light;
 #endif
 
-
-
+    VertexColor = aRGBLight.bgra;
 }
 
