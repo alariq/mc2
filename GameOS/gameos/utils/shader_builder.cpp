@@ -5,11 +5,18 @@
 #include <assert.h>
 #include <stdio.h>
 #include <cstring>
+#include <string>
 
 #include "utils/stream.h"
 #include "utils/logging.h"
 #include "utils/gl_utils.h"
 #include "utils/shader_builder.h"
+#include "utils/timing.h"
+#include "utils/file_utils.h"
+
+
+#define PATH_SEPARATOR_AS_CHAR  '/'
+#define PATH_SEPARATOR "/"
 
 
 
@@ -135,13 +142,14 @@ glsl_shader::Shader_t get_shader_type(GLenum type)
 
 
 
-const char* glsl_load(const char* fname)
+const char* glsl_load(const char* fname, size_t* out_size = nullptr)
 {
     assert(fname);
     stream* pstream = stream::makeFileStream();
     if(0 != pstream->open(fname,"rb"))
     {
         log_error("Can't open %s \n", fname);
+        delete pstream;
         return 0;
     }
 
@@ -153,55 +161,168 @@ const char* glsl_load(const char* fname)
     size_t rv = pstream->read(pdata, 1, size);
     assert(rv==size);
     pdata[size] = '\0';
+    if(out_size)
+        *out_size = size;
+
+    pstream->close();
+    delete pstream;
+
     return pdata;
 }
 
+bool parse_include(const char* str, const char*& include, size_t& size, const char*& ieol)
+{
+    const char* begin = strchr(str, '<');
+    const char* end = strchr(str, '>');
+    const char* eol = strchr(str, '\n');
+    ieol = eol;
 
+    if(!begin || !end || (eol && end > eol) || end - begin <= 1)
+        return false;
 
-glsl_shader* glsl_shader::makeShader(Shader_t stype, const char* fname, const char* prefix/* = nullptr*/)
-{ 
+    begin++;
+
+    while(*begin==' ')
+        begin++;
+
+    while(*(end-1)==' ')
+        end--;
+
+    include = begin;
+    size = end - begin;
+    return true;
+}
+
+std::string get_path(const char* fname)
+{
+    const char* pathend = strchr(fname, PATH_SEPARATOR_AS_CHAR);
+    if(!pathend)
+        return std::string();
+    else
+        return std::string(fname, pathend - fname);
+}
+
+bool parse_includes(const std::string& base_path, const char* psource, std::vector<std::string>& include_list, std::string& parsed_source)
+{
+    static const char* INCLUDE = "#include";
+    const char* token = psource;
+    const char* start = psource;
+    while((token = strstr(start, INCLUDE)))
+    {
+        parsed_source.append(std::string(start, token - start));
+
+        const char* include;
+        size_t size;
+        if(!parse_include(token + strlen(INCLUDE), include, size, start))
+            return false;
+
+        std::string inc = std::string(include, size);
+        std::string include_path = base_path + std::string(PATH_SEPARATOR) + inc;
+        include_list.push_back(include_path);
+
+        // insert include contents to the shader source code
+        size_t count;
+        const char* psource = glsl_load(include_path.c_str(), &count);
+        if(!psource)
+        {
+            log_error("Could not load include: %s\n", include_path.c_str());
+            return false;
+        }
+
+        parsed_source.append("//");
+        parsed_source.append(include_path + "\n");
+        parsed_source.append(std::string(psource, count) + "\n");
+
+        if(!start) // include was at last line 
+            break;
+    }
+
+    parsed_source.append(std::string(start));
+
+    //printf("preprocessed source file: \n =================\n %s \n===================\n", parsed_source.c_str());
+
+    return true;
+}
+
+bool load_shader(const char* fname, std::string& shader_source, std::vector<std::string>& includes)
+{
     const char* psource = glsl_load(fname);
     if(!psource)
         return 0;
+
+    std::string base_path = get_path(fname);
+    if(!parse_includes(base_path, psource, includes, shader_source))
+    {
+		log_error("Shader filename: %s: failed to parse includes\n", fname);
+        delete[] psource;
+        return nullptr;
+    }
+
+    delete[] psource;
+
+    return true;
+}
+
+bool compile_shader(GLenum shader, const char** strings, size_t count)
+{
+    glShaderSource(shader, count, strings, 0);
+    glCompileShader(shader);
+
+	GLenum err = glGetError();
+	if(err != GL_NO_ERROR)
+	{
+		log_error("OpenGL Error: %s\n", ogl_get_error_code_str(err));
+	}
+
+    bool error = get_shader_error_status(shader, GL_COMPILE_STATUS);
+    return !error && err==GL_NO_ERROR;
+}
+
+
+glsl_shader* glsl_shader::makeShader(Shader_t stype, const char* fname, const char* prefix/* = nullptr*/)
+{
+    std::string shader_source;
+    std::vector<std::string> shader_includes;
+
+    if(!load_shader(fname, shader_source, shader_includes))
+    {
+		log_error("Shader filename: %s, failed to load shader\n", fname);
+        return nullptr;
+    }
 	
     GLenum type = get_gl_shader_type(stype);
     GLuint shader = glCreateShader(type);
     if(0 == shader)
         return 0;
 
-    const char* strings[] = { prefix == nullptr ? "" : prefix, psource };
-
-    glShaderSource(shader, sizeof(strings)/sizeof(strings[0]), strings, 0);
-    delete[] psource;
-
-    glCompileShader(shader);
-
-	GLenum err = glGetError();
-	if(err != GL_NO_ERROR)
-	{
-		log_error("Shader filename: %s\n", fname);
-		log_error("OpenGL Error: %s\n", ogl_get_error_code_str(err));
-	}
-
-    if(get_shader_error_status(shader, GL_COMPILE_STATUS))
+    const char* strings[] = { prefix == nullptr ? "" : prefix, shader_source.c_str() };
+    if(!compile_shader(shader, strings, sizeof(strings)/sizeof(strings[0])))
     {
-		log_error("Shader filename: %s\n", fname);
         glDeleteShader(shader);
-        return 0;
+        return nullptr;
     }
 
     glsl_shader* pshader = new glsl_shader();
     pshader->fname_ = fname;
     pshader->shader_ = shader;
     pshader->type_ = type;
+    pshader->includes_ = shader_includes;
 
-    if(s_shaders[stype].count(fname))
+    char unique_id[256] = {0};
+    snprintf(unique_id, 256, "%s_%p", fname, pshader);
+    std::string uid = &unique_id[0];
+
+    if(s_shaders[stype].count(uid))
 	{
-		glsl_shader* pshader = s_shaders[stype][fname];
-		s_shaders[stype].erase(fname);
+        log_error("Duplicate shader name: %s\n", fname);
         delete pshader;
+        return nullptr;
+
+		//glsl_shader* pshader = s_shaders[stype][fname];
+		//s_shaders[stype].erase(fname);
+        //delete pshader;
 	}
-    s_shaders[stype].insert( std::make_pair(pshader->fname_, pshader) );
+    s_shaders[stype].insert( std::make_pair(uid, pshader) );
      
     return pshader;
 }
@@ -223,26 +344,38 @@ glsl_shader::~glsl_shader()
 
 bool glsl_shader::reload(const char* prefix)
 {
-    const char* psource = glsl_load(fname_.c_str());
-    if(!psource)
-        return false;
+    std::string shader_source;
+    std::vector<std::string> shader_includes;
 
-    const char* strings[] = { prefix == nullptr ? "" : prefix, psource };
-
-    glShaderSource(shader_, sizeof(strings)/sizeof(strings[0]), strings, 0);
-
-    glShaderSource(shader_, 1, strings, 0);
-    delete[] psource;
-
-    glCompileShader(shader_);
-
-    if(get_shader_error_status(shader_, GL_COMPILE_STATUS))
+    if(!load_shader(fname_.c_str(), shader_source, shader_includes))
     {
-        //glDeleteShader(shader);
+		log_error("Shader filename: %s, failed to load shader\n", fname_.c_str());
+        return nullptr;
+    }
+	
+    const char* strings[] = { prefix == nullptr ? "" : prefix, shader_source.c_str() };
+    if(!compile_shader(shader_, strings, sizeof(strings)/sizeof(strings[0])))
+    {
         return false;
     }
 
+    includes_ = shader_includes;
+
     return true;
+}
+
+uint64_t glsl_shader::getModTimeMs()
+{
+    using namespace filesystem;
+
+	uint64_t mt = get_file_mod_time_ms(fname_.c_str());
+
+    for(int i=0;i<includes_.size();++i)
+    {
+	    uint64_t t = get_file_mod_time_ms(includes_[i].c_str());
+        mt = max(mt, t);
+    }
+    return mt;
 }
 
 void parse_uniforms(GLuint pprogram, glsl_program::UniArr_t* puniforms, glsl_program::SamplerArr_t* psamplers)
@@ -483,6 +616,8 @@ glsl_program* glsl_program::makeProgram2(const char* name, const char* vp, const
     parse_uniforms(shp, &pprogram->uniforms_, &pprogram->samplers_);
     parse_uniform_blocks(shp, &pprogram->uniform_blocks_);
 
+    pprogram->last_load_time_ = timing::get_wall_time_ms();
+
     s_programs.insert(std::make_pair(name, pprogram) );
     return pprogram;
 
@@ -570,14 +705,26 @@ bool glsl_program::reload()
         return false;
     }
 
+	for(size_t i=0; i< sizeof(pipeline)/sizeof(pipeline[0]); ++i)
+	{
+		if(!pipeline[i]) continue;
+		glDetachShader(shp_, pipeline[i]->shader_);
+	}
+
     std::map< std::string, glsl_uniform*>::iterator it = uniforms_.begin(); 
     std::map< std::string, glsl_uniform*>::iterator end = uniforms_.end(); 
     for(;it!=end;++it)
         delete it->second;
     uniforms_.clear();
 
+    samplers_.clear();
+    uniform_blocks_.clear();
+
     parse_uniforms(shp_, &uniforms_, &samplers_);
+    parse_uniform_blocks(shp_, &uniform_blocks_);
     
+    last_load_time_ = timing::get_wall_time_ms();
+
     is_valid_ = true;
     return true;
 
@@ -751,3 +898,27 @@ GLint glsl_program::getAttribLocation(const char* pattrib)
 		return glGetAttribLocation(this->shp_, pattrib);
 	return -1;
 }
+
+uint64_t glsl_program::getModTimeMs()
+{
+    uint64_t least_recent_mt = 0;
+    if(shp_)
+    {
+		glsl_shader* pipeline[] = { vsh_, hsh_, dsh_, gsh_, fsh_ };
+		for(uint32_t i=0; i< sizeof(pipeline)/sizeof(pipeline[0]); ++i)
+		{
+			if(!pipeline[i]) continue;
+
+			uint64_t mt = pipeline[i]->getModTimeMs();
+            least_recent_mt = max(mt, least_recent_mt);
+		}
+	}
+
+    return least_recent_mt;
+}
+
+bool glsl_program::needsReload()
+{
+    return last_load_time_ < getModTimeMs();
+}
+

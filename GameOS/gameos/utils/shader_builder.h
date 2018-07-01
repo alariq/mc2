@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <vector>
 #include <map>
 #include "utils/graphics.h"
 
@@ -70,6 +71,7 @@ struct glsl_shader
     GLenum type_;
     std::string fname_;
     GLuint shader_;
+    std::vector<std::string> includes_;
 
     static std::map<std::string, glsl_shader*> s_shaders[glsl_shader::NUM_SHADER_TYPES];
 
@@ -77,8 +79,11 @@ struct glsl_shader
     static glsl_shader* makeShader(Shader_t type, const char* fname, const char* prefix = nullptr);
     static void deleteShader(glsl_shader* psh);
 
+    // returns time of least-recently modified file on which this shader depends
+    uint64_t getModTimeMs();
+
 private:
-    glsl_shader() {}
+    glsl_shader():type_(0), fname_(""), shader_(0), includes_()  {}
     ~glsl_shader();
 };
 
@@ -125,6 +130,10 @@ struct glsl_program {
 
     static std::map<std::string, glsl_program*> s_programs;
 
+    uint64_t last_load_time_;
+    // returns time of least-recently modified file on which this shader depends
+    uint64_t getModTimeMs();
+    bool needsReload();
 	
 private:
     glsl_program():shp_(0), vsh_(0), fsh_(0), hsh_(0), dsh_(0), gsh_(0), is_valid_(false) {};

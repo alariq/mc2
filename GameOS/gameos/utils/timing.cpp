@@ -2,6 +2,7 @@
 
 #ifdef PLATFORM_WINDOWS
 #include<windows.h>
+#include<time.h>
 #else
 #include<time.h>
 #endif
@@ -66,4 +67,14 @@ namespace timing {
 		return ticks;
 #endif
 	}
+
+    uint64_t get_wall_time_ms()
+    {
+        // or clock_gettime(CLOCKREALTIME, ts);
+        struct timespec ts;
+        timespec_get(&ts, TIME_UTC);
+		size_t milliseconds = ts.tv_sec * 1e+3;
+		milliseconds += ts.tv_nsec / 1e+6;
+        return milliseconds;
+    }
 }

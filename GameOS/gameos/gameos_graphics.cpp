@@ -19,6 +19,7 @@
 #include "utils/Image.h"
 #include "utils/vec.h"
 #include "utils/string_utils.h"
+#include "utils/timing.h"
 #include "gos_render.h"
 
 class gosRenderer;
@@ -134,8 +135,8 @@ class gosMaterialVariation {
 
         ~gosMaterialVariation()
         {
-            delete defines_;
-            delete unique_name_suffix_;
+            delete[] defines_;
+            delete[] unique_name_suffix_;
         }
 };
 
@@ -236,12 +237,19 @@ class gosRenderMaterial {
             pmat->name_ = new char[strlen(shader) + 1];
             strcpy(pmat->name_, shader);
 
-            pmat->pos_loc = pmat->program_->getAttribLocation("pos");
-            pmat->color_loc = pmat->program_->getAttribLocation("color");
-            pmat->spec_color_and_fog_loc = pmat->program_->getAttribLocation("fog");
-            pmat->texcoord_loc = pmat->program_->getAttribLocation("texcoord");
+            pmat->onLoad();
 
             return pmat;
+        }
+
+
+        void onLoad() {
+            gosASSERT(program_);
+
+            pos_loc = program_->getAttribLocation("pos");
+            color_loc = program_->getAttribLocation("color");
+            spec_color_and_fog_loc = program_->getAttribLocation("fog");
+            texcoord_loc = program_->getAttribLocation("texcoord");
         }
 
         static void destroy(gosRenderMaterial* pmat) {
@@ -253,6 +261,16 @@ class gosRenderMaterial {
 
             delete[] pmat->name_;
             pmat->name_ = 0;
+        }
+
+        void checkReload()
+        {
+            if(program_) {
+                if(program_->needsReload()) {
+                    if(program_->reload())
+                        onLoad();
+                }
+            }
         }
 
         void applyVertexDeclaration() {
@@ -1571,6 +1589,15 @@ void gosRenderer::beginFrame()
 
 void gosRenderer::endFrame()
 {
+    // check for file changes every half second
+    static uint64_t last_check_time = timing::get_wall_time_ms();
+    if(timing::get_wall_time_ms() - last_check_time > 500)
+    {
+        for(int i=0; i< materialList_.size(); ++i)
+        {
+            materialList_[i]->checkReload();
+        }
+    }
 }
 
 void gosRenderer::handleEvents()
