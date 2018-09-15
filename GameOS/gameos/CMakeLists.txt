@@ -25,6 +25,7 @@ set(SOURCES ${SOURCES}
     utils/vec.cpp
     utils/timing.cpp
     utils/string_utils.cpp
+    utils/file_utils.cpp
     )
 
 #find_package(SDL2 REQUIRED PATHS "/opt" NO_DEFAULT_PATH)

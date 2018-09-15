@@ -15,17 +15,10 @@
 #include "utils/file_utils.h"
 
 
-#define PATH_SEPARATOR_AS_CHAR  '/'
-#define PATH_SEPARATOR "/"
-
-
-
 std::map<std::string, glsl_shader*> glsl_shader::s_shaders[glsl_shader::NUM_SHADER_TYPES];
 
 std::map<std::string, glsl_program*> glsl_program::s_programs;
 UNIFORM_FUNC glsl_program::uniformFuncs[15] = {0};
-
-
 
 const int constantSizes[] = {
     sizeof(float),
@@ -175,7 +168,7 @@ bool parse_include(const char* str, const char*& include, size_t& size, const ch
     const char* begin = strchr(str, '<');
     const char* end = strchr(str, '>');
     const char* eol = strchr(str, '\n');
-    ieol = eol;
+    ieol = eol+1; // skip \n
 
     if(!begin || !end || (eol && end > eol) || end - begin <= 1)
         return false;
@@ -193,23 +186,48 @@ bool parse_include(const char* str, const char*& include, size_t& size, const ch
     return true;
 }
 
-std::string get_path(const char* fname)
+bool load_shader(const char* fname, std::string& shader_source, std::vector<std::string>& includes);
+
+size_t get_num_lines(const char* text)
 {
-    const char* pathend = strchr(fname, PATH_SEPARATOR_AS_CHAR);
-    if(!pathend)
-        return std::string();
-    else
-        return std::string(fname, pathend - fname);
+    if(!text)
+        return 0;
+
+    size_t count = 1;
+    const char* token = text;
+    while(token && (token = strchr(token, '\n')))
+    {
+        token++;
+        count++;
+    }
+
+    return count;
 }
 
-bool parse_includes(const std::string& base_path, const char* psource, std::vector<std::string>& include_list, std::string& parsed_source)
+void append_line_directive(std::string& code, size_t line, const char* fname)
 {
+    char buf[512];
+    snprintf(buf, sizeof(buf), "#line %zu // %s\n", line, fname);
+    buf[510] = '\n'; // just in case our snprintf'ed line will be more than 512
+    code.append(buf);
+}
+
+bool parse_includes(const char* fname, const char* psource, std::vector<std::string>& include_list, std::string& parsed_source)
+{
+    size_t current_line = 1;
+
+    std::string base_path = filesystem::get_path(fname);
+
     static const char* INCLUDE = "#include";
     const char* token = psource;
     const char* start = psource;
     while((token = strstr(start, INCLUDE)))
     {
-        parsed_source.append(std::string(start, token - start));
+        std::string code = std::string(start, token - start);
+
+        append_line_directive(parsed_source, current_line, fname);
+        parsed_source.append(code);
+        current_line += get_num_lines(code.c_str());
 
         const char* include;
         size_t size;
@@ -217,29 +235,25 @@ bool parse_includes(const std::string& base_path, const char* psource, std::vect
             return false;
 
         std::string inc = std::string(include, size);
-        std::string include_path = base_path + std::string(PATH_SEPARATOR) + inc;
+        std::string include_path = base_path + std::string(filesystem::kPathSeparator) + inc;
         include_list.push_back(include_path);
 
         // insert include contents to the shader source code
-        size_t count;
-        const char* psource = glsl_load(include_path.c_str(), &count);
-        if(!psource)
-        {
-            log_error("Could not load include: %s\n", include_path.c_str());
+        std::string source;
+        if(!load_shader(include_path.c_str(), source, include_list))
             return false;
-        }
 
-        parsed_source.append("//");
-        parsed_source.append(include_path + "\n");
-        parsed_source.append(std::string(psource, count) + "\n");
+        parsed_source.append(source);
 
         if(!start) // include was at last line 
             break;
     }
 
-    parsed_source.append(std::string(start));
-
-    //printf("preprocessed source file: \n =================\n %s \n===================\n", parsed_source.c_str());
+    if(*start)
+    {
+        append_line_directive(parsed_source, current_line, fname);
+        parsed_source.append(std::string(start));
+    }
 
     return true;
 }
@@ -250,12 +264,11 @@ bool load_shader(const char* fname, std::string& shader_source, std::vector<std:
     if(!psource)
         return 0;
 
-    std::string base_path = get_path(fname);
-    if(!parse_includes(base_path, psource, includes, shader_source))
+    if(!parse_includes(fname, psource, includes, shader_source))
     {
 		log_error("Shader filename: %s: failed to parse includes\n", fname);
         delete[] psource;
-        return nullptr;
+        return false;
     }
 
     delete[] psource;
@@ -289,6 +302,9 @@ glsl_shader* glsl_shader::makeShader(Shader_t stype, const char* fname, const ch
 		log_error("Shader filename: %s, failed to load shader\n", fname);
         return nullptr;
     }
+
+    log_info("Loading shader: %s\n", fname);
+
 	
     GLenum type = get_gl_shader_type(stype);
     GLuint shader = glCreateShader(type);
@@ -323,6 +339,17 @@ glsl_shader* glsl_shader::makeShader(Shader_t stype, const char* fname, const ch
         //delete pshader;
 	}
     s_shaders[stype].insert( std::make_pair(uid, pshader) );
+
+#define DUMP_SHADER_PREPROCESSED_FILES 1
+#if DUMP_SHADER_PREPROCESSED_FILES
+    char dump_name[256] = {0};
+    snprintf(dump_name, 256, "./dump/%s.glsl", uid.c_str());
+    FILE* f = fopen(dump_name, "w");
+    if(f) {
+        fwrite(shader_source.c_str(), shader_source.size(), 1, f);
+    }
+    fclose(f);
+#endif
      
     return pshader;
 }

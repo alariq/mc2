@@ -8,7 +8,7 @@ else("${CMAKE_SIZEOF_VOID_P}" EQUAL "8")
 	message(STATUS "Target is 32 bits")
 endif("${CMAKE_SIZEOF_VOID_P}" EQUAL "8")
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O0 -std=c++0x -ggdb ")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x -ggdb")
 if(NOT MSVC)
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-local-typedefs -Wno-unknown-warning-option") #-fsanitize=address -fno-omit-frame-pointer")
 endif()
