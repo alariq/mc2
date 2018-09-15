@@ -2,12 +2,7 @@ tags
 CMakeCache.txt
 out/
 bin/
-build/
-build64/
-build2013/
-build-rel/
-build-dbg/
-build-reldbginfo/
+build*/
 *.exe
 *.cmake
 Makefile
@@ -48,6 +43,7 @@ vidcard.csv
 *.old
 longpath.dbg
 tmp/
+dump/
 
 *.h~
 *.hpp~
