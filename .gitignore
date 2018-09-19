@@ -44,6 +44,10 @@ vidcard.csv
 longpath.dbg
 tmp/
 dump/
+test_code/
+test_sound/
+# Source repository should not track built resources
+*.fst
 
 *.h~
 *.hpp~
