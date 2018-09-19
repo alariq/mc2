@@ -491,7 +491,7 @@ long FastFile::readFast (DWORD fastFileHandle, void *bfr, DWORD size)
 				result = fread(LZPacketBuffer,1,files[fastFileHandle].pfe->size,handle);
 				logicalPosition += files[fastFileHandle].pfe->size;
 
-				//sebi: second cndiotion to handle zero-length files
+				//sebi: second condition to handle zero-length files
 				if (result != files[fastFileHandle].pfe->size && files[fastFileHandle].pfe->size>0)
 				{
 					//READ Error.  Maybe the CD is missing?

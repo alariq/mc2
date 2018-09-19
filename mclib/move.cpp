@@ -1271,12 +1271,16 @@ long MovePath::init (long numberOfSteps) {
 		maxNumberOfSteps = numberOfSteps;
 		return(maxNumberOfSteps);
 	}
-	for (long i = 0; i < MAX_STEPS_PER_MOVEPATH; i++) {
+	for (int i = 0; i < MAX_STEPS_PER_MOVEPATH; i++) {
 		stepList[i].distanceToGoal = 0.0;
 		stepList[i].destination.x = 0.0;
 		stepList[i].destination.y = 0.0;
 		stepList[i].destination.z = 0.0;
 		stepList[i].direction = 0;
+		stepList[i].area = 0; // sebi: init var
+		// should we set cells[] to something as well?
+		stepList[i].cell[0] = 0; 
+		stepList[i].cell[1] = 0; 
 	}
 	return(-1);
 }
@@ -4995,7 +4999,8 @@ long MoveMap::calcPath (MovePathPtr path, Stuff::Vector3D* goalWorldPos, int* go
 		p.z = (float)0; // How do we get the elevation for this point? Do we care?
 		char msg[200];
 		sprintf(msg, " Bad Move Goal: %d [%d(%d), %d(%d)], (%.2f, %.2f, %.2f)", DebugMovePathType, goalR, height, goalC, width, p.x, p.y, p.z);
-		gosASSERT((goalR >= 0) && (goalR < height) && (goalC >= 0) && (goalC < width));
+		//sebi:
+		//gosASSERT((goalR >= 0) && (goalR < height) && (goalC >= 0) && (goalC < width));
 	}
 
 	//------------------------------------------------------------------
