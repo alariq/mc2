@@ -1,0 +1,218 @@
+{
+   suppress i965 driver possible leaks
+   Memcheck:Leak
+   match-leak-kinds: possible
+   obj:*i965_dri.so
+   ...
+   fun:main
+}
+
+{
+   suppress i965 driver definite leaks
+   Memcheck:Leak
+   match-leak-kinds: definite
+   obj:*i965_dri.so
+}
+
+{
+   draw_screen
+   Memcheck:Leak
+   match-leak-kinds: possible
+   fun:malloc
+   fun:strdup
+   obj:/usr/lib/x86_64-linux-gnu/dri/i965_dri.so
+   obj:/usr/lib/x86_64-linux-gnu/dri/i965_dri.so
+   obj:/usr/lib/x86_64-linux-gnu/dri/i965_dri.so
+   obj:/usr/lib/x86_64-linux-gnu/dri/i965_dri.so
+   obj:/usr/lib/x86_64-linux-gnu/dri/i965_dri.so
+   obj:/usr/lib/x86_64-linux-gnu/dri/i965_dri.so
+   obj:/usr/lib/x86_64-linux-gnu/dri/i965_dri.so
+   obj:/usr/lib/x86_64-linux-gnu/dri/i965_dri.so
+   fun:_ZL11draw_screenv
+   fun:main
+}
+
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: possible
+   fun:calloc
+   obj:/usr/lib/x86_64-linux-gnu/dri/i965_dri.so
+   obj:/usr/lib/x86_64-linux-gnu/dri/i965_dri.so
+   obj:/usr/lib/x86_64-linux-gnu/dri/i965_dri.so
+   obj:/usr/lib/x86_64-linux-gnu/dri/i965_dri.so
+   obj:/usr/lib/x86_64-linux-gnu/dri/i965_dri.so
+   obj:/usr/lib/x86_64-linux-gnu/dri/i965_dri.so
+   obj:/usr/lib/x86_64-linux-gnu/dri/i965_dri.so
+   obj:/usr/lib/x86_64-linux-gnu/dri/i965_dri.so
+   obj:/usr/lib/x86_64-linux-gnu/dri/i965_dri.so
+   obj:/usr/lib/x86_64-linux-gnu/dri/i965_dri.so
+   obj:/usr/lib/x86_64-linux-gnu/dri/i965_dri.so
+}
+
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: possible
+   fun:malloc
+   fun:strdup
+   obj:/usr/lib/x86_64-linux-gnu/dri/i965_dri.so
+   obj:/usr/lib/x86_64-linux-gnu/dri/i965_dri.so
+   obj:/usr/lib/x86_64-linux-gnu/dri/i965_dri.so
+   obj:/usr/lib/x86_64-linux-gnu/dri/i965_dri.so
+   obj:/usr/lib/x86_64-linux-gnu/dri/i965_dri.so
+   obj:/usr/lib/x86_64-linux-gnu/dri/i965_dri.so
+   obj:/usr/lib/x86_64-linux-gnu/dri/i965_dri.so
+   obj:/usr/lib/x86_64-linux-gnu/dri/i965_dri.so
+   obj:/usr/lib/x86_64-linux-gnu/dri/i965_dri.so
+   fun:_ZL11draw_screenv
+}
+
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: possible
+   fun:calloc
+   obj:/usr/lib/x86_64-linux-gnu/dri/i965_dri.so
+   obj:/usr/lib/x86_64-linux-gnu/dri/i965_dri.so
+   obj:/usr/lib/x86_64-linux-gnu/dri/i965_dri.so
+   obj:/usr/lib/x86_64-linux-gnu/dri/i965_dri.so
+   obj:/usr/lib/x86_64-linux-gnu/dri/i965_dri.so
+   obj:/usr/lib/x86_64-linux-gnu/dri/i965_dri.so
+   obj:/usr/lib/x86_64-linux-gnu/dri/i965_dri.so
+   obj:/usr/lib/x86_64-linux-gnu/dri/i965_dri.so
+   obj:/usr/lib/x86_64-linux-gnu/dri/i965_dri.so
+   obj:/usr/lib/x86_64-linux-gnu/dri/i965_dri.so
+   obj:/usr/lib/x86_64-linux-gnu/dri/i965_dri.so
+}
+
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: possible
+   fun:malloc
+   fun:strdup
+   obj:/usr/lib/x86_64-linux-gnu/dri/i965_dri.so
+   obj:/usr/lib/x86_64-linux-gnu/dri/i965_dri.so
+   obj:/usr/lib/x86_64-linux-gnu/dri/i965_dri.so
+   obj:/usr/lib/x86_64-linux-gnu/dri/i965_dri.so
+   obj:/usr/lib/x86_64-linux-gnu/dri/i965_dri.so
+   obj:/usr/lib/x86_64-linux-gnu/dri/i965_dri.so
+   obj:/usr/lib/x86_64-linux-gnu/dri/i965_dri.so
+   obj:/usr/lib/x86_64-linux-gnu/dri/i965_dri.so
+   obj:/usr/lib/x86_64-linux-gnu/dri/i965_dri.so
+   obj:/usr/lib/x86_64-linux-gnu/dri/i965_dri.so
+
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: possible
+   fun:malloc
+   obj:/usr/lib/x86_64-linux-gnu/dri/i965_dri.so
+   fun:_ZN12glsl_program12makeProgram2EPKcS1_S1_S1_S1_S1_iPS1_
+   fun:_ZN12glsl_program11makeProgramEPKcS1_S1_
+   fun:main
+}
+
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: definite
+   fun:malloc
+   fun:strdup
+   obj:/usr/lib/x86_64-linux-gnu/dri/i965_dri.so
+   obj:/usr/lib/x86_64-linux-gnu/dri/i965_dri.so
+   obj:/usr/lib/x86_64-linux-gnu/dri/i965_dri.so
+   obj:/usr/lib/x86_64-linux-gnu/dri/i965_dri.so
+   fun:_ZN11glsl_shader10makeShaderENS_8Shader_tEPKc
+   fun:_ZN12glsl_program12makeProgram2EPKcS1_S1_S1_S1_S1_iPS1_
+   fun:_ZN12glsl_program11makeProgramEPKcS1_S1_
+   fun:_ZN17gosShaderMaterial4loadEPKc
+   fun:_ZN11gosRenderer4initEv
+   fun:_Z18gos_CreateRendererPN8graphics13RenderContextEPNS_12RenderWindowEii
+}
+
+
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: possible
+   fun:malloc
+   obj:/usr/lib/x86_64-linux-gnu/dri/i965_dri.so
+   obj:/usr/lib/x86_64-linux-gnu/dri/i965_dri.so
+   obj:/usr/lib/x86_64-linux-gnu/dri/i965_dri.so
+   obj:/usr/lib/x86_64-linux-gnu/dri/i965_dri.so
+   obj:/usr/lib/x86_64-linux-gnu/dri/i965_dri.so
+   obj:/usr/lib/mesa-diverted/x86_64-linux-gnu/libGL.so.1.2.0
+   obj:/usr/lib/mesa-diverted/x86_64-linux-gnu/libGL.so.1.2.0
+   fun:X11_GL_CreateContext
+   fun:SDL_GL_CreateContext_REAL
+   fun:_ZN8graphics19init_render_contextEPNS_12RenderWindowE
+   fun:main
+}
+
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: possible
+   fun:malloc
+   obj:/usr/lib/x86_64-linux-gnu/dri/i965_dri.so
+   obj:/usr/lib/x86_64-linux-gnu/dri/i965_dri.so
+   obj:/usr/lib/x86_64-linux-gnu/dri/i965_dri.so
+   obj:/usr/lib/x86_64-linux-gnu/dri/i965_dri.so
+   obj:/usr/lib/x86_64-linux-gnu/dri/i965_dri.so
+   obj:/usr/lib/mesa-diverted/x86_64-linux-gnu/libGL.so.1.2.0
+   obj:/usr/lib/mesa-diverted/x86_64-linux-gnu/libGL.so.1.2.0
+    ...
+   fun:main
+}
+
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: definite 
+   fun:malloc
+   obj:/usr/lib/x86_64-linux-gnu/dri/i965_dri.so
+   obj:/usr/lib/x86_64-linux-gnu/dri/i965_dri.so
+   obj:/usr/lib/x86_64-linux-gnu/dri/i965_dri.so
+   obj:/usr/lib/x86_64-linux-gnu/dri/i965_dri.so
+   obj:/usr/lib/x86_64-linux-gnu/dri/i965_dri.so
+   obj:/usr/lib/mesa-diverted/x86_64-linux-gnu/libGL.so.1.2.0
+   obj:/usr/lib/mesa-diverted/x86_64-linux-gnu/libGL.so.1.2.0
+    ...
+   fun:main
+}
+
+{
+    desc: drm_intel_gem_bo_map
+    Memcheck:Leak
+    match-leak-kinds: definite 
+    fun:drm_intel_gem_bo_map
+    obj:/usr/lib/x86_64-linux-gnu/dri/i965_dri.so)
+    obj:/usr/lib/x86_64-linux-gnu/dri/i965_dri.so)
+    obj:/usr/lib/x86_64-linux-gnu/dri/i965_dri.so)
+    obj:/usr/lib/x86_64-linux-gnu/dri/i965_dri.so)
+    obj:/usr/lib/x86_64-linux-gnu/dri/i965_dri.so)
+    obj:/usr/lib/x86_64-linux-gnu/dri/i965_dri.so)
+    obj:/usr/lib/x86_64-linux-gnu/dri/i965_dri.so)
+    obj:/usr/lib/x86_64-linux-gnu/dri/i965_dri.so)
+    fun:_Z14getTextureDataRK7TextureiPh9TexFormat
+    fun:_ZN10gosTexture4LockEibPi
+    fun:_Z15gos_LockTexturejjbP10TEXTUREPTR
+}
+
+{
+    desc: drm_intel_gem_bo_map
+    Memcheck:Leak
+    match-leak-kinds: definite 
+    fun:drm_intel_gem_bo_map
+    obj:/usr/lib/x86_64-linux-gnu/dri/i965_dri.so)
+}
+
+{
+    desc: drm_intel_gem_bo_map
+    Memcheck:Leak
+    match-leak-kinds: possible
+    fun: memalign
+    obj:/usr/lib/x86_64-linux-gnu/dri/i965_dri.so)
+}

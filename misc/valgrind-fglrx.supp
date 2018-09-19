@@ -1,0 +1,488 @@
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Param
+   ioctl(generic)
+   fun:ioctl
+   fun:ukiCreateContext
+   obj:/usr/X11R6/lib64/modules/dri/fglrx_dri.so
+   obj:*
+   obj:/usr/X11R6/lib64/modules/dri/fglrx_dri.so
+   obj:*
+   obj:/usr/X11R6/lib64/modules/dri/fglrx_dri.so
+   obj:*
+   obj:*
+   obj:*
+   fun:calloc
+   obj:*
+}
+
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Cond
+   obj:/usr/X11R6/lib64/modules/dri/fglrx_dri.so
+   obj:/usr/X11R6/lib64/modules/dri/fglrx_dri.so
+   obj:/usr/X11R6/lib64/modules/dri/fglrx_dri.so
+   obj:/usr/X11R6/lib64/modules/dri/fglrx_dri.so
+   obj:*
+   obj:/usr/X11R6/lib64/modules/dri/fglrx_dri.so
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Cond
+   obj:/usr/X11R6/lib64/modules/dri/fglrx_dri.so
+}
+
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Addr2
+   fun:memcpy@GLIBC_2.2.5
+   obj:/usr/X11R6/lib64/modules/dri/fglrx_dri.so
+   obj:*
+}
+
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Addr8
+   fun:memcpy@GLIBC_2.2.5
+   obj:/usr/X11R6/lib64/modules/dri/fglrx_dri.so
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Addr8
+   fun:memcpy@GLIBC_2.2.5
+   obj:/usr/X11R6/lib64/modules/dri/fglrx_dri.so
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Addr8
+   fun:memcpy@GLIBC_2.2.5
+   obj:/usr/X11R6/lib64/modules/dri/fglrx_dri.so
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Param
+   ioctl(generic)
+   fun:ioctl
+   fun:uki_firegl_MapLockPageTableNew
+   obj:/usr/X11R6/lib64/modules/dri/fglrx_dri.so
+   obj:*
+   obj:*
+   obj:*
+   fun:getenv
+}
+
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   obj:/usr/X11R6/lib64/modules/dri/fglrx_dri.so
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+}
+
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   obj:/usr/X11R6/lib64/modules/dri/fglrx_dri.so
+   obj:*
+   ... 
+}
+
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value4
+   obj:/usr/X11R6/lib64/modules/dri/fglrx_dri.so
+   obj:*
+   ... 
+}
+
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value2
+   obj:/usr/X11R6/lib64/modules/dri/fglrx_dri.so
+   obj:*
+   ... 
+}
+
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Addr2
+   fun:memcpy@GLIBC_2.2.5
+   obj:/usr/X11R6/lib64/modules/dri/fglrx_dri.so
+}
+
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Param
+   ioctl(generic)
+   fun:ioctl
+   fun:uki_firegl_ClearDirtyPagesNew
+   obj:/usr/X11R6/lib64/modules/dri/fglrx_dri.so
+   obj:/usr/lib/x86_64-linux-gnu/libatiuki.so.1.0
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Param
+   ioctl(generic)
+   fun:ioctl
+   fun:uki_firegl_UnMapLockPageTableNew
+   obj:/usr/X11R6/lib64/modules/dri/fglrx_dri.so
+   obj:*
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Addr4
+   obj:/usr/X11R6/lib64/modules/dri/fglrx_dri.so
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Addr1
+   obj:/usr/X11R6/lib64/modules/dri/fglrx_dri.so
+}
+
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   obj:/usr/X11R6/lib64/modules/dri/fglrx_dri.so
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Addr8
+   obj:/usr/X11R6/lib64/modules/dri/fglrx_dri.so
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Addr8
+   obj:/usr/X11R6/lib64/modules/dri/fglrx_dri.so
+   obj:*
+   obj:/usr/X11R6/lib64/modules/dri/fglrx_dri.so
+   obj:*
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Addr8
+   obj:/usr/X11R6/lib64/modules/dri/fglrx_dri.so
+   obj:*
+   obj:*
+   obj:*
+}
+
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Addr8
+   obj:/usr/X11R6/lib64/modules/dri/fglrx_dri.so
+}
+
+
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Param
+   ioctl(generic)
+   fun:ioctl
+   fun:uki_firegl_ClearDirtyPagesNew
+   obj:/usr/X11R6/lib64/modules/dri/fglrx_dri.so
+   obj:*
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Addr8
+   obj:/usr/X11R6/lib64/modules/dri/fglrx_dri.so
+   obj:*
+}
+
+
+
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Addr8
+   fun:memcpy@@GLIBC_2.14
+   fun:FindFirstFileA
+   fun:_ZN19LogisticsSaveDialog10initDialogEPKcb
+   fun:_ZN19LogisticsSaveDialog9beginLoadEv
+   fun:_ZN8MainMenu13handleMessageEmm
+   fun:_ZN11aAnimButton6updateEv
+   fun:_ZN15LogisticsScreen6updateEv
+   fun:_ZN8MainMenu6updateEv
+   fun:_ZN12MissionBegin6updateEv
+   fun:_ZN9Logistics6updateEv
+   fun:_Z11DoGameLogicv
+   fun:main
+}
+
+{
+   caused by gos_LockTexture
+   Memcheck:Cond
+   fun:_ZN12GVAppearance14setPaintSchemeEv
+   fun:_ZN12GVAppearance14setPaintSchemeEjjj
+   fun:_ZN12GVAppearance16resetPaintSchemeEjjj
+   fun:_ZN7Mission16createPartObjectElP5Mover
+   fun:_ZN7Mission4initEPKcllPN5Stuff8Vector3DEPA3_cl
+   fun:_ZN9Logistics12beginMissionEPviPS0_
+   fun:_ZN9Logistics6updateEv
+   fun:_Z11DoGameLogicv
+   fun:main
+}
+
+
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Cond
+   fun:_ZN16Mech3DAppearance14setPaintSchemeEv
+   fun:_ZN16Mech3DAppearance14setPaintSchemeEjjj
+   fun:_ZN16Mech3DAppearance16resetPaintSchemeEjjj
+   fun:_ZN7Mission16createPartObjectElP5Mover
+   fun:_ZN7Mission4initEPKcllPN5Stuff8Vector3DEPA3_cl
+   fun:_ZN9Logistics12beginMissionEPviPS0_
+   fun:_ZN9Logistics6updateEv
+   fun:_Z11DoGameLogicv
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Cond
+   fun:_ZN16Mech3DAppearance14setPaintSchemeEv
+   fun:_ZN16Mech3DAppearance14setPaintSchemeEjjj
+   fun:_ZN16Mech3DAppearance16resetPaintSchemeEjjj
+   fun:_ZN7Mission16createPartObjectElP5Mover
+   fun:_ZN7Mission4initEPKcllPN5Stuff8Vector3DEPA3_cl
+   fun:_ZN9Logistics12beginMissionEPviPS0_
+   fun:_ZN9Logistics6updateEv
+   fun:_Z11DoGameLogicv
+   fun:main
+}
+
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Cond
+   fun:_ZN16Mech3DAppearance14setPaintSchemeEv
+   fun:_ZN16Mech3DAppearance14setPaintSchemeEjjj
+   fun:_ZN16Mech3DAppearance16resetPaintSchemeEjjj
+   fun:_ZN12SimpleCamera7setMechEPKclll
+   fun:_ZN13MechBayScreen7setMechEP13LogisticsMechb
+   fun:_ZN13MechBayScreen6updateEv
+   fun:_ZN12MissionBegin6updateEv
+   fun:_ZN9Logistics6updateEv
+   fun:_Z11DoGameLogicv
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Cond
+   fun:_ZN16Mech3DAppearance14setPaintSchemeEv
+   fun:_ZN16Mech3DAppearance14setPaintSchemeEjjj
+   fun:_ZN16Mech3DAppearance16resetPaintSchemeEjjj
+   fun:_ZN12SimpleCamera7setMechEPKclll
+   fun:_ZN13MechBayScreen7setMechEP13LogisticsMechb
+   fun:_ZN13MechBayScreen6updateEv
+   fun:_ZN12MissionBegin6updateEv
+   fun:_ZN9Logistics6updateEv
+   fun:_Z11DoGameLogicv
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Cond
+   fun:_ZN16Mech3DAppearance14setPaintSchemeEv
+   fun:_ZN16Mech3DAppearance14setPaintSchemeEjjj
+   fun:_ZN16Mech3DAppearance16resetPaintSchemeEjjj
+   fun:_ZN12SimpleCamera7setMechEPKclll
+   fun:_ZN13MechBayScreen7setMechEP13LogisticsMechb
+   fun:_ZN13MechBayScreen6updateEv
+   fun:_ZN12MissionBegin6updateEv
+   fun:_ZN9Logistics6updateEv
+   fun:_Z11DoGameLogicv
+   fun:main
+}
+
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Cond
+   fun:_ZN16Mech3DAppearance14setPaintSchemeEv
+   fun:_ZN16Mech3DAppearance14setPaintSchemeEjjj
+   fun:_ZN16Mech3DAppearance16resetPaintSchemeEjjj
+   fun:_ZN12SimpleCamera7setMechEPKclll
+   fun:_ZN13MechBayScreen7setMechEP13LogisticsMechb
+   fun:_ZN13MechBayScreen6updateEv
+   fun:_ZN12MissionBegin6updateEv
+   fun:_ZN9Logistics6updateEv
+   fun:_Z11DoGameLogicv
+   fun:main
+}
+
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Cond
+   fun:_ZN16Mech3DAppearance14setPaintSchemeEv
+   fun:_ZN16Mech3DAppearance14setPaintSchemeEjjj
+   fun:_ZN16Mech3DAppearance16resetPaintSchemeEjjj
+   fun:_ZN7Mission8addMoverEP14_MoverInitData
+   fun:_ZN9Logistics12beginMissionEPviPS0_
+   fun:_ZN9Logistics6updateEv
+   fun:_Z11DoGameLogicv
+   fun:main
+}
+
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Cond
+   fun:_ZN16Mech3DAppearance14setPaintSchemeEv
+   fun:_ZN16Mech3DAppearance14setPaintSchemeEjjj
+   fun:_ZN16Mech3DAppearance16resetPaintSchemeEjjj
+   fun:_ZN7Mission8addMoverEP14_MoverInitData
+   fun:_ZN9Logistics12beginMissionEPviPS0_
+   fun:_ZN9Logistics6updateEv
+   fun:_Z11DoGameLogicv
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Cond
+   fun:_ZN16Mech3DAppearance14setPaintSchemeEv
+   fun:_ZN16Mech3DAppearance14setPaintSchemeEjjj
+   fun:_ZN16Mech3DAppearance16resetPaintSchemeEjjj
+   fun:_ZN7Mission8addMoverEP14_MoverInitData
+   fun:_ZN9Logistics12beginMissionEPviPS0_
+   fun:_ZN9Logistics6updateEv
+   fun:_Z11DoGameLogicv
+   fun:main
+}
+
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Cond
+   fun:_ZN16Mech3DAppearance14setPaintSchemeEv
+   fun:_ZN16Mech3DAppearance14setPaintSchemeEjjj
+   fun:_ZN16Mech3DAppearance16resetPaintSchemeEjjj
+   fun:_ZN16Mech3DAppearance12recalcBoundsEv
+   fun:_ZN10BattleMech6updateEv
+   fun:_ZN17GameObjectManager6updateEbbb
+   fun:_ZN7Mission6updateEv
+   fun:_ZN9Logistics12beginMissionEPviPS0_
+   fun:_ZN9Logistics6updateEv
+   fun:_Z11DoGameLogicv
+   fun:main
+}
+
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Cond
+   fun:_ZN16Mech3DAppearance14setPaintSchemeEv
+   fun:_ZN16Mech3DAppearance14setPaintSchemeEjjj
+   fun:_ZN16Mech3DAppearance16resetPaintSchemeEjjj
+   fun:_ZN16Mech3DAppearance12recalcBoundsEv
+   fun:_ZN10BattleMech6updateEv
+   fun:_ZN17GameObjectManager6updateEbbb
+   fun:_ZN7Mission6updateEv
+   fun:_ZN9Logistics12beginMissionEPviPS0_
+   fun:_ZN9Logistics6updateEv
+   fun:_Z11DoGameLogicv
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Cond
+   fun:_ZN16Mech3DAppearance14setPaintSchemeEv
+   fun:_ZN16Mech3DAppearance14setPaintSchemeEjjj
+   fun:_ZN16Mech3DAppearance16resetPaintSchemeEjjj
+   fun:_ZN16Mech3DAppearance12recalcBoundsEv
+   fun:_ZN10BattleMech6updateEv
+   fun:_ZN17GameObjectManager6updateEbbb
+   fun:_ZN7Mission6updateEv
+   fun:_ZN9Logistics12beginMissionEPviPS0_
+   fun:_ZN9Logistics6updateEv
+   fun:_Z11DoGameLogicv
+   fun:main
+}
+
+
+
+
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Addr1
+   fun:memcpy@@GLIBC_2.14
+   fun:_Z23execAssignmentStatementP13_SymTableNode
+   fun:_Z13execStatementv
+   fun:_Z15execIfStatementv
+   fun:_Z13execStatementv
+   fun:_Z13execStatementv
+   fun:_Z7executeP13_SymTableNode
+   fun:_Z23execDeclaredRoutineCallP13_SymTableNodeb
+   fun:_Z15execRoutineCallP13_SymTableNodeb
+   fun:_Z13execStatementv
+   fun:_Z13execStatementv
+   fun:_Z7executeP13_SymTableNode
+}
+
+
+
+
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   obj:/lib/x86_64-linux-gnu/libz.so.1.2.8
+   fun:inflate
+   fun:uncompress
+   fun:_ZN10PacketFile11writePacketEiPhjh
+   fun:_ZN11MechWarrior4saveEP10PacketFilel
+   fun:_ZN11MechWarrior4SaveEP10PacketFilel
+   fun:_ZN7Mission4saveEPKc
+   fun:_ZN7Mission6updateEv
+   fun:_Z11DoGameLogicv
+   fun:main
+}
+
+{
+    packet.cpp:619
+   Memcheck:Cond
+   fun:_ZN10PacketFile11writePacketEiPhjh
+   fun:_ZN7Carnage4SaveEP10PacketFilel
+   fun:_ZN17GameObjectManager4SaveEP10PacketFilel
+   fun:_ZN7Mission4saveEPKc
+   fun:_ZN7Mission6updateEv
+   fun:_Z11DoGameLogicv
+   fun:main
+}
+
