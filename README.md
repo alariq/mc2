@@ -14,7 +14,8 @@ Sound system is not fully implemented (panning, doppler, etc. not supported yet)
 * make sure no files are created outside of user directory
 * reduce draw calls number
 * reimplement/optimize priority queue
-* optimize geometry T&L (it is all on CPU now! at least move to SIMD, stretch goal (if somebody actually will be interested in a game) move all to GPU and do 2017 year graphics) ( WIP: this work is done in a separate branch)
+* finish moving lighting to shaders (move whole lighting there, not only shader-based drawing of CPU-prelit vertices like I do now)
+* Update graphics to 2018
 * I am sure there is more
 
 
