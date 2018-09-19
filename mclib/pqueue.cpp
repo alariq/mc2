@@ -126,8 +126,38 @@ int PriorityQueue::find (unsigned int id) {
 
 	for (int index = 0; index <= numItems; index++)
 		if (pqList[index].id == id)
+        {
 			return(index);
+        }
 	return(0);
+}
+
+//---------------------------------------------------------------------------
+
+int PriorityQueue::findByKey (int32_t key, uint32_t id, int startIndex/* = 1*/) {
+
+    int curIndex = startIndex;
+
+    if(key == pqList[curIndex].key && pqList[curIndex].id == id)
+        return curIndex;
+
+    int nextIndex = curIndex << 1;
+    if(nextIndex <= numItems && pqList[nextIndex].key <= key)
+    {
+        int idx = findByKey(key, id, nextIndex);
+        if(idx != 0)
+            return idx;
+    }
+    nextIndex++;
+	// no need for this check because last item is at index numItems (see e.g. find())
+    if(nextIndex <= numItems && pqList[nextIndex].key <= key)
+    {
+        int idx = findByKey(key, id, nextIndex);
+        if(idx != 0)
+            return idx;
+    }
+
+    return(0);
 }
 
 //---------------------------------------------------------------------------

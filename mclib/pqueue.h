@@ -57,6 +57,8 @@ class PriorityQueue {
 		void change (int itemIndex, int newValue);
 
 		int find (unsigned int id);
+
+		int findByKey (int32_t key, uint32_t id, int startIndex = 1);
 		
 		void clear (void) {
 			numItems = 0;
