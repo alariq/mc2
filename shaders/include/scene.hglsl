@@ -1,0 +1,52 @@
+#ifndef __SCENE_HGLSL__
+#define __SCENE_HGLSL__
+
+#define SCENE_DATA_ATTACHMENT_SLOT  1
+
+struct SceneData_t {
+   float fogStart;
+   float fogFull;
+   float minHazeDistance;
+   float distanceFactor;
+   vec4 cameraPos;
+   vec4 fogColor;
+};
+
+layout (binding = SCENE_DATA_ATTACHMENT_SLOT, std140) uniform SceneData
+{
+    SceneData_t g_scene;
+};
+
+float calc_fog_factor(in vec3 wpos, in vec3 cam_pos)
+{
+    const float fogStart = g_scene.fogStart;
+    const float fogFull = g_scene.fogFull;
+
+    float eyeDistance = length(wpos - cam_pos.xyz);
+    float haze_factor = 
+        clamp((eyeDistance - g_scene.minHazeDistance) * g_scene.distanceFactor, 0.0, 1.0);
+
+    float distFog = 1 - haze_factor;
+
+    float factor = clamp((fogStart - wpos.y)/(fogStart - fogFull), 0.0, 1.0);
+    factor = 1.0 - factor * factor;
+
+    factor = min(factor, distFog);
+
+    return factor;
+}
+
+vec3 apply_fog(in vec3 color, in vec3 wpos, in vec3 cam_pos)
+{
+    float use_fog = dot(g_scene.fogColor.xyz, vec3(1.0));
+
+	if(use_fog > 0.0)
+    {
+        float fog_factor = calc_fog_factor(wpos, g_scene.cameraPos.xyz);
+    	color = mix(g_scene.fogColor.rgb, color.rgb, fog_factor);
+    }
+
+    return color;
+}
+
+#endif // __SCENE_HGLSL__

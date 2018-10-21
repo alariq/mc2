@@ -13,6 +13,8 @@ in PREC vec3 Normal;
 in PREC vec2 Texcoord;
 in PREC vec4 VertexColor;
 in PREC vec3 VertexLight;
+in PREC vec3 WorldPos;
+in PREC vec3 CameraPos;
 
 layout (location=0) out PREC vec4 FragColor;
 
@@ -40,6 +42,10 @@ void main(void)
     PREC vec3 lighting = calc_light(lights_index, Normal, VertexLight);
 #endif
 
-	FragColor = vec4(c.xyz * lighting, c.a);
+    c.xyz = c.xyz * lighting;
+
+    c.xyz = apply_fog(c.xyz, WorldPos.xyz, CameraPos);
+
+	FragColor = vec4(c.xyz, c.a);
 }
 

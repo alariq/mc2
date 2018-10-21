@@ -2223,7 +2223,7 @@ long TG_Shape::MultiTransformShape (Stuff::Matrix4D *shapeToClip, Stuff::Point3D
 	numVisibleFaces = 0;			//Reset Visible Faces
 
 	TG_TypeTrianglePtr tri = &(theShape->listOfTypeTriangles[0]);
-	for (int j=0;j<numTriangles;j++,tri++)
+	for (unsigned int j=0;j<numTriangles;j++,tri++)
 	{
 		//---------------------------------------
 		// Mark backfacing those that are.
@@ -2714,7 +2714,7 @@ void TG_Shape::Render (float forceZ, bool isHudElement, BYTE alphaValue, bool is
 			Stuff::Matrix4D mvp;
 			if ((forceZ >= 0.0f) && (forceZ < 1.0f))
 			{
-				// matrix that wil make (x,y,w * forceZ, w) from (x,y,z,w), so that later after division by w, it will become just forceZ
+				// matrix that will make (x,y,w * forceZ, w) from (x,y,z,w), so that later after division by w, it will become just forceZ
 				Stuff::Matrix4D forceZMatrix = Stuff::Matrix4D::Identity;
 				forceZMatrix(2, 2) = 0.0f;
 				forceZMatrix(3, 2) = forceZ;

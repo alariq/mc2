@@ -34,6 +34,8 @@ out float FogValue;
 out vec2 Texcoord;
 out vec4 VertexColor;
 out vec3 VertexLight;
+out vec3 WorldPos;
+out vec3 CameraPos;
 
 void main(void)
 {
@@ -45,6 +47,10 @@ void main(void)
     p.z = p.z * rhw;
     p.w = abs(rhw);
 
+    WorldPos = (world_ * vec4(pos.xyz, 1.0)).xyz;
+
+    // something is wrong with this: check later
+    //CameraPos = (inverse(view_) * vec4(0,0,0,1)).xyz;
 
     vec4 p2 = projection_ * vec4(p.xyz,1);
 

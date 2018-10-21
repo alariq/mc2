@@ -314,6 +314,17 @@ public:
 
 struct TG_HWLightsData;
 
+struct TG_HWSceneData {
+    float fog_start;
+    float fog_end;
+    float min_haze_dist;
+    float dist_factor;
+    float cam_pos[4];
+    float fog_color[4];
+};
+
+typedef TG_HWSceneData* TG_HWSceneDataPtr;
+
 //----------------------------------------------------------------------
 class MC_TextureManager
 {
@@ -335,7 +346,7 @@ class MC_TextureManager
 		UserHeapPtr						textureCacheHeap;			//Heap used to cache textures from vidCard to system RAM.
 		UserHeapPtr						textureStringHeap;			//Heap used to store filenames of textures so no dupes.
 		bool 							textureManagerInstrumented;	//Texture Manager Instrumented.
-		long							totalCacheMisses;			//NUmber of times flush has been called.\
+		long							totalCacheMisses;			//NUmber of times flush has been called.
 		
 		static gos_VERTEXManager		*gvManager;					//Stores arrays of vertices for draw.
 		static gos_RenderShapeManager<TG_RenderShape>	*rsManager;					//Stores arrays of shapes for draw.
@@ -365,6 +376,8 @@ class MC_TextureManager
         uint32_t                        lightDataStructuresCapacity;
         uint32_t                        lightDataStructuresCount;
 		gosBuffer						*lightDataBuffer_;
+        TG_HWSceneData*                 sceneData_;
+		gosBuffer						*sceneDataBuffer_;
 		
 	//Member Functions
 	//-----------------
@@ -394,6 +407,9 @@ class MC_TextureManager
             lightDataBuffer_ = nullptr;
             lightDataStructuresCapacity = 0;
             lightDataStructuresCount = 0;
+
+			sceneData_ = nullptr;
+            sceneDataBuffer_ = nullptr;
 		}
 
 		MC_TextureManager (void)

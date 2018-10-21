@@ -1,3 +1,4 @@
+#include <scene.hglsl>
 
 #define ENABLE_VERTEX_LIGHTING              0
 

@@ -47,6 +47,7 @@
 #include<gameos.hpp>
 #include<mlr/mlr.hpp>
 #include<gosfx/gosfxheaders.hpp>
+#include <utils/gl_utils.h>
 
 //---------------------------------------------------------------------------
 // static globals
@@ -183,6 +184,10 @@ void MC_TextureManager::start (void)
     lightData_ = new TG_HWLightsData[lightDataStructuresCapacity];
 	lightDataBuffer_ = gos_CreateBuffer(gosBUFFER_TYPE::UNIFORM, gosBUFFER_USAGE::STATIC_DRAW, sizeof(TG_HWLightsData) * lightDataStructuresCapacity, 1, NULL);
 	gos_BindBufferBase(lightDataBuffer_, LIGHT_DATA_ATTACHMENT_SLOT);
+
+    sceneData_ = new TG_HWSceneData;
+	sceneDataBuffer_ = gos_CreateBuffer(gosBUFFER_TYPE::UNIFORM, gosBUFFER_USAGE::STATIC_DRAW, sizeof(TG_HWSceneData), 1, NULL);
+	gos_BindBufferBase(sceneDataBuffer_, SCENE_DATA_ATTACHMENT_SLOT);
 }
 
 extern Stuff::MemoryStream *effectStream;
@@ -246,6 +251,13 @@ void MC_TextureManager::destroy (void)
 
     delete[] lightData_;
     lightData_ = nullptr;
+
+	if(sceneDataBuffer_)
+		gos_DestroyBuffer(sceneDataBuffer_);
+	sceneDataBuffer_ = nullptr;
+
+    delete sceneData_;
+    sceneData_ = nullptr;
 }
 
 //----------------------------------------------------------------------
@@ -789,7 +801,8 @@ public:
         float ld[4] = { (float)light_index, 0.0f, 0.0f, 0.0f};
 		gos_SetRenderMaterialParameterFloat4(mat, "light_offset_", ld);
 
-		gos_SetRenderMaterialUniformBlockBindingPoint(mat, "LightsData", 0);
+		gos_SetRenderMaterialUniformBlockBindingPoint(mat, "LightsData", LIGHT_DATA_ATTACHMENT_SLOT);
+		gos_SetRenderMaterialUniformBlockBindingPoint(mat, "SceneData", SCENE_DATA_ATTACHMENT_SLOT);
 
 		gos_ApplyRenderMaterial(mat);
 
@@ -942,8 +955,28 @@ void MC_TextureManager::renderLists (void)
 	    gos_BindBufferBase(lightDataBuffer_, LIGHT_DATA_ATTACHMENT_SLOT);
     }
     //
+    
+    // update scene data uniform buffer
+    sceneData_->fog_start = eye->fogStart;
+    sceneData_->fog_end = eye->fogFull;
+    sceneData_->min_haze_dist = Camera::MinHazeDistance;
+    sceneData_->dist_factor = Camera::DistanceFactor;
+    Stuff::Vector3D cp = eye->getCameraOrigin();
+    sceneData_->cam_pos[0] = cp.x;
+    sceneData_->cam_pos[1] = cp.y;
+    sceneData_->cam_pos[2] = cp.z;
+    sceneData_->cam_pos[3] = 1.0f;
+	vec4 fc = uint32_to_vec4(eye->fogColor);
+    sceneData_->fog_color[0] = fc.z;
+    sceneData_->fog_color[1] = fc.y;
+    sceneData_->fog_color[2] = fc.x;
+    sceneData_->fog_color[3] = fc.w;
+    gos_UpdateBuffer(sceneDataBuffer_, sceneData_, 0, sizeof(TG_HWSceneData));
+    //gos_BindBufferBase(lightDataBuffer_, LIGHT_DATA_ATTACHMENT_SLOT);
+    
+    
 
-	for (long i = 0; i<nextAvailableHardwareVertexNode; i++)
+	for (size_t i = 0; i<nextAvailableHardwareVertexNode; i++)
 	{
 		if ((masterHardwareVertexNodes[i].flags & MC2_DRAWSOLID) &&
 			(masterHardwareVertexNodes[i].shapes))
