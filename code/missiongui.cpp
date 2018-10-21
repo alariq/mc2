@@ -842,9 +842,8 @@ void MissionInterfaceManager::update (void)
 	
 	if( useLeftRightMouseProfile ) // using AOE control style
 	{
-        // sebi: WTF??? always false
-		//if ( WAYPOINT_KEY == -1 )
-		//	WAYPOINT_KEY = KEY_LCONTROL;
+		if ( WAYPOINT_KEY == -1 )
+			WAYPOINT_KEY = KEY_LCONTROL;
 
 		commandClicked = rightClicked;
 		selectClicked = !bLeftDouble && !lastUpdateDoubleClick && userInput->leftMouseReleased() && !userInput->getKeyDown( KEY_T) && !isDragging;
@@ -870,9 +869,8 @@ void MissionInterfaceManager::update (void)
 		selectClicked = leftClicked && !lastUpdateDoubleClick;
 		cameraClicked = userInput->isRightDrag();
 
-        // sebi: always false
-		//if ( WAYPOINT_KEY == -1 )
-		//	WAYPOINT_KEY = KEY_LCONTROL;
+		if ( WAYPOINT_KEY == -1 )
+			WAYPOINT_KEY = KEY_LCONTROL;
 		if ( moveCameraAround( lineOfSight, passable, ctrlDn, bGui, moverCount, nonMoverCount ) )
 		{
 			bool leftClicked = (!userInput->isLeftDrag() && !userInput->isRightDrag() && userInput->isLeftClick());
@@ -3317,7 +3315,7 @@ bool MissionInterfaceManager::moveCameraAround( bool lineOfSight, bool passable,
 			((GameCamera *)eye)->setTarget(target);
 	}
 
-	if (!cameraClicked )
+	if (!cameraClicked && !isPaused()) // sebi: only scoll if not paused
 	{
 		if ( mouseX <= (screenScrollLeft))
 			scrollLeft();
