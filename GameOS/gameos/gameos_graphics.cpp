@@ -2749,7 +2749,7 @@ void __stdcall gos_BindBufferBase(gosBuffer* buffer, uint32_t slot)
 void __stdcall gos_UpdateBuffer(HGOSBUFFER buffer, void* data, size_t offset, size_t num_bytes)
 {
 	gosASSERT(buffer);
-    gosASSERT(buffer->element_size_ * buffer->count_ > num_bytes);
+    gosASSERT(buffer->element_size_ * buffer->count_ >= num_bytes);
 	GLenum gl_target = getGLBufferType(buffer->type_);
     glBindBuffer(gl_target, buffer->buffer_);
 	glBufferSubData(gl_target, offset, num_bytes, data);

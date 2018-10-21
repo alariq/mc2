@@ -305,28 +305,46 @@ glsl_shader* glsl_shader::makeShader(Shader_t stype, const char* fname, const ch
 
     log_info("Loading shader: %s\n", fname);
 
+
+    glsl_shader* pshader = new glsl_shader();
+
+    char unique_id[256] = {0};
+    snprintf(unique_id, 256, "%s_%p", fname, pshader);
+    std::string uid = &unique_id[0];
+
+#define DUMP_SHADER_PREPROCESSED_FILES 1
+#if DUMP_SHADER_PREPROCESSED_FILES
+    char dump_name[256] = {0};
+    snprintf(dump_name, 256, "./dump/%s.glsl", uid.c_str());
+    FILE* f = fopen(dump_name, "w");
+    if(f) {
+        fwrite(shader_source.c_str(), shader_source.size(), 1, f);
+    }
+    fclose(f);
+#endif
+
 	
     GLenum type = get_gl_shader_type(stype);
     GLuint shader = glCreateShader(type);
     if(0 == shader)
+    {
+        glDeleteShader(shader);
+        delete pshader;
         return 0;
+    }
 
     const char* strings[] = { prefix == nullptr ? "" : prefix, shader_source.c_str() };
     if(!compile_shader(shader, strings, sizeof(strings)/sizeof(strings[0])))
     {
         glDeleteShader(shader);
+        delete pshader;
         return nullptr;
     }
 
-    glsl_shader* pshader = new glsl_shader();
     pshader->fname_ = fname;
     pshader->shader_ = shader;
     pshader->type_ = type;
     pshader->includes_ = shader_includes;
-
-    char unique_id[256] = {0};
-    snprintf(unique_id, 256, "%s_%p", fname, pshader);
-    std::string uid = &unique_id[0];
 
     if(s_shaders[stype].count(uid))
 	{
@@ -340,16 +358,6 @@ glsl_shader* glsl_shader::makeShader(Shader_t stype, const char* fname, const ch
 	}
     s_shaders[stype].insert( std::make_pair(uid, pshader) );
 
-#define DUMP_SHADER_PREPROCESSED_FILES 1
-#if DUMP_SHADER_PREPROCESSED_FILES
-    char dump_name[256] = {0};
-    snprintf(dump_name, 256, "./dump/%s.glsl", uid.c_str());
-    FILE* f = fopen(dump_name, "w");
-    if(f) {
-        fwrite(shader_source.c_str(), shader_source.size(), 1, f);
-    }
-    fclose(f);
-#endif
      
     return pshader;
 }

@@ -111,7 +111,7 @@ class HeapManager
 		HeapManager (void);
 		
 		void destroy (void);
-		~HeapManager (void);
+		virtual ~HeapManager (void);
 
 		long createHeap (unsigned long memSize);
 		long commitHeap (unsigned long commitSize = 0);
