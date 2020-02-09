@@ -15,7 +15,8 @@ Sound system is not fully implemented (panning, doppler, etc. not supported yet)
 * reduce draw calls number
 * reimplement/optimize priority queue
 * finish moving lighting to shaders (move whole lighting there, not only shader-based drawing of CPU-prelit vertices like I do now)
-* Update graphics to 2018
+* Update graphics to ~~2018~~ 2020
+* Add network support?
 * I am sure there is more
 
 
