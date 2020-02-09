@@ -97,7 +97,7 @@ vec3 get_base_light(
     {
 
     }
-    else if (start_v_light & 0x00ffffff)		//Some other kind of light, just add it in.
+    else if ((start_v_light & 0x00ffffff)!=0)		//Some other kind of light, just add it in.
     {
         if (!lightsOut)
         {
@@ -109,7 +109,9 @@ vec3 get_base_light(
         final = vec3(1.0);	//Just max out its light.
     }
 
-    return final;
+    final.xyz += g_scene.baseVertexColor.xyz; // used for brightness
+
+    return clamp(final.xyz, vec3(0.0), vec3(1.0));
 }
 
 //================================================================================ 

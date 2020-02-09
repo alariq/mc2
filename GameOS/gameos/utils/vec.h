@@ -182,6 +182,12 @@ struct vec4 {
 	vec3 yzx() const { return vec3(y, z, x); }
 	vec3 zxy() const { return vec3(z, x, y); }
 
+	vec4 xzyw() const { return vec4(x, z, y, w); }
+	vec4 zyxw() const { return vec4(z, y, x, w); }
+	vec4 yxzw() const { return vec4(y, x, z, w); }
+	vec4 yzxw() const { return vec4(y, z, x, w); }
+	vec4 zxyw() const { return vec4(z, x, y, w); }
+
 	void operator += (const vec4 &v);
 	void operator -= (const vec4 &v);
 	void operator *= (const float s);

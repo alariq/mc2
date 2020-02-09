@@ -321,6 +321,7 @@ struct TG_HWSceneData {
     float dist_factor;
     float cam_pos[4];
     float fog_color[4];
+    vec4 baseVertexColor;
 };
 
 typedef TG_HWSceneData* TG_HWSceneDataPtr;

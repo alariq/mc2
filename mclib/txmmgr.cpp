@@ -60,6 +60,7 @@ int				MC_TextureManager::iBufferRefCount = 0;
 
 bool MLRVertexLimitReached = false;
 extern bool useFog;
+extern DWORD BaseVertexColor;
 
 DWORD actualTextureSize = 0;
 DWORD compressedTextureSize = 0;
@@ -971,6 +972,7 @@ void MC_TextureManager::renderLists (void)
     sceneData_->fog_color[1] = fc.y;
     sceneData_->fog_color[2] = fc.x;
     sceneData_->fog_color[3] = fc.w;
+    sceneData_->baseVertexColor = uint32_to_vec4(BaseVertexColor).zyxw();
     gos_UpdateBuffer(sceneDataBuffer_, sceneData_, 0, sizeof(TG_HWSceneData));
     //gos_BindBufferBase(lightDataBuffer_, LIGHT_DATA_ATTACHMENT_SLOT);
     
@@ -1040,8 +1042,8 @@ void MC_TextureManager::renderLists (void)
 	// restore viewport
 	gos_SetRenderViewport(0, 0, Environment.drawableWidth, Environment.drawableHeight);
 
-	
-	for (long i=0;i<nextAvailableVertexNode;i++)
+	bool bSkip_DRAWSOLID = false;
+	for (long i=0;i<nextAvailableVertexNode && !bSkip_DRAWSOLID;i++)
 	{
 		if ((masterVertexNodes[i].flags & MC2_DRAWSOLID) &&
 			(masterVertexNodes[i].vertices))

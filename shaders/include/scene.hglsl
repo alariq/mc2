@@ -10,6 +10,7 @@ struct SceneData_t {
    float distanceFactor;
    vec4 cameraPos;
    vec4 fogColor;
+   vec4 baseVertexColor;
 };
 
 layout (binding = SCENE_DATA_ATTACHMENT_SLOT, std140) uniform SceneData

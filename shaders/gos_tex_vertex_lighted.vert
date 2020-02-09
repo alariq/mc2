@@ -62,7 +62,7 @@ void main(void)
     //FogValue = fog.w;
     Texcoord = texcoord;
 
-    // base light can be only calculated in VS because relies on eaxt vertex colors
+    // base light can be only calculated in VS because relies on exact vertex colors
     // TODO: pass correct parameters here
     vec3 base_light = get_base_light(aRGBLight.bgra, false, 0.0, false, false,
             vec3(0.0), vec3(0.0), vec3(0.0));
