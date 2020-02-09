@@ -23,8 +23,8 @@ void memfill(void *Dest,int Length);
 
 #ifndef LINUX_BUILD
 extern enum { CPU_UNKNOWN, CPU_PENTIUM, CPU_MMX, CPU_KATMAI } Processor;
+static int64_t fillnum=-1;
 #endif
-static _int64 fillnum=-1;
 
 
 //

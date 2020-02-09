@@ -58,6 +58,50 @@ unsigned long CObjective::s_blinkColor = SB_YELLOW;
 aFont* CObjective::s_markerFont = 0;
 float MaxExtractUnitDistance = 0.0f;
 
+static const char *g_actionSpeciesStringArray[] = {
+	"PlayBIK",
+	"PlayWAV",
+	"DisplayTextMessage",
+	"DisplayResourceTextMessage",
+	"SetBooleanFlag",
+	"MakeNewTechnologyAvailable",
+	"_RemoveStructure",
+};
+
+const char *g_conditionSpeciesStringArray[] = {
+	"DestroyAllEnemyUnits",
+		"DestroyNumberOfEnemyUnits",
+		"DestroyEnemyUnitGroup",
+		"DestroySpecificEnemyUnit",
+		"DestroySpecificStructure",
+
+		"CaptureOrDestroyAllEnemyUnits",
+		"CaptureOrDestroyNumberOfEnemyUnits",
+		"CaptureOrDestroyEnemyUnitGroup",
+		"CaptureOrDestroySpecificEnemyUnit",
+		"CaptureOrDestroySpecificStructure",
+
+		"DeadOrFledAllEnemyUnits",
+		"DeadOrFledNumberOfEnemyUnits",
+		"DeadOrFledEnemyUnitGroup",
+		"DeadOrFledSpecificEnemyUnit",
+
+		"CaptureSpecificUnit",
+		"CaptureSpecificStructure",
+
+		"GuardSpecificUnit",
+		"GuardSpecificStructure",
+
+		"MoveAnyUnitToArea",
+		"MoveAllUnitsToArea",
+		"MoveAllSurvivingUnitsToArea",
+		"MoveAllSurvivingMechsToArea",
+
+		"BooleanFlagIsSet",
+		"ElapsedMissionTime",
+};
+
+
 static bool MoverIsDeadOrDisabled(const long pMoverWID) 
 {
 	bool retval = false;
@@ -267,7 +311,7 @@ void CBooleanArray::save (long alignment, FitIniFile *file)
 {
 	char blockID[256];
 	sprintf(blockID, "Team%dBooleanFlags",alignment);
-	long result = file->writeBlock(blockID);
+	long result = file->writeBlock(blockID); (void)result;
 
 	CEStringList::EIterator flagIDListIter;
 	long count = 0;

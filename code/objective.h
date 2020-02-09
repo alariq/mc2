@@ -72,38 +72,7 @@ enum MARKER_TYPES
 	NUMERIC = 2
 };
 
-static const char *g_conditionSpeciesStringArray[] = {
-	"DestroyAllEnemyUnits",
-		"DestroyNumberOfEnemyUnits",
-		"DestroyEnemyUnitGroup",
-		"DestroySpecificEnemyUnit",
-		"DestroySpecificStructure",
-
-		"CaptureOrDestroyAllEnemyUnits",
-		"CaptureOrDestroyNumberOfEnemyUnits",
-		"CaptureOrDestroyEnemyUnitGroup",
-		"CaptureOrDestroySpecificEnemyUnit",
-		"CaptureOrDestroySpecificStructure",
-
-		"DeadOrFledAllEnemyUnits",
-		"DeadOrFledNumberOfEnemyUnits",
-		"DeadOrFledEnemyUnitGroup",
-		"DeadOrFledSpecificEnemyUnit",
-
-		"CaptureSpecificUnit",
-		"CaptureSpecificStructure",
-
-		"GuardSpecificUnit",
-		"GuardSpecificStructure",
-
-		"MoveAnyUnitToArea",
-		"MoveAllUnitsToArea",
-		"MoveAllSurvivingUnitsToArea",
-		"MoveAllSurvivingMechsToArea",
-
-		"BooleanFlagIsSet",
-		"ElapsedMissionTime",
-};
+extern const char *g_conditionSpeciesStringArray[];
 
 enum objective_status_type {
 	OS_UNDETERMINED = 0,		//Make sure first one is zero just to be safe
@@ -516,16 +485,6 @@ enum action_species_type {
 	_REMOVE_STRUCTURE,
 
 	NUM_ACTION_SPECIES
-};
-
-static const char *g_actionSpeciesStringArray[] = {
-	"PlayBIK",
-	"PlayWAV",
-	"DisplayTextMessage",
-	"DisplayResourceTextMessage",
-	"SetBooleanFlag",
-	"MakeNewTechnologyAvailable",
-	"_RemoveStructure",
 };
 
 class CObjectiveAction {

@@ -66,7 +66,7 @@ RenderWindow* create_window(const char* pwinname, int width, int height)
     }
 
     // initialize using 0 videodriver
-    if (SDL_VideoInit(0) < 0) {
+    if (SDL_VideoInit(nullptr) < 0) {
         fprintf(stderr, "Couldn't initialize video driver: %s\n", SDL_GetError());
         return NULL;
     }

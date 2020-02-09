@@ -1,4 +1,5 @@
 cmake_minimum_required (VERSION 2.8)
+#cmake_policy(SET CMP0072 NEW) # cmake --help-policy CMP0072
 project(mc2)
 
 include(CMakeToolsHelpers OPTIONAL)
@@ -50,6 +51,7 @@ find_package(SDL2 QUIET)
 if(SDL2_FOUND)
     set(SDL_LIBS ${SDL2_LIBRARIES})
     set(SDL_INCLUDES "${SDL2_PREFIX}/include")
+    message("Found SDL2 package ${SDL_LIBS}" )
 else()
     message("sdl2 package was not found, looking for libs and headers separately")
     find_library(SDL2 NAMES "SDL2")
@@ -65,6 +67,7 @@ get_filename_component(COM_PATH2 "./GameOS/gameos" ABSOLUTE)
 
 set(COMMON_INCLUDE_DIRS  ${COM_PATH1} ${COM_PATH2})
 
+include_directories(SD2::SDL2)
 include_directories(${SDL_INCLUDES})
 include_directories(${GLEW_INCLUDE})
 
@@ -195,9 +198,10 @@ else()
 endif()
 
 message("sdl2 prefix: ${SDL2_PREFIX}")
+message("SDL_LIBS: ${SDL_LIBS}")
 
 
 add_executable(mc2 ${SOURCES})
-target_link_libraries(mc2 mclib gosfx mlr stuff gui gameos windows ${ZLIB} ${SDL_LIBS} ${GLEW} ${SDL2_mixer} ${ADDITIONAL_LIBS} ${OPENGL_gl_LIBRARY})
+target_link_libraries(mc2 mclib gosfx mlr stuff gui gameos windows ${ZLIB} SDL2::SDL2 ${SDL_LIBS} ${GLEW} ${SDL2_mixer} ${ADDITIONAL_LIBS} ${OPENGL_gl_LIBRARY})
 
 add_subdirectory("./Viewer" "./out/Viewer")

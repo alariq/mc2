@@ -98,6 +98,9 @@ static FORMAT getFormatFromBpp(const unsigned int bpp) {
 	case 32:
 		return FORMAT_RGBA8;
 		break;
+    default:
+        assert(0 && "bad bpp");
+        return FORMAT_RGBA8;
 	}
 }
 
@@ -334,7 +337,7 @@ bool Image::loadCompressedTGA(const TGAHeader* header, const unsigned char* mem,
 	int offset = 0;
 	const size_t num_pixels = width * height;
 
-	unsigned char* dest = pixels = new unsigned char[width * height * pixelSize];
+	unsigned char* pixels = new unsigned char[width * height * pixelSize];
 
 	while (num_read_pixels < num_pixels) {
 
@@ -342,10 +345,7 @@ bool Image::loadCompressedTGA(const TGAHeader* header, const unsigned char* mem,
 			return false;
 
 		memcpy(p, mem + offset, pixelSize + 1);
-		if (len < pixelSize + 1)
-		{
-			int sdfas = 0;
-		}
+
 		len -= pixelSize + 1;
 		offset += pixelSize + 1;
 
