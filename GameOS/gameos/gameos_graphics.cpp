@@ -499,7 +499,7 @@ void gosMesh::draw(gosRenderMaterial* material) const
     if(num_vertices_ == 0)
         return;
 
-    updateBuffer(vb_, GL_ARRAY_BUFFER, pvertex_data_, num_vertices_*sizeof(gos_VERTEX));
+    updateBuffer(vb_, GL_ARRAY_BUFFER, pvertex_data_, num_vertices_*sizeof(gos_VERTEX), GL_DYNAMIC_DRAW_ARB);
 
     material->apply();
 
@@ -2752,8 +2752,7 @@ void __stdcall gos_UpdateBuffer(HGOSBUFFER buffer, void* data, size_t offset, si
     gosASSERT(buffer->element_size_ * buffer->count_ >= num_bytes);
 	GLenum gl_target = getGLBufferType(buffer->type_);
     glBindBuffer(gl_target, buffer->buffer_);
-	glBufferSubData(gl_target, offset, num_bytes, data);
-	//glBufferData(gl_target, num_bytes, data, GL_DYNAMIC_DRAW);
+	glBufferData(gl_target, num_bytes, data, GL_DYNAMIC_DRAW);
     glBindBuffer(gl_target, 0);
 }
 
