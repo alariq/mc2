@@ -27,5 +27,5 @@ add_definitions(-DVIEWER=1)
 include_directories("./window" ${COMMON_INCLUDE_DIRS} "../mclib" "../gui" "../code" "../netlib")
 
 add_executable(viewer ${SOURCES})
-target_link_libraries(viewer mclib gosfx mlr stuff gui gameos windows ${ZLIB} SDL2::SDL2 ${SDL_LIBS} ${GLEW} ${SDL2_mixer} ${ADDITIONAL_LIBS} ${OPENGL_gl_LIBRARY})
+target_link_libraries(viewer mclib gosfx mlr stuff gui gameos windows z SDL2::SDL2 ${SDL_LIBS} GLEW SDL2_mixer ${ADDITIONAL_LIBS} OpenGL)
 
