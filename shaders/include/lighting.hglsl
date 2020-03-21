@@ -124,6 +124,9 @@ vec3 calc_light(in int lights_index, in vec3 normal, in vec3 base_light)
     
     ObjectLights ld = light[lights_index];
 
+    if(0 == ld.numLights.x)
+        return vec3(1,1,1);
+    
     float n_dot_l = clamp(dot((normal), -ld.light_dir[0].xyz), 0.0, 1.0);
     vec3 diffuse = n_dot_l * ld.light_color[0].xyz;
     vec3 ambient = ld.light_color[1].xyz;
