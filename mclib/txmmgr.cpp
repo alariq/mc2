@@ -823,8 +823,8 @@ void GatherLightsParameters(TG_HWLightsData* lights)
 	uint32_t num_lights = 0;
 	const uint32_t max_num_lights = MAX_HW_LIGHTS_IN_WORLD;
 
-	const TG_LightPtr* listOfLights = eye->getWorldLights();
-	const DWORD numLights = eye->getNumLights();
+	const TG_LightPtr* listOfLights = TG_Shape::s_listOfLights;
+	const DWORD numLights = TG_Shape::s_numLights;
 
 	for (uint32_t iLight = 0; iLight < numLights; iLight++)
 	{
