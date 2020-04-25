@@ -1,8 +1,12 @@
 # mc2
 [website](https://alariq.github.io/mc2-website/)
+
 Mech Commander 2 Linux port.
+
 Work in progress.
+
 Currently game can be run on both Linux and Windows.
+
 Can be compiled in 64-bit.
 
 Fixed a lot of bugs (including ones present in original game).
