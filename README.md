@@ -4,11 +4,8 @@
 Mech Commander 2 Linux port.
 
 Work in progress.
-
-Currently game can be run on both Linux and Windows.
-
-Can be compiled in 64-bit.
-
+This port is an open source implementation of a closed MC2 engine code using available interface (.h) files.
+Currently game can be run on both Linux and Windows in 64bit mode.
 Fixed a lot of bugs (including ones present in original game).
 Sound system is not fully implemented (panning, doppler, etc. not supported yet)
 
