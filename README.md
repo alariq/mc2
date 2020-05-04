@@ -1,7 +1,5 @@
-# mc2
+# Mech Commander 2 open source engine + Linux port.
 [website](https://alariq.github.io/mc2-website/)
-
-Mech Commander 2 Linux port.
 
 Work in progress.
 This port is an open source implementation of a closed MC2 engine code using available interface (.h) files.
