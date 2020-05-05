@@ -265,7 +265,7 @@ void
 MemoryStream&
 	MemoryStream::WriteBytes(
 		const void *ptr,
-		DWORD number_of_bytes
+		size_t number_of_bytes
 	)
 {
 	Check_Object(this);

@@ -19,11 +19,13 @@ else("${CMAKE_SIZEOF_VOID_P}" EQUAL "8")
 	message(STATUS "Target is 32 bits")
 endif("${CMAKE_SIZEOF_VOID_P}" EQUAL "8")
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x -ggdb")
 set(CMAKE_EXPORT_COMPILE_COMMANDS "ON")
- 
+
+set(CMAKE_MODULE_PATH "${CMAKE_PREFIX_PATH}/cmake")
+set(SDL2_DIR "${CMAKE_PREFIX_PATH}/cmake")
 
 if(NOT MSVC)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x -ggdb")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-local-typedefs -Werror=array-bounds -Wno-switch -Wwrite-strings -Wno-unknown-warning-option -Wunused-variable") # -fsanitize=address -fno-omit-frame-pointer")
 endif()
 # -Wno-unused-local-typedefs - to disable "typedef was ignored on this declaration"
@@ -38,7 +40,7 @@ endif()
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -D_ARMOR -D_DEBUG -DBUGLOG -DLAB_ONLY")
 #set(CMAKE_CXX_FLAGS_RELWITHDEBINFO" ${CMAKE_CXX_FLAGS_RELWITHDEBINFO} -DSOME_STUFF")
 if(MSVC)
-    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MTd")
+    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MTd /MP")
 endif()
 
 
@@ -47,7 +49,7 @@ add_definitions(-DLINUX_BUILD)
 
 find_path(GLEW_INCLUDE "GL/glew.h")
 
-find_package(SDL2 QUIET)
+find_package(SDL2 REQUIRED)
 if(SDL2_FOUND)
     set(SDL_LIBS ${SDL2_LIBRARIES})
     set(SDL_INCLUDES "${SDL2_PREFIX}/include")
@@ -173,11 +175,15 @@ set(SOURCES
     )
 
 find_library(SDL2_mixer NAMES "SDL2_mixer")
+find_library(SDL2_ttf NAMES "SDL2_ttf") # needed by text_tool
 find_library(GLEW NAMES "GLEW" "glew32")
 find_library(ZLIB NAMES "z" "zlib")
 
+find_package(GLEW REQUIRED)
+
 # TODO: get rid of gl library by not using old style opengl
 find_package(OpenGL REQUIRED)
+find_package(zlib REQUIRED)
 
 message("OPENGL library found in ${OPENGL}")
 message("GLEW library found in ${GLEW}")
@@ -203,6 +209,9 @@ message("zlib: ${ZLIB}")
 
 
 add_executable(mc2 ${SOURCES})
-target_link_libraries(mc2 mclib gosfx mlr stuff gui gameos windows z SDL2::SDL2 ${SDL_LIBS} GLEW SDL2_mixer ${ADDITIONAL_LIBS} OpenGL)
+target_link_libraries(mc2 mclib gosfx mlr stuff gui gameos windows ZLIB::ZLIB SDL2::SDL2 SDL2::SDL2main GLEW::GLEW ${SDL2_mixer} ${ADDITIONAL_LIBS} OpenGL::GL)
 
+add_subdirectory("./res" "./out/res")
+add_subdirectory("./data_tools" "./out/data_tools")
+add_subdirectory("./text_tool" "./out/text_tool")
 add_subdirectory("./Viewer" "./out/Viewer")

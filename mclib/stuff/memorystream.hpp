@@ -435,7 +435,7 @@ namespace Stuff {
 		virtual MemoryStream&
 			WriteBytes(
 				const void *ptr,
-				DWORD number_of_bytes
+				size_t number_of_bytes
 			);
 
 		MemoryStream&

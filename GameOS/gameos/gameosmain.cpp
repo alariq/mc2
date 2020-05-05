@@ -227,15 +227,15 @@ int main(int argc, char** argv)
     //signal(SIGTRAP, SIG_IGN);
 
     // gather command line
-    uint32_t cmdline_len = 0;
+	size_t cmdline_len = 0;
     for(int i=0;i<argc;++i) {
         cmdline_len += strlen(argv[i]);
         cmdline_len += 1; // ' '
     }
     char* cmdline = new char[cmdline_len + 1];
-    uint32_t offset = 0;
+    size_t offset = 0;
     for(int i=0;i<argc;++i) {
-        uint32_t arglen = strlen(argv[i]);
+        size_t arglen = strlen(argv[i]);
         memcpy(cmdline + offset, argv[i], arglen);
         cmdline[offset + arglen] = ' ';
         offset += arglen + 1;

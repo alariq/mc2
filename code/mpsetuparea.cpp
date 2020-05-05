@@ -623,22 +623,22 @@ void aColorPicker::update()
 
 		if (userInput->isLeftClick()) {
 			if (tab0Button.pointInside(cx, cy)) {
-				handleMessage(aMSG_BUTTONCLICKED, (unsigned long)(&tab0Button));
+				handleMessage(aMSG_BUTTONCLICKED, &tab0Button);
 			} else if (tab1Button.pointInside(cx, cy)) {
-				handleMessage(aMSG_BUTTONCLICKED, (unsigned long)(&tab1Button));
+				handleMessage(aMSG_BUTTONCLICKED, &tab1Button);
 			}
 		}
 
 		if (colorPlaneStatic.pointInside(cx, cy)) {
-			handleMessage(aMSG_LEFTMOUSEDOWN, (unsigned long)(&colorPlaneStatic));
+			handleMessage(aMSG_LEFTMOUSEDOWN, &colorPlaneStatic);
 		}
 	}
 }
 
-int aColorPicker::handleMessage( unsigned long message, unsigned long who )
+int aColorPicker::handleMessage( unsigned long message, const void* who )
 {
 	{
-		if ((unsigned long)(&tab0Button) == who) 
+		if (&tab0Button == who) 
 		{
 			if (aMSG_BUTTONCLICKED == message)
 			{
@@ -648,7 +648,7 @@ int aColorPicker::handleMessage( unsigned long message, unsigned long who )
 				return 1;
 			}
 		}
-		else if ((unsigned long)(&tab1Button) == who) 
+		else if (&tab1Button == who) 
 		{
 			if (aMSG_BUTTONCLICKED == message)
 			{
@@ -658,7 +658,7 @@ int aColorPicker::handleMessage( unsigned long message, unsigned long who )
 				return 1;
 			}
 		}
-		else if ((unsigned long)(&colorPlaneStatic) == who) 
+		else if (&colorPlaneStatic == who) 
 		{
 			if ((aMSG_LEFTMOUSEDOWN == message)
 				|| ((aMSG_MOUSEMOVE == message) && (userInput->isLeftDrag())))
