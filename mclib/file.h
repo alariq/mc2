@@ -186,7 +186,7 @@ class File
 			long readLineEx (MemoryPtr buffer, long maxLength);
 
 			long write (unsigned long pos, MemoryPtr buffer, long bytes);
-			long write (MemoryPtr buffer, long bytes);
+			long write (MemoryPtr buffer, size_t bytes);
 
 			long writeByte (unsigned char value);
 			long writeWord (short value);

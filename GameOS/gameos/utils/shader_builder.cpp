@@ -319,8 +319,8 @@ glsl_shader* glsl_shader::makeShader(Shader_t stype, const char* fname, const ch
     FILE* f = fopen(dump_name, "w");
     if(f) {
         fwrite(shader_source.c_str(), shader_source.size(), 1, f);
+		fclose(f);
     }
-    fclose(f);
 #endif
 
 	

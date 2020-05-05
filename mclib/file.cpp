@@ -1627,7 +1627,7 @@ long File::writeLine (char *buffer)
 }
 
 //---------------------------------------------------------------------------
-long File::write (MemoryPtr buffer, long bytes)
+long File::write(MemoryPtr buffer, size_t bytes)
 {
 	long result = 0;
 	

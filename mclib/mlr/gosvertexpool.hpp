@@ -30,7 +30,7 @@ namespace MidLevelRenderer {
 			int GetLength () 
 				{ 
 					Check_Object(this); 
-					return vertices.GetLength()-1; 
+					return (int)vertices.GetLength()-1; 
 				}
 
 			unsigned GetLast () 
@@ -69,7 +69,7 @@ namespace MidLevelRenderer {
 			int GetLength2UV () 
 				{ 
 					Check_Object(this); 
-					return vertices2uv.GetLength()-1; 
+					return (int)vertices2uv.GetLength()-1; 
 				}
 
 			unsigned GetLast2UV () 

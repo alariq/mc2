@@ -3,7 +3,6 @@
 #include <stdint.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <unistd.h>
 #include <string.h>
 
 namespace filesystem {
@@ -18,9 +17,16 @@ const char *const kPathSeparator = "\\";
 
 uint64_t get_file_mod_time_ms(const char* fname)
 {
-    struct stat fi = {0};
+#if PLATFORM_WINDOWS
+	struct _stat fi = { 0 };
+    _stat(fname, &fi);
+	return fi.st_mtime * 1000;
+#else
+    struct _stat fi = {0};
     stat(fname, &fi);
-	return fi.st_mtim.tv_sec * 1e+3 + fi.st_mtim.tv_nsec / 1e+6;
+	return fi.st_mtime.tv_sec * 1e+3 + fi.st_mtime.tv_nsec / 1e+6;
+#endif
+
 }
 
 std::string get_path(const char* fname)

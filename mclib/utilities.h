@@ -106,7 +106,7 @@ inline int cLoadString(
 {
 	memset(lpBuffer,0,nBufferMax);
 	const char * tmpBuffer = gos_GetResourceString(handle, uID);
-	long stringLength = strlen(tmpBuffer);
+	int stringLength = (int)strlen(tmpBuffer);
 	if (stringLength >= nBufferMax)
 		STOP(("String too long for buffer.  String Id %u, bufferLen %d, StringLen %l",uID,nBufferMax,stringLength));
 	memcpy(lpBuffer,tmpBuffer,stringLength);

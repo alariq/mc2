@@ -396,7 +396,7 @@ namespace Stuff {
 	{
 		Check_Object(this);
 		Verify(length < GetSize());
-		stringLength = length;
+		stringLength = (uint32_t)length;
 		Verify(strlen(stringText) == stringLength);
 	}
 

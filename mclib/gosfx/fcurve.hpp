@@ -342,13 +342,14 @@ namespace gosFX {
 				{Check_Object(this); return m_keys[index];}
 		int
 			GetKeyCount()
-				{Check_Object(this); return m_keys.GetLength();}
+				{Check_Object(this); return (int)m_keys.GetLength();}
 		int
 			GetKeyIndex(Stuff::Scalar time)
 				{
 					Check_Object(this);
-					int i;
-					for (i=0; i<m_keys.GetLength(); ++i)
+					int i = 0;
+					const int len = (int)m_keys.GetLength();
+					for (; i<len; ++i)
 						if (m_keys[i].m_time > time)
 							break;
 					return --i;
