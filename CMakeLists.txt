@@ -23,6 +23,7 @@ endif("${CMAKE_SIZEOF_VOID_P}" EQUAL "8")
 set(CMAKE_EXPORT_COMPILE_COMMANDS "ON")
 
 set(CMAKE_MODULE_PATH "${CMAKE_PREFIX_PATH}/cmake")
+# set directory containing SDL2Config.cmake or sdl2-config.cmake, so find_package(SDL2) works.
 set(SDL2_DIR "${CMAKE_PREFIX_PATH}/cmake")
 
 if(NOT MSVC)
