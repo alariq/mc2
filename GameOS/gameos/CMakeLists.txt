@@ -3,7 +3,6 @@ project(gameos)
 
 set(SOURCES ${SOURCES}
     gameos.cpp
-    gameosmain.cpp
     gameos_graphics.cpp
     gameos_res.cpp
     gameos_fileio.cpp
@@ -28,10 +27,13 @@ set(SOURCES ${SOURCES}
     utils/file_utils.cpp
     )
 
+set(MAIN_SRC gameosmain.cpp)
+
 #find_package(SDL2 REQUIRED PATHS "/opt" NO_DEFAULT_PATH)
 #include_directories("${SDL2_PREFIX}/include")
 
 include_directories("../include"  ".")
 
 add_library(gameos ${SOURCES})
+add_library(gameos_main ${MAIN_SRC})
 

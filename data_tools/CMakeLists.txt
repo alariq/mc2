@@ -3,6 +3,8 @@ set(PAK_SOURCES "pak.cpp" "common.hpp")
 set(ASECONV_SOURCES "aseconv.cpp" "common.hpp")
 set(MAKERSP_SOURCES "makersp.cpp")
 
+add_compile_definitions(DISABLE_GAMEOS_MAIN)
+
 add_executable(makefst ${MAKEFST_SOURCES})
 target_link_libraries(makefst mclib stuff gameos windows ZLIB::ZLIB SDL2::SDL2 SDL2::SDL2main ${ADDITIONAL_LIBS})
 

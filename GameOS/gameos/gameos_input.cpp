@@ -6,9 +6,6 @@
 
 #include<string.h>
 
-extern input::MouseInfo g_mouse_info;
-extern input::KeyboardInfo g_keyboard_info;
-
 //
 // The mouse position and buttons are read once a frame.
 //
@@ -38,36 +35,38 @@ void __stdcall gos_GetMouseInfo( float* pXPosition, float* pYPosition, int* pXDe
     const float w = (float)Environment.drawableWidth;
     const float h = (float)Environment.drawableHeight;
 
+    const input::MouseInfo* mi = input::getMouseInfo();
+
     if(pXPosition)
-        *pXPosition = g_mouse_info.x_ / w;
+        *pXPosition = mi->x_ / w;
     if(pYPosition)
-        *pYPosition = g_mouse_info.y_ / h;
+        *pYPosition = mi->y_ / h;
 
 	// as percentage of screen size
     
     // sebi: I do not like this percentage style and it does not work good, so
     /*
     if(pXDelta)
-        *pXDelta = (int)(100.0f * clamp(g_mouse_info.rel_x_ / w, -1.0f, 1.0f));
+        *pXDelta = (int)(100.0f * clamp(mi->rel_x_ / w, -1.0f, 1.0f));
     if(pYDelta)
-        *pYDelta = (int)(100.0f * clamp(g_mouse_info.rel_y_ / h, -1.0f, 1.0f));
+        *pYDelta = (int)(100.0f * clamp(mi->rel_y_ / h, -1.0f, 1.0f));
         */
     if(pXDelta)
-        *pXDelta = (int)(clamp(g_mouse_info.rel_x_, -w, w));
+        *pXDelta = (int)(clamp(mi->rel_x_, -w, w));
     if(pYDelta)
-        *pYDelta = (int)(clamp(g_mouse_info.rel_y_, -h, h));
+        *pYDelta = (int)(clamp(mi->rel_y_, -h, h));
 
     //if(pWheelDelta)
-    //  *pWheelDelta = (int)(100.0f * (g_mouse_info.wheel_vert_ / h));
+    //  *pWheelDelta = (int)(100.0f * (mi->wheel_vert_ / h));
     if(pWheelDelta)
-        *pWheelDelta = (int)(g_mouse_info.wheel_vert_);
+        *pWheelDelta = (int)(mi->wheel_vert_);
 
     if(pButtonsPressed) {
         DWORD bs = 0;
         for(int i=0; i<input::MouseInfo::NUM_BUTTONS;++i)
         {
-            bool down = g_mouse_info.button_state_[i] == input::KS_PRESSED;
-            down |= g_mouse_info.button_state_[i] == input::KS_HELD;
+            bool down = mi->button_state_[i] == input::KS_PRESSED;
+            down |= mi->button_state_[i] == input::KS_HELD;
             bs |= down ? (1<<i) : 0;
         }
         *pButtonsPressed = bs;
@@ -296,8 +295,10 @@ SDL_Scancode remap_gos_to_sdl(const gosEnum_KeyIndex key_index) {
 ////////////////////////////////////////////////////////////////////////////////
 DWORD __stdcall gos_GetKey()
 {
-    if(g_keyboard_info.first_pressed_!=-1) {
-        SDL_Scancode sc = (SDL_Scancode)g_keyboard_info.first_pressed_;
+    const input::KeyboardInfo* ki = input::getKeyboardInfo();
+
+    if(ki->first_pressed_!=-1) {
+        SDL_Scancode sc = (SDL_Scancode)ki->first_pressed_;
         SDL_Keycode kc = SDL_GetKeyFromScancode(sc);
         unsigned char c = 0;
         // check if it represents a character:
@@ -307,9 +308,9 @@ DWORD __stdcall gos_GetKey()
             // this is all hardcodede crap, mayeb will fix it later
 
 			// FIXME: it is incorrect to do so because caps lock is not held constantly but either turned on or off
-            //const bool caps_pressed = !!g_keyboard_info.last_state_[SDL_SCANCODE_CAPSLOCK];
+            //const bool caps_pressed = !!ki->last_state_[SDL_SCANCODE_CAPSLOCK];
 
-            const bool shift_pressed = !!(g_keyboard_info.last_state_[SDL_SCANCODE_LSHIFT] || g_keyboard_info.last_state_[SDL_SCANCODE_RSHIFT]);
+            const bool shift_pressed = !!(ki->last_state_[SDL_SCANCODE_LSHIFT] || ki->last_state_[SDL_SCANCODE_RSHIFT]);
             const bool register_mod = /*caps_pressed ^ */shift_pressed; 
             if(c >= SDLK_a && c<=SDLK_z && register_mod)
             {
@@ -366,15 +367,18 @@ const char* __stdcall gos_DescribeKey( DWORD Key )
 ////////////////////////////////////////////////////////////////////////////////
 void __stdcall gos_KeyboardFlush()
 {
-    g_keyboard_info.key_pressed_ = g_keyboard_info.key_released_ = false;
+    input::resetKeypress();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 gosEnum_KeyStatus __stdcall gos_GetKeyStatus(gosEnum_KeyIndex index)
 {
+    const input::MouseInfo* mi = input::getMouseInfo();
+    const input::KeyboardInfo* ki = input::getKeyboardInfo();
+
     if(index >= KEY_LMOUSE && index <= KEY_MOUSEX2) {
         gosASSERT(index > 0 && index <= input::MouseInfo::NUM_BUTTONS);
-        return (gosEnum_KeyStatus)g_mouse_info.button_state_[index-1];
+        return (gosEnum_KeyStatus)mi->button_state_[index-1];
     }
 
     // if keyboard
@@ -387,7 +391,7 @@ gosEnum_KeyStatus __stdcall gos_GetKeyStatus(gosEnum_KeyIndex index)
         SDL_Scancode sc = remap_gos_to_sdl((gosEnum_KeyIndex)(index & 0xFF));
         gosASSERT(sc>=0 && sc<sizeof(g_keyboard_info.last_state_)/sizeof(g_keyboard_info.last_state_[0]));
 
-        return (gosEnum_KeyStatus)g_keyboard_info.last_state_[sc];
+        return (gosEnum_KeyStatus)ki->last_state_[sc];
     }
 
     return KEY_FREE;

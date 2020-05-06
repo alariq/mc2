@@ -33,14 +33,19 @@ struct KeyboardInfo {
     uint8_t last_state_[512];
 };
 
-void handleMouseMotion(const SDL_Event* event, MouseInfo* mi);
-void handleMouseButton(const SDL_Event* event, MouseInfo* mi);
-void handleMouseWheel(const SDL_Event* event, MouseInfo* mi);
-void beginUpdateMouseState(MouseInfo* mi);
-void updateMouseState(MouseInfo* mi);
+const MouseInfo* getMouseInfo();
+const KeyboardInfo* getKeyboardInfo();
 
-void handleKeyEvent(const SDL_Event* event, KeyboardInfo* ki);
-void updateKeyboardState(KeyboardInfo* ki);
+void handleMouseMotion(const SDL_Event* event);
+void handleMouseButton(const SDL_Event* event);
+void handleMouseWheel(const SDL_Event* event);
+void beginUpdateMouseState();
+void updateMouseState();
+
+void handleKeyEvent(const SDL_Event* event);
+void updateKeyboardState();
+
+void resetKeypress();
 
 }
 

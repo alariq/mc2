@@ -22,9 +22,9 @@ uint64_t get_file_mod_time_ms(const char* fname)
     _stat(fname, &fi);
 	return fi.st_mtime * 1000;
 #else
-    struct _stat fi = {0};
+    struct stat fi = {0};
     stat(fname, &fi);
-	return fi.st_mtime.tv_sec * 1e+3 + fi.st_mtime.tv_nsec / 1e+6;
+	return fi.st_mtim.tv_sec * 1e+3 + fi.st_mtim.tv_nsec / 1e+6;
 #endif
 
 }
