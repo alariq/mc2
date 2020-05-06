@@ -1,5 +1,6 @@
 cmake_minimum_required (VERSION 2.8)
-#cmake_policy(SET CMP0072 NEW) # cmake --help-policy CMP0072
+# select GLVND versus legacy OpenGL libraries
+cmake_policy(SET CMP0072 NEW) # cmake --help-policy CMP0072
 project(mc2)
 
 include(CMakeToolsHelpers OPTIONAL)
@@ -183,7 +184,7 @@ find_package(GLEW REQUIRED)
 
 # TODO: get rid of gl library by not using old style opengl
 find_package(OpenGL REQUIRED)
-find_package(zlib REQUIRED)
+find_package(ZLIB REQUIRED)
 
 message("OPENGL library found in ${OPENGL}")
 message("GLEW library found in ${GLEW}")
