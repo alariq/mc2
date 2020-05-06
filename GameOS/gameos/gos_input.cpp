@@ -3,6 +3,9 @@
 #include <assert.h>
 #include "gos_input.h"
 
+static input::MouseInfo g_mouse_info;
+static input::KeyboardInfo g_keyboard_info;
+
 namespace input {
 
 MouseInfo::MouseInfo()
@@ -20,6 +23,18 @@ KeyboardInfo::KeyboardInfo():
     memset(last_state_, 0, sizeof(last_state_));
 }
 
+const MouseInfo* getMouseInfo() {
+    return &g_mouse_info;
+}
+
+const KeyboardInfo* getKeyboardInfo() {
+    return &g_keyboard_info;
+}
+
+void resetKeypress() {
+    g_keyboard_info.key_pressed_ = g_keyboard_info.key_released_ = false;
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 static int sdl2idx(int button) {
     switch(button) {
@@ -32,27 +47,30 @@ static int sdl2idx(int button) {
     }
 }
 
-void handleMouseMotion(const SDL_Event* event, MouseInfo* mi) {
-    assert(event && mi);
+void handleMouseMotion(const SDL_Event* event) {
+    assert(event);
 
+    MouseInfo* mi = &g_mouse_info;
     mi->x_ = (float)event->motion.x;
     mi->y_ = (float)event->motion.y;
     mi->rel_x_ = (float)event->motion.xrel;
     mi->rel_y_ = (float)event->motion.yrel;
 }
 
-void handleMouseButton(const SDL_Event* event, MouseInfo* mi) {
-    assert(event && mi);
+void handleMouseButton(const SDL_Event* event) {
+    assert(event);
 
+    MouseInfo* mi = &g_mouse_info;
     int idx = sdl2idx(event->button.button);
     if(idx != -1 && idx < MouseInfo::NUM_BUTTONS) {
         mi->button_state_[idx] = event->type == SDL_MOUSEBUTTONUP ? KS_PRESSED : KS_RELEASED;
     }
 }
 
-void handleMouseWheel(const SDL_Event* event, MouseInfo* mi) {
-    assert(event && mi);
+void handleMouseWheel(const SDL_Event* event) {
+    assert(event);
     
+    MouseInfo* mi = &g_mouse_info;
     mi->wheel_vert_ = (float)event->wheel.y;
     mi->wheel_hor_ = (float)event->wheel.x;
 
@@ -64,13 +82,14 @@ void handleMouseWheel(const SDL_Event* event, MouseInfo* mi) {
     */
 }
 
-void beginUpdateMouseState(MouseInfo* mi) {
+void beginUpdateMouseState() {
+    MouseInfo* mi = &g_mouse_info;
     mi->rel_x_ = mi->rel_y_ = 0.0f;
     mi->wheel_hor_ = mi->wheel_vert_ = 0.0f;
 }
 
-void updateMouseState(MouseInfo* mi) {
-    assert(mi);
+void updateMouseState() {
+    MouseInfo* mi = &g_mouse_info;
 
     Uint32 button_state = SDL_GetMouseState(NULL, NULL);
     int buttons[] = {SDL_BUTTON_LEFT, SDL_BUTTON_MIDDLE, SDL_BUTTON_RIGHT, SDL_BUTTON_X1, SDL_BUTTON_X2 };
@@ -103,7 +122,8 @@ void updateMouseState(MouseInfo* mi) {
 // Keyboard
 //
 
-void handleKeyEvent(const SDL_Event* event, KeyboardInfo* ki) {
+void handleKeyEvent(const SDL_Event* event) {
+    KeyboardInfo* ki = &g_keyboard_info;
     if(event->key.state == SDL_PRESSED) {
         ki->key_pressed_ = true;
     } else {
@@ -113,7 +133,8 @@ void handleKeyEvent(const SDL_Event* event, KeyboardInfo* ki) {
     ki->pressed_keysym_ = event->key.keysym;
 }
 
-void updateKeyboardState(KeyboardInfo* ki) {
+void updateKeyboardState() {
+    KeyboardInfo* ki = &g_keyboard_info;
 
     int array_len;
     const Uint8* state = SDL_GetKeyboardState(&array_len);

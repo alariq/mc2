@@ -1,4 +1,11 @@
-extern bool g_debug_draw_calls;
+static bool g_debug_draw_calls;
+bool gos_RenderGetEnableDebugDrawCalls() {
+    return g_debug_draw_calls;
+}
+
+void gos_RenderEnableDebugDrawCalls() {
+    g_debug_draw_calls = true;
+}
 
 void gos_RenderUpdateDebugInput() {
 

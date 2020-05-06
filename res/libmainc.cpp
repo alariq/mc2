@@ -1,16 +1,16 @@
 #include "libmain.h"
 
-DLL_EXPORT void __cdecl initStringResources()
+DLL_EXPORT void CDECL initStringResources()
 {
     initStringResources__();
 }
 
-DLL_EXPORT void __cdecl freeStringResources()
+DLL_EXPORT void CDECL freeStringResources()
 {
     freeStringResources__();
 }
 
-DLL_EXPORT const char* __cdecl getStringById(unsigned int id)
+DLL_EXPORT const char* CDECL getStringById(unsigned int id)
 {
     return getStringById__(id);
 }

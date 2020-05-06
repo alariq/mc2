@@ -493,97 +493,6 @@ int main(int argc, char** argv)
 	TG_Shape::tglHeap = new UserHeap;
 	TG_Shape::tglHeap->init(tglHeapSize, "TinyGeom");
 
-#if 0
-
-	//--------------------------------------------------------------
-	// Read in System.CFG
-	FitIniFilePtr systemFile = new FitIniFile;
-
-#ifdef _DEBUG
-	long systemOpenResult =
-#endif
-		systemFile->open("system.cfg");
-
-#ifdef _DEBUG
-	assert(systemOpenResult == NO_ERR);
-#endif
-
-	{
-#ifdef _DEBUG
-		long systemPathResult =
-#endif
-			systemFile->seekBlock("systemPaths");
-		assert(systemPathResult == NO_ERR);
-		{
-			long result = systemFile->readIdString("terrainPath", terrainPath, 79);
-			assert(result == NO_ERR);
-
-			result = systemFile->readIdString("artPath", artPath, 79);
-			assert(result == NO_ERR);
-
-			result = systemFile->readIdString("fontPath", fontPath, 79);
-			assert(result == NO_ERR);
-
-			result = systemFile->readIdString("savePath", savePath, 79);
-			assert(result == NO_ERR);
-
-			result = systemFile->readIdString("spritePath", spritePath, 79);
-			assert(result == NO_ERR);
-
-			result = systemFile->readIdString("shapesPath", shapesPath, 79);
-			assert(result == NO_ERR);
-
-			result = systemFile->readIdString("soundPath", soundPath, 79);
-			assert(result == NO_ERR);
-
-			result = systemFile->readIdString("objectPath", objectPath, 79);
-			assert(result == NO_ERR);
-
-			result = systemFile->readIdString("cameraPath", cameraPath, 79);
-			assert(result == NO_ERR);
-
-			result = systemFile->readIdString("tilePath", tilePath, 79);
-			assert(result == NO_ERR);
-
-			result = systemFile->readIdString("missionPath", missionPath, 79);
-			assert(result == NO_ERR);
-
-			result = systemFile->readIdString("warriorPath", warriorPath, 79);
-			assert(result == NO_ERR);
-
-			result = systemFile->readIdString("profilePath", profilePath, 79);
-			assert(result == NO_ERR);
-
-			result = systemFile->readIdString("interfacepath", interfacePath, 79);
-			assert(result == NO_ERR);
-
-			result = systemFile->readIdString("moviepath", moviePath, 79);
-			assert(result == NO_ERR);
-
-			result = systemFile->readIdString("tglpath", tglPath, 79);
-			assert(result == NO_ERR);
-
-			result = systemFile->readIdString("texturepath", texturePath, 79);
-			assert(result == NO_ERR);
-
-			result = systemFile->readIdString("CDsoundPath", CDsoundPath, 79);
-			assert(result == NO_ERR);
-
-			result = systemFile->readIdString("CDmoviepath", CDmoviePath, 79);
-			assert(result == NO_ERR);
-
-			result = systemFile->readIdString("CDspritePath", CDspritePath, 79);
-			assert(result == NO_ERR);
-		}
-	}
-
-	systemFile->close();
-	delete systemFile;
-	systemFile = NULL;
-
-#endif
-
-
 	//-------------------------------------------------------
 	// Check if we are running this from the command line
 	// with ASE2TGL as the command line parameter.  If so,
@@ -658,52 +567,11 @@ int main(int argc, char** argv)
 		}
 	}
 
-	/*
-	//Time BOMB goes here.
-	// Set Date and write Binary data to registry under key
-	// GraphicsDataInit!!
-	SYSTEMTIME bombDate;
-	DWORD dataSize = sizeof(SYSTEMTIME);
-	gos_LoadDataFromRegistry("GraphicsDataInit", &bombDate, &dataSize);
-	if (dataSize == 0)
-	{
-	bombDate.wYear = 2001;
-	bombDate.wMonth = 3;
-	bombDate.wDayOfWeek = 4;
-	bombDate.wDay = 31;
-	bombDate.wHour = 0;
-	bombDate.wMinute = 0;
-	bombDate.wSecond = 0;
-	bombDate.wMilliseconds = 0;
-
-	dataSize = sizeof(SYSTEMTIME);
-	gos_SaveDataToRegistry("GraphicsDataInit", &bombDate, dataSize);
-	}
-	*/
-
-	//
-	// Exit app
-	//
-	//CoUninitialize();
-
-	//ExitGameOS();	
-
 	return 0;
 }
 
-DWORD	Seed;
-
-//
-//
-//
-void __stdcall UpdateRenderers()
-{
-}
-
-void __stdcall DoGameLogic()
-{
-}
-
+void __stdcall UpdateRenderers() { }
+void __stdcall DoGameLogic() { }
 
 //
 // Setup the GameOS structure

@@ -55,10 +55,6 @@ int unpack(const char* pak_file, const char* out_path)
                 packet_buffer_len = messageSize;
             }
 
-            if(i==63)
-            {
-                int sdfasda=0;
-            }
             pakFile->readPacket(i, packet_buffer);
 
 			char fname[1024];
