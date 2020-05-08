@@ -389,7 +389,7 @@ gosEnum_KeyStatus __stdcall gos_GetKeyStatus(gosEnum_KeyIndex index)
             (void)asfa;
         }
         SDL_Scancode sc = remap_gos_to_sdl((gosEnum_KeyIndex)(index & 0xFF));
-        gosASSERT(sc>=0 && sc<sizeof(g_keyboard_info.last_state_)/sizeof(g_keyboard_info.last_state_[0]));
+        gosASSERT(sc>=0 && sc<sizeof(ki->last_state_)/sizeof(ki->last_state_[0]));
 
         return (gosEnum_KeyStatus)ki->last_state_[sc];
     }

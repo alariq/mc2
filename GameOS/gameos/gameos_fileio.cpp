@@ -198,7 +198,7 @@ void __stdcall gos_GetCurrentPath(char* Buffer, int buf_len)
     }
 }
 
-void __stdcall gos_GetFile(char const* FileName, BYTE** MemoryImage, DWORD* Size)
+void __stdcall gos_GetFile(char const* FileName, BYTE** MemoryImage, SIZE_T* Size)
 {
     STOP(("gos function not implemented"));
 }

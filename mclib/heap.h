@@ -197,10 +197,10 @@ class UserHeap : public HeapManager
 		unsigned long coreLeft (void);
 		unsigned long size (void) { return heapSize;}
 		
-		void *Malloc (unsigned long memSize);
+		void *Malloc (size_t memSize);
 		long Free (void *memBlock);
 		
-		void *calloc (unsigned long memSize);
+		void *calloc (size_t memSize);
 		
 		void walkHeap (bool printIt = FALSE, bool skipAllocated = FALSE);
 		

@@ -834,7 +834,7 @@ void aDropList::update()
 			int cy = userInput->getMouseY();
 
 			if (expandButton.pointInside(cx, cy)) {
-				handleMessage(aMSG_BUTTONCLICKED, (unsigned long)(&expandButton));
+				handleMessage(aMSG_BUTTONCLICKED, &expandButton);
 			}
 
 			// lose focus if appropriate
@@ -872,10 +872,10 @@ void aDropList::update()
 }
 
 
-int aDropList::handleMessage( unsigned long message, unsigned long who )
+int aDropList::handleMessage( unsigned long message, void* who )
 {
 	{
-		if ((unsigned long)(&expandButton) == who) 
+		if (&expandButton == who) 
 		{
 			if (aMSG_BUTTONCLICKED == message)
 			{
@@ -1124,7 +1124,7 @@ void aComboBox::update()
 			int cy = userInput->getMouseY();
 
 			if (expandButton.pointInside(cx, cy)) {
-				handleMessage(aMSG_BUTTONCLICKED, (unsigned long)(&expandButton));
+				handleMessage(aMSG_BUTTONCLICKED, &expandButton);
 			}
 
 			// lose focus if appropriate
@@ -1175,10 +1175,10 @@ void aComboBox::update()
 }
 
 
-int aComboBox::handleMessage( unsigned long message, unsigned long who )
+int aComboBox::handleMessage( unsigned long message, const void* who )
 {
 	{
-		if ((unsigned long)(&expandButton) == who) 
+		if (&expandButton == who) 
 		{
 			if (aMSG_BUTTONCLICKED == message)
 			{

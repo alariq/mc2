@@ -496,7 +496,7 @@ namespace Stuff {
 	{
 		Check_Object(stream);
 		Check_Pointer(array);
-		uint32_t length = array->length;
+		uint32_t length = (uint32_t)array->length;
 		MemoryStreamIO::Write(stream, &length);
 		if (length > 0)
 			stream->WriteBytes(&array->data[0], length * sizeof(T));
@@ -514,7 +514,7 @@ namespace Stuff {
 		uint32_t length;
 		MemoryStreamIO::Read(stream, &length);
 		array->SetLength(length);
-		Verify(length == array->length);
+		Verify(length == (uint32_t)array->length);
 		if (length > 0)
 			stream->ReadBytes(&array->data[0], length * sizeof(T));
 		return *stream;

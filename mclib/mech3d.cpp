@@ -1730,7 +1730,7 @@ DWORD bgrTorgb (DWORD frontRGB)
 //-----------------------------------------------------------------------------
 void Mech3DAppearance::setPaintScheme (DWORD mcRed, DWORD mcGreen, DWORD mcBlue)
 {
-#ifdef BGR
+#if defined(BGR)
 	// These come into here bgr instead of RGB.  CONVERT!
 	psRed = bgrTorgb(mcRed);
 	psBlue = bgrTorgb(mcBlue);
@@ -1747,7 +1747,7 @@ void Mech3DAppearance::setPaintScheme (DWORD mcRed, DWORD mcGreen, DWORD mcBlue)
 //-----------------------------------------------------------------------------
 void Mech3DAppearance::getPaintScheme( DWORD& red, DWORD& green, DWORD& blue )
 {
-#ifdef BGR
+#if defined(BGR)
 	red = bgrTorgb(psRed);
 	blue = bgrTorgb(psBlue);
 	green = bgrTorgb(psGreen);
@@ -2280,7 +2280,9 @@ bool Mech3DAppearance::recalcBounds (void)
 							mechShape = mechType->mechShape[currentLOD]->CreateFrom();
 							mechShape->SetAlphaValue(alphaValue);
 
-							resetPaintScheme(psRed,psGreen,psBlue);
+							DWORD r, g, b;
+							getPaintScheme(r, g, b);
+							resetPaintScheme(r,g,b);
 
 							if (rightArmOff)
 								mechShape->StopUsing("joint_ruarm");
@@ -2303,7 +2305,9 @@ bool Mech3DAppearance::recalcBounds (void)
 							mechShape->SetAlphaValue(alphaValue);
 
 							//Automatically reloads texture and stores it.
-							resetPaintScheme(psRed,psGreen,psBlue);
+							DWORD r, g, b;
+							getPaintScheme(r, g, b);
+							resetPaintScheme(r,g,b);
 
 							if (rightArmOff)
 								mechShape->StopUsing("joint_ruarm");

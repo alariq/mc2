@@ -344,17 +344,17 @@ namespace Stuff {
 		virtual void*
 			GetPointer() const
 				{Check_Object(this); return currentPosition;}
-		DWORD
-			GetIndex() const
+		
+		size_t GetIndex() const
 				{Check_Object(this); return currentPosition - streamStart;}
-		DWORD
+		size_t
 			GetSize() const
 				{Check_Object(this); return streamSize;}
 
-		DWORD
+		size_t
 			GetBytesUsed() const
 				{Check_Object(this); return currentPosition - streamStart;}
-		virtual DWORD
+		virtual size_t
 			GetBytesRemaining() const
 				{Check_Object(this); return streamSize - GetBytesUsed();}
 
@@ -574,7 +574,7 @@ namespace Stuff {
 		BYTE
 			*streamStart,
 			*currentPosition;
-		DWORD
+		size_t
 			streamSize;
 	};
 

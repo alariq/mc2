@@ -689,7 +689,7 @@ DoneCL:
 }			
 
 //---------------------------------------------------------------------------
-void * UserHeap::Malloc (unsigned long memSize)
+void * UserHeap::Malloc (size_t memSize)
 {
 	void * result = NULL;
 	if (gosHeap)
@@ -1464,7 +1464,7 @@ Dealloc_Done:
 }
 
 //---------------------------------------------------------------------------
-void * UserHeap::calloc (unsigned long memSize)
+void * UserHeap::calloc (size_t memSize)
 {
 	void * result = malloc(memSize);
 	memset(result,0,memSize);

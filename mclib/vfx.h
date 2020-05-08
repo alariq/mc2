@@ -323,7 +323,7 @@ extern BYTE * VFX_driver_name(void *VFXScanDLL);
 extern LONG  VFX_register_driver(void *DLLbase);
 
 extern LONG  VFX_line_draw (PANE *pane, LONG x0, LONG y0, 
-                                 LONG x1, LONG y1, LONG mode, LONG parm);
+                                 LONG x1, LONG y1, LONG mode, void* parm);
 
 extern long  VFX_shape_draw (PANE *pane, void *shape_table,
                                   LONG shape_number, LONG hotX, LONG hotY);

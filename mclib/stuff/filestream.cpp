@@ -459,7 +459,7 @@ bool
 		if (next_slash == NULL)
 		{
 			//copy the whole string
-			int length = strlen(start_position)+1;
+			size_t length = strlen(start_position)+1;
 			new_string = new char[length];
 			Check_Pointer(new_string);
 
@@ -478,7 +478,7 @@ bool
 			}
 
 			//copy the sub string
-			int length = next_slash - start_position;
+			size_t length = next_slash - start_position;
 			new_string = new char[length+1];
 			Check_Pointer(new_string);
 

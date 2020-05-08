@@ -1109,7 +1109,9 @@ void GVAppearance::setObjStatus (long oStatus)
 			}
 		}
 		
-		resetPaintScheme(psRed,psGreen,psBlue);
+		DWORD r, g, b;
+		getPaintScheme(r, g, b);
+		resetPaintScheme(r, g, b);
 	}
 	
 	status = oStatus;
@@ -1805,7 +1807,9 @@ bool GVAppearance::recalcBounds (void)
 									gvShape->SetTextureHandle(j,0xffffffff);
 								}
 							}
-							resetPaintScheme(psRed,psGreen,psBlue);
+							DWORD r, g, b;
+							getPaintScheme(r, g, b);
+							resetPaintScheme(r,g,b);
 						}
 
 						//ONLY change if we need
@@ -1858,7 +1862,10 @@ bool GVAppearance::recalcBounds (void)
 									gvShape->SetTextureHandle(i,0xffffffff);
 								}
 							}
-							resetPaintScheme(psRed,psGreen,psBlue);
+
+							DWORD r, g, b;
+							getPaintScheme(r, g, b);
+							resetPaintScheme(r,g,b);
 						}					
 					}
 				}

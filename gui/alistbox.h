@@ -225,7 +225,7 @@ public:
 	void specialDestroy();
 	virtual void		render();
 	virtual void		update();
-	virtual int			handleMessage( unsigned long message, unsigned long who );
+	virtual int			handleMessage( unsigned long message, void* who );
 	virtual bool		pointInside(long xPos, long yPos) const;
 	//virtual void	resize(long w, long h);
 
@@ -276,7 +276,7 @@ public:
 	virtual void	destroy();
 	virtual void		render();
 	virtual void		update();
-	virtual int			handleMessage( unsigned long message, unsigned long who );
+	virtual int			handleMessage( unsigned long message, const void* who );
 	virtual bool		pointInside(long xPos, long yPos) const;
 	//virtual void	resize(long w, long h);
 
