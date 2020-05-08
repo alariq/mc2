@@ -32,7 +32,7 @@ public:
 	DWORD
 		m_numberOfRecords,				// Number of used records in database
 		m_nextRecordID;					// Sequential index assigned in ADD
-	DWORD
+	size_t
 		m_idOffsets[e_DataBlockSize],	// Offsets to DatabaseRecords ( sorted by index )
 		m_nameOffsets[e_DataBlockSize];	// Offsets to DatabaseRecords ( sorted by HASH )
 
@@ -61,9 +61,10 @@ public:
 	__int64
 		m_lastModified;				// Time record was last modifyed
 
-	DWORD
+	size_t
 		m_nextIDRecord,				// offset to chain of records that share the same hash
-		m_nextNameRecord,			// offset to chain of records that share the same hash
+		m_nextNameRecord;			// offset to chain of records that share the same hash
+	DWORD
 		m_ID,						// ID
 		m_hash,						// Hash value
 		m_nameLength,
@@ -287,7 +288,7 @@ void
 	if (m_name)
 	{
 		record_hash = GenerateHash(m_name);
-		name_length = strlen(m_name);
+		name_length = (DWORD)strlen(m_name);
 		Verify(name_length > 0);
 	}
 	else
@@ -354,7 +355,7 @@ void
 	if (m_name)
 	{
 		record_hash = GenerateHash(m_name);
-		name_length = strlen(m_name);
+		name_length = (DWORD)strlen(m_name);
 		Verify(name_length > 0);
 	}
 	else
@@ -623,7 +624,7 @@ DatabaseHandle::DatabaseHandle(
 		m_handle = 0;
 		if (gos_DoesFileExist(filename))
 		{
-			DWORD size;
+			size_t size;
 			gos_GetFile(
 				filename,
 				reinterpret_cast<BYTE**>(&m_dataBase),
@@ -760,7 +761,7 @@ void
 	};
 	OutputRecord *new_records = new OutputRecord[m_dataBase->m_numberOfRecords];
 	Check_Pointer(new_records);
-	DWORD new_id_index[Database::e_DataBlockSize];
+	size_t new_id_index[Database::e_DataBlockSize];
 	memset(new_id_index, 0, sizeof(new_id_index));
 
 	//
@@ -818,7 +819,7 @@ void
 			//---------------------------------
 			//
 			DWORD index = old_record->m_ID % Database::e_DataBlockSize;
-			int j = new_id_index[index];
+			size_t j = new_id_index[index];
 			OutputRecord *new_record = &new_records[j];
 			for (; j<m_dataBase->m_numberOfRecords; ++j, ++new_record)
 			{
@@ -889,8 +890,8 @@ void
 		//------------------------------------------------------------
 		//
 		bool free_block = old_record->m_mustFree;
-		DWORD next_id = old_record->m_nextIDRecord;
-		DWORD next_name = old_record->m_nextNameRecord;
+		size_t next_id = old_record->m_nextIDRecord;
+		size_t next_name = old_record->m_nextNameRecord;
 		old_record->m_mustFree = false;
 		old_record->m_nextIDRecord = new_record->m_nextIDRecord;
 		old_record->m_nextNameRecord = new_record->m_nextNameRecord;

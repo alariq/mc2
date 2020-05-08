@@ -1724,7 +1724,7 @@ gosFX::ComplexCurve::InsertKey(Stuff::Scalar m_time)
 	//-----------------------------------------------------------------------
 	//
 	int before = GetKeyIndex(m_time);
-	int key_count = m_keys.GetLength();
+	int key_count = (int)m_keys.GetLength();
 	m_keys.SetLength(key_count+1);
 	for (int i=key_count-1; i>=before; --i)
 		m_keys[i+1] = m_keys[i];
@@ -1798,7 +1798,7 @@ gosFX::ComplexCurve::DeleteKey(int index)
 	// If this is the last key, we just resize and return
 	//---------------------------------------------------
 	//
-	int key_count = m_keys.GetLength();
+	int key_count = (int)m_keys.GetLength();
 	if (index == key_count-1)
 	{
 		m_keys.SetLength(index);
@@ -1885,7 +1885,7 @@ gosFX::ComplexCurve::ComputeRange(
 	// If the key is empty, set everything to zero
 	//--------------------------------------------
 	//
-	int key_count = m_keys.GetLength();
+	int key_count = (int)m_keys.GetLength();
 	if (!key_count)
 	{
 		*low = *hi = 0.0f;

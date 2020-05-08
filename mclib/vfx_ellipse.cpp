@@ -16,7 +16,8 @@ void AG_ellipse_draw(PANE *pane, LONG xc, LONG yc, LONG width, LONG height, LONG
 {
 	if( width==0 || height==0 )
 	{
-		VFX_line_draw( pane, xc-width, yc-height, xc+width, yc+height, 0, color );
+		size_t ll = color;
+		VFX_line_draw( pane, xc-width, yc-height, xc+width, yc+height, 0, reinterpret_cast<void*>(ll) );
 		return;
 	}
 
@@ -316,7 +317,8 @@ void AG_ellipse_fill(PANE *pane, LONG xc, LONG yc, LONG width, LONG height, LONG
 {
 	if( width==0 || height==0 )
 	{
-		VFX_line_draw( pane, xc-width, yc-height, xc+width, yc+height, 0, color );
+		size_t ll = color;
+		VFX_line_draw( pane, xc-width, yc-height, xc+width, yc+height, 0, reinterpret_cast<void*>(ll) );
 		return;
 	}
 
@@ -619,7 +621,7 @@ void AG_ellipse_fillOr(PANE *pane, LONG xc, LONG yc, LONG width, LONG height, LO
 	{
 		xorgPane = pane;
 		gColor = (unsigned char)color;
-		VFX_line_draw( pane, xc-width, yc-height, xc+width, yc+height,LD_EXECUTE,(long)(&orLineCallback) );
+		VFX_line_draw( pane, xc-width, yc-height, xc+width, yc+height,LD_EXECUTE, &orLineCallback);
 		return;
 	}
 
@@ -832,7 +834,7 @@ void AG_ellipse_fillXor(PANE *pane, LONG xc, LONG yc, LONG width, LONG height, L
 	{
 		xorgPane = pane;
 		gColor = (unsigned char)color;
-		VFX_line_draw( pane, xc-width, yc-height, xc+width, yc+height, LD_EXECUTE,(long)(&andLineCallback) );
+		VFX_line_draw( pane, xc-width, yc-height, xc+width, yc+height, LD_EXECUTE, &andLineCallback);
 		return;
 	}
 

@@ -682,7 +682,7 @@ long VFX_shape_count (void *shape_table)
 //;----------------------------------------------------------------------------
 
 LONG VFX_line_draw (PANE *panep, LONG x0, LONG y0, 
-                                 LONG x1, LONG y1, LONG mode, LONG parm)
+                                 LONG x1, LONG y1, LONG mode, ptrdiff_t parm)
 
 {
 

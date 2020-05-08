@@ -1038,7 +1038,7 @@ void __stdcall gos_TextDrawV( const char *Message, char* arglist );
 // The whole file in read into memory, MemoryImage will point to the start of the file,
 // Size will be the size of the file.
 //
-void __stdcall gos_GetFile( const char* FileName, BYTE** MemoryImage, DWORD* Size );
+void __stdcall gos_GetFile( const char* FileName, BYTE** MemoryImage, SIZE_T* Size );
 
 
 //
