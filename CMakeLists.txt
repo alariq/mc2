@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 2.8)
+cmake_minimum_required (VERSION 3.10)
 # select GLVND versus legacy OpenGL libraries
 cmake_policy(SET CMP0072 NEW) # cmake --help-policy CMP0072
 project(mc2)
@@ -22,9 +22,10 @@ endif("${CMAKE_SIZEOF_VOID_P}" EQUAL "8")
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS "ON")
 
-set(CMAKE_MODULE_PATH "${CMAKE_PREFIX_PATH}/cmake")
-# set directory containing SDL2Config.cmake or sdl2-config.cmake, so find_package(SDL2) works.
-set(SDL2_DIR "${CMAKE_PREFIX_PATH}/cmake")
+list(APPEND CMAKE_MODULE_PATH ${CMAKE_PREFIX_PATH}/cmake)
+list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake/sdl2)
+# may have to help find_package bydetting path to FindSDL2.cmake
+#set(SDL2_DIR "${CMAKE_PREFIX_PATH}/cmake")
 
 if(NOT MSVC)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x -ggdb")
@@ -50,31 +51,28 @@ endif()
 add_definitions(-DUSE_ASSEMBLER_CODE=0)
 add_definitions(-DLINUX_BUILD)
 
-find_path(GLEW_INCLUDE "GL/glew.h")
-
 find_package(SDL2 REQUIRED)
-if(SDL2_FOUND)
-    set(SDL_LIBS ${SDL2_LIBRARIES})
-    set(SDL_INCLUDES "${SDL2_PREFIX}/include")
-    message("Found SDL2 package ${SDL_LIBS}" )
-else()
-    message("sdl2 package was not found, looking for libs and headers separately")
-    find_library(SDL2 NAMES "SDL2")
-    find_library(SDL2main NAMES "SDL2main")
-    find_path(SDL2_INCLUDE "SDL2/SDL.h")
-    set(SDL_LIBS ${SDL2} ${SDL2main})
-    set(SDL_INCLUDES ${SDL2_INCLUDE})
-endif()
-message("SDL libs are here: ${SDL_LIBS}")
+find_package(SDL2_mixer REQUIRED)
+#required by text_tool
+find_package(SDL2_ttf REQUIRED)
+find_package(GLEW REQUIRED)
+find_package(OpenGL REQUIRED)
+find_package(ZLIB REQUIRED)
+
+message("Found SDL2 package ${SDL_LIBS}" )
+message("SDL2 prefix: ${SDL2_PREFIX}")
+message("OPENGL library found in ${OPENGL}")
+message("GLEW library found in ${GLEW}")
+message("Zlib library found in ${ZLIB}")
+
+message("OpenGL library linking: ${OPENGL_gl_LIBRARY}")
+message("OpenGL library include: ${OPENGL_INCLUDE_DIR}")
+
 
 get_filename_component(COM_PATH1 "./GameOS/include" ABSOLUTE)
 get_filename_component(COM_PATH2 "./GameOS/gameos" ABSOLUTE)
 
 set(COMMON_INCLUDE_DIRS  ${COM_PATH1} ${COM_PATH2})
-
-include_directories(SD2::SDL2)
-include_directories(${SDL_INCLUDES})
-include_directories(${GLEW_INCLUDE})
 
 add_subdirectory("./mclib/" "./out/mclib")
 add_subdirectory("./mclib/mlr" "./out/mclib/mlr")
@@ -177,27 +175,9 @@ set(SOURCES
     "code/mc2movie.cpp"
     )
 
-find_library(SDL2_mixer NAMES "SDL2_mixer")
-find_library(SDL2_ttf NAMES "SDL2_ttf") # needed by text_tool
-find_library(GLEW NAMES "GLEW" "glew32")
-find_library(ZLIB NAMES "z" "zlib")
-
-find_package(GLEW REQUIRED)
-
-# TODO: get rid of gl library by not using old style opengl
-find_package(OpenGL REQUIRED)
-find_package(ZLIB REQUIRED)
-
-message("OPENGL library found in ${OPENGL}")
-message("GLEW library found in ${GLEW}")
-message("Zlib library found in ${ZLIB}")
 
 include_directories(${COMMON_INCLUDE_DIRS} "./mclib" "./gui" "./code" "./netlib")
 
-message("OpenGL library linking: ${OPENGL_gl_LIBRARY}")
-message("OpenGL library include: ${OPENGL_INCLUDE_DIR}")
-
-#if(NOT ${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
 if(NOT WIN32)
 	set(ADDITIONAL_LIBS dl)
 	message("Not win32 system")
@@ -206,12 +186,9 @@ else()
 	set(ADDITIONAL_LIBS winmm)
 endif()
 
-message("sdl2 prefix: ${SDL2_PREFIX}")
-message("SDL_LIBS: ${SDL_LIBS}")
-message("zlib: ${ZLIB}")
 
 add_executable(mc2 ${SOURCES} ${MAIN_SRC})
-target_link_libraries(mc2 mclib gosfx mlr stuff gui gameos gameos_main windows ZLIB::ZLIB SDL2::SDL2 SDL2::SDL2main GLEW::GLEW ${SDL2_mixer} ${ADDITIONAL_LIBS} OpenGL::GL)
+target_link_libraries(mc2 mclib gosfx mlr stuff gui gameos gameos_main windows ZLIB::ZLIB SDL2::Main GLEW::GLEW SDL2::Mixer ${ADDITIONAL_LIBS} OpenGL::GL)
 
 add_subdirectory("./res" "./out/res")
 add_subdirectory("./data_tools" "./out/data_tools")
