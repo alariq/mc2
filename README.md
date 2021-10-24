@@ -1,7 +1,9 @@
 # Mech Commander 2 open source engine + Linux port.
 [website](https://alariq.github.io/mc2-website/)
 
-Work in progress.
+Disclaimer: I consider this project finished for now, there is a lot more to do for someone who wants to improve the game, but all functionality (except networking) is implemented and I've passed the game on my Linux box. Also found original game bugs and crashes are fixed.
+
+
 This port is an open source implementation of a closed MC2 engine code using available interface (.h) files.
 Currently game can be run on both Linux and Windows in 64bit mode.
 Fixed a lot of bugs (including ones present in original game).
@@ -15,7 +17,7 @@ Sound system is not fully implemented (panning, doppler, etc. not supported yet)
 * reduce draw calls number
 * reimplement/optimize priority queue
 * finish moving lighting to shaders (move whole lighting there, not only shader-based drawing of CPU-prelit vertices like I do now)
-* Update graphics to ~~2018~~ 2020
+* Update graphics to ~~2018~~ ~~2020~~ 2021
 * Add network support?
 * I am sure there is more
 
