@@ -1,4 +1,5 @@
 #include"vfx.h"
+#include <cstddef> // size_t
 extern char AlphaTable[];
 extern char SpecialColor[];
 
