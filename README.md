@@ -1,6 +1,9 @@
 # Mech Commander 2 open source engine + Linux port.
 [website](https://alariq.github.io/mc2-website/)
 
+ ## !NB: as russia conducts war in Ukraine I have no time to support this project until we will get rid of orcs. You are encouraged to help.
+ 
+
 Disclaimer: I consider this project finished for now, there is a lot more to do for someone who wants to improve the game, but all functionality (except networking) is implemented and I've passed the game on my Linux box. Also found original game bugs and crashes are fixed.
 
 
