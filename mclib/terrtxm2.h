@@ -30,7 +30,7 @@
 #define NO_ERR		0
 #endif
 
-#define MAX_WATER_DETAIL_TEXTURES	256
+#define MAX_WATER_DETAIL_TEXTURES	16
 
 #define TOTAL_COLORMAP_TYPES		5
 //---------------------------------------------------------------------------
