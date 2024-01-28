@@ -176,9 +176,15 @@ cd build64
 cmake -DCMAKE_LIBRARY_ARCHITECTURE=x64 ..
 make all
 
-cd ../../mc2srcdata/buildscripts
+cd ../../mc2srcdata/build_scripts
 make all BUILD_PLATFORM=linux
 ./copy_assets.sh
 
 ```
 
+Running on Linux
+----------------
+```
+cd ../../mc2/build64
+./mc2
+```
