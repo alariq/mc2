@@ -760,7 +760,7 @@ void InfoWindow::drawScrollingStuff()
 	//memset( names, 0, sizeof( char* ) * 60 );
 	MemSet(names, 0);
 
-	char count[4];
+	byte count[4];
 	count[0] = pUnit->ecm;
 	count[1] = pUnit->probe;
 	count[2] = pUnit->jumpJets;
