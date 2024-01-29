@@ -517,7 +517,7 @@ class MC_TextureManager
 					masterTextureNodes[nodeId].hardwareVertexData2->flags = flags;
 					masterTextureNodes[nodeId].hardwareVertexData2->textureIndex = nodeId;
 				}
-				else if (masterTextureNodes[nodeId].vertexData &&
+				else if (masterTextureNodes[nodeId].hardwareVertexData &&
 					(masterTextureNodes[nodeId].hardwareVertexData->flags != flags) &&
 					masterTextureNodes[nodeId].hardwareVertexData2 &&
 					(masterTextureNodes[nodeId].hardwareVertexData2->flags != flags) &&
