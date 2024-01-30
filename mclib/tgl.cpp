@@ -2457,6 +2457,11 @@ long TG_Shape::MultiTransformShape (Stuff::Matrix4D *shapeToClip, Stuff::Point3D
 		}
 	}
 
+#ifdef ALSO_RENDER_USING_TEX_SHADER
+	// This piece of code renders mechs and vehicles using the gos_tex_vertex_lighted.vert shader. This is in addition to the same objectes being
+	// rendered by addTriangle above. This results in a sparkling effect as the 2 renders fight each other as the mechs rotate. This behaviour is
+	// quite evident with 5 mechs.
+
 	// FIXME: this (listOfTypeTriangles[0]) is not correct if model has more than 1 texture! 
 	if (!isSpotlight && !isWindow && !theShape->listOfTextures[theShape->listOfTypeTriangles[0].localTextureHandle].textureAlpha && (alphaValue == 0xff))
 	{
@@ -2492,6 +2497,7 @@ long TG_Shape::MultiTransformShape (Stuff::Matrix4D *shapeToClip, Stuff::Point3D
 			mcTextureManager->addRenderShape(theShape->listOfTextures[theShape->listOfTypeTriangles[0].localTextureHandle].mcTextureNodeIndex, MC2_DRAWSOLID | addFlags);
 		}
 	}
+#endif
 
 	gosASSERT(oneOff || oneOn);
 
