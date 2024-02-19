@@ -154,7 +154,7 @@ Dependencies
 ------------
 Apt based distros:
 ```
-sudo apt install libsdl2-dev, libsdl2-mixer-dev, libsdl2-ttf-dev, libsdl2-mixer-dev, zlib1g-dev, libglerw-dev
+sudo apt install libsdl2-dev, libsdl2-mixer-dev, libsdl2-ttf-dev, libsdl2-mixer-dev, zlib1g-dev, libglew-dev
 ```
 
 Build steps
