@@ -150,6 +150,15 @@ Once everything in place, you can launch build scripts as described in correspon
 Building on Linux
 =================
 
+Dependencies
+------------
+Apt based distros:
+```
+sudo apt install libsdl2-dev, libsdl2-mixer-dev, libsdl2-ttf-dev, libsdl2-mixer-dev, zlib1g-dev, libglerw-dev
+```
+
+Build steps
+-----------
 The build process has been reworked to reduce the number of steps and chance of failure. It handles building and moving data and resources into the correct locations at the right time  and cloning repositories as required. The game is build in the ```mc2/build64``` directory.
 
 You only need to clone the mc2 directory and the build process will clone the data directory and SDL2 cmake modules for you the first time you run the build process. The mc2 and mc2srcdata projects will be cloned side by side and the build process relies on this. The top level directory structure will look like :
