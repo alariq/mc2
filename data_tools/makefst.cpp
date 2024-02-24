@@ -29,7 +29,7 @@ int unpack(const char* fst_file, const char* out_path)
 	long result = ff->open(fst_file);
 	if (0 != result) {
         if(result == FASTFILE_VERSION) {
-            SPEW(("DBG", "Wrong fast file version\n"));
+            fprintf(stderr, "Wrong fast file version\n");
         }
         PAUSE(("Error opening fast file\n"));
         delete ff;
@@ -68,7 +68,7 @@ int unpack(const char* fst_file, const char* out_path)
         long fHandle = ff->openFast(hash, fname);
         if(fHandle==-1)
         {
-            SPEW(("DUMP", "Failed to find file: %s in fast file\n", fname));
+            fprintf( stderr, "DUMP: Failed to find file: %s in fast file\n", fname);
             continue;
         }
 
@@ -97,7 +97,7 @@ int unpack(const char* fst_file, const char* out_path)
             {
                 DWORD err = GetLastError();
                 if (err == ERROR_ALREADY_EXISTS) {
-                    SPEW(("DBG", "Failed to create directory %s, error code: %d - directory already exists\n", tmp, err));
+                    fprintf( stderr, "DBG: Failed to create directory %s, error code: %d - directory already exists\n", tmp, err);
                 } else {
                     PAUSE(("Failed to create directory %s, error code: %d\n", tmp, err));
                 }
@@ -136,7 +136,7 @@ int pack(const char* in_path, const char* fst_file, const char* mount, const cha
 
     FastFile out_ff;
     if(NO_ERR != out_ff.create(fst_file, b_compress)) {
-        SPEW(("pack: ", "Failed to create fast file %s\n", fst_file));
+        fprintf( stderr, "pack: Failed to create fast file %s\n", fst_file);
         return -1;
     }
 
@@ -145,13 +145,11 @@ int pack(const char* in_path, const char* fst_file, const char* mount, const cha
 
     std::queue<char*> dirs2process;
     std::queue<char*> files2pack;
-    size_t num_files2pack = 0;
 
     const char* prefix = in_path;
 
 
     if(!rsp_file) {
-
         char* findString = new char[1];
         strcpy(findString, "");
         dirs2process.push(findString);
@@ -161,7 +159,7 @@ int pack(const char* in_path, const char* fst_file, const char* mount, const cha
             char* cur_dir = dirs2process.front();
             dirs2process.pop();
 
-            SPEW(("Processing dir: ", "%s\n", cur_dir));
+            fprintf( stdout, "Processing dir: %s\n", cur_dir);
 
             char* cur_search_path = new char[strlen(prefix) + strlen(PATH_SEPARATOR) + strlen(cur_dir) + strlen(PATH_SEPARATOR) + strlen("*") + 1];
             if(strlen(cur_dir) > 0) {
@@ -187,8 +185,7 @@ int pack(const char* in_path, const char* fst_file, const char* mount, const cha
                         }
 
                         files2pack.push(filename);
-                        SPEW(("\t", "%s\n", filename));
-                        num_files2pack++;
+                        printf( "\t%s\n", filename);
                     } else {
                         if(strcmp(findResult.cFileName, ".") && strcmp(findResult.cFileName, "..")) {
                             char* findString = new char[strlen(cur_dir) + strlen(findResult.cFileName) + strlen(PATH_SEPARATOR) + 1];
@@ -239,14 +236,12 @@ int pack(const char* in_path, const char* fst_file, const char* mount, const cha
             strcpy(fname, line);
 
             files2pack.push(fname);
-
-            num_files2pack++;
         }
         fclose(fh);
         delete[] line;
     }
 
-    SPEW(("DBG: ", "Numfiles to pack: %d\n", num_files2pack));
+    printf( "DBG: Numfiles to pack: %lu\n", files2pack.size() );
 
     size_t filebuf_size = CHUNK_SIZE;
     uint8_t* filebuf = new uint8_t[filebuf_size];
@@ -295,7 +290,7 @@ int pack(const char* in_path, const char* fst_file, const char* mount, const cha
             if(mount) {
 
 				if (strstr(filename, "pmwbubba.fit")) {
-					int asdfa = 0;
+					// int asdfa = 0;
 				}
 
                 S_snprintf(filename_buf, filenamebuf_size, "%s" PATH_SEPARATOR "%s", mount, filename);

@@ -283,7 +283,7 @@ void InfoWindow::init( FitIniFile& file )
 	char SkillText[32];
 	for (int i = 0; i < 7; i++ )
 	{
-		sprintf( SkillText, "Skill%ld", i );
+		sprintf( SkillText, "Skill%d", i );
 		skillInfos[i].init( file, SkillText ,ControlGui::hiResOffsetX, ControlGui::hiResOffsetY);
 	
 	}
@@ -623,8 +623,8 @@ void InfoWindow::drawScrollingStuff()
 
 	char disabledCount[60][2];
 	long ammo[60];
-	char ranges[60];
-	char names[60];// sebi: changed long to char
+	byte ranges[60];
+	byte names[60];// igough: changed char to unsigned 8 bit since the value can be over 127, which causes a negative index
 	memset( disabledCount, 0, sizeof( char ) * 60 * 2);
 
 	// sebi: ORIG BUG FIX memory owerwrite fix fow win64 build: sizeof(long) < sizeof(char*)!
@@ -643,7 +643,7 @@ void InfoWindow::drawScrollingStuff()
 
 	for (long curWeapon = pUnit->numOther; curWeapon < (pUnit->numOther + pUnit->numWeapons); curWeapon++) 
 	{
-			char nName = pUnit->inventory[curWeapon].masterID;
+			byte nName = pUnit->inventory[curWeapon].masterID;
 			bool bFound = 0;
 			for ( int j = 0; j < i; j++ )
 			{
@@ -760,7 +760,7 @@ void InfoWindow::drawScrollingStuff()
 	//memset( names, 0, sizeof( char* ) * 60 );
 	MemSet(names, 0);
 
-	char count[4];
+	byte count[4];
 	count[0] = pUnit->ecm;
 	count[1] = pUnit->probe;
 	count[2] = pUnit->jumpJets;
@@ -995,7 +995,7 @@ void InfoWindow::drawSkillBar( int skill, float yVal, float height )
 	}
 
 	char buffer[32];
-	sprintf( buffer, "%ld", skill );
+	sprintf( buffer, "%d", skill );
 	componentFont.render( buffer, SKILLRIGHT+2, yVal, SCROLLLEFT - SKILLRIGHT - 2, SKILLHEIGHT, 0xff005392, 0, 0 );
 }
 

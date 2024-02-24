@@ -1,9 +1,11 @@
-cmake_minimum_required (VERSION 3.10)
+cmake_minimum_required (VERSION 3.14)
 # select GLVND versus legacy OpenGL libraries
 cmake_policy(SET CMP0072 NEW) # cmake --help-policy CMP0072
 project(mc2)
 
 include(CMakeToolsHelpers OPTIONAL)
+# Load the URLs for the SDL2 cmake modules and the MC2 data repo
+include(MC2Repos REQUIRED)
 
 # Set a default build type for single-configuration
 # CMake generators if no build type is set.
@@ -51,6 +53,37 @@ endif()
 add_definitions(-DUSE_ASSEMBLER_CODE=0)
 add_definitions(-DLINUX_BUILD)
 
+find_package(Git REQUIRED)
+
+if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/cmake/sdl2")
+    message(STATUS "Found cmake SDL package dir")
+else()
+    # The SDL2 cmake package directory is missing, so clone it from a repo
+    message(STATUS "Cloning from ${SDL2_CMAKE_MODULE_REPO}")
+    execute_process(COMMAND ${GIT_EXECUTABLE} clone ${SDL2_CMAKE_MODULE_REPO} ${CMAKE_CURRENT_SOURCE_DIR}/cmake/sdl2
+                    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+                    RESULT_VARIABLE GIT_CLONE_RESULT )
+    if(NOT GIT_CLONE_RESULT EQUAL "0")
+        message(FATAL_ERROR "git clone of repo failed with ${GIT_CLONE_RESULT}, please clone manually")
+    endif()
+endif()
+
+# Check for MC2 data dir next to the MC2 dir. If not there, clone it from a repo
+get_filename_component(MC2_DATA_PATH "../mc2srcdata" ABSOLUTE)
+if(EXISTS "${MC2_DATA_PATH}")
+    message(STATUS "Found MC2 data dir")
+else()
+    # The MechCommander 2 data directory is missing so clone from a repo
+    message(STATUS "Cloning from ${MC2_DATA_REPO}")
+    execute_process(COMMAND ${GIT_EXECUTABLE} clone ${MC2_DATA_REPO} ${MC2_DATA_PATH}
+                    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/..
+                    RESULT_VARIABLE GIT_CLONE_RESULT )
+    if(NOT GIT_CLONE_RESULT EQUAL "0")
+        message(FATAL_ERROR "git clone of MC2 data repo failed with ${GIT_CLONE_RESULT}, please clone manually")
+    endif()
+endif()
+
+
 find_package(SDL2 REQUIRED)
 find_package(SDL2_mixer REQUIRED)
 #required by text_tool
@@ -73,6 +106,16 @@ get_filename_component(COM_PATH1 "./GameOS/include" ABSOLUTE)
 get_filename_component(COM_PATH2 "./GameOS/gameos" ABSOLUTE)
 
 set(COMMON_INCLUDE_DIRS  ${COM_PATH1} ${COM_PATH2})
+
+include_directories(${COMMON_INCLUDE_DIRS} "./mclib" "./gui" "./code" "./netlib")
+
+# Build the MC2 resource shared object and after the build completes, copy to the build dir
+add_subdirectory("./res" "./out/res")
+
+# Build the data and text tools for converting the MC2 data and after the build completes, copy to the data dir
+add_subdirectory("./data_tools" "./out/data_tools")
+add_subdirectory("./text_tool" "./out/text_tool")
+
 
 add_subdirectory("./mclib/" "./out/mclib")
 add_subdirectory("./mclib/mlr" "./out/mclib/mlr")
@@ -176,7 +219,6 @@ set(SOURCES
     )
 
 
-include_directories(${COMMON_INCLUDE_DIRS} "./mclib" "./gui" "./code" "./netlib")
 
 if(NOT WIN32)
 	set(ADDITIONAL_LIBS dl)
@@ -188,9 +230,13 @@ endif()
 
 
 add_executable(mc2 ${SOURCES} ${MAIN_SRC})
-target_link_libraries(mc2 mclib gosfx mlr stuff gui gameos gameos_main windows ZLIB::ZLIB SDL2::Main GLEW::GLEW SDL2::Mixer ${ADDITIONAL_LIBS} OpenGL::GL)
+target_link_libraries(mc2 mc2res mclib gosfx mlr stuff gui gameos gameos_main windows ZLIB::ZLIB SDL2::Main GLEW::GLEW SDL2::Mixer ${ADDITIONAL_LIBS} OpenGL::GL)
 
-add_subdirectory("./res" "./out/res")
-add_subdirectory("./data_tools" "./out/data_tools")
-add_subdirectory("./text_tool" "./out/text_tool")
 add_subdirectory("./Viewer" "./out/Viewer")
+
+add_custom_command(
+        TARGET ${PROJECT_NAME} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+                ${CMAKE_CURRENT_SOURCE_DIR}/shaders
+                ${CMAKE_CURRENT_BINARY_DIR}/shaders )
+

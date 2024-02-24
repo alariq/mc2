@@ -1,0 +1,2 @@
+set(SDL2_CMAKE_MODULE_REPO "https://gitlab.com/aminosbh/sdl2-cmake-modules.git")
+set(MC2_DATA_REPO "https://github.com/igough/mc2srcdata.git")

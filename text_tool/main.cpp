@@ -1,3 +1,5 @@
+#define _ARMOR
+
 #include "gameos.hpp"
 #include "gos_render.h"
 #include "gos_font.h"
@@ -12,6 +14,8 @@
 #include "utils/camera.h"
 #include "utils/shader_builder.h"
 #include "utils/gl_utils.h"
+
+#include <GL/glew.h>
 
 static const uint32_t NUM_GLYPHS = 255 - 32;
 static const uint32_t START_GLYPH = 32;
@@ -69,10 +73,11 @@ int main(int argc, char** argv)
     const char* size = argv[2];
     const char* outFile = argv[3];
 
+
     int fontSize = atoi(size);
     if(fontSize<=0 || fontSize>=100) {
         printf("Invalid font size: %d\n", fontSize);
-        return 1;
+        return 2;
     }
 
     //int size_width = 2; // 2 chars enough to store 0 to 99
@@ -91,25 +96,26 @@ int main(int argc, char** argv)
 
     graphics::RenderWindowHandle win = graphics::create_window("text_tool", 512, 512);
     if(!win)
-        return 1;
+        return 3;
+
 
     graphics::RenderContextHandle ctx = graphics::init_render_context(win);
     if(!ctx)
-        return 1;
+        return 4;
 
     GLenum err = glewInit();
     if (GLEW_OK != err)
     {
         SPEW(("GLEW", "Error: %s\n", glewGetErrorString(err)));
-        return 1;
+        return 5;
     }
 
     SPEW(("GRAPHICS", "Status: Using GLEW %s\n", glewGetString(GLEW_VERSION)));
-    if (!GLEW_ARB_vertex_program || !GLEW_ARB_vertex_program)
-    {
-        SPEW(("GRAPHICS", "No shader program support\n"));
-        return 1;
-    }
+    // if ( !GLEW_ARB_vertex_program )
+    // {
+    //     SPEW(("GRAPHICS", "No shader program support\n"));
+    //     return 6;
+    // }
 
     graphics::make_current_context(ctx);
 
@@ -117,7 +123,7 @@ int main(int argc, char** argv)
 
     if(TTF_Init() == -1) {
         printf("TTF_Init: %s\n", TTF_GetError());
-        exit(1);
+        exit(7);
     }
 
     int outlinePixelSize = 0;
@@ -125,7 +131,7 @@ int main(int argc, char** argv)
     TTF_Font* font = TTF_OpenFont(fontFile, fontSize);
     if(!font) {
         printf("TTF_OpenFont: %s\n", TTF_GetError());
-        exit(1);
+        exit(8);
     }
 
     TTF_SetFontStyle(font, TTF_STYLE_NORMAL);

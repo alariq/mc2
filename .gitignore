@@ -34,7 +34,7 @@ Tools
 *.a
 viewer
 mc2
-text_tool
+text_tool/text_tool
 .ycm_extra_conf.py
 .ycm_extra_conf.pyc
 *.ico
@@ -48,6 +48,7 @@ tmp/
 dump/
 test_code/
 test_sound/
+cmake/sdl2
 # Source repository should not track built resources
 *.fst
 

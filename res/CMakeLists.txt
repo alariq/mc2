@@ -1,3 +1,6 @@
+cmake_minimum_required (VERSION 3.14)
+project(mc2res)
+
 set(RES_SOURCES libmain.cpp libmainc.cpp)
 
 if("${CMAKE_SIZEOF_VOID_P}" EQUAL "8")
@@ -10,4 +13,10 @@ else("${CMAKE_SIZEOF_VOID_P}" EQUAL "8")
 endif("${CMAKE_SIZEOF_VOID_P}" EQUAL "8")
 
 include_directories("." "../test_scripts/res_conv")
-add_library(mc2res_${res_suffix} SHARED ${RES_SOURCES})
+add_library(${PROJECT_NAME} SHARED ${RES_SOURCES})
+
+add_custom_command(
+        TARGET ${PROJECT_NAME} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy
+        ${CMAKE_CURRENT_BINARY_DIR}/libmc2res.so
+        ${CMAKE_CURRENT_BINARY_DIR}/../..)

@@ -2655,7 +2655,11 @@ void __stdcall GetGameOSEnvironment(const char* CommandLine )
 	Environment.allowMultipleApps = false;
 	Environment.dontClearRegistry = true;
 
-    Environment.checkCDForFiles = true;
+	// New code was added to handle JPG versions of the burning files. Unfortunately, these JPG files are NOT included in the textures directory.
+	// if checkCDForFiles is set to true, then an attempt to load the burning textures from JPGs will continually retry and
+	// ask to insert the CD. If set to false, when the .JPG is not found, the load will fail and fallback to loading the .TGA
+	// versions which are included in textures.fst
+    Environment.checkCDForFiles = false;
 	
 	if (useSound)
 	{
