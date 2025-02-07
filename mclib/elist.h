@@ -4,6 +4,7 @@
 #pragma warning( disable : 4211 )
 
 #include<memory.h>
+#include<new> // for placement new
 #include"heap.h"
 //--------------------------------------------------------------------------------------
 //

@@ -34,6 +34,7 @@
 
 #include "platform_str.h"
 #include <stddef.h> // linux offsetof()
+#include <new> // for placement new
 
 //-------------------------------------------------------------------------------
 // Include Files
