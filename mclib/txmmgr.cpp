@@ -571,8 +571,8 @@ void MC_TextureManager::addRenderShape(DWORD nodeId, TG_RenderShape* render_shap
 
 			masterTextureNodes[nodeId].hardwareVertexData2->currentShape = shapes;
 		}
-		else if (masterTextureNodes[nodeId].vertexData3 &&
-			masterTextureNodes[nodeId].vertexData3->flags == flags)
+		else if (masterTextureNodes[nodeId].hardwareVertexData3 &&
+			masterTextureNodes[nodeId].hardwareVertexData3->flags == flags)
 		{
 			TG_RenderShape * shapes = masterTextureNodes[nodeId].hardwareVertexData3->currentShape;
 
