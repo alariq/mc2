@@ -88,6 +88,13 @@ bool renderTGLShapes = true;
 
 bool silentMode = false;		//Used for automated builds to keep errors from popping up.
 
+//sebi: uncomment this to also enable path of rendering shapes using lighting in shaders
+// instead of calculating everything on the CPU
+// (will render them offset a bit to check that they are rendered exactly same as old way)
+// for now everything seems to be correct thoug, so could enable it by default
+// look into gos_tex_vertex_lighted.vert for where offset is defined
+bool bShadersDrawPathEnabled = false;
+
 //-------------------------------------------------------------------------------
 // Parse Functions
 void GetNumberData (char *rawData, char *result)
@@ -2458,7 +2465,7 @@ long TG_Shape::MultiTransformShape (Stuff::Matrix4D *shapeToClip, Stuff::Point3D
 	}
 
 	// FIXME: this (listOfTypeTriangles[0]) is not correct if model has more than 1 texture! 
-	if (!isSpotlight && !isWindow && !theShape->listOfTextures[theShape->listOfTypeTriangles[0].localTextureHandle].textureAlpha && (alphaValue == 0xff))
+	if (bShadersDrawPathEnabled && !isSpotlight && !isWindow && !theShape->listOfTextures[theShape->listOfTypeTriangles[0].localTextureHandle].textureAlpha && (alphaValue == 0xff))
 	{
 		DWORD addFlags = 0;
 		if (isHudElement)

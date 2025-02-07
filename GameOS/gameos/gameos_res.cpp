@@ -60,14 +60,14 @@ HSTRRES __stdcall gos_OpenResourceDLL(char const* FileName, const char** strings
     /* Get symbol */
     fptr = (get_string_by_id_fptr)DL_LoadFunction(module, "getStringById");
     if ((error = DL_GetError())) {
-        fprintf(stderr, "Couldn't find hello: %s\n", error);
+        fprintf(stderr, "Couldn't load function getStringById in %s (not exported?): %s\n", FileName, error);
         return NULL;
     }
 
     init_string_resources_fptr init_fptr;
     init_fptr = (init_string_resources_fptr)DL_LoadFunction(module, "initStringResources");
     if ((error = DL_GetError())) {
-        fprintf(stderr, "Couldn't find hello: %s\n", error);
+        fprintf(stderr, "Couldn't load function initStringResources in %s (not exported?): %s\n", FileName, error);
         return NULL;
     }
     init_fptr();

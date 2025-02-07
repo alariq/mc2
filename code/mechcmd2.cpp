@@ -838,6 +838,10 @@ void __stdcall InitializeGameEngine()
 	gosResourceHandle = gos_OpenResourceDLL("./libmc2res.so", NULL, 0);
 #endif
 
+	if(!gosResourceHandle) {
+        fprintf(stderr, "Error loading ResourseDLL (mc2res)\n");
+	}
+
 	//Check for enough SwapFile Space FIRST!!!
 	// In order to do that, we must force Win2K/XP to enlarge
 	// its swapfile at the get go to insure goodness and that
