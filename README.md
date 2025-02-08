@@ -33,12 +33,13 @@ Sound system is not fully implemented (panning, doppler, etc. not supported yet)
 Building on Windows
 ===================
 
-**Updated detailed build manual for Windows can be found in `BUILD-WIN.txt`**
+**Updated detailed build manual for Windows can be found in `BUILD-WIN.md`**
 
 To build on windows use CMake
 
 Ensure, that you have all necessary dependencies: SDL2, SDL_mixer, SDL_ttf(for tools), zlib, glew
 I recommend to get zlib sources and build them by hand (do not forget to copy zconf.h)
+One can also use 3rdparty.zip package in the repo for simpler setup, it contains all needed 3rdparty libraries
 
 Just for a reference here is how my 3rdparty tree may look like
 ```
