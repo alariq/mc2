@@ -11,7 +11,6 @@
 // Pragmas needed to compile at Warning 4
 //
 //
-#pragma pack(push,4)
 #ifdef PLATFORM_WINDOWS
 #pragma warning( disable: 4725 )					// fdiv generates a warning
 #pragma warning( disable: 4127 )					// conditional expression is constant eg: Asserts will not work otherwise
@@ -71,6 +70,8 @@ static inline unsigned long long rdtsc(void)
 #endif // PLATFORM_WINDOWS
 
 #include "utils/vec.h"
+
+#pragma pack(push,4)
 //
 //
 //
