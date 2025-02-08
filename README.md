@@ -24,23 +24,31 @@ Sound system is not fully implemented (panning, doppler, etc. not supported yet)
 * Add network support?
 * I am sure there is more
 
-
-Original game was released under Shared Source Limited Permission License (please refer to EULA.txt)
-My code is licenced under GPL v.3 (see license.txt)
+### Licensing
+* Original game was released under Shared Source Limited Permission License (please refer to EULA.txt)
+* My code is licenced under GPL v.3 (see license.txt)
+* All third party libraries use their own licenses
 
 
 Building on Windows
 ===================
 
+**Updated detailed build manual for Windows can be found in `BUILD-WIN.txt`**
+
 To build on windows use CMake
 
-Ensure, that you have all necessary dependencies: SDL2, SDL_mixer, zlib, glew
+Ensure, that you have all necessary dependencies: SDL2, SDL_mixer, SDL_ttf(for tools), zlib, glew
 I recommend to get zlib sources and build them by hand (do not forget to copy zconf.h)
 
-Just for a reference here is how my 3rdparty tree looks like
+Just for a reference here is how my 3rdparty tree may look like
 ```
 |   
 +---bin
++---cmake
+    |    sdl2_mixer-config.cmake
+    |    sdl2_ttf-config.cmake
+    |    sdl2-config.cmake
+    |    
 +---include
 |   |   zconf.h
 |   |   zlib.h
@@ -52,24 +60,20 @@ Just for a reference here is how my 3rdparty tree looks like
 |   |       wglew.h
 |   |       
 |   \---SDL2
-|           all sdl headers (SDL_mixer shiuld be there as well)
+|           all sdl headers (SDL_mixer.h and SDL_ttf.h should be there as well)
 |           
 \---lib
     +---x64
     |       glew32.lib
     |       glew32s.lib
-    |       libFLAC-8.dll
-    |       libmodplug-1.dll
-    |       libmpg123-0.dll
-    |       libogg-0.dll
-    |       libvorbis-0.dll
-    |       libvorbisfile-3.dll
     |       SDL2.dll
     |       SDL2.lib
     |       SDL2main.lib
     |       SDL2test.lib
     |       SDL2_mixer.dll
     |       SDL2_mixer.lib
+    |       SDL2_ttf.lib
+    |       SDL2_ttf.dll
     |       zlib.dll
     |       zlib.lib
     |       zlibstatic.lib
@@ -77,22 +81,13 @@ Just for a reference here is how my 3rdparty tree looks like
     \---x86
             glew32.lib
             glew32s.lib
-            libFLAC-8.dll
-            libmodplug-1.dll
-            libmpg123-0.dll
-            libogg-0.dll
-            libvorbis-0.dll
-            libvorbisfile-3.dll
-            LICENSE.FLAC.txt
-            LICENSE.modplug.txt
-            LICENSE.mpg123.txt
-            LICENSE.ogg-vorbis.txt
             SDL2.dll
             SDL2.lib
             SDL2main.lib
             SDL2test.lib
             SDL2_mixer.dll
             SDL2_mixer.lib
+            SDL2_mixer.dll
             zlib.dll
             zlib.lib
             zlibstatic.lib
@@ -109,10 +104,17 @@ cd build64
 cmake.exe -G "Visual Studio 15 2017 Win64" -DCMAKE_PREFIX_PATH=c:/path_to_your_dependencies/ -DCMAKE_LIBRARY_ARCHITECTURE=x64 ..
 ```
 (to generate project for VS1027 for 64bit build)
+(prefer absolute path)
 
 or for 32bit build:
 
 `cmake.exe -G "Visual Studio 15 2017 Win64" -DCMAKE_PREFIX_PATH=c:/path_to_your_dependencies/ -DCMAKE_LIBRARY_ARCHITECTURE=x86 ..`
+(prefer absolute path)
+
+for 6bit build and VS2022:
+
+`cmake.exe -G "Visual Studio 17 2022" -DCMAKE_PREFIX_PATH=c:/path_to_your_dependencies/ -DCMAKE_LIBRARY_ARCHITECTURE=x64 ..`
+(prefer absolute path)
 
 Now run generated solution and try to build it!
 
@@ -120,8 +122,8 @@ Now run generated solution and try to build it!
 Now build string resources
 --------------------------
 
-First use script in ```test_scripts/res_conv/res_conv.pl``` to generate ```strings.res.cpp``` and  ```strings.res.h`` files or just take them from that folder
-Then copy them to ```./res``` folder
+First use script in `test_scripts/res_conv/res_conv.pl` to generate `strings.res.cpp` and  `strings.res.h` files or just take them from that folder
+Then copy them to `./res` folder
 Then:
 
 ```
