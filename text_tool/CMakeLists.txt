@@ -4,5 +4,6 @@ add_definitions(-DLINUX_BUILD)
 
 set(TEXT_TOOL_SOURCES "main.cpp")
 
+include_directories(${CMAKE_PREFIX_PATH}/include)
 add_executable(text_tool ${TEXT_TOOL_SOURCES})
-target_link_libraries(text_tool gameos windows SDL2::Main SDL2::TTF GLEW::GLEW ${ADDITIONAL_LIBS} OpenGL::GL)
+target_link_libraries(text_tool gameos windows ${SDL2_LIBRARIES} SDL2_ttf::SDL2_ttf GLEW::GLEW ${ADDITIONAL_LIBS} OpenGL::GL)

@@ -1,3 +1,5 @@
+project(mc2res)
+
 set(RES_SOURCES libmain.cpp libmainc.cpp)
 
 if("${CMAKE_SIZEOF_VOID_P}" EQUAL "8")
@@ -8,6 +10,13 @@ else("${CMAKE_SIZEOF_VOID_P}" EQUAL "8")
 	message(STATUS "Target is 32 bits")
 	set(res_suffix 32)
 endif("${CMAKE_SIZEOF_VOID_P}" EQUAL "8")
+
+if(WIN32)
+	add_definitions(-DPLATFORM_WINDOWS)
+	add_definitions(-D_CRT_SECURE_NO_WARNINGS)
+	message("Compiling on M$ Windows")
+endif()
+
 
 include_directories("." "../test_scripts/res_conv")
 add_library(mc2res_${res_suffix} SHARED ${RES_SOURCES})

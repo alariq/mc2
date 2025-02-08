@@ -84,6 +84,7 @@ set(SOURCES ${SOURCES}
     )
 
 include_directories(${COMMON_INCLUDE_DIRS} "./mclib" "../Editor" "../DirectX8/include" "./")
+include_directories(${THIRDPARTY_INCLUDE_DIRS})
 
 add_definitions(-DBGR)
 add_library(mclib ${SOURCES})

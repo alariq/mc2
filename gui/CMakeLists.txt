@@ -13,5 +13,6 @@ set(SOURCES ${SOURCES}
     )
 
 include_directories(${COMMON_INCLUDE_DIRS} "../mclib" "../Code")
+include_directories(${THIRDPARTY_INCLUDE_DIRS})
 
 add_library(gui ${SOURCES})

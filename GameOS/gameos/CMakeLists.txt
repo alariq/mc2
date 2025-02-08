@@ -33,6 +33,7 @@ set(MAIN_SRC gameosmain.cpp)
 #include_directories("${SDL2_PREFIX}/include")
 
 include_directories("../include"  ".")
+include_directories(${THIRDPARTY_INCLUDE_DIRS})
 
 add_library(gameos ${SOURCES})
 add_library(gameos_main ${MAIN_SRC})
