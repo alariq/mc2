@@ -26,6 +26,7 @@ struct DDSURFACEDESC2 {
 #include"gamesound.h"
 #include"aanimobject.h"
 #include"multplyr.h"
+#include <algorithm>
 
 #include"prefs.h"
 extern CPrefs prefs;
@@ -716,6 +717,11 @@ void MainMenu::update()
 void MainMenu::render()
 {
 
+	// Calculate scale factors relative to 1024x768 base resolution
+	float scaleX = Environment.screenWidth / 1024.0f;
+	float scaleY = Environment.screenHeight / 768.0f;
+	float fontScale = std::min(scaleX, scaleY);
+
 	if (introMovie)
 	{
 		introMovie->render();
@@ -770,8 +776,13 @@ void MainMenu::render()
 			}
 		}
 
-		GUI_RECT rect = { 0, 0, Environment.screenWidth, Environment.screenHeight };
-		drawRect( rect, color );
+		GUI_RECT rect = {
+            0,
+            0,
+            static_cast<long>(1024 * scaleX),
+            static_cast<long>(768 * scaleY)
+        };
+        drawRect(rect, color);
 
 		if ( bDrawBackground )
 		{
@@ -791,10 +802,18 @@ void MainMenu::render()
 
 	if ( !xDelta && !yDelta )
 	{
-		drawShadowText( 0xffc66600, 0xff000000, textObjects[1].font.getTempHandle(), 
-			textObjects[1].globalX(), textObjects[1].globalTop(),
-			textObjects[1].globalRight(), textObjects[1].globalBottom(),
-			true, textObjects[1].text, false, textObjects[1].font.getSize(), 1, 1 );
+        long scaledX = static_cast<long>(textObjects[1].globalX() * scaleX);
+        long scaledTop = static_cast<long>(textObjects[1].globalTop() * scaleY);
+        long scaledRight = static_cast<long>(textObjects[1].globalRight() * scaleX);
+        long scaledBottom = static_cast<long>(textObjects[1].globalBottom() * scaleY);
+        long fontSize = static_cast<long>(textObjects[1].font.getSize() * fontScale);
+
+        drawShadowText(
+            0xffc66600, 0xff000000,
+            textObjects[1].font.getTempHandle(),
+            scaledX, scaledTop, scaledRight, scaledBottom,
+            true, textObjects[1].text, false, fontSize, 1, 1
+        );
 	}
 
 	textObjects[1].showGUIWindow( false );
