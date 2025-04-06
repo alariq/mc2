@@ -50,9 +50,6 @@ void MouseTimerKill();
 
 extern void (*AsynFunc)(RECT& WinRect,DDSURFACEDESC2& mouseSurfaceDesc );
 
-
-
-
 extern bool bInvokeOptionsScreenFlag;
 bool	MainMenu::bDrawMechlopedia = false;;
 
@@ -808,12 +805,31 @@ void MainMenu::render()
         long scaledBottom = static_cast<long>(textObjects[1].globalBottom() * scaleY);
         long fontSize = static_cast<long>(textObjects[1].font.getSize() * fontScale);
 
-        drawShadowText(
-            0xffc66600, 0xff000000,
-            textObjects[1].font.getTempHandle(),
-            scaledX, scaledTop, scaledRight, scaledBottom,
-            true, textObjects[1].text, false, fontSize, 1, 1
-        );
+		int textWidth = textObjects[1].font.width(textObjects[1].text);
+		int textX = (Environment.screenWidth - textWidth) / 2;
+		int textY = Environment.screenHeight - 24;
+
+		const char* text = textObjects[1].text;
+		int centerX = Environment.screenWidth / 2;
+		int y = Environment.screenHeight - 24; // distance from bottom, adjust as needed
+
+		float maxWidth = Environment.screenWidth * 0.9f;
+		float scale = 1.0f;
+		if (textWidth > maxWidth)
+			scale = maxWidth / (float)textWidth;
+
+		drawShadowText(
+			0xffc66600,                      // text color
+			0xff000000,                      // shadow color
+			textObjects[1].font.getTempHandle(),
+			centerX - (textWidth * scale) / 2,  // left
+			y,                                  // top
+			centerX + (textWidth * scale) / 2,  // right
+			y + 24,                             // bottom
+			true, text, false, 
+			textObjects[1].font.getSize(), 
+			scale, scale
+		);
 	}
 
 	textObjects[1].showGUIWindow( false );
