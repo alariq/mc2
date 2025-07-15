@@ -51,6 +51,9 @@ test_sound/
 # Source repository should not track built resources
 *.fst
 
+# Temporary 3rdparty folder (extracted from 3rdparty.zip)
+3rdparty/
+
 *.h~
 *.hpp~
 *.c~
