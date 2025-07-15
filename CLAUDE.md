@@ -13,10 +13,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ### Windows Build Process (TESTED & WORKING)
 
 **Step 1: Extract 3rdparty Dependencies**
-The repository includes a `3rdparty.zip` file that contains all necessary libraries. Extract it to the root directory so you have:
+The repository includes a `3rdparty.zip` file that contains all necessary libraries. This needs to be extracted to a temporary `3rdparty/` folder (this folder is not committed to git):
 ```
 mc2/
-├── 3rdparty/
+├── 3rdparty.zip          (committed)
+├── 3rdparty/             (temporary, extract from zip)
 │   ├── cmake/
 │   ├── include/
 │   └── lib/
@@ -24,7 +25,13 @@ mc2/
 │       └── x86/
 ```
 
-**Step 2: Main Application Build**
+**Step 2: Extract Dependencies (if not using setup script)**
+```bash
+# Extract 3rdparty.zip to create temporary 3rdparty/ folder
+powershell -Command "Expand-Archive -Path '3rdparty.zip' -DestinationPath '.' -Force"
+```
+
+**Step 3: Main Application Build**
 ```bash
 # Navigate to project root
 cd G:/games source code/games/mc2
@@ -40,7 +47,7 @@ cmake.exe -G "Visual Studio 17 2022" -DCMAKE_PREFIX_PATH="G:/games source code/g
 cmake --build . --config Release
 ```
 
-**Step 3: Resource DLL Build**
+**Step 4: Resource DLL Build**
 ```bash
 # Navigate to res directory
 cd G:/games source code/games/mc2/res
@@ -56,7 +63,7 @@ cmake.exe -G "Visual Studio 17 2022" -DCMAKE_LIBRARY_ARCHITECTURE=x64 ..
 cmake --build . --config Release
 ```
 
-**Step 4: Prepare String Resources**
+**Step 5: Prepare String Resources**
 ```bash
 # Copy the pre-generated string resources to res directory
 copy "test_scripts\res_conv\strings.res.cpp" "res\"
@@ -87,6 +94,8 @@ Game data is built separately using the mc2srcdata repository. Use the tools fro
 Two convenience scripts are provided:
 - **`setup_build_environment.bat`** - Extracts 3rdparty.zip and checks build tools
 - **`build_windows.bat`** - Complete build process for Windows
+
+**Note:** The scripts automatically extract `3rdparty.zip` to a temporary `3rdparty/` folder. This folder is not committed to git and should be treated as a build artifact. The original `3rdparty.zip` remains in the repository for convenience.
 
 ### Common Issues and Solutions
 
