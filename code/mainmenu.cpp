@@ -696,6 +696,37 @@ void MainMenu::update()
 
 void MainMenu::render()
 {
+	// Enhanced UI scaling system for modern resolutions
+	// - Baseline resolution: 1024x768 (original game design target)
+	// - Supports scaling from 800x600 to 4K+ with limits
+	// - Cached calculations for performance optimization
+	// - Separate X/Y scaling for layout flexibility
+	// - Uniform font scaling for readability
+	// - Responsive copyright text centering with width constraints
+	static float lastScreenWidth = 0;
+	static float lastScreenHeight = 0;
+	static float cachedScaleX = 1.0f;
+	static float cachedScaleY = 1.0f;
+	static float cachedFontScale = 1.0f;
+	
+	// Only recalculate when resolution changes
+	if (Environment.screenWidth != lastScreenWidth || Environment.screenHeight != lastScreenHeight) {
+		// Calculate scale factors relative to 1024x768 base resolution
+		float rawScaleX = Environment.screenWidth / 1024.0f;
+		float rawScaleY = Environment.screenHeight / 768.0f;
+		
+		// Apply scaling limits to prevent extreme scaling
+		const float maxScale = 3.0f;
+		const float minScale = 0.5f;
+		cachedScaleX = (rawScaleX > maxScale) ? maxScale : (rawScaleX < minScale) ? minScale : rawScaleX;
+		cachedScaleY = (rawScaleY > maxScale) ? maxScale : (rawScaleY < minScale) ? minScale : rawScaleY;
+		
+		// Use uniform scaling for fonts to maintain readability
+		cachedFontScale = (cachedScaleX < cachedScaleY) ? cachedScaleX : cachedScaleY;
+		
+		lastScreenWidth = Environment.screenWidth;
+		lastScreenHeight = Environment.screenHeight;
+	}
 
 	if (introMovie)
 	{
@@ -749,7 +780,12 @@ void MainMenu::render()
 			}
 		}
 
-		GUI_RECT rect = {0, 0, Environment.screenWidth, Environment.screenHeight};
+		GUI_RECT rect = {
+			0,
+			0,
+			static_cast<long>(1024 * cachedScaleX),
+			static_cast<long>(768 * cachedScaleY)
+		};
 		drawRect(rect, color);
 
 		if (bDrawBackground)
@@ -768,10 +804,37 @@ void MainMenu::render()
 
 	if (!xDelta && !yDelta)
 	{
-		drawShadowText(0xffc66600, 0xff000000, textObjects[1].font.getTempHandle(),
-					   textObjects[1].globalX(), textObjects[1].globalTop(),
-					   textObjects[1].globalRight(), textObjects[1].globalBottom(),
-					   true, textObjects[1].text, false, textObjects[1].font.getSize(), 1, 1);
+		// Enhanced copyright text rendering with resolution-aware scaling
+		const char* text = textObjects[1].text;
+		int textWidth = textObjects[1].font.width(text);
+		int centerX = Environment.screenWidth / 2;
+		int bottomY = Environment.screenHeight - 24; // Distance from bottom
+		
+		// Calculate text scaling with width constraint
+		float maxWidth = Environment.screenWidth * 0.9f;
+		float textScale = cachedFontScale;
+		if (textWidth * textScale > maxWidth) {
+			textScale = maxWidth / (float)textWidth;
+		}
+		
+		// Calculate scaled font size
+		long scaledFontSize = static_cast<long>(textObjects[1].font.getSize() * textScale);
+		
+		// Calculate final text dimensions
+		int scaledTextWidth = static_cast<int>(textWidth * textScale);
+		
+		drawShadowText(
+			0xffc66600,                              // text color
+			0xff000000,                              // shadow color
+			textObjects[1].font.getTempHandle(),
+			centerX - scaledTextWidth / 2,           // left (centered)
+			bottomY,                                 // top
+			centerX + scaledTextWidth / 2,           // right
+			bottomY + 24,                            // bottom
+			true, text, false, 
+			scaledFontSize,
+			textScale, textScale                     // X and Y scale factors
+		);
 	}
 
 	textObjects[1].showGUIWindow(false);
