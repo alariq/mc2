@@ -73,3 +73,13 @@ CMakeToolsMeta.in.txt
 CMakeToolsMeta.txt
 compile_commands.json
 
+# Temporary build dependencies (extracted from 3rdparty.zip)
+3rdparty/
+
+# Game files directory (not source code)
+full_game/
+
+# Build output directories
+mc2.dir/
+x64/
+
