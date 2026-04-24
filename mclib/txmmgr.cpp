@@ -1067,7 +1067,7 @@ void MC_TextureManager::renderLists (void)
 			else if (totalVertices > MAX_SENDDOWN)
 			{
 				gos_SetRenderState( gos_State_Texture, masterTextureNodes[masterVertexNodes[i].textureIndex].get_gosTextureHandle());
-				
+
 				//Must divide up vertices into batches of 10,000 each to send down.
 				// Somewhere around 20000 to 30000 it really gets screwy!!!
 				long currentVertices = 0;
@@ -1077,9 +1077,9 @@ void MC_TextureManager::renderLists (void)
 					long tVertices = totalVertices - currentVertices;
 					if (tVertices > MAX_SENDDOWN)
 						tVertices = MAX_SENDDOWN;
-					
+
 					gos_RenderIndexedArray(v, tVertices, indexArray, tVertices );
-					
+
 					currentVertices += tVertices;
 				}
 			}
@@ -1089,7 +1089,8 @@ void MC_TextureManager::renderLists (void)
 			masterVertexNodes[i].currentVertex = masterVertexNodes[i].vertices;
 		}
 	}
-	
+
+
 	if (Environment.Renderer == 3)
 	{
 		//Do NOT draw the water as transparent in software
@@ -1571,8 +1572,17 @@ void MC_TextureManager::renderLists (void)
 	gos_SetRenderState( gos_State_ZCompare, 0);
 	gos_SetRenderState( gos_State_Perspective, 1);
  	gos_SetRenderState( gos_State_AlphaMode, gos_Alpha_AlphaInvAlpha);
-	gos_SetRenderState( gos_State_AlphaTest, 1);
-	
+	// AlphaTest must stay OFF here. The ALPHA_TEST variant of
+	// shaders/gos_tex_vertex.frag discards fragments where
+	// tex_color.a < 0.5, which kills every semi-transparent compass
+	// pixel (the compass HUD texture has soft-alpha edges). With
+	// AlphaMode=AlphaInvAlpha above, normal alpha blending handles
+	// the transparent background correctly — no discard needed.
+	// MS's D3D8 original tolerated AlphaTest=1 here because its
+	// fixed-function reference threshold differed; our OpenGL port's
+	// 0.5 threshold doesn't.
+	gos_SetRenderState( gos_State_AlphaTest, 0);
+
  	for (int i=0;i<nextAvailableVertexNode;i++)
 	{
 		if ((masterVertexNodes[i].flags & MC2_ISCOMPASS) &&
@@ -1583,7 +1593,7 @@ void MC_TextureManager::renderLists (void)
 			{
 				totalVertices = masterVertexNodes[i].currentVertex - masterVertexNodes[i].vertices;
 			}
-			
+
 			if (totalVertices && (totalVertices < MAX_SENDDOWN))
 			{
 				gos_SetRenderState( gos_State_Texture, masterTextureNodes[masterVertexNodes[i].textureIndex].get_gosTextureHandle());
@@ -1592,7 +1602,7 @@ void MC_TextureManager::renderLists (void)
 			else if (totalVertices > MAX_SENDDOWN)
 			{
 				gos_SetRenderState( gos_State_Texture, masterTextureNodes[masterVertexNodes[i].textureIndex].get_gosTextureHandle());
-				
+
 				//Must divide up vertices into batches of 10,000 each to send down.
 				// Somewhere around 20000 to 30000 it really gets screwy!!!
 				long currentVertices = 0;
@@ -1602,19 +1612,19 @@ void MC_TextureManager::renderLists (void)
 					long tVertices = totalVertices - currentVertices;
 					if (tVertices > MAX_SENDDOWN)
 						tVertices = MAX_SENDDOWN;
-					
+
 					gos_RenderIndexedArray(v, tVertices, indexArray, tVertices );
-					
+
 					currentVertices += tVertices;
 				}
 			}
-	
+
 			//Reset the list to zero length to avoid drawing more then once!
 			//Also comes in handy if gameLogic is not called.
 			masterVertexNodes[i].currentVertex = masterVertexNodes[i].vertices;
 		}
 	}
-	
+
 	gos_SetRenderState( gos_State_Filter, gos_FilterNone);
 	
  	for (int i=0;i<nextAvailableVertexNode;i++)
