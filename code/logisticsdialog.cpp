@@ -526,8 +526,6 @@ void LogisticsSaveDialog::initDialog( const char* path, bool bCampaign )
 		{
 			if ((findResult.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) == 0)
 			{
-				aLocalizedListItem* pEntry = new aLocalizedListItem();
-				*pEntry = s_instance->templateItem;
 				char* pExt = strstr( findResult.cFileName, ".fit" );
 				if ( !pExt  )
 				{
@@ -535,7 +533,22 @@ void LogisticsSaveDialog::initDialog( const char* path, bool bCampaign )
 				}
 				if ( pExt )
 					*pExt = '\0';
-			
+
+				// Skip the two built-in campaigns here — they are handled by
+				// the fileExists() defensive-add block below, which works
+				// whether they are loose on disk or packed inside a fastfile.
+				// Without this skip, loose-file builds list both entries
+				// twice.
+				if ( bCampaign &&
+					 (S_stricmp( findResult.cFileName, "campaign" ) == 0 ||
+					  S_stricmp( findResult.cFileName, "tutorial" ) == 0) )
+				{
+					continue;
+				}
+
+				aLocalizedListItem* pEntry = new aLocalizedListItem();
+				*pEntry = s_instance->templateItem;
+
 				if (!bCampaign && isCorrectVersionSaveGame(findResult.cFileName))
 					pEntry->setText( findResult.cFileName );
 				else if (bCampaign)
