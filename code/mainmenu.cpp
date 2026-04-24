@@ -806,7 +806,7 @@ void MainMenu::render()
 		// Calculate text scaling with width constraint
 		float maxWidth = Environment.screenWidth * 0.9f;
 		float textScale = cachedFontScale;
-		if (textWidth * textScale > maxWidth) {
+		if (textWidth > 0 && textWidth * textScale > maxWidth) {
 			textScale = maxWidth / (float)textWidth;
 		}
 		
