@@ -272,7 +272,13 @@ long Logistics::update(void)
         }
 
         bMovie->update();
-        if (bMovie)
+        // Wait for the movie to actually finish before tearing it down.
+        // Previously this was `if (bMovie)`, which is always true right
+        // after a `new`, so the full-screen video got deleted on frame 1
+        // before render() could ever draw it. controlgui.cpp:996-997
+        // (in-mission cinematics) already uses the correct !isPlaying()
+        // gate; this brings full-screen video in line with it.
+        if (!bMovie->isPlaying())
         {
             if (LogisticsData::instance->campaignOver() && (S_strnicmp(bMovie->getMovieName().c_str(), "credits", 7) == 0))
             {
@@ -296,7 +302,7 @@ long Logistics::update(void)
                 movieRect.top = 0;
                 movieRect.left = 0;
                 movieRect.right = Environment.screenWidth;
-                movieRect.bottom = 600;
+                movieRect.bottom = Environment.screenHeight;
 
                 SDL_Window* gameWindow = SDL_GL_GetCurrentWindow();
                 SDL_GLContext gameContext = SDL_GL_GetCurrentContext();
@@ -856,15 +862,33 @@ void Logistics::playFullScreenVideo(const char* fileName)
     if (!fileName || !fileName[0])
         return;
 
-    FullPathFileName movieName;
-    //movieName.init(moviePath, fileName, ".bik");
-    movieName.init(moviePath, fileName, ".mp4");
+    // Retail campaign.fit stores big-video names with a ".bik" extension
+    // (e.g. "cinema1.bik"). init() below appends ".mp4", which would
+    // otherwise produce the bogus path "cinema1.bik.mp4". Strip the
+    // extension only if it's terminal — don't maul a name that happens
+    // to contain ".bik" somewhere in the middle. Other video call sites
+    // either split via _splitpath (controlgui.cpp) or pass bare names
+    // (forcegroupbar.cpp), so the fix only needs to live here.
+    char basename[256];
+    strncpy(basename, fileName, sizeof(basename) - 1);
+    basename[sizeof(basename) - 1] = '\0';
+    size_t len = strlen(basename);
+    if (len >= 4 && S_stricmp(basename + len - 4, ".bik") == 0)
+        basename[len - 4] = '\0';
 
+    FullPathFileName movieName;
+    movieName.init(moviePath, basename, ".mp4");
+
+    // Full logical screen — MP4Player::render() aspect-preserves within the
+    // rect so widescreen source letterboxes cleanly on 16:9 displays and
+    // 4:3 source pillarboxes. Previously the rect was hardcoded to a
+    // 100-500 horizontal band, which squeezed the video into a ~400px-
+    // tall strip with black above and below.
     RECT movieRect;
-    movieRect.top = 100;
+    movieRect.top = 0;
     movieRect.left = 0;
     movieRect.right = Environment.screenWidth;
-    movieRect.bottom = 500;
+    movieRect.bottom = Environment.screenHeight;
 
     SDL_Window* gameWindow = SDL_GL_GetCurrentWindow();
     SDL_GLContext gameContext = SDL_GL_GetCurrentContext();
