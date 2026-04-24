@@ -75,11 +75,11 @@ echo Step 3: Setting up string resources...
 cd "%MC2_ROOT%\res"
 if not exist "strings.res.cpp" (
     echo Copying strings.res.cpp...
-    copy "%MC2_ROOT%\test_scripts\res_conv\strings.res.cpp" .
+    copy "%MC2_ROOT%\test_scripts\res_conv\strings.res.cpp" "."
 )
 if not exist "strings.res.h" (
     echo Copying strings.res.h...
-    copy "%MC2_ROOT%\test_scripts\res_conv\strings.res.h" .
+    copy "%MC2_ROOT%\test_scripts\res_conv\strings.res.h" "."
 )
 
 echo.

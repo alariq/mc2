@@ -51,7 +51,6 @@ extern void (*AsynFunc)(RECT &WinRect, DDSURFACEDESC2 &mouseSurfaceDesc);
 
 extern bool bInvokeOptionsScreenFlag;
 bool MainMenu::bDrawMechlopedia = false;
-;
 
 void SplashIntro::init()
 {

@@ -6,9 +6,13 @@ echo MechCommander 2 - Build Environment Setup
 echo ================================================
 echo.
 
+REM Resolve paths relative to the script location so this works from anywhere
+pushd "%~dp0"
+
 REM Check if we're in the correct directory
 if not exist "CMakeLists.txt" (
-    echo ERROR: CMakeLists.txt not found. Please run this script from the mc2 root directory.
+    echo ERROR: CMakeLists.txt not found. Please ensure this script is located in the mc2 root directory.
+    popd
     exit /b 1
 )
 
@@ -16,6 +20,7 @@ REM Check if 3rdparty.zip exists
 if not exist "3rdparty.zip" (
     echo ERROR: 3rdparty.zip not found in the current directory.
     echo Please ensure 3rdparty.zip is present in the mc2 root directory.
+    popd
     exit /b 1
 )
 
@@ -26,6 +31,7 @@ if not exist "3rdparty" (
     if errorlevel 1 (
         echo ERROR: Failed to extract 3rdparty.zip
         echo Please extract 3rdparty.zip manually to the mc2 root directory.
+        popd
         exit /b 1
     )
     echo 3rdparty dependencies extracted successfully!
@@ -36,16 +42,19 @@ if not exist "3rdparty" (
 REM Verify 3rdparty structure
 if not exist "3rdparty\lib\x64" (
     echo ERROR: 3rdparty\lib\x64 not found. The 3rdparty.zip may be corrupted.
+    popd
     exit /b 1
 )
 
 if not exist "3rdparty\include" (
     echo ERROR: 3rdparty\include not found. The 3rdparty.zip may be corrupted.
+    popd
     exit /b 1
 )
 
 if not exist "3rdparty\cmake" (
     echo ERROR: 3rdparty\cmake not found. The 3rdparty.zip may be corrupted.
+    popd
     exit /b 1
 )
 
@@ -80,4 +89,7 @@ echo Ready to build!
 echo Run 'build_windows.bat' to start the build process.
 echo.
 
-pause
+popd
+
+REM Pause only when running interactively; skip under CI
+if not defined CI pause
