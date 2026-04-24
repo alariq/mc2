@@ -15,6 +15,7 @@ MechIcon.cpp			: Implementation of the MechIcon component.
 #include"controlgui.h"
 #include"gamesound.h"
 #include"platform_windows.h"
+#include <iostream>
 
 #ifndef MISSION_H
 #include"mission.h"
@@ -30,7 +31,6 @@ TGAFileHeader* ForceGroupIcon::s_textureMemory = 0;
 
 StaticInfo*		ForceGroupIcon::jumpJetIcon = NULL;
 
-MC2MoviePtr	ForceGroupIcon::bMovie = NULL;
 DWORD ForceGroupIcon::pilotVideoTexture = 0;
 MechWarrior*	ForceGroupIcon::pilotVideoPilot = NULL;
 
@@ -108,6 +108,7 @@ ForceGroupIcon::ForceGroupIcon(  )
 	bDrawBack = 0;
 	backDamageIndex = -1;
 	damageIconIndex = 0;
+	bMovie = NULL;
 
 	locationIndex = 0;
 
@@ -177,16 +178,18 @@ void ForceGroupIcon::swapResolutions( bool bForce )
 
 ForceGroupIcon::~ForceGroupIcon()
 {
-
-	if (pilotVideoPilot && pilotVideoPilot == unit->getPilot() )
+	// If we own the current pilot video, free it and clear the shared
+	// identifiers so setPilotVideo() does not try to match our now-dead pilot.
+	// Per-instance ownership means no cross-icon pilot check is needed — only
+	// the owning icon has a non-null bMovie. This drops the old
+	// `unit->getPilot()` dereference, which was unsafe if unit had already been
+	// torn down.
+	if ( bMovie )
 	{
-		if ( bMovie )
-		{
-			delete bMovie;
-			bMovie = NULL;
-			pilotVideoTexture = 0;
-		}
+		delete bMovie;
+		bMovie = NULL;
 		pilotVideoPilot = NULL;
+		pilotVideoTexture = 0;
 	}
 	s_slotUsed[damageIconIndex] = 0;
 
@@ -641,12 +644,7 @@ void MechIcon::update()
 
 	if (bMovie)
 	{
-		bool result = bMovie->update();
-		if (result)
-		{
-			delete bMovie;
-			bMovie = NULL;
-		}
+		bMovie->update();
 	}
 
 	if (unit->body[MECH_BODY_LOCATION_LTORSO].damageState == IS_DAMAGE_DESTROYED)
@@ -970,7 +968,6 @@ void ForceGroupIcon::render()
 			}
 			else
 			{
-				bMovie->setRect(vRect);
 				bMovie->render();
 			}
 		}
@@ -1017,8 +1014,6 @@ void ForceGroupIcon::render()
 	{
 		drawDeathEffect();
 	}
-
-
 }
 
 void ForceGroupIcon::renderUnitIcon( float left, float top, float right, float bottom )

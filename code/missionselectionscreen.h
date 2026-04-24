@@ -16,9 +16,7 @@ MissionSelectionScreen.h : Header file for mission selection
 #include"alistbox.h"
 #endif
 
-#ifndef MC2movie_H
-#include"mc2movie.h"
-#endif
+class MC2Movie;
 
 class FitIniFile;
 
@@ -43,7 +41,7 @@ private:
 
 	LogisticsScreen	operationScreen;
 
-	MC2MoviePtr		bMovie;
+	MC2Movie*		bMovie;
 	bool				playedLogisticsTune;
 
 	//HGOSVIDEO			video;

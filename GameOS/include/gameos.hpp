@@ -2842,6 +2842,17 @@ void __stdcall gos_LockTexture( DWORD Handle, DWORD MipMapSize, bool ReadOnly, T
 void __stdcall gos_UnLockTexture( DWORD Handle );
 
 //
+// Returns the underlying GL texture id for Handle, or 0 if invalid.
+// Intended for fast-path per-frame uploads (e.g. video) using
+// glBindTexture + glTexSubImage2D, bypassing gos_LockTexture's
+// readback + byte-swap path. Uses uint32_t rather than GLuint to
+// avoid dragging a GL header into this public interface; GL spec
+// guarantees GLuint is a 32-bit unsigned int, so callers can pass
+// the return value directly to glBindTexture.
+//
+uint32_t __stdcall gos_GetTextureGLId( DWORD Handle );
+
+//
 // Converts from 32bpp source to subrect of n-bpp dest, bypassing intermediate 32bpp buffer
 //
 void __stdcall gos_ConvertTextureRect( DWORD Handle, DWORD DestLeft, DWORD DestTop, DWORD *Source, DWORD SourcePitch, DWORD Width, DWORD Height );

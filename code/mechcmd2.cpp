@@ -280,9 +280,14 @@ float trisPerSecond[MAX_HARDWARE_CARDS] =
 extern bool loadInMissionSave;
 extern char CDInstallPath[];
 
-extern float averageFrameRate;
+/*extern float averageFrameRate;
 extern long currentFrameNum;
-extern float last30Frames[];
+extern float last30Frames[];*/
+
+float averageFrameRate = 0.0f;
+long currentFrameNum = 0;
+float last30Frames[30] = { 0.0f };
+
 
 extern bool WindowsNT;
 

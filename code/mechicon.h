@@ -15,8 +15,8 @@ MechIcon.h			: Interface for the MechIcon component.
 #include"afont.h"
 #endif
 
-#ifndef MC2movie_H
-#include"mc2movie.h"
+#ifndef MP4PLAYER_H
+#include"mp4player.h"
 #endif
 
 //*************************************************************************************************
@@ -156,7 +156,12 @@ protected:
 
 		float		msgPlayTime;
 
-		static		MC2MoviePtr 	bMovie;
+		// Per-instance; at any given time at most one icon has this non-null.
+		// Invariant owned by ForceGroupBar::setPilotVideo() — the only licensed
+		// creator, which walks all icons to clean up before allocating a new one.
+		// Do not assign to this outside setPilotVideo() unless that invariant is
+		// preserved.
+		MP4Player*	bMovie;
 		static		DWORD			pilotVideoTexture;
 		static		MechWarrior*	pilotVideoPilot;
 		

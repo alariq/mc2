@@ -6,6 +6,8 @@ ForceGroupBar.cpp			: Implementation of the ForceGroupBar component.
 //===========================================================================//
 \*************************************************************************************************/
 
+#include <SDL2/SDL.h>
+#include <windows.h>
 #include"forcegroupbar.h"
 #include"mechicon.h"
 #include"objmgr.h"
@@ -14,10 +16,11 @@ ForceGroupBar.cpp			: Implementation of the ForceGroupBar component.
 #include"controlgui.h"
 #include "../resource.h"
 #include"multplyr.h"
-#include"mc2movie.h"
+#include"mp4player.h"
 #include"comndr.h"
 #include"prefs.h"
 #include"gamesound.h"
+#include <iostream>
 
 float ForceGroupBar::iconWidth = 48;
 float ForceGroupBar::iconHeight = 42;
@@ -412,24 +415,31 @@ bool ForceGroupBar::setPilotVideo( const char* pVideo, MechWarrior* pPilot )
 {
 	if ( !pVideo  )
 	{
-		if ( ForceGroupIcon::bMovie )
+		// Walk icons to find the current owner (at most one, per invariant) and
+		// free its player. Per-instance ownership means no static to poke.
+		for (int i = 0; i < iconCount; i++)
 		{
-			delete ForceGroupIcon::bMovie;
-			ForceGroupIcon::bMovie = NULL;
-			
+			if (icons[i] && icons[i]->bMovie)
+			{
+				delete icons[i]->bMovie;
+				icons[i]->bMovie = NULL;
+				break;
+			}
 		}
-		else if ( ForceGroupIcon::pilotVideoTexture )
+
+		// Unconditional fallback-texture destruction — cheap guard against a
+		// stale handle if the slot ever gets into mixed state.
+		if ( ForceGroupIcon::pilotVideoTexture )
 			gos_DestroyTexture( ForceGroupIcon::pilotVideoTexture );
-		
+
 		ForceGroupIcon::pilotVideoTexture = 0;
 		ForceGroupIcon::pilotVideoPilot = 0;
 	}
 
-	else if  (ForceGroupIcon::bMovie || ControlGui::instance->isMoviePlaying()
+	else if  (isPlayingVideo() || ControlGui::instance->isMoviePlaying()
 		|| ForceGroupIcon::pilotVideoTexture || !prefs.pilotVideos)
 	{
-		// one already playing...
-		// OR we don't want them playing.
+		// one already playing, or we don't want them playing.
 		return 0;
 	}
 
@@ -441,9 +451,17 @@ bool ForceGroupBar::setPilotVideo( const char* pVideo, MechWarrior* pPilot )
 			{
 				ForceGroupIcon::pilotVideoPilot = pPilot;
 				FullPathFileName aviPath;
-				aviPath.init( moviePath, pVideo, ".bik" );
+				aviPath.init( moviePath, pVideo, ".mp4" );
 
-				if ( (frameRate > 15.0) && fileExists(aviPath) && prefs.pilotVideos) // This is about correct.  Slower then this and movie has hard time keeping up!
+				const bool exists = fileExists(aviPath);
+
+				// Original gate was 15.0 FPS (a 2001-era "don't show video if CPU
+				// can't keep up" safeguard). On modern hardware the actual frame
+				// rate occasionally dips below 15 during load hitches, which flips
+				// the pilot portrait to a static .tga for that specific acknowledge-
+				// ment. Original game never did that -- it always played video when
+				// one existed. Lower the floor so transient hitches don't degrade.
+				if ( (frameRate > 5.0) && exists && prefs.pilotVideos)
 				{
 					//Update the RECT every frame.  What if we shift Icons around cause someone died!!
 					RECT vRect;
@@ -452,8 +470,22 @@ bool ForceGroupBar::setPilotVideo( const char* pVideo, MechWarrior* pPilot )
 					vRect.top 		= icons[i]->bmpLocation[icons[i]->locationIndex][3].y;
 					vRect.bottom 	= icons[i]->bmpLocation[icons[i]->locationIndex][1].y;
 
-					ForceGroupIcon::bMovie = new MC2Movie;
-					ForceGroupIcon::bMovie->init(aviPath,vRect,true);
+				SDL_Window* gameWindow = SDL_GL_GetCurrentWindow();
+				SDL_GLContext gameContext = SDL_GL_GetCurrentContext();
+
+				// Defensive: invariant is "at most one icon has bMovie non-null at
+				// a time." If a prior cleanup failed, leaking on this assignment
+				// would be silent. Walk other icons and free any stray owner.
+				for (int j = 0; j < iconCount; j++)
+				{
+					if (j != i && icons[j] && icons[j]->bMovie)
+					{
+						delete icons[j]->bMovie;
+						icons[j]->bMovie = NULL;
+					}
+				}
+				icons[i]->bMovie = new MP4Player(std::string(aviPath), gameWindow, gameContext);
+				icons[i]->bMovie->init(aviPath, RECT{vRect.left, vRect.top, vRect.right, vRect.bottom}, true, gameWindow, gameContext);
 				}
 				else // make a still texture
 				{
@@ -499,7 +531,7 @@ bool ForceGroupBar::setPilotVideo( const char* pVideo, MechWarrior* pPilot )
 							cLoadString(IDS_MC2_CDMISSING,msg,1023);
 							cLoadString(IDS_MC2_MISSING_TITLE,title,255);
 							sprintf(data,msg1,(const char*)path,msg);
-							DWORD result = MessageBox(NULL,data,title,MB_OKCANCEL | MB_ICONWARNING);
+							DWORD result = MessageBox((HWND)NULL, data, title, MB_OKCANCEL | MB_ICONWARNING);
 							if (result == IDCANCEL)
 							{
 								ExitGameOS();
@@ -526,9 +558,11 @@ bool ForceGroupBar::setPilotVideo( const char* pVideo, MechWarrior* pPilot )
 
 bool ForceGroupBar::isPlayingVideo()
 {
-	if ( ForceGroupIcon::bMovie )
-		return true;
-
+	for (int i = 0; i < iconCount; i++)
+	{
+		if (icons[i] && icons[i]->bMovie)
+			return true;
+	}
 	return false;
 }
 

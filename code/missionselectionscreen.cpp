@@ -14,6 +14,8 @@ MissionSelectionScreen.cpp			: Implementation of the MissionSelectionScreen comp
 #include"sounds.h"
 #include"mc2movie.h"
 #include"gamesound.h"
+#include <SDL2/SDL.h>
+#include <iostream>  // Add this for std::cerr
 
 #define VIDEO_RECT 7
 #define MAP_RECT 3
@@ -79,39 +81,41 @@ void MissionSelectionScreen::render(int xOffset, int yOffset )
 	if ( xOffset == 0 && yOffset == 0 )
 		missionDescriptionListBox.render();
 
-	//Renders the movie the old way.
-	//movie Now!
 	LogisticsScreen::render( xOffset, yOffset );
-	if ( !xOffset && !yOffset )
+	if ( !xOffset && !yOffset && bMovie && bMovie->isPlaying() && bMovie->getTextureHandle() )
 	{
-		/*
+		// Restored from the original commented-out block (pre-open-source).
+		// Per FMV_DESIGN.md §5: argb MUST be 0xffffffff (the gos_tex_vertex
+		// fragment shader multiplies vertex color into the sampled texel).
 		gos_VERTEX v[4];
 
-		for( int i = 0; i < 4; i++ )
+		for ( int i = 0; i < 4; i++ )
 		{
 			v[i].argb = 0xffffffff;
 			v[i].frgb = 0;
 			v[i].rhw = .5;
 			v[i].u = 0.f;
 			v[i].v = 0.f;
-			v[i].x = rects[VIDEO_RECT].left()+1 + xOffset;
-			v[i].y = rects[VIDEO_RECT].top()+1 + yOffset;
+			v[i].x = rects[VIDEO_RECT].left() + 1 + xOffset;
+			v[i].y = rects[VIDEO_RECT].top()  + 1 + yOffset;
 			v[i].z = 0.f;
 		}
 
-		v[2].x = v[3].x = v[0].x + rects[VIDEO_RECT].width()-2;
-		v[2].y = v[1].y = v[0].y + rects[VIDEO_RECT].height()-2;
+		v[2].x = v[3].x = v[0].x + rects[VIDEO_RECT].width()  - 2;
+		v[2].y = v[1].y = v[0].y + rects[VIDEO_RECT].height() - 2;
 
 		v[2].u = v[3].u = 1.0f;
 		v[2].v = v[1].v = 1.0f;
 
-		gos_SetRenderState( gos_State_Texture,  videoTexture );
+		// State discipline note: gos render state is a global state machine,
+		// not a stack — gos_State_AlphaMode set here leaks to whatever
+		// gos_DrawQuads runs next. Each subsequent UI element must set the
+		// alpha mode it needs; we do not restore here.
+		gos_SetRenderState( gos_State_Texture,   bMovie->getTextureHandle() );
+		gos_SetRenderState( gos_State_Filter,    gos_FilterNone );
+		gos_SetRenderState( gos_State_AlphaMode, gos_Alpha_OneZero );
 		gos_DrawQuads( v, 4 );
-		gos_SetRenderState( gos_State_Texture,  0 );
-		*/
-
-		if (bMovie)
-			bMovie->render();
+		gos_SetRenderState( gos_State_Texture,   0 );
 	}
 
 
@@ -228,18 +232,24 @@ void MissionSelectionScreen::begin()
 
 	
 	str = LogisticsData::instance->getCurrentVideoFileName();
+	std::cout << "[MissionSelectionScreen] Current video filename: " << (str ? str : "NULL") << "\n";
 	if ( str && strlen( str ) )
 	{
-		FullPathFileName videoName;
-		videoName.init( moviePath, str, ".bik" );
+		FullPathFileName movieName;
+		//videoName.init( moviePath, str, ".bik" );
+		movieName.init( moviePath, str, ".mp4" );
+		std::cout << "[MissionSelectionScreen] Full movie path: " << (const char*)movieName << "\n";
 
-		if (fileExists(videoName) || fileExistsOnCD(videoName))
+		if (fileExists(movieName) || fileExistsOnCD(movieName))
 		{
+			std::cout << "[MissionSelectionScreen] Video file found, creating movie\n";
 			RECT movieRect;
 			movieRect.left = rects[VIDEO_RECT].left()+1;
 			movieRect.top = rects[VIDEO_RECT].top()+1;
 			movieRect.right = movieRect.left + rects[VIDEO_RECT].width()-2;
 			movieRect.bottom = movieRect.top + rects[VIDEO_RECT].height()-2;
+			std::cout << "[MissionSelectionScreen] Movie rect: " << movieRect.left << "," << movieRect.top 
+			          << " " << (movieRect.right - movieRect.left) << "x" << (movieRect.bottom - movieRect.top) << "\n";
 		
 			//If there is one already here, cause we loaded a savegame or something,
 			// Toss it to prevent leaking from the system Heap!
@@ -250,9 +260,9 @@ void MissionSelectionScreen::begin()
 				bMovie = NULL;
 			}
 
-			bMovie = new MC2Movie;
-			bMovie->init(videoName,movieRect,true);
-
+			bMovie = new MC2Movie();
+			RECT convertedRect = { movieRect.left, movieRect.top, movieRect.right, movieRect.bottom };
+			bMovie->init( (const char*)movieName, convertedRect, true );
 			if (Environment.Renderer == 3)
 			{
 				//DO NOT show the movies by default in software.
@@ -362,19 +372,14 @@ int MissionSelectionScreen::handleMessage( unsigned long msg, unsigned long who 
 		bStop = true;
 		break;
 
-	case MN_MSG_PAUSE:
-		if ( !getButton( who )->isPressed() )
+		case MN_MSG_PAUSE:
+		// MC2Movie has no pause() — see FMV_DESIGN.md §2.2. The button
+		// remains for visual continuity but no longer affects playback.
+		if ( bMovie )
 		{
-			if ( bMovie )
-				bMovie->pause(0);
-			getButton( who )->press(false);
+			getButton(who)->toggle();
 		}
-		else
-		{
-			if ( bMovie )
-				bMovie->pause(1);
-			getButton( who )->press(true);
-		}
+		break;
 
 
 		break;

@@ -1,18 +1,15 @@
-#ifndef MC2MOVIE_H
-#define MC2MOVIE_H
+#ifndef MP4PLAYER_H
+#define MP4PLAYER_H
 
-// MC2Movie — Video playback decoded by FFmpeg into a gos-owned texture.
-// Decode/audio machinery cloned from MP4Player; rendering is done by the
-// caller via the standard gos UI pipeline (gos_SetRenderState +
-// gos_DrawQuads against getTextureHandle()).
-//
-// See FMV_DESIGN.md §2 for the public API and §4 for texture lifecycle.
+// MP4Player — Video playback using separate packet queues (ffplay/VLC architecture)
+// Audio callback is master clock. Video decoded on demand, PTS-gated.
 
 #include <string>
 #include <queue>
 #include <mutex>
 #include <atomic>
 #include <SDL2/SDL.h>
+#include <GL/glew.h>
 #include <windows.h>
 
 extern "C" {
@@ -24,25 +21,32 @@ extern "C" {
 #include <libavutil/opt.h>
 }
 
-class MC2Movie {
+class MP4Player {
 public:
-    MC2Movie();
-    ~MC2Movie();
+    MP4Player(const std::string& moviePath, SDL_Window* window, SDL_GLContext context);
+    ~MP4Player();
 
-    bool init(const char* path, RECT rect, bool loop);
-    void update();
-    bool isPlaying() const;
+    void init(const char* path, RECT rect, bool looped, SDL_Window* window, SDL_GLContext context);
+    void update();   // demux + decode audio + decode video (one frame)
+    void render();   // draw current frame to displayRect
     void stop();
+    void pause();
     void restart();
-    const std::string& getMovieName() const;
+    bool isPlaying();
+    bool isDone();
+    void setVolume(float volume);
     void setRect(RECT rect);
-    DWORD getTextureHandle() const;
+    std::string getMovieName() const;
+    int getFrameCount() const;
+
+    double frameRate;
 
 private:
     void openFile(const std::string& path);
     void cleanup();
-    void demux();
-    void decodeVideo();
+    void demux();            // read packets, route to queues
+    void decodeVideo();      // pop video packets, decode until next frame ready
+    void initTexture();
 
     static void audioCallback(void* userdata, Uint8* stream, int len);
     double getClock();
@@ -61,7 +65,6 @@ private:
     double vidTimeBase, audTimeBase;
     double frameDur;
     int vidW, vidH;
-    double frameRate;
 
     // Video packet queue
     std::queue<AVPacket*> vidPktQueue;
@@ -85,9 +88,11 @@ private:
     bool hasAudio;
     bool audioStarted;
 
-    // gos-owned frame texture (replaces MP4Player's private GLuint).
-    DWORD gosTextureHandle;
+    // GL rendering
+    GLuint textureID;
     bool textureReady;
+    SDL_Window* sdlWindow;
+    SDL_GLContext glContext;
 
     // Pending video frame (decoded, waiting for PTS)
     uint8_t* pendingData;
@@ -98,6 +103,7 @@ private:
     RECT displayRect;
     std::string moviePath;
     bool playing;
+    bool paused;
     bool looped;
     bool demuxEof;
     bool clockRunning;

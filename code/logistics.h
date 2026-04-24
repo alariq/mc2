@@ -16,7 +16,7 @@
 #endif
 
 #ifndef MC2movie_H
-#include"mc2movie.h"
+#include"mp4player.h"
 #endif
 
 #include"logisticsdata.h"
@@ -101,7 +101,7 @@ class Logistics
 		int DoBeginMission();
 		void playFullScreenVideo( const char* fileName );
 
-		MC2MoviePtr	bMovie;
+		MP4Player*	bMovie;
 
 
 	private:

@@ -2407,6 +2407,12 @@ void __stdcall gos_UnLockTexture( DWORD Handle )
     //gosASSERT(0 && "Not implemented");
 }
 
+uint32_t __stdcall gos_GetTextureGLId( DWORD Handle )
+{
+    gosTexture* tex = g_gos_renderer->getTexture( Handle );
+    return tex ? tex->getTextureId() : 0;
+}
+
 void __stdcall gos_PushRenderStates()
 {
     gosASSERT(g_gos_renderer);

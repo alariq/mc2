@@ -9,11 +9,14 @@ controlGui.cpp			: Implementation of the controlGui component.
 #include"team.h"
 #include"gamesound.h"
 #include"comndr.h"
+#include"mc2movie.h"
+#include <iostream>
 
 #ifndef MULTPLYR_H
 #include"multplyr.h"
 #endif
 
+#include <SDL2/SDL.h>
 
 #ifndef GAMETACMAP_H
 #include"gametacmap.h"
@@ -22,6 +25,8 @@ controlGui.cpp			: Implementation of the controlGui component.
 #ifndef LOGISTICSDATA_H
 #include"logisticsdata.h"
 #endif
+
+#include"windows.h"
 
 #ifndef PAUSEWINDOW_H
 #include"pausewindow.h"
@@ -52,6 +57,8 @@ ButtonData* ControlGui::vehicleData = NULL;
 
 long ControlGui::hiResOffsetX = 0;
 long ControlGui::hiResOffsetY = 0;
+long ControlGui::fitBakedHiResOffsetX = 0;
+long ControlGui::fitBakedHiResOffsetY = 0;
 
 long ControlGui::OBJECTIVESTOP= 0;
 long ControlGui::OBJECTIVESLEFT= 0;
@@ -359,11 +366,59 @@ void ControlGui::render( bool bPaused )
 		RenderObjectives();
 	}
 
-	if ( moviePlaying && bMovie)
+	if ( moviePlaying && bMovie && bMovie->getTextureHandle() )
 	{
+		// [FMV_DIAG] TEMPORARY — log first-frame draw coords.
+		static bool fmvDiagLogged = false;
+		if ( !fmvDiagLogged )
+		{
+			fmvDiagLogged = true;
+			std::cout << "[FMV_DIAG] render: videoRect = ("
+			          << videoRect.left << ", " << videoRect.top << ", "
+			          << videoRect.right << ", " << videoRect.bottom << ")\n";
+			for ( int i = 0; i < videoInfoCount; i++ )
+			{
+				std::cout << "[FMV_DIAG] render: VideoStatic" << i
+				          << " quad = (" << videoInfos[i].location[0].x
+				          << ", " << videoInfos[i].location[0].y
+				          << ") to (" << videoInfos[i].location[2].x
+				          << ", " << videoInfos[i].location[2].y << ")\n";
+			}
+		}
+
+		// Draw order per FMV_DESIGN.md §7.2:
+		//   panel backdrop (already drawn above) → videoInfos border → video quad
 		for ( int i = 0; i < videoInfoCount; i++ )
 			videoInfos[i].render();
-		bMovie->render();
+
+		// videoRect is loaded from buttonlayout{res}.fit and already has
+		// hiResOffsetX/Y baked in (see :2491-2496) — no further offset needed.
+		gos_VERTEX v[4];
+		for ( int i = 0; i < 4; i++ )
+		{
+			v[i].argb = 0xffffffff;   // shader multiplies vertex color into texel
+			v[i].frgb = 0;
+			v[i].rhw = .5;
+			v[i].u = 0.f;
+			v[i].v = 0.f;
+			v[i].x = videoRect.left;
+			v[i].y = videoRect.top;
+			v[i].z = 0.f;
+		}
+		v[2].x = v[3].x = videoRect.right;
+		v[2].y = v[1].y = videoRect.bottom;
+		v[2].u = v[3].u = 1.0f;
+		v[2].v = v[1].v = 1.0f;
+
+		gos_SetRenderState( gos_State_Texture,   bMovie->getTextureHandle() );
+		// Bilinear on the video quad — we upscale the 128x72 source by 1.5x
+		// (and more at higher resolutions), so point filtering looks chunky.
+		// Borders use StaticInfo::render which sets gos_FilterNone itself, so
+		// their crispness is not affected by this.
+		gos_SetRenderState( gos_State_Filter,    gos_FilterBiLinear );
+		gos_SetRenderState( gos_State_AlphaMode, gos_Alpha_OneZero );
+		gos_DrawQuads( v, 4 );
+		gos_SetRenderState( gos_State_Texture,   0 );
 	}
 
 	if (drawGUIOn)
@@ -938,8 +993,8 @@ void ControlGui::update( bool bPaused, bool bLOS )
 
 	if (moviePlaying && bMovie)
 	{
-		bool result = bMovie->update();
-		if (result)
+		bMovie->update();
+		if (!bMovie->isPlaying())
 		{
 			moviePlaying = false;
 			delete bMovie;
@@ -2487,8 +2542,22 @@ void ControlGui::initStatics( FitIniFile& file )
 	file.readIdLong( "right", 	videoRect.right );
 	file.readIdLong( "top", 	videoRect.top );
 	file.readIdLong( "bottom", 	videoRect.bottom );
-	videoRect.left += hiResOffsetX;
-	videoRect.right += hiResOffsetX;
+
+	// [FMV_DIAG] TEMPORARY — remove after diagnosing frame/video misalignment.
+	std::cout << "[FMV_DIAG] hiResOffset = (" << hiResOffsetX << ", " << hiResOffsetY << ")\n";
+	std::cout << "[FMV_DIAG] videoRect raw   = ("
+	          << videoRect.left << ", " << videoRect.top << ", "
+	          << videoRect.right << ", " << videoRect.bottom << ")\n";
+
+	videoRect.left   += hiResOffsetX;
+	videoRect.right  += hiResOffsetX;
+	videoRect.top    += hiResOffsetY;
+	videoRect.bottom += hiResOffsetY;
+
+	// [FMV_DIAG] TEMPORARY
+	std::cout << "[FMV_DIAG] videoRect final = ("
+	          << videoRect.left << ", " << videoRect.top << ", "
+	          << videoRect.right << ", " << videoRect.bottom << ")\n";
 
 	file.seekBlock( "VideoTextBox" );
 	file.readIdLong( "left", 	videoTextRect.left );
@@ -2501,11 +2570,117 @@ void ControlGui::initStatics( FitIniFile& file )
 
 	if ( videoInfoCount )
 	{
+		// VideoStatic quads have hiResOffsetX pre-baked into their X coords in
+		// the 1280/1600/1920 .fit files (e.g. 1600.fit: VideoStatic0.XLocation
+		// = 1180 + 288 = 1468 ≈ 1467). Subtract the baked amount so the runtime
+		// X offset from init() lands them aligned with videoRect. Y was never
+		// baked — VideoStatic.YLocation is always 0/77 regardless of res — so
+		// we pass the full runtime Y through.
+		const long staticXOffset = hiResOffsetX - fitBakedHiResOffsetX;
+		const long staticYOffset = hiResOffsetY;
+
 		videoInfos = new StaticInfo[videoInfoCount];
 		for ( i = 0; i < videoInfoCount; i++ )
 		{
 			sprintf( blockName, "VideoStatic%ld", i );
-			videoInfos[i].init( file, blockName );
+			videoInfos[i].init( file, blockName, staticXOffset, staticYOffset );
+
+			// [FMV_DIAG] TEMPORARY — log post-init quad bounds for each VideoStatic.
+			std::cout << "[FMV_DIAG] " << blockName
+			          << " location = (" << videoInfos[i].location[0].x
+			          << ", " << videoInfos[i].location[0].y
+			          << ") to (" << videoInfos[i].location[2].x
+			          << ", " << videoInfos[i].location[2].y << ")\n";
+		}
+
+		// Dock the FMV panel (video + borders + text rect) to the top-right
+		// corner of the screen, and scale the whole group uniformly. Done as
+		// a single rigid-body transform so the frame art stays aligned with
+		// the video quad regardless of the source .fit resolution.
+		const float fmvScale = 1.5f;
+
+		// 1) Compute bounding box of the current group (post-offset coords).
+		float bbLeft   = (float)videoRect.left;
+		float bbTop    = (float)videoRect.top;
+		float bbRight  = (float)videoRect.right;
+		float bbBottom = (float)videoRect.bottom;
+		for ( i = 0; i < videoInfoCount; i++ )
+		{
+			for ( int k = 0; k < 4; k++ )
+			{
+				if ( videoInfos[i].location[k].x < bbLeft )   bbLeft   = videoInfos[i].location[k].x;
+				if ( videoInfos[i].location[k].y < bbTop )    bbTop    = videoInfos[i].location[k].y;
+				if ( videoInfos[i].location[k].x > bbRight )  bbRight  = videoInfos[i].location[k].x;
+				if ( videoInfos[i].location[k].y > bbBottom ) bbBottom = videoInfos[i].location[k].y;
+			}
+		}
+		const float groupW = bbRight - bbLeft;
+		const float groupH = bbBottom - bbTop;
+
+		// 2) Target: pin scaled group's right edge to screen right, top to y=0.
+		const float targetRight = (float)Environment.screenWidth;
+		const float targetTop   = 0.0f;
+		const float scaledW     = groupW * fmvScale;
+		const float scaledH     = groupH * fmvScale;
+		const float targetLeft  = targetRight - scaledW;
+		const float targetBottom = targetTop + scaledH;
+
+		// 3) Transform a point from old-group space to new-group space.
+		auto xform = [&](float oldX, float oldY, float& outX, float& outY)
+		{
+			outX = targetLeft + (oldX - bbLeft) * fmvScale;
+			outY = targetTop  + (oldY - bbTop)  * fmvScale;
+		};
+
+		// 4) Apply to videoRect. GUI_RECT is long, so round.
+		float nxL, nyT, nxR, nyB;
+		xform((float)videoRect.left,  (float)videoRect.top,    nxL, nyT);
+		xform((float)videoRect.right, (float)videoRect.bottom, nxR, nyB);
+		videoRect.left   = (long)(nxL + 0.5f);
+		videoRect.top    = (long)(nyT + 0.5f);
+		videoRect.right  = (long)(nxR + 0.5f);
+		videoRect.bottom = (long)(nyB + 0.5f);
+
+		// 5) Apply to each border quad vertex.
+		for ( i = 0; i < videoInfoCount; i++ )
+		{
+			for ( int k = 0; k < 4; k++ )
+			{
+				float nx, ny;
+				xform(videoInfos[i].location[k].x, videoInfos[i].location[k].y, nx, ny);
+				videoInfos[i].location[k].x = nx;
+				videoInfos[i].location[k].y = ny;
+			}
+		}
+
+		// 6) videoTextRect (briefing captions inside the video panel). Its Y
+		// was never offset at load time, so we synthesize a top/bottom relative
+		// to the pre-transform videoRect, then map through xform.
+		{
+			float ntxL, ntyT, ntxR, ntyB;
+			xform((float)videoTextRect.left,  (float)videoTextRect.top,    ntxL, ntyT);
+			xform((float)videoTextRect.right, (float)videoTextRect.bottom, ntxR, ntyB);
+			videoTextRect.left   = (long)(ntxL + 0.5f);
+			videoTextRect.top    = (long)(ntyT + 0.5f);
+			videoTextRect.right  = (long)(ntxR + 0.5f);
+			videoTextRect.bottom = (long)(ntyB + 0.5f);
+		}
+
+		// [FMV_DIAG] Log the post-transform geometry so we can confirm.
+		std::cout << "[FMV_DIAG] post-xform videoRect = ("
+		          << videoRect.left << ", " << videoRect.top << ", "
+		          << videoRect.right << ", " << videoRect.bottom
+		          << ")  group bbox was (" << bbLeft << "," << bbTop
+		          << ")-(" << bbRight << "," << bbBottom
+		          << ")  scaled to (" << targetLeft << "," << targetTop
+		          << ")-(" << targetRight << "," << targetBottom << ")\n";
+		for ( i = 0; i < videoInfoCount; i++ )
+		{
+			std::cout << "[FMV_DIAG] post-xform VideoStatic" << i
+			          << " = (" << videoInfos[i].location[0].x
+			          << "," << videoInfos[i].location[0].y
+			          << ")-(" << videoInfos[i].location[2].x
+			          << "," << videoInfos[i].location[2].y << ")\n";
 		}
 	}
 
@@ -2673,7 +2848,7 @@ void ControlGui::swapResolutions( int resolutionX, int resolutionY )
 		result = buttonFile.readIdLong("xOffset",hiResOffsetX);
 		if (result != NO_ERR)
 			hiResOffsetX = 0;
-			
+
 		result = buttonFile.readIdLong("yOffset",hiResOffsetY);
 		if (result != NO_ERR)
 			hiResOffsetY = 0;
@@ -2682,6 +2857,12 @@ void ControlGui::swapResolutions( int resolutionX, int resolutionY )
 	{
 		hiResOffsetX = hiResOffsetY = 0;
 	}
+
+	// Snapshot the raw offsets before x_correction / y_correction below; we
+	// need them to un-bake coordinates that .fit authors hard-coded with the
+	// HiresOffsets values pre-applied (VideoStatic frame quads, specifically).
+	fitBakedHiResOffsetX = hiResOffsetX;
+	fitBakedHiResOffsetY = hiResOffsetY;
 
 	if ( resolutionX == 1920) {
         y_correction = resolutionY - (768 + hiResOffsetY);
@@ -2847,8 +3028,12 @@ void ControlGui::switchTabs(int direction)
 
 void ControlGui::playMovie( const char* fileName )
 {
+	std::cout << "[ControlGui] playMovie called with: " << (fileName ? fileName : "NULL") << "\n";
 	if (moviePlaying)
+	{
+		std::cout << "[ControlGui] Movie already playing, returning\n";
 		return;
+	}
 
 	RECT vRect;
 	vRect.left = videoRect.left;
@@ -2863,9 +3048,26 @@ void ControlGui::playMovie( const char* fileName )
 	_splitpath(fileName,NULL,NULL,realName,NULL);
 
 	FullPathFileName movieName;
-	movieName.init(moviePath,realName,".bik");
-	bMovie = new MC2Movie;
-	bMovie->init(movieName,vRect,true);
+	//movieName.init(moviePath,realName,".mp4");F
+	movieName.init(moviePath,realName,".mp4");
+	std::cout << "[ControlGui] Full movie path: " << (const char*)movieName << "\n";
+	
+	std::cout << "[ControlGui] Creating MC2Movie\n";
+
+	bMovie = new MC2Movie();
+
+	RECT convertedRect = { vRect.left, vRect.top, vRect.right, vRect.bottom };
+
+	std::cout << "[ControlGui] Movie rect: " << convertedRect.left << "," << convertedRect.top
+	          << " " << (convertedRect.right - convertedRect.left) << "x" << (convertedRect.bottom - convertedRect.top) << "\n";
+
+	if ( !bMovie->init( (const char*)movieName, convertedRect, false ) ) // don't loop cutscenes
+	{
+		std::cout << "[ControlGui] ERROR: init failed for " << (const char*)movieName << "\n";
+		delete bMovie;
+		bMovie = nullptr;
+		return;
+	}
 
 	//Maybe not enough frames to run.  Do not flash the border!
 	// Do ONE update to make sure the damned sound starts at least!!
@@ -2873,6 +3075,7 @@ void ControlGui::playMovie( const char* fileName )
 	if (bMovie->isPlaying())
 	{
 		moviePlaying = true;
+		std::cout << "[ControlGui] Movie started playing successfully\n";
 	}
 	else
 	{
@@ -2880,6 +3083,7 @@ void ControlGui::playMovie( const char* fileName )
 		moviePlaying = false;
 		delete bMovie;
 		bMovie = NULL;
+		std::cout << "[ControlGui] Movie failed to start playing\n";
 	}
 }
 

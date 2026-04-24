@@ -1,16 +1,15 @@
 #define NOMINMAX
-#include "mc2movie.h"
+#include "mp4player.h"
 #include "gameos.hpp"
 #include <iostream>
 #include <algorithm>
 #include <GL/gl.h>
 
 // =========================================================================
-// Audio callback — drains PCM queue, updates master clock.
-// Cloned from MP4Player::audioCallback. Distinct symbol on purpose.
+// Audio callback — drains PCM queue, updates master clock
 // =========================================================================
-void MC2Movie::audioCallback(void* userdata, Uint8* stream, int len) {
-    auto* p = static_cast<MC2Movie*>(userdata);
+void MP4Player::audioCallback(void* userdata, Uint8* stream, int len) {
+    auto* p = static_cast<MP4Player*>(userdata);
     std::lock_guard<std::mutex> lock(p->audioMutex);
 
     int written = 0;
@@ -40,35 +39,35 @@ void MC2Movie::audioCallback(void* userdata, Uint8* stream, int len) {
 // =========================================================================
 // Constructor / Destructor
 // =========================================================================
-MC2Movie::MC2Movie()
+MP4Player::MP4Player(const std::string& path, SDL_Window* window, SDL_GLContext context)
     : fmtCtx(nullptr), vidCtx(nullptr), audCtx(nullptr),
       decFrame(nullptr), rgbFrame(nullptr), rgbBuf(nullptr), rgbBufSize(0),
       swsCtx(nullptr), swrCtx(nullptr), vidIdx(-1), audIdx(-1),
       vidTimeBase(0), audTimeBase(0), frameDur(1.0/24.0), vidW(0), vidH(0),
-      frameRate(0),
       audFrame(nullptr), audioDevice(0), sampleRate(0), channels(0),
       hasAudio(false), audioStarted(false),
-      gosTextureHandle(0), textureReady(false),
+      textureID(0), textureReady(false), sdlWindow(window), glContext(context),
       pendingData(nullptr), pendingPts(-1), hasPending(false),
-      displayRect{}, playing(false),
+      displayRect{}, moviePath(path), playing(false), paused(false),
       looped(false), demuxEof(false), clockRunning(false),
-      frameCount(0), perfFreq(0), startCounter(0)
+      frameCount(0), frameRate(0), perfFreq(0), startCounter(0)
 {
     perfFreq = SDL_GetPerformanceFrequency();
+    openFile(path);
 }
 
-MC2Movie::~MC2Movie() {
+MP4Player::~MP4Player() {
     cleanup();
 }
 
 // =========================================================================
-// Open file, find streams, init decoders.
+// Open file, find streams, init decoders
 // =========================================================================
-void MC2Movie::openFile(const std::string& path) {
+void MP4Player::openFile(const std::string& path) {
     moviePath = path;
 
     if (avformat_open_input(&fmtCtx, path.c_str(), nullptr, nullptr) < 0) {
-        std::cerr << "[MC2Movie] Cannot open: " << path << "\n";
+        std::cerr << "[MP4Player] Cannot open: " << path << "\n";
         return;
     }
     avformat_find_stream_info(fmtCtx, nullptr);
@@ -98,9 +97,13 @@ void MC2Movie::openFile(const std::string& path) {
 
         decFrame = av_frame_alloc();
         rgbFrame = av_frame_alloc();
-        // sws_scale SIMD tail-overrun guard. See mp4player.cpp for full
-        // rationale. Briefings are typically 1920-wide (SIMD-safe) but the
-        // guard is cheap and keeps the pattern consistent across all players.
+        // sws_scale with SWS_BILINEAR uses SIMD that overruns the last row's
+        // tail by up to ~32 bytes on SIMD-unfriendly widths (e.g. 76-px pilot
+        // portrait clips). Keep align=1 so linesize is packed (downstream
+        // memcpy and glTexSubImage2D assume packed rows), but allocate a tail
+        // guard so the overrun lands in harmless memory. Pre-fix, this bug
+        // manifested as STATUS_HEAP_CORRUPTION detected on the next heap op
+        // (often inside SDL_GL_SwapWindow).
         const int SWS_TAIL_GUARD = 64;
         rgbBufSize = av_image_get_buffer_size(AV_PIX_FMT_RGBA, vidW, vidH, 1);
         rgbBuf = new uint8_t[rgbBufSize + SWS_TAIL_GUARD];
@@ -108,7 +111,7 @@ void MC2Movie::openFile(const std::string& path) {
                              AV_PIX_FMT_RGBA, vidW, vidH, 1);
         pendingData = new uint8_t[rgbBufSize + SWS_TAIL_GUARD];
 
-        std::cout << "[MC2Movie] Video: " << vidW << "x" << vidH
+        std::cout << "[MP4Player] Video: " << vidW << "x" << vidH
                   << " @ " << frameRate << " FPS\n";
     }
 
@@ -151,42 +154,56 @@ void MC2Movie::openFile(const std::string& path) {
         audioDevice = SDL_OpenAudioDevice(nullptr, 0, &want, &audioSpec, 0);
         if (audioDevice > 0) {
             hasAudio = true;
-            std::cout << "[MC2Movie] Audio: " << sampleRate << " Hz, "
+            std::cout << "[MP4Player] Audio: " << sampleRate << " Hz, "
                       << channels << " ch\n";
         }
     }
 }
 
 // =========================================================================
-// init — open file, allocate gos texture at video dimensions, start playback.
+// init — called by game code to set display rect and start playback
 // =========================================================================
-bool MC2Movie::init(const char* path, RECT rect, bool loop) {
+void MP4Player::init(const char* path, RECT rect, bool loop,
+                     SDL_Window* window, SDL_GLContext context) {
     displayRect = rect;
     looped = loop;
+    if (window) sdlWindow = window;
+    if (context) glContext = context;
 
-    if (path && (!fmtCtx || moviePath != path)) {
+    // Reopen if different file
+    if (path && moviePath != path && !fmtCtx) {
         openFile(path);
     }
 
-    if (!fmtCtx || !vidCtx || vidW <= 0 || vidH <= 0) {
-        return false;
-    }
-
-    if (gosTextureHandle == 0) {
-        gosTextureHandle = gos_NewEmptyTexture(
-            gos_Texture_Alpha, "MC2Movie",
-            RECT_TEX(vidW, vidH), 0);
-        textureReady = (gosTextureHandle != 0);
-    }
-
+    initTexture();
     restart();
-    return true;
+}
+
+void MP4Player::initTexture() {
+    if (!sdlWindow || !glContext) return;
+    if (vidW == 0 || vidH == 0) return;
+
+    SDL_GL_MakeCurrent(sdlWindow, glContext);
+
+    if (textureID) {
+        glDeleteTextures(1, &textureID);
+        textureID = 0;
+    }
+
+    glGenTextures(1, &textureID);
+    glBindTexture(GL_TEXTURE_2D, textureID);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, vidW, vidH, 0,
+                 GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glBindTexture(GL_TEXTURE_2D, 0);
+    textureReady = true;
 }
 
 // =========================================================================
 // cleanup
 // =========================================================================
-void MC2Movie::cleanup() {
+void MP4Player::cleanup() {
     if (audioDevice) {
         SDL_PauseAudioDevice(audioDevice, 1);
         SDL_CloseAudioDevice(audioDevice);
@@ -208,8 +225,7 @@ void MC2Movie::cleanup() {
     delete[] pendingData; pendingData = nullptr;
     delete[] rgbBuf; rgbBuf = nullptr;
 
-    if (gosTextureHandle) { gos_DestroyTexture(gosTextureHandle); gosTextureHandle = 0; }
-    textureReady = false;
+    if (textureID) { glDeleteTextures(1, &textureID); textureID = 0; }
     if (swsCtx) { sws_freeContext(swsCtx); swsCtx = nullptr; }
     if (swrCtx) { swr_free(&swrCtx); swrCtx = nullptr; }
     if (decFrame) { av_frame_free(&decFrame); }
@@ -225,7 +241,7 @@ void MC2Movie::cleanup() {
 // =========================================================================
 // getClock — audio master, wall clock fallback
 // =========================================================================
-double MC2Movie::getClock() {
+double MP4Player::getClock() {
     if (hasAudio && audioStarted) return audioClock.load();
     if (clockRunning) return (double)(SDL_GetPerformanceCounter() - startCounter) / (double)perfFreq;
     return 0.0;
@@ -234,7 +250,7 @@ double MC2Movie::getClock() {
 // =========================================================================
 // demux — read packets from file, route to queues
 // =========================================================================
-void MC2Movie::demux() {
+void MP4Player::demux() {
     if (demuxEof) return;
 
     int audioPcmSize;
@@ -287,11 +303,9 @@ void MC2Movie::demux() {
 }
 
 // =========================================================================
-// decodeVideo — pop from video packet queue, decode until we have a frame.
-// Upload targets the gos texture's underlying GL id; no other GL state is
-// touched (gos owns viewport, scissor, blend, depth, pixel-storage, texenv).
+// decodeVideo — pop from video packet queue, decode until we have a frame
 // =========================================================================
-void MC2Movie::decodeVideo() {
+void MP4Player::decodeVideo() {
     static bool firstFrameLogged = false;
     while (!hasPending && !vidPktQueue.empty()) {
         AVPacket* pkt = vidPktQueue.front();
@@ -308,28 +322,27 @@ void MC2Movie::decodeVideo() {
                 double clock = getClock();
 
                 if (!clockRunning || framePts <= clock + 0.005) {
+                    // Due now — upload to texture
                     if (textureReady) {
-                        // Sanitize pixel-store state — the game's GL context
-                        // may have left GL_UNPACK_ROW_LENGTH non-zero or
-                        // alignment non-1 from an earlier texture upload,
-                        // which would skew every row of our RGBA data.
                         glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
                         glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
-                        glBindTexture(GL_TEXTURE_2D, gos_GetTextureGLId(gosTextureHandle));
+                        glBindTexture(GL_TEXTURE_2D, textureID);
                         glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, vidW, vidH,
                                         GL_RGBA, GL_UNSIGNED_BYTE, rgbFrame->data[0]);
+                        glBindTexture(GL_TEXTURE_2D, 0);
                     }
                     frameCount++;
                     if (!firstFrameLogged) {
                         firstFrameLogged = true;
-                        std::cout << "[MC2Movie] First frame decoded: PTS=" << framePts
-                                  << " texReady=" << textureReady
-                                  << " gosTex=" << gosTextureHandle
+                        std::cout << "[MP4Player] First frame decoded: PTS=" << framePts
+                                  << " texReady=" << textureReady << " texID=" << textureID
                                   << " " << vidW << "x" << vidH << "\n";
                     }
 
+                    // Frame drop if behind
                     if (clockRunning && framePts < clock - frameDur) continue;
                 } else {
+                    // Future frame — buffer
                     memcpy(pendingData, rgbFrame->data[0], rgbBufSize);
                     pendingPts = framePts;
                     hasPending = true;
@@ -347,8 +360,9 @@ void MC2Movie::decodeVideo() {
 // =========================================================================
 // update — main per-frame call from game loop
 // =========================================================================
-void MC2Movie::update() {
-    if (!playing) return;
+void MP4Player::update() {
+    if (!playing || paused) return;
+    if (sdlWindow && glContext) SDL_GL_MakeCurrent(sdlWindow, glContext);
 
     // Step 1: Demux packets into queues
     demux();
@@ -362,7 +376,7 @@ void MC2Movie::update() {
             SDL_PauseAudioDevice(audioDevice, 0);
             audioStarted = true;
             clockRunning = true;
-            std::cout << "[MC2Movie] Audio started (queue: " << qsz
+            std::cout << "[MP4Player] Audio started (queue: " << qsz
                       << ", vidPkts: " << vidPktQueue.size() << ")\n";
         }
     }
@@ -373,22 +387,14 @@ void MC2Movie::update() {
 
     // Step 3: Check pending video frame
     double clock = getClock();
-    if (frameCount > 0 && frameCount % 30 == 0) {
-        static int lastLog = -1;
-        if (frameCount != lastLog) {
-            lastLog = frameCount;
-            int aq; { std::lock_guard<std::mutex> lock(audioMutex); aq = (int)audPcmQueue.size(); }
-            std::cout << "[MC2Movie] Frame " << frameCount << " | clock: " << clock
-                      << "s | aq: " << aq << " | vq: " << vidPktQueue.size() << "\n";
-        }
-    }
     if (hasPending && pendingPts <= clock + 0.005) {
         if (textureReady) {
             glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
             glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
-            glBindTexture(GL_TEXTURE_2D, gos_GetTextureGLId(gosTextureHandle));
+            glBindTexture(GL_TEXTURE_2D, textureID);
             glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, vidW, vidH,
                             GL_RGBA, GL_UNSIGNED_BYTE, pendingData);
+            glBindTexture(GL_TEXTURE_2D, 0);
         }
         frameCount++;
         hasPending = false;
@@ -403,6 +409,7 @@ void MC2Movie::update() {
         { std::lock_guard<std::mutex> lock(audioMutex); qsz = (int)audPcmQueue.size(); }
         if (qsz == 0) {
             if (looped) {
+                // Seek back to start
                 av_seek_frame(fmtCtx, -1, 0, AVSEEK_FLAG_BACKWARD);
                 if (vidCtx) avcodec_flush_buffers(vidCtx);
                 if (audCtx) avcodec_flush_buffers(audCtx);
@@ -418,12 +425,124 @@ void MC2Movie::update() {
 }
 
 // =========================================================================
+// render — draw current texture to displayRect
+// =========================================================================
+void MP4Player::render() {
+    if (!textureReady || !textureID || vidW == 0) return;
+
+    // Game uses logical coordinates (e.g. 800x600) but window may be larger.
+    // Map display rect from game coords to physical window pixels.
+    int windowW, windowH;
+    SDL_GL_GetDrawableSize(sdlWindow, &windowW, &windowH);
+
+    int logicalW = Environment.screenWidth > 0 ? Environment.screenWidth : windowW;
+    int logicalH = Environment.screenHeight > 0 ? Environment.screenHeight : windowH;
+    float scaleX = (float)windowW / logicalW;
+    float scaleY = (float)windowH / logicalH;
+
+    float physLeft   = displayRect.left   * scaleX;
+    float physTop    = displayRect.top    * scaleY;
+    float physRight  = displayRect.right  * scaleX;
+    float physBottom = displayRect.bottom * scaleY;
+    float physW = physRight - physLeft;
+    float physH = physBottom - physTop;
+
+    // Save GL state
+    GLint savedViewport[4];
+    glGetIntegerv(GL_VIEWPORT, savedViewport);
+    GLboolean savedBlend = glIsEnabled(GL_BLEND);
+    GLboolean savedTex2d = glIsEnabled(GL_TEXTURE_2D);
+    GLboolean savedDepth = glIsEnabled(GL_DEPTH_TEST);
+    GLboolean savedScissor = glIsEnabled(GL_SCISSOR_TEST);
+    GLint savedMatrixMode;
+    glGetIntegerv(GL_MATRIX_MODE, &savedMatrixMode);
+    GLint savedActiveTex;
+    glGetIntegerv(GL_ACTIVE_TEXTURE, &savedActiveTex);
+    GLint savedTexEnvMode;
+    glGetTexEnviv(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, &savedTexEnvMode);
+    GLint savedUnpackAlign, savedUnpackRowLen;
+    glGetIntegerv(GL_UNPACK_ALIGNMENT, &savedUnpackAlign);
+    glGetIntegerv(GL_UNPACK_ROW_LENGTH, &savedUnpackRowLen);
+
+    // Set up clean GL state for video rendering
+    glViewport(0, 0, windowW, windowH);
+    glActiveTexture(GL_TEXTURE0);
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+    glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
+
+    // Scissor to clip to physical rect (GL uses bottom-left origin)
+    glEnable(GL_SCISSOR_TEST);
+    glScissor((int)physLeft, windowH - (int)physBottom, (int)physW, (int)physH);
+
+    glDisable(GL_DEPTH_TEST);
+    glDisable(GL_BLEND);
+
+    // Aspect-preserving fit within physical rect
+    float vidAspect = (float)vidW / vidH;
+    float rectAspect = physW / physH;
+    float scaledW, scaledH;
+    float offX = physLeft, offY = physTop;
+
+    if (vidAspect > rectAspect) {
+        scaledW = physW;
+        scaledH = physW / vidAspect;
+        offY += (physH - scaledH) / 2;
+    } else {
+        scaledH = physH;
+        scaledW = physH * vidAspect;
+        offX += (physW - scaledW) / 2;
+    }
+
+    // Top-left origin projection in physical window pixels
+    glMatrixMode(GL_PROJECTION);
+    glPushMatrix();
+    glLoadIdentity();
+    glOrtho(0, windowW, windowH, 0, -1, 1);
+    glMatrixMode(GL_MODELVIEW);
+    glPushMatrix();
+    glLoadIdentity();
+
+    // Draw video quad
+    glEnable(GL_TEXTURE_2D);
+    glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+    glBindTexture(GL_TEXTURE_2D, textureID);
+
+    glBegin(GL_QUADS);
+    glTexCoord2f(0, 0); glVertex2f(offX, offY);
+    glTexCoord2f(1, 0); glVertex2f(offX + scaledW, offY);
+    glTexCoord2f(1, 1); glVertex2f(offX + scaledW, offY + scaledH);
+    glTexCoord2f(0, 1); glVertex2f(offX, offY + scaledH);
+    glEnd();
+
+    // Restore all GL state
+    glBindTexture(GL_TEXTURE_2D, 0);
+    glDisable(GL_TEXTURE_2D);
+    glDisable(GL_SCISSOR_TEST);
+    glMatrixMode(GL_PROJECTION);
+    glPopMatrix();
+    glMatrixMode(GL_MODELVIEW);
+    glPopMatrix();
+
+    glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, savedTexEnvMode);
+    glActiveTexture(savedActiveTex);
+    glPixelStorei(GL_UNPACK_ALIGNMENT, savedUnpackAlign);
+    glPixelStorei(GL_UNPACK_ROW_LENGTH, savedUnpackRowLen);
+    if (savedBlend) glEnable(GL_BLEND); else glDisable(GL_BLEND);
+    if (savedTex2d) glEnable(GL_TEXTURE_2D); else glDisable(GL_TEXTURE_2D);
+    if (savedDepth) glEnable(GL_DEPTH_TEST); else glDisable(GL_DEPTH_TEST);
+    if (savedScissor) glEnable(GL_SCISSOR_TEST); else glDisable(GL_SCISSOR_TEST);
+    glViewport(savedViewport[0], savedViewport[1], savedViewport[2], savedViewport[3]);
+    glMatrixMode(savedMatrixMode);
+}
+
+// =========================================================================
 // Playback control
 // =========================================================================
-void MC2Movie::restart() {
+void MP4Player::restart() {
     if (!fmtCtx || !vidCtx) return;
 
     playing = true;
+    paused = false;
     demuxEof = false;
     audioStarted = false;
     clockRunning = false;
@@ -435,6 +554,7 @@ void MC2Movie::restart() {
     if (vidCtx) avcodec_flush_buffers(vidCtx);
     if (audCtx) avcodec_flush_buffers(audCtx);
 
+    // Clear queues
     while (!vidPktQueue.empty()) {
         av_packet_unref(vidPktQueue.front());
         av_packet_free(&vidPktQueue.front());
@@ -448,26 +568,42 @@ void MC2Movie::restart() {
         }
     }
 
+    // Audio stays paused until primed in update()
     if (audioDevice) SDL_PauseAudioDevice(audioDevice, 1);
 }
 
-void MC2Movie::stop() {
+void MP4Player::stop() {
     playing = false;
+    paused = false;
     if (audioDevice) SDL_PauseAudioDevice(audioDevice, 1);
 }
 
-bool MC2Movie::isPlaying() const {
-    return playing;
+void MP4Player::pause() {
+    if (!playing) return;
+    paused = !paused;
+    if (audioDevice) SDL_PauseAudioDevice(audioDevice, paused ? 1 : 0);
 }
 
-void MC2Movie::setRect(RECT rect) {
+bool MP4Player::isPlaying() {
+    return playing && !paused;
+}
+
+bool MP4Player::isDone() {
+    return !playing;
+}
+
+void MP4Player::setVolume(float volume) {
+    // SDL2 doesn't have per-device volume; would need to scale in callback
+}
+
+void MP4Player::setRect(RECT rect) {
     displayRect = rect;
 }
 
-const std::string& MC2Movie::getMovieName() const {
+std::string MP4Player::getMovieName() const {
     return moviePath;
 }
 
-DWORD MC2Movie::getTextureHandle() const {
-    return gosTextureHandle;
+int MP4Player::getFrameCount() const {
+    return frameCount;
 }

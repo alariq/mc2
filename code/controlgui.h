@@ -36,7 +36,7 @@ ControlGui.h			: Interface for the ControlGui component.  This thing holds the t
 #include"aedit.h"
 #endif
 
-#ifndef MC2movie_H
+#ifndef MC2MOVIE_H
 #include"mc2movie.h"
 #endif
 
@@ -124,6 +124,12 @@ class ControlGui
 
 		static long			hiResOffsetX;
 		static long			hiResOffsetY;
+		// Raw HiresOffsets values as read from the .fit file (before
+		// x_correction / y_correction). .fit authors pre-baked these into
+		// certain static quad coordinates (notably VideoStatic), so we need
+		// the raw values to unbake them before applying the runtime offsets.
+		static long			fitBakedHiResOffsetX;
+		static long			fitBakedHiResOffsetY;
 
 		ControlGui();
 		~ControlGui();
@@ -365,7 +371,7 @@ class ControlGui
 		long				videoInfoCount;
 		GUI_RECT			videoRect;
 		GUI_RECT			videoTextRect;
-		MC2MoviePtr			bMovie;
+		MC2Movie*			bMovie;
 
 		StaticInfo*			timerInfos;
 		long				timerInfoCount;
