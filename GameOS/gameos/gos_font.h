@@ -22,6 +22,22 @@ struct gosGlyphInfo {
     uint32_t font_line_skip_;
 };
 
+// Atlas extracted from a .d3f file. Pixels are 8-bit alpha, square or
+// rectangular per format version. Caller takes ownership and must
+// delete[] pixels.
+struct gosD3FAtlas {
+    uint8_t* pixels;
+    int      width;
+    int      height;
+};
+
 bool gos_load_glyphs(const char* glyphFile, gosGlyphInfo& gi);
+
+// Loads a retail .d3f font (v1 or v4). On success, fills `gi` with
+// per-glyph metrics + global ascent/line_skip derived via alpha-scan,
+// and hands the embedded 8-bit alpha atlas back through `atlas`.
+// Returns false (without allocating) if the file is missing or has an
+// unrecognized signature.
+bool gos_load_d3f(const char* d3fFile, gosGlyphInfo& gi, gosD3FAtlas& atlas);
 
 #endif // GOS_FONT_H

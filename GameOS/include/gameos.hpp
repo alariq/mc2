@@ -2842,6 +2842,14 @@ void __stdcall gos_LockTexture( DWORD Handle, DWORD MipMapSize, bool ReadOnly, T
 void __stdcall gos_UnLockTexture( DWORD Handle );
 
 //
+// Returns the underlying GL texture id for a gos texture handle, or 0
+// if the handle is invalid. Used by callers (e.g. font atlas upload)
+// that want to drive glTexSubImage2D directly against a gos-owned
+// texture without going through the lock/unlock convert path.
+//
+uint32_t __stdcall gos_GetTextureGLId( DWORD Handle );
+
+//
 // Converts from 32bpp source to subrect of n-bpp dest, bypassing intermediate 32bpp buffer
 //
 void __stdcall gos_ConvertTextureRect( DWORD Handle, DWORD DestLeft, DWORD DestTop, DWORD *Source, DWORD SourcePitch, DWORD Width, DWORD Height );

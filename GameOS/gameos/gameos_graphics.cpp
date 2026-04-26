@@ -2077,14 +2077,29 @@ void gosRenderer::drawText(const char* text) {
 
             const char c = text[i + pos];
 
+            // Skip non-printable control chars. findTextBreak still
+            // includes the trailing '\n' in num_chars to drive line
+            // advance via `y += font_height` below; we just must not
+            // emit a quad for it. Legacy .glyph files had a zero-width
+            // entry at index 10, so the old path drew nothing visible;
+            // D3F atlases ship a placeholder glyph there that would
+            // appear as a square at end-of-line and on \n\n blank lines.
+            if((unsigned char)c < 0x20) {
+                continue;
+            }
+
             const gosGlyphMetrics& gm = font->getGlyphMetrics(c);
             int char_off_x = gm.minx;
             int char_off_y = font_ascent - gm.maxy;
             int char_w = gm.maxx - gm.minx;
             int char_h = gm.maxy - gm.miny;
 
-            uint32_t iu0 = gm.u + char_off_x;
-            uint32_t iv0 = gm.v + char_off_y;
+            // u/v are the actual atlas sample origin under the post-load
+            // contract — char_off_x/y drive screen quad position only,
+            // not the atlas read. The legacy .glyph loader pre-folds its
+            // metrics so this path stays pixel-identical for that format.
+            uint32_t iu0 = gm.u;
+            uint32_t iv0 = gm.v;
             uint32_t iu1 = iu0 + char_w;
             uint32_t iv1 = iv0 + char_h;
 
@@ -2100,14 +2115,18 @@ void gosRenderer::drawText(const char* text) {
         y += font_height;
         pos += num_chars;
     }
-    // FIXME: save states before messing with it, because user code can set its ow and does not know that something was changed by us
-    
+    // Save Texture/Filter/TextureAddress so the text draw doesn't leak
+    // state to whatever the next caller relies on. Filter was being
+    // leaked previously (only Texture was saved); TextureAddress is now
+    // forced to clamp because the default wrap mode samples adjacent
+    // glyphs at atlas edges with nearest filtering.
     int prev_texture = getRenderState(gos_State_Texture);
-    
-    // All states are set by client code
-    // so we only set font texture
+    int prev_filter  = getRenderState(gos_State_Filter);
+    int prev_addr    = getRenderState(gos_State_TextureAddress);
+
     setRenderState(gos_State_Texture, tex_id);
     setRenderState(gos_State_Filter, gos_FilterNone);
+    setRenderState(gos_State_TextureAddress, gos_TextureClamp);
 
     // for now draw anyway because no render state saved for draw calls
     applyRenderStates();
@@ -2121,8 +2140,8 @@ void gosRenderer::drawText(const char* text) {
     fg.w = 255.0f;//(ta.Foreground & 0xFF000000) >> 24;
     fg = fg / 255.0f;
     mat->getShader()->setFloat4(s_Foreground, fg);
-    //ta.Size 
-    //ta.WordWrap 
+    //ta.Size
+    //ta.WordWrap
     //ta.Proportional
     //ta.Bold
     //ta.Italic
@@ -2135,6 +2154,8 @@ void gosRenderer::drawText(const char* text) {
     text_->rewind();
 
     setRenderState(gos_State_Texture, prev_texture);
+    setRenderState(gos_State_Filter, prev_filter);
+    setRenderState(gos_State_TextureAddress, prev_addr);
 
     afterDrawCall();
 }
@@ -2187,9 +2208,94 @@ gosFont* gosFont::load(const char* fontFile) {
     char fname[256];
     char dir[256];
     _splitpath(fontFile, NULL, dir, fname, NULL);
+
+    // Retail .d3f wins when present. .bmp + .glyph stays as the
+    // permanent fallback for converted fonts and community content.
+    {
+        const char* d3f_ext = ".d3f";
+        const size_t d3fNameSize = strlen(fname) + 1 + strlen(dir) + strlen(d3f_ext) + 1;
+        char* d3fName = new char[d3fNameSize];
+        memset(d3fName, 0, d3fNameSize);
+        uint32_t d3f_len = S_snprintf(d3fName, d3fNameSize, "%s/%s%s", dir, fname, d3f_ext);
+        gosASSERT(d3f_len <= d3fNameSize - 1);
+
+        gosGlyphInfo gi;
+        gosD3FAtlas atlas;
+        if(gos_load_d3f(d3fName, gi, atlas)) {
+            // Legacy .glyph sidecar bridge — when a same-basename
+            // .glyph exists alongside the .d3f, adopt its line spacing
+            // and max-advance globals. UI widgets were authored against
+            // those values; D3F's dwFontHeight em-box would pack lines
+            // ~2x denser than retail. font_ascent_ is intentionally
+            // left at the calibrated value (visible band height) so
+            // the per-glyph maxy/miny set by calibrate_vertical stay
+            // consistent with the renderer's char_off_y math.
+            //
+            // .glyph header layout (matches gos_load_glyphs):
+            //   u32 num_glyphs, start_glyph, max_advance, ascent, line_skip
+            {
+                const char* glyph_ext = ".glyph";
+                const size_t sidecarNameSize = strlen(fname) + 1 + strlen(dir) + strlen(glyph_ext) + 1;
+                char* sidecarName = new char[sidecarNameSize];
+                memset(sidecarName, 0, sidecarNameSize);
+                S_snprintf(sidecarName, sidecarNameSize, "%s/%s%s", dir, fname, glyph_ext);
+
+                FILE* sidecar = fopen(sidecarName, "rb");
+                if(sidecar) {
+                    uint32_t legacy_globals[5] = {0};
+                    if(fread(legacy_globals, sizeof(uint32_t), 5, sidecar) == 5) {
+                        gi.max_advance_    = legacy_globals[2];
+                        gi.font_line_skip_ = legacy_globals[4];
+                    }
+                    fclose(sidecar);
+                }
+                delete[] sidecarName;
+            }
+
+            DWORD tex_id = gos_NewEmptyTexture(gos_Texture_Alpha, d3fName,
+                                               RECT_TEX(atlas.width, atlas.height), 0);
+            if(tex_id != 0) {
+                // Expand 8-bit alpha to RGBA8: fan alpha into R for the
+                // gos_text shader's .xxxx sample. Other channels also
+                // populated so any future shader change still gets sane data.
+                const size_t pixel_count = (size_t)atlas.width * (size_t)atlas.height;
+                DWORD* rgba = new DWORD[pixel_count];
+                for(size_t i = 0; i < pixel_count; ++i) {
+                    uint32_t a = atlas.pixels[i];
+                    rgba[i] = (a) | (a << 8) | (a << 16) | (a << 24);
+                }
+                delete[] atlas.pixels;
+                atlas.pixels = NULL;
+
+                GLuint gl_id = gos_GetTextureGLId(tex_id);
+                glBindTexture(GL_TEXTURE_2D, gl_id);
+                glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
+                glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0,
+                                atlas.width, atlas.height,
+                                GL_RGBA, GL_UNSIGNED_BYTE, rgba);
+                glBindTexture(GL_TEXTURE_2D, 0);
+                delete[] rgba;
+
+                gosFont* font = new gosFont();
+                font->gi_ = gi;
+                font->font_name_ = new char[strlen(fname) + 1];
+                strcpy(font->font_name_, fname);
+                font->font_id_ = new char[strlen(fontFile) + 1];
+                strcpy(font->font_id_, fontFile);
+                font->tex_id_ = tex_id;
+
+                delete[] d3fName;
+                return font;
+            }
+            delete[] gi.glyphs_;
+            delete[] atlas.pixels;
+        }
+        delete[] d3fName;
+    }
+
     const char* tex_ext = ".bmp";
     const char* glyph_ext = ".glyph";
-    
+
 	const size_t textureNameSize = strlen(fname) + sizeof('/') + strlen(dir) + strlen(tex_ext) + 1;
     char* textureName = new char[textureNameSize];
 	memset(textureName, 0, textureNameSize);
@@ -2405,6 +2511,12 @@ void __stdcall gos_UnLockTexture( DWORD Handle )
     ptex->Unlock();
 
     //gosASSERT(0 && "Not implemented");
+}
+
+uint32_t __stdcall gos_GetTextureGLId( DWORD Handle )
+{
+    gosTexture* tex = g_gos_renderer->getTexture( Handle );
+    return tex ? tex->getTextureId() : 0;
 }
 
 void __stdcall gos_PushRenderStates()
