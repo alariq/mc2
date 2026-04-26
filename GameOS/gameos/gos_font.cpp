@@ -28,11 +28,24 @@ bool gos_load_glyphs(const char* glyphFile, gosGlyphInfo& gi)
 
     gi.glyphs_ = new gosGlyphMetrics[gi.num_glyphs_];
 
-    while(num_structs_read!= gi.num_glyphs_) {
-        num_structs_read+= fread(&gi.glyphs_[num_structs_read],
+    while(num_structs_read != gi.num_glyphs_) {
+        size_t got = fread(&gi.glyphs_[num_structs_read],
                 sizeof(gosGlyphMetrics),
                 gi.num_glyphs_ - num_structs_read,
                 glyph_info);
+        if(got == 0) {
+            // EOF or read error — bail rather than spin forever on a
+            // truncated/corrupt .glyph file.
+            SPEW(("gos_load_glyphs: short read on %s, expected %u "
+                  "glyphs, got %u\n",
+                  glyphFile, gi.num_glyphs_, (uint32_t)num_structs_read));
+            fclose(glyph_info);
+            delete[] gi.glyphs_;
+            gi.glyphs_ = NULL;
+            gi.num_glyphs_ = 0;
+            return false;
+        }
+        num_structs_read += got;
     }
 
     fclose(glyph_info);

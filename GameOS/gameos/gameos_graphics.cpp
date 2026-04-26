@@ -2274,10 +2274,17 @@ gosFont* gosFont::load(const char* fontFile) {
 
                 GLuint gl_id = gos_GetTextureGLId(tex_id);
                 glBindTexture(GL_TEXTURE_2D, gl_id);
+                // Save/restore GL_UNPACK_ALIGNMENT — it's global state
+                // and a later texture upload may rely on a different
+                // value (driver default is 4, but other code paths set
+                // it to 1 for tightly-packed sources).
+                GLint prev_unpack_alignment = 0;
+                glGetIntegerv(GL_UNPACK_ALIGNMENT, &prev_unpack_alignment);
                 glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
                 glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0,
                                 atlas.width, atlas.height,
                                 GL_RGBA, GL_UNSIGNED_BYTE, rgba);
+                glPixelStorei(GL_UNPACK_ALIGNMENT, prev_unpack_alignment);
                 glBindTexture(GL_TEXTURE_2D, 0);
                 delete[] rgba;
 
@@ -2292,7 +2299,14 @@ gosFont* gosFont::load(const char* fontFile) {
                 delete[] d3fName;
                 return font;
             }
+            // Texture allocation failed — release everything
+            // calibrate_vertical allocated, including the per-glyph ink
+            // bounds arrays, before falling through to the .bmp+.glyph
+            // path.
             delete[] gi.glyphs_;
+            delete[] gi.ink_top_;
+            delete[] gi.ink_bot_;
+            delete[] gi.ink_valid_;
             delete[] atlas.pixels;
         }
         delete[] d3fName;
@@ -2520,6 +2534,13 @@ void __stdcall gos_UnLockTexture( DWORD Handle )
 
 uint32_t __stdcall gos_GetTextureGLId( DWORD Handle )
 {
+    // gosRenderer::getTexture asserts on INVALID_TEXTURE_ID and
+    // out-of-range handles; in release builds gosASSERT is a no-op so
+    // the out-of-range case is UB. Pre-validate the obvious invalid
+    // cases so the documented "returns 0 for invalid handle" contract
+    // holds for callers that may probe with a sentinel.
+    if(!g_gos_renderer || Handle == INVALID_TEXTURE_ID)
+        return 0;
     gosTexture* tex = g_gos_renderer->getTexture( Handle );
     return tex ? tex->getTextureId() : 0;
 }
@@ -2777,38 +2798,32 @@ void __stdcall gos_TextVisualBounds( DWORD* Width, int* Top, int* Bottom, const 
 
     int max_width = 0;
     int cur_width = 0;
-    int num_newlines = 0;
-    int first_line_top = 0;
-    int cur_line_top = INT_MAX;
-    int cur_line_bot = INT_MIN;
-    int last_inked_line_bot = INT_MIN;
-    bool first_line_inked = false;
+    int line_index = 0;
+    int min_top = INT_MAX;
+    int max_bot = INT_MIN;
     bool any_ink = false;
 
+    // Per-glyph: project each ink position into the multi-line block's
+    // y coordinate as `line_index * line_skip + ink_offset`. Tracking
+    // min/max globally avoids a leading-empty-lines bug where
+    // first-line-ink bookkeeping would otherwise emit a Top that
+    // ignores the line offset.
     for(const char* p = text; ; ++p) {
         unsigned char c = (unsigned char)*p;
         if(c == '\n' || c == '\0') {
             if(cur_width > max_width) max_width = cur_width;
-            if(cur_line_top != INT_MAX) {
-                if(!first_line_inked) {
-                    first_line_top = cur_line_top;
-                    first_line_inked = true;
-                }
-                last_inked_line_bot = cur_line_bot;
-            }
             if(c == '\0') break;
-            num_newlines++;
+            line_index++;
             cur_width = 0;
-            cur_line_top = INT_MAX;
-            cur_line_bot = INT_MIN;
             continue;
         }
         cur_width += font->getCharAdvance(c);
         if(gi.ink_valid_ && c < gi.num_glyphs_ && gi.ink_valid_[c]) {
-            int t = (int)gi.ink_top_[c];
-            int b = (int)gi.ink_bot_[c];
-            if(t < cur_line_top) cur_line_top = t;
-            if(b > cur_line_bot) cur_line_bot = b;
+            int base = line_index * line_skip;
+            int t = base + (int)gi.ink_top_[c];
+            int b = base + (int)gi.ink_bot_[c];
+            if(t < min_top) min_top = t;
+            if(b > max_bot) max_bot = b;
             any_ink = true;
         }
     }
@@ -2816,17 +2831,19 @@ void __stdcall gos_TextVisualBounds( DWORD* Width, int* Top, int* Bottom, const 
     *Width = (DWORD)max_width;
 
     if(any_ink) {
-        *Top    = first_line_top;
-        *Bottom = num_newlines * line_skip + last_inked_line_bot;
+        *Top    = min_top;
+        *Bottom = max_bot;
     } else if(gi.ink_valid_) {
         // Whitespace-only or empty — degenerate, no ink to center on.
         *Top    = 0;
         *Bottom = 0;
     } else {
-        // Legacy .glyph fallback — preserve line-skip-based geometry so
-        // centering math gives the same result as gos_TextStringLength.
+        // Legacy .glyph fallback — line-skip-based geometry under the
+        // inclusive-bounds convention callers use ((Top+Bottom+1)/2).
+        // The `- 1` makes (0 + (lines*ls - 1) + 1)/2 = lines*ls/2,
+        // matching gos_TextStringLength's height/2 centering result.
         *Top    = 0;
-        *Bottom = (num_newlines + 1) * line_skip;
+        *Bottom = (line_index + 1) * line_skip - 1;
     }
 }
 
