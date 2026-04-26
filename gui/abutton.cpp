@@ -164,7 +164,7 @@ void aButton::render()
 			gos_TextSetAttributes(data.textFont, data.textColors[state], data.textSize, true, true, false, false, data.textAlign);
 			gos_TextSetRegion( data.textRect.left, data.textRect.top, data.textRect.right, data.textRect.bottom );
 			gos_TextVisualBounds( &width, &visTop, &visBot, buffer );
-			gos_TextSetPosition( data.textRect.left, (data.textRect.top + data.textRect.bottom)/2 - (visTop + visBot + 1)/2 + 1 );
+			gos_TextSetPosition( data.textRect.left, (data.textRect.top + data.textRect.bottom)/2 - (visTop + visBot + 1)/2 );
 			gos_TextDraw( buffer );
 
 			if ( data.outlineText )

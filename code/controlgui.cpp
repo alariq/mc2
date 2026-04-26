@@ -1459,7 +1459,7 @@ void ControlButton::render()
 			gos_TextVisualBounds( &width, &visTop, &visBot, buffer );
 
 			data->textFont.render( buffer, location[0].x,
-				(location[0].y + location[2].y)/2 - (visTop + visBot + 1)/2 + 1,
+				(location[0].y + location[2].y)/2 - (visTop + visBot + 1)/2,
 				location[2].x - location[0].x,
 				location[2].y - location[0].y,
 				data->textColors[state], 0, 2 );
