@@ -13,13 +13,30 @@ typedef struct {
 } gosGlyphMetrics;
 
 struct gosGlyphInfo {
-    gosGlyphInfo():num_glyphs_(0), glyphs_(0) {}
+    gosGlyphInfo()
+        : num_glyphs_(0), start_glyph_(0), glyphs_(0),
+          max_advance_(0), font_ascent_(0), font_line_skip_(0),
+          ink_top_(0), ink_bot_(0), ink_valid_(0) {}
     uint32_t num_glyphs_;
     uint32_t start_glyph_;
     gosGlyphMetrics* glyphs_;
     uint32_t max_advance_;
     uint32_t font_ascent_;
     uint32_t font_line_skip_;
+
+    // Per-glyph ink bounds, runtime-only (NOT serialized — extending
+    // gosGlyphMetrics would break gos_load_glyphs's blob-read of legacy
+    // .glyph files). Allocated only by the D3F load path; NULL for
+    // legacy .bmp+.glyph fonts. Values are int8 offsets relative to
+    // the rendered quad top (i.e. relative to atlas row top_trim, not
+    // raw atlas row 0). Negative ink_top is legitimate for extended
+    // glyphs that sit above the ASCII-trimmed band. ink_valid_[c] is
+    // 1 if the glyph has any opaque pixels, 0 otherwise (sentinel —
+    // can't use ink_top==ink_bot==0 since a real glyph may legitimately
+    // span a single row at offset 0).
+    int8_t*  ink_top_;
+    int8_t*  ink_bot_;
+    uint8_t* ink_valid_;
 };
 
 // Atlas extracted from a .d3f file. Pixels are 8-bit alpha, square or

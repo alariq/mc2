@@ -180,6 +180,42 @@ void calibrate_vertical(gosGlyphInfo& gi, const gosD3FAtlas& atlas,
 
     gi.font_ascent_    = (uint32_t)visible_height;
     gi.font_line_skip_ = (uint32_t)visible_height + 1; // +1 leading
+
+    // Second pass: populate per-glyph ink bounds for the visual-bounds
+    // API (gos_TextVisualBounds). Scans ALL 256 slots, not just ASCII —
+    // extended glyphs need bounds too, even though they don't drive
+    // global_top/global_bot. Stored relative to the rendered quad top
+    // (post-shift), so a glyph that sat at atlas band row top_trim has
+    // ink_top=0; an extended glyph that reaches above the trim line has
+    // a negative ink_top.
+    delete[] gi.ink_top_;
+    delete[] gi.ink_bot_;
+    delete[] gi.ink_valid_;
+    gi.ink_top_   = new int8_t[gi.num_glyphs_];
+    gi.ink_bot_   = new int8_t[gi.num_glyphs_];
+    gi.ink_valid_ = new uint8_t[gi.num_glyphs_];
+    memset(gi.ink_top_,   0, gi.num_glyphs_);
+    memset(gi.ink_bot_,   0, gi.num_glyphs_);
+    memset(gi.ink_valid_, 0, gi.num_glyphs_);
+
+    for(uint32_t c = 0; c < gi.num_glyphs_; ++c) {
+        if(!gi.glyphs_[c].valid) continue;
+        int top, bot;
+        if(!scan_glyph_v_extent(atlas.pixels, atlas.width, atlas.height,
+                                bX[c], bY[c], bW[c], (int)font_height,
+                                &top, &bot)) {
+            continue;
+        }
+        int rel_top = top - top_trim;
+        int rel_bot = bot - top_trim;
+        if(rel_top < INT8_MIN) rel_top = INT8_MIN;
+        if(rel_top > INT8_MAX) rel_top = INT8_MAX;
+        if(rel_bot < INT8_MIN) rel_bot = INT8_MIN;
+        if(rel_bot > INT8_MAX) rel_bot = INT8_MAX;
+        gi.ink_top_[c]   = (int8_t)rel_top;
+        gi.ink_bot_[c]   = (int8_t)rel_bot;
+        gi.ink_valid_[c] = 1;
+    }
 }
 
 bool parse_v4(FILE* f, gosGlyphInfo& gi, gosD3FAtlas& atlas)

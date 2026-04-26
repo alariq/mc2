@@ -997,6 +997,21 @@ void __stdcall gos_TextDrawBackground( int Left, int Top, int Right, int Bottom,
 void __stdcall gos_TextStringLength( DWORD* Width, DWORD* Height, const char *Message, ... );
 
 //
+// Returns max line width and visual ink bounds (Top/Bottom relative to
+// gos_TextSetPosition's y coordinate). Use for vertically centering
+// labels in fixed frames where line-skip-based centering biases ALL
+// CAPS text low. Top is signed — extended glyphs (Ä Ö Ü) can sit
+// above the trimmed band.
+//
+// Multi-line: Top is the first line's top, Bottom is
+// (lines − 1) * line_skip + last line's bottom.
+//
+// Falls back to line-skip-based geometry for legacy .glyph fonts that
+// lack per-glyph ink data; centering then matches gos_TextStringLength.
+//
+void __stdcall gos_TextVisualBounds( DWORD* Width, int* Top, int* Bottom, const char *Message, ... );
+
+//
 // Draws string using current attributes and position
 //
 //  Special Codes -

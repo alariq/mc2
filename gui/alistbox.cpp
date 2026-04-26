@@ -1303,14 +1303,21 @@ void aTextListItem::render()
 	if ( y > tmpHeight && font.height( text, width() ) <= tmpHeight
 		&& !bForceToTop )
 	{
-		y = (location[2].y + location[0].y)/2.f - tmpHeight/2.f;
+		// Centered branch — use visual ink bounds so the visible text
+		// sits at true vertical center of the row, not the line-skip
+		// midpoint. Top-aligned (else) branch left untouched.
+		DWORD w;
+		int   visTop, visBot;
+		gos_TextSetAttributes( font.getTempHandle(), location[0].argb, font.getSize(), true, true, false, false, alignment );
+		gos_TextVisualBounds( &w, &visTop, &visBot, text );
+		y = (location[2].y + location[0].y)/2.f - (visTop + visBot + 1)/2.f;
 	}
 	else
 		y = location[0].y + tmpHeight/4.f;
 
 	font.render( text, location[0].x, y,
-		location[2].x - location[0].x, location[2].y - location[0].y, 
-		location[0].argb, 0, alignment ); 
+		location[2].x - location[0].x, location[2].y - location[0].y,
+		location[0].argb, 0, alignment );
 }
 
 void aTextListItem::setText( long resID )

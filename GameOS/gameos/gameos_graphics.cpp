@@ -2,6 +2,7 @@
 #include <map>
 #include <algorithm>
 #include <string>
+#include <climits>
 
 #include "gameos.hpp"
 #include "font3d.hpp"
@@ -937,6 +938,7 @@ class gosFont {
         void getCharUV(int c, uint32_t* u, uint32_t* v) const;
         int getCharAdvance(int c) const;
         const gosGlyphMetrics& getGlyphMetrics(int c) const;
+        const gosGlyphInfo& getGlyphInfo() const { return gi_; }
 
 
         DWORD getTextureId() const { return tex_id_; }
@@ -2198,6 +2200,9 @@ gosFont::~gosFont()
         getGosRenderer()->deleteTexture(tex_id_);
 
     delete[] gi_.glyphs_;
+    delete[] gi_.ink_top_;
+    delete[] gi_.ink_bot_;
+    delete[] gi_.ink_valid_;
     delete[] font_name_;
     delete[] font_id_;
 }
@@ -2728,6 +2733,101 @@ void __stdcall gos_TextStringLength( DWORD* Width, DWORD* Height, const char *fm
 
     *Width = max_width;
     *Height = (num_newlines + 1) * font->getMaxCharHeight();
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// Visual ink bounds for the active font + text. Width matches
+// gos_TextStringLength (max line width across \n). Top/Bottom are signed
+// pixel offsets from the gos_TextSetPosition y coordinate to the topmost
+// / bottommost inked pixel that would render — independent of line_skip
+// padding. Use for vertically centering labels in fixed frames where
+// line-skip-based centering biases ALL CAPS text low.
+//
+// Negative Top is legitimate for extended glyphs (Ä Ö Ü etc.) that sit
+// above the ASCII-trimmed band — those would render slightly clipped at
+// the top under the current renderer, but the bounds still reflect
+// where ink would conceptually appear.
+//
+// Multi-line: Top is the first line's top, Bottom is
+// (num_lines − 1) * font_line_skip + last line's bottom. Single-line
+// callers (buttons / list items) get the obvious answer.
+//
+// Legacy .glyph fonts (no per-glyph ink data) fall back to
+// Top=0, Bottom=line-skip-equivalent — centering math degrades to the
+// existing line-skip-based behavior, no improvement but no regression.
+void __stdcall gos_TextVisualBounds( DWORD* Width, int* Top, int* Bottom, const char *fmt, ... )
+{
+    gosASSERT(Width && Top && Bottom);
+
+    const int   MAX_TEXT_LEN = 4096;
+    char        text[MAX_TEXT_LEN] = {0};
+    va_list     ap;
+
+    va_start(ap, fmt);
+    vsnprintf(text, MAX_TEXT_LEN - 1, fmt, ap);
+    va_end(ap);
+    text[MAX_TEXT_LEN - 1] = '\0';
+
+    const gosTextAttribs& ta = g_gos_renderer->getTextAttributes();
+    const gosFont* font = ta.FontHandle;
+    gosASSERT(font);
+
+    const gosGlyphInfo& gi = font->getGlyphInfo();
+    const int line_skip = font->getMaxCharHeight();
+
+    int max_width = 0;
+    int cur_width = 0;
+    int num_newlines = 0;
+    int first_line_top = 0;
+    int cur_line_top = INT_MAX;
+    int cur_line_bot = INT_MIN;
+    int last_inked_line_bot = INT_MIN;
+    bool first_line_inked = false;
+    bool any_ink = false;
+
+    for(const char* p = text; ; ++p) {
+        unsigned char c = (unsigned char)*p;
+        if(c == '\n' || c == '\0') {
+            if(cur_width > max_width) max_width = cur_width;
+            if(cur_line_top != INT_MAX) {
+                if(!first_line_inked) {
+                    first_line_top = cur_line_top;
+                    first_line_inked = true;
+                }
+                last_inked_line_bot = cur_line_bot;
+            }
+            if(c == '\0') break;
+            num_newlines++;
+            cur_width = 0;
+            cur_line_top = INT_MAX;
+            cur_line_bot = INT_MIN;
+            continue;
+        }
+        cur_width += font->getCharAdvance(c);
+        if(gi.ink_valid_ && c < gi.num_glyphs_ && gi.ink_valid_[c]) {
+            int t = (int)gi.ink_top_[c];
+            int b = (int)gi.ink_bot_[c];
+            if(t < cur_line_top) cur_line_top = t;
+            if(b > cur_line_bot) cur_line_bot = b;
+            any_ink = true;
+        }
+    }
+
+    *Width = (DWORD)max_width;
+
+    if(any_ink) {
+        *Top    = first_line_top;
+        *Bottom = num_newlines * line_skip + last_inked_line_bot;
+    } else if(gi.ink_valid_) {
+        // Whitespace-only or empty — degenerate, no ink to center on.
+        *Top    = 0;
+        *Bottom = 0;
+    } else {
+        // Legacy .glyph fallback — preserve line-skip-based geometry so
+        // centering math gives the same result as gos_TextStringLength.
+        *Top    = 0;
+        *Bottom = (num_newlines + 1) * line_skip;
+    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////

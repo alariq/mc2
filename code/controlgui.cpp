@@ -1453,10 +1453,13 @@ void ControlButton::render()
 		{
 			char buffer[256];
 			cLoadString( data->textID, buffer, 256 );
-			unsigned long height = data->textFont.height();
-			
+			DWORD width;
+			int   visTop, visBot;
+			gos_TextSetAttributes( data->textFont.getTempHandle(), data->textColors[state], data->textFont.getSize(), true, true, false, false, 2 );
+			gos_TextVisualBounds( &width, &visTop, &visBot, buffer );
+
 			data->textFont.render( buffer, location[0].x,
-				(location[0].y + location[2].y)/2 - height/2 + 1,
+				(location[0].y + location[2].y)/2 - (visTop + visBot + 1)/2 + 1,
 				location[2].x - location[0].x,
 				location[2].y - location[0].y,
 				data->textColors[state], 0, 2 );
