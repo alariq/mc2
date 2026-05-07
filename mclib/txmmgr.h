@@ -517,7 +517,7 @@ class MC_TextureManager
 					masterTextureNodes[nodeId].hardwareVertexData2->flags = flags;
 					masterTextureNodes[nodeId].hardwareVertexData2->textureIndex = nodeId;
 				}
-				else if (masterTextureNodes[nodeId].vertexData &&
+				else if (masterTextureNodes[nodeId].hardwareVertexData &&
 					(masterTextureNodes[nodeId].hardwareVertexData->flags != flags) &&
 					masterTextureNodes[nodeId].hardwareVertexData2 &&
 					(masterTextureNodes[nodeId].hardwareVertexData2->flags != flags) &&
@@ -569,7 +569,7 @@ class MC_TextureManager
 					hardwareVertexData2->flags = flags;
 					hardwareVertexData2->textureIndex = 0;
 				}
-				else if (hardwareVertexData && (vertexData->flags != flags) &&
+				else if (hardwareVertexData && (hardwareVertexData->flags != flags) &&
 					hardwareVertexData2 && (hardwareVertexData2->flags != flags) &&
 					!hardwareVertexData3)
 				{
@@ -581,7 +581,7 @@ class MC_TextureManager
 					hardwareVertexData3->flags = flags;
 					hardwareVertexData3->textureIndex = 0;
 				}
-				else if (hardwareVertexData && (vertexData->flags != flags) &&
+				else if (hardwareVertexData && (hardwareVertexData->flags != flags) &&
 					hardwareVertexData2 && (hardwareVertexData2->flags != flags) &&
 					hardwareVertexData3 && (hardwareVertexData3->flags != flags) &&
 					!hardwareVertexData4)
@@ -594,7 +594,7 @@ class MC_TextureManager
 					hardwareVertexData4->flags = flags;
 					hardwareVertexData4->textureIndex = 0;
 				}
-				else if (hardwareVertexData && (vertexData->flags != flags) &&
+				else if (hardwareVertexData && (hardwareVertexData->flags != flags) &&
 					hardwareVertexData2 && (hardwareVertexData2->flags != flags) &&
 					hardwareVertexData3 && (hardwareVertexData3->flags != flags) &&
 					hardwareVertexData4 && (hardwareVertexData4->flags != flags) &&
