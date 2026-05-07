@@ -624,7 +624,7 @@ void InfoWindow::drawScrollingStuff()
 	char disabledCount[60][2];
 	long ammo[60];
 	char ranges[60];
-	char names[60];// sebi: changed long to char
+	unsigned char names[60];// sebi: changed long to char
 	memset( disabledCount, 0, sizeof( char ) * 60 * 2);
 
 	// sebi: ORIG BUG FIX memory owerwrite fix fow win64 build: sizeof(long) < sizeof(char*)!
@@ -643,7 +643,7 @@ void InfoWindow::drawScrollingStuff()
 
 	for (long curWeapon = pUnit->numOther; curWeapon < (pUnit->numOther + pUnit->numWeapons); curWeapon++) 
 	{
-			char nName = pUnit->inventory[curWeapon].masterID;
+			unsigned char nName = pUnit->inventory[curWeapon].masterID;
 			bool bFound = 0;
 			for ( int j = 0; j < i; j++ )
 			{
@@ -673,7 +673,7 @@ void InfoWindow::drawScrollingStuff()
 			else
 				ammo[i] += pUnit->getWeaponShots( curWeapon );
 
-			int  range = MasterComponent::masterList[pUnit->inventory[curWeapon].masterID].getWeaponRange();
+			unsigned char range = MasterComponent::masterList[pUnit->inventory[curWeapon].masterID].getWeaponRange();
 			ranges[i] = range;
 			bDraw[range] = true;
 
