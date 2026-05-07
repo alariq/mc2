@@ -2261,7 +2261,9 @@ gosRenderer* gos_GetRenderer();
 // x, y, w, h
 vec4 __stdcall gos_GetRenderViewport(); //sebi
                                                                               //
-const mat4& __stdcall gos_GetProjection(); //sebi
+void __stdcall gos_SetProjection(int w, int h);
+void __stdcall gos_GetProjectionDim(int* w, int* h); //sebi
+const mat4& __stdcall gos_GetProjectionAsMatrix(); //sebi
 
 //
 // Set a renderstate

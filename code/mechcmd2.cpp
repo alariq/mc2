@@ -710,27 +710,34 @@ void __stdcall UpdateRenderers()
 		if (mission && (!optionsScreenWrapper || optionsScreenWrapper->isDone() ) )
 			mission->render();
 
+        bool b_is_in_menu = !mission->isActive();//logistics || (optionsScreenWrapper && !optionsScreenWrapper->isDone());
+        int proj_w, proj_h;
+        if(b_is_in_menu) {
+            gos_GetProjectionDim(&proj_w, &proj_h);
+            gos_SetProjection(800,600);
+        }
+
+        float viewMulX, viewMulY, viewAddX, viewAddY;
+        gos_GetViewport(&viewMulX, &viewMulY, &viewAddX, &viewAddY);
+        userInput->setViewport(viewMulX,viewMulY,viewAddX,viewAddY);
+
 		if (logistics)
 		{
-			float viewMulX, viewMulY, viewAddX, viewAddY;
-			gos_GetViewport(&viewMulX, &viewMulY, &viewAddX, &viewAddY);
-			userInput->setViewport(viewMulX,viewMulY,viewAddX,viewAddY);
-
 			logistics->render();
 		}
 
 		if (optionsScreenWrapper && !optionsScreenWrapper->isDone() )
 		{
-			float viewMulX, viewMulY, viewAddX, viewAddY;
-			gos_GetViewport(&viewMulX, &viewMulY, &viewAddX, &viewAddY);
-			userInput->setViewport(viewMulX,viewMulY,viewAddX,viewAddY);
-
 			optionsScreenWrapper->render();
 		}
 
 		//------------------------------------------------------------
-		gos_SetRenderState( gos_State_Filter, gos_FilterNone );
 		userInput->render();
+
+        if(b_is_in_menu) {
+            //restore projection
+            gos_SetProjection(proj_w, proj_h);
+        }
 
 		DEBUGWINS_render();
 
@@ -2110,6 +2117,14 @@ void __stdcall DoGameLogic()
 			//----------------------------------------
 			// Update all of the timers
 			timerManager->update();
+
+            bool b_is_in_menu = !mission->isActive();//logistics || (optionsScreenWrapper && !optionsScreenWrapper->isDone());
+            int proj_w, proj_h;
+            if(b_is_in_menu) {
+                gos_GetProjectionDim(&proj_w, &proj_h);
+                gos_SetProjection(800,600);
+            }
+
 	
 			//-----------------------------------------------------
 			// Update Mission and Logistics here.
@@ -2198,7 +2213,11 @@ void __stdcall DoGameLogic()
 						mission->missionInterface->togglePauseWithoutMenu();
 				}
 			}
-	
+
+            if(b_is_in_menu) {
+                //restore projection
+                gos_SetProjection(proj_w, proj_h);
+            }
 
 		}
 	

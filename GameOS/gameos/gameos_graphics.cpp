@@ -1149,6 +1149,7 @@ class gosRenderer {
 		vec4 getRenderViewport() { return render_viewport_; }
 
 		const mat4& getProj2Screen() { return projection_; }
+		void getProjDim(int* w, int* h) { *w = width_; *h = height_; }
 
         void setRenderState(gos_RenderState RenderState, int Value) {
             renderStates_[RenderState] = Value;
@@ -1159,6 +1160,9 @@ class gosRenderer {
         }
 
         void setScreenMode(DWORD width, DWORD height, DWORD bit_depth, bool GotoFullScreen, bool anti_alias) {
+
+            //setScreenMode(width, height, GotoFullScreen);
+
             reqWidth = width;
             reqHeight = height;
             reqBitDepth = bit_depth;
@@ -1202,6 +1206,9 @@ class gosRenderer {
         gosRenderMaterial* selectBasicRenderMaterial(const RenderState& rs) const ;
         gosRenderMaterial* selectLightedRenderMaterial(const RenderState& rs) const ;
 
+
+        void setScreenMode(int w, int h, bool b_fullscreen);
+        void updateProjection(int w, int h);
 		void handleEvents();
 
     private:
@@ -1619,30 +1626,49 @@ void gosRenderer::endFrame()
     }
 }
 
+void gosRenderer::updateProjection(int w, int h) {
+
+    width_ = w;
+    height_ = h;
+
+    // x = 1/w; x =2*x - 1;
+    // y = 1/h; y= 1- y; y =2*y - 1;
+    // z = z;
+    projection_ = mat4(2.0f / (float)width_, 0, 0.0f, -1.0f,
+            0, -2.0f / (float)height_, 0.0f, 1.0f,
+            0, 0, 1.0f, 0.0f,
+            0, 0, 0.0f, 1.0f);
+}
+
+void gosRenderer::setScreenMode(int w, int h, bool b_fullscreen) {
+    if(graphics::resize_window(win_h_, w, h))
+    {
+        graphics::set_window_fullscreen(win_h_, b_fullscreen);
+
+        Environment.screenWidth = width_;
+        Environment.screenHeight = height_;
+        graphics::get_drawable_size(win_h_, &Environment.drawableWidth, &Environment.drawableHeight);
+    }
+}
+
 void gosRenderer::handleEvents()
 {
     if(pendingRequest) {
 
-        width_ = reqWidth;
-        height_ = reqHeight;
+        if(width_ != reqWidth || height_ != reqHeight) {
 
-        // x = 1/w; x =2*x - 1;
-        // y = 1/h; y= 1- y; y =2*y - 1;
-        // z = z;
-        projection_ = mat4(2.0f / (float)width_, 0, 0.0f, -1.0f,
-                0, -2.0f / (float)height_, 0.0f, 1.0f,
-                0, 0, 1.0f, 0.0f,
-                0, 0, 0.0f, 1.0f);
+            if(graphics::resize_window(win_h_, reqWidth, reqHeight))
+            {
+                graphics::set_window_fullscreen(win_h_, reqGotoFullscreen);
 
-        if(graphics::resize_window(win_h_, width_, height_))
-		{
-            graphics::set_window_fullscreen(win_h_, reqGotoFullscreen);
+                graphics::get_window_size(win_h_, &width_, &height_);
+                Environment.screenWidth = width_;
+                Environment.screenHeight = height_;
 
-            Environment.screenWidth = width_;
-            Environment.screenHeight = height_;
+                graphics::get_drawable_size(win_h_, &Environment.drawableWidth, &Environment.drawableHeight);
 
-			graphics::get_drawable_size(win_h_, &Environment.drawableWidth, &Environment.drawableHeight);
-
+            }
+            updateProjection(Environment.screenWidth, Environment.screenHeight);
         }
         pendingRequest = false;
     }
@@ -1667,7 +1693,11 @@ gosRenderMaterial* gosRenderer::selectBasicRenderMaterial(const RenderState& rs)
 	const auto& sh_var = rs[gos_State_Texture]!=0 ?
 		materialDB_.find("gos_tex_vertex")->second :
 		materialDB_.find("gos_vertex")->second;
-    uint32_t flags = rs[gos_State_AlphaTest] ? SHADER_FLAG_INDEX_TO_MASK(gosGLOBAL_SHADER_FLAGS::ALPHA_TEST) : 0;
+    //uint32_t flags = rs[gos_State_AlphaTest] ? SHADER_FLAG_INDEX_TO_MASK(gosGLOBAL_SHADER_FLAGS::ALPHA_TEST) : 0;
+    uint32_t flags = 0;
+    if(rs[gos_State_AlphaTest]) {
+        flags = SHADER_FLAG_INDEX_TO_MASK(gosGLOBAL_SHADER_FLAGS::ALPHA_TEST);
+    }
 
     if(sh_var.count(flags))
         return sh_var.at(flags);
@@ -2642,7 +2672,17 @@ vec4 __stdcall gos_GetRenderViewport() {
 	return g_gos_renderer->getRenderViewport();
 }
 
-const mat4& __stdcall gos_GetProjection() {
+void __stdcall gos_SetProjection(int w, int h) {
+    gosASSERT(g_gos_renderer);
+	return g_gos_renderer->updateProjection(w, h);
+}
+
+void __stdcall gos_GetProjectionDim(int* w, int* h) {
+    gosASSERT(g_gos_renderer);
+	g_gos_renderer->getProjDim(w, h);
+}
+
+const mat4& __stdcall gos_GetProjectionAsMatrix() {
     gosASSERT(g_gos_renderer);
 	return g_gos_renderer->getProj2Screen();
 }

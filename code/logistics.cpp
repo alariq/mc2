@@ -885,10 +885,12 @@ void Logistics::playFullScreenVideo( const char* fileName )
 	FullPathFileName path;
 	path.init( moviePath, fileName, ".bik" );
 
+    float mx, my, ax, ay;
+    gos_GetViewport(&mx, &my, &ax, &ay);
 	RECT movieRect;
 	movieRect.top = 100;
 	movieRect.left = 0;
-	movieRect.right = Environment.screenWidth;
+	movieRect.right = mx;//Environment.screenWidth;
 	movieRect.bottom = 500;
 
 	bMovie = new MC2Movie;

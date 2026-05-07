@@ -14,6 +14,8 @@
 #include <signal.h>
 
 extern graphics::RenderContextHandle gos_GetRenderContext();
+
+extern void gos_SetProjection(int w, int h);
 extern void gos_DestroyRenderer();
 extern void gos_RendererBeginFrame();
 extern void gos_RendererEndFrame();
@@ -50,7 +52,7 @@ static void handle_key_down( SDL_Keysym* keysym ) {
 static void set_mouse_capture(bool enabled)
 {
     graphics::RenderWindowHandle win = gos_GetWindow();
-    bool fullscreen = graphics::is_window_fullscreen(win);
+    //bool fullscreen = graphics::is_window_fullscreen(win);
     SDL_bool capture = (enabled /*&& fullscreen*/) ? SDL_TRUE : SDL_FALSE;
     graphics::grab_window(win, (bool)capture);
 
@@ -90,7 +92,17 @@ static void process_events( void ) {
                 {
                     float w = (float)event.window.data1;(void)w;
                     float h = (float)event.window.data2;(void)h;
+#if 1
+                    SDL_Window* window = SDL_GetWindowFromID(event.window.windowID);
+                    //glViewport(0, 0, (GLsizei)w, (GLsizei)h);
                     SPEW(("INPUT", "resize event: w: %f h:%f\n", w, h));
+                    printf("WINDOW RESIZED");
+
+                    Environment.screenWidth = w;
+                    Environment.screenHeight = h;
+                    SDL_GL_GetDrawableSize(window, &Environment.drawableWidth, &Environment.drawableHeight);
+#endif
+                    gos_SetProjection(w, h);
                     break;
                 }
                 case SDL_WINDOWEVENT_FOCUS_LOST:

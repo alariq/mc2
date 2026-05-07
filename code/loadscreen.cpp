@@ -37,6 +37,7 @@ TGAFileHeader* LoadScreen::waitingForPlayersMemory = 0;
 
 LoadScreen* LoadScreenWrapper::enterScreen = NULL;
 LoadScreen* LoadScreenWrapper::exitScreen = NULL;
+bool LoadScreenWrapper::bIsEnterState = 0;
 
 
 extern volatile bool mc2IsInMouseTimer;
@@ -146,8 +147,8 @@ void LoadScreenWrapper::changeRes()
             }
         }
     }
+
     Appendix = str_resolutions[suitable_res];
-    //
 
 	char fileName[256];
 	sprintf( fileName, "mcl_loadingscreen" );
@@ -175,6 +176,7 @@ void LoadScreenWrapper::changeRes()
 	exitScreen->init( outFile, 0x2 );
 
 	exitScreen->setupOutAnims();
+    //bIsEnterState = false;
 
 	LoadScreen::changeRes( outFile );
 }
@@ -276,6 +278,7 @@ void LoadScreenWrapper::begin()
 	bFirstTime = true;
 
 	enterScreen->begin();
+    bIsEnterState = true;
 }
 
 void LoadScreenWrapper::update()
@@ -291,11 +294,12 @@ void LoadScreenWrapper::update()
 	{
 		status = READYTOLOAD;
 		waitForResChange = 0;
+        bIsEnterState = false;
 	}
 	else
 	{
-
-	if ( Environment.screenWidth == 800 )
+        if(bIsEnterState)
+        //if ( Environment.screenWidth == 800 )
 		{
 			enterScreen->update();
 			status = enterScreen->getStatus();
@@ -316,7 +320,8 @@ void LoadScreenWrapper::update()
 
 void LoadScreenWrapper::render( int xOffset, int yOffset )
 {
-	if ( Environment.screenWidth == 800 )
+    if(bIsEnterState)
+	//if ( Environment.screenWidth == 800 )
 	{
 		enterScreen->render( xOffset, yOffset );
 	}

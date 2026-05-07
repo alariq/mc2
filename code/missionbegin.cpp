@@ -165,13 +165,14 @@ void MissionBegin::begin()
    	bool localWindow = !prefs.fullScreen;
    	if (Environment.fullScreen && prefs.fullScreen)
    		localFullScreen = false;
-
+#if 0
 	if (prefs.renderer == 3)
 		gos_SetScreenMode(800,600,16,0,0,0,true,localFullScreen,0,localWindow,0,localRenderer);
 	else if (prefs.bitDepth)
 		gos_SetScreenMode(800,600,32,prefs.renderer,0,0,0,localFullScreen,0,localWindow,0,localRenderer);
 	else
 		gos_SetScreenMode(800,600,16,prefs.renderer,0,0,0,localFullScreen,0,localWindow,0,localRenderer);
+#endif
 
 	if ( mainMenu ) // already initialized
 	{

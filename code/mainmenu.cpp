@@ -206,7 +206,7 @@ void MainMenu::begin()
    			if (Environment.fullScreen && prefs.fullScreen)
    				localFullScreen = false;
 
-
+#if 0
 			// make sure we get into 800 x 600 mode
 			if ( Environment.screenWidth != 800 )
 			{
@@ -216,6 +216,7 @@ void MainMenu::begin()
 				else
 					gos_SetScreenMode(800,600,16,prefs.renderer,0,0,0,localFullScreen ,0,localWindow,0,localRenderer);
 			}
+#endif
 
 
 	}
@@ -450,11 +451,13 @@ void MainMenu::update()
 		}
 
         //sebi: update movie rect because window size can change
+        float mx, my, ax, ay;
+        gos_GetViewport(&mx, &my, &ax, &ay);
         RECT movieRect;
         movieRect.top = 0;
         movieRect.left = 0;
-        movieRect.right = Environment.screenWidth;
-        movieRect.bottom = Environment.screenHeight;
+        movieRect.right = mx;//Environment.screenWidth;
+        movieRect.bottom = my;//Environment.screenHeight;
         introMovie->setRect(movieRect);
 		bool result = introMovie->update();
 		if (result)

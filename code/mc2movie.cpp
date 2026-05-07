@@ -376,7 +376,7 @@ void MC2Movie::render (void)
     //gos_SetRenderViewport(viewport_[2], viewport_[3], viewport_[0], viewport_[1]);
 
     HGOSRENDERMATERIAL mat = gos_getRenderMaterial("gos_YCbCr");
-    gos_SetRenderMaterialParameterMat4(mat, "projection_", gos_GetProjection());
+    gos_SetRenderMaterialParameterMat4(mat, "projection_", gos_GetProjectionAsMatrix());
     gos_SetRenderMaterialParameterFloat4(mat, "texture_crop_size_", texture_crop_size_);
     vec4 scale_offset(MC2Rect.left, MC2Rect.top, MC2Rect.right - MC2Rect.left, MC2Rect.bottom - MC2Rect.top);
     gos_SetRenderMaterialParameterFloat4(mat, "scale_offset", scale_offset);

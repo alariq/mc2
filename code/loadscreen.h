@@ -46,6 +46,7 @@ public:
 
 	static LoadScreen*	enterScreen;
 	static LoadScreen*	exitScreen;
+    static bool         bIsEnterState;
 	static void			changeRes();
 	bool				waitForResChange;
 	bool				bFirstTime;
