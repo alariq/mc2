@@ -42,7 +42,8 @@ void main(void)
     vec4 p = wvp_ * vec4(pos.xyz, 1);
     float rhw = 1 / p.w;
 
-    p.x = (p.x * rhw) * vp.z + vp.x + 100.0;
+    float debug_offset = 0.0;
+    p.x = (p.x * rhw) * vp.z + vp.x + debug_offset;
     p.y = (p.y * rhw) * vp.w + vp.y;
     p.z = p.z * rhw;
     p.w = abs(rhw);

@@ -334,6 +334,13 @@ long Mission::update (void)
 		if ((missionLineChanged + 50) < turn)
 		{
 			#ifndef FINAL
+            //sebi: debug hardware T&L
+            extern bool bShadersDrawPathEnabled;
+			if (userInput->getKeyDown(KEY_G) && userInput->ctrl() && !userInput->alt() && userInput->shift())
+			{
+				bShadersDrawPathEnabled ^= true;
+			}		
+            //~
 			if (userInput->getKeyDown(KEY_X) && userInput->ctrl() && !userInput->alt() && !userInput->shift())
 			{
 				useCollisions ^= true;

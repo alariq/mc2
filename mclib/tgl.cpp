@@ -81,7 +81,7 @@ extern bool useFaceLighting;
 extern bool hasGuardBand;
 extern bool useFog;
 extern DWORD BaseVertexColor;
-bool drawOldWay = false;
+bool drawOldWay = false;//true;
 extern bool useShadows;
 bool useLocalShadows = false;
 
@@ -1682,7 +1682,9 @@ long TG_Shape::MultiTransformShape (Stuff::Matrix4D *shapeToClip, Stuff::Point3D
 
 	lastTurnTransformed = turn;
 
-	
+	bool bDrawnByShader = bShadersDrawPathEnabled && !isSpotlight && !isWindow && 
+        !theShape->listOfTextures[theShape->listOfTypeTriangles[0].localTextureHandle].textureAlpha && (alphaValue == 0xff);
+
 	for (long j=0;j<numVertices;j++)
 	{
 		Stuff::Point3D pos = theShape->listOfTypeVertices[j].position;
@@ -2245,6 +2247,9 @@ long TG_Shape::MultiTransformShape (Stuff::Matrix4D *shapeToClip, Stuff::Point3D
 			DWORD redFinal = 0, greenFinal = 0, blueFinal = 0;
 			DWORD redSpec=0, greenSpec=0, blueSpec=0;
 			DWORD redAmb=0, greenAmb=0, blueAmb=0;
+
+            if(bDrawnByShader)
+                continue;
 	
 			if (useFaceLighting)
 			{
@@ -2466,7 +2471,7 @@ long TG_Shape::MultiTransformShape (Stuff::Matrix4D *shapeToClip, Stuff::Point3D
 	}
 
 	// FIXME: this (listOfTypeTriangles[0]) is not correct if model has more than 1 texture! 
-	if (bShadersDrawPathEnabled && !isSpotlight && !isWindow && !theShape->listOfTextures[theShape->listOfTypeTriangles[0].localTextureHandle].textureAlpha && (alphaValue == 0xff))
+	if (bDrawnByShader)
 	{
 		DWORD addFlags = 0;
 		if (isHudElement)
@@ -2486,9 +2491,7 @@ long TG_Shape::MultiTransformShape (Stuff::Matrix4D *shapeToClip, Stuff::Point3D
 
 		if (theShape->ib_ && theShape->vb_) {
 
-            size_t numLights = MAX_HW_LIGHTS_IN_WORLD;
             GatherLightsParameters(&lightData_);
-            gosASSERT(numLights > 0); // ensure at least one light was filled
 
 			cur_viewport[0] = viewMulX;
 			cur_viewport[1] = viewMulY;
@@ -2552,6 +2555,9 @@ void TG_Shape::Render (float forceZ, bool isHudElement, BYTE alphaValue, bool is
 
 	TG_TypeShapePtr theShape = (TG_TypeShapePtr)myType;
 
+	bool bDrawnByShader = bShadersDrawPathEnabled && !isSpotlight && !isWindow && 
+        !theShape->listOfTextures[theShape->listOfTypeTriangles[0].localTextureHandle].textureAlpha && (alphaValue == 0xff);
+
 	gos_SetRenderState( gos_State_AlphaTest, theShape->alphaTestOn);
 	gos_SetRenderState( gos_State_Filter, theShape->filterOn ? gos_FilterBiLinear : gos_FilterNone);
 
@@ -2569,6 +2575,7 @@ void TG_Shape::Render (float forceZ, bool isHudElement, BYTE alphaValue, bool is
 	if (isSpotlight && !isNight)
 		return;
  	
+    if(!bDrawnByShader)
  	for (long j=0;j<numVisibleFaces;j++)
 	{
 		if (listOfVisibleFaces[j] < numTriangles)
@@ -2695,7 +2702,7 @@ void TG_Shape::Render (float forceZ, bool isHudElement, BYTE alphaValue, bool is
 
 
 	// FIXME: this (listOfTypeTriangles[0]) is not correct if model has more than 1 texture! 
-	if (bShadersDrawPathEnabled && !isSpotlight && !isWindow && !theShape->listOfTextures[theShape->listOfTypeTriangles[0].localTextureHandle].textureAlpha && (alphaValue == 0xff))
+	if (bDrawnByShader)
 	{
 		DWORD addFlags = 0;
 		if (isHudElement)
