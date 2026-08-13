@@ -1672,9 +1672,18 @@ long LogisticsData::updateAvailability()
 
 void LogisticsData::appendAvailability(const char* pFileName, bool* availableArray )
 {
+	char normalizedName[1024];
+	strncpy(normalizedName, pFileName, sizeof(normalizedName) - 1);
+	normalizedName[sizeof(normalizedName) - 1] = 0;
+
+	normalizePathSeparators(normalizedName);
+
 	FitIniFile file;
-	if ( NO_ERR != file.open( pFileName ) )
+	if ( NO_ERR != file.open( normalizedName ) )
 	{
+		char error[1024];
+		sprintf(error, "FAILED TO OPEN ADDITIONAL PURCHASE FILE: %s\n", pFileName);
+		PAUSE((error));
 		return;
 	}
 	long result = file.seekBlock( "Components" );

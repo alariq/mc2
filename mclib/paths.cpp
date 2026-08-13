@@ -56,6 +56,15 @@ char transcriptsPath[80]	= "data" PATH_SEPARATOR "multiplayer" PATH_SEPARATOR "t
 //---------------------------------------------------------------------------
 // Free Functions
 
+void normalizePathSeparators(char* path)
+{
+	for (char* p = path; *p; ++p)
+	{
+		if (*p == '\\')
+			*p = '/';
+	}
+}
+
 //---------------------------------------------------------------------------
 //
 // Edit Log

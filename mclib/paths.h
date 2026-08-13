@@ -44,6 +44,8 @@ extern char transcriptsPath[];
 //---------------------------------------------------------------------------
 // Free Functions
 
+void normalizePathSeparators(char* path);
+
 //---------------------------------------------------------------------------
 
 #ifdef LINUX_BUILD
