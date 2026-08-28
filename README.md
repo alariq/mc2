@@ -45,5 +45,4 @@ Updated detailed build manual for Windows can be found in `BUILD-WIN.md`
 Building on Linux
 =================
 
-You, probably already know how to do it. If not, please, see windows building section, the process is quite similar.
-
+Updated detailed build manual for Linux can be found in `BUILD-LINUX.md`
