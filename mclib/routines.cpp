@@ -187,7 +187,7 @@ long RandomNumber (long range)
 //---------------------------------------------------------------------------
 bool RollDice (long percent)
 {
-	return (((rand()*100)>>15) < percent);			// Optimized the % out
+	return (((gos_rand()*100)>>15) < percent);			// Optimized the % out
 }
 
 
