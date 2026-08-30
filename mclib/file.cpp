@@ -220,6 +220,7 @@ long File::open (const char* fName, FileMode _mode, long numChild, bool doNotLow
 	fileName = (char *)systemHeap->Malloc(fNameLength+1);
 	gosASSERT(fileName != NULL);
 
+#ifdef LINUX_BUILD
 	//sebi: additional path convertion for paths stored in 
 	// configuration files (.ini, .fit, etc.)
 	for(int i=0;i<fNameLength;++i) {
@@ -230,6 +231,9 @@ long File::open (const char* fName, FileMode _mode, long numChild, bool doNotLow
 		}
 	}
 	fileName[fNameLength] = '\0';
+#else
+	strncpy(fileName,fName,fNameLength+1);
+#endif
 
 	fileMode = _mode;
 	//_fmode = _O_BINARY;
