@@ -219,8 +219,18 @@ long File::open (const char* fName, FileMode _mode, long numChild, bool doNotLow
 	
 	fileName = (char *)systemHeap->Malloc(fNameLength+1);
 	gosASSERT(fileName != NULL);
-		
-	strncpy(fileName,fName,fNameLength+1);
+
+	//sebi: additional path convertion for paths stored in 
+	// configuration files (.ini, .fit, etc.)
+	for(int i=0;i<fNameLength;++i) {
+		if(fName[i] == '\\') {
+			fileName[i] = '/';
+		} else {
+			fileName[i] = fName[i];
+		}
+	}
+	fileName[fNameLength] = '\0';
+
 	fileMode = _mode;
 	//_fmode = _O_BINARY;
 
